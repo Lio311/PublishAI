@@ -199,14 +199,14 @@ export default async function AdminDashboardPage({
             </h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left" dir={locale === 'he' ? 'rtl' : 'ltr'}>
+            <table className="w-full text-sm text-left table-fixed" dir={locale === 'he' ? 'rtl' : 'ltr'}>
               <thead className="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
                 <tr>
-                  <th className="px-6 py-3">{locale === 'he' ? 'מספר' : 'ID'}</th>
-                  <th className="px-6 py-3">{locale === 'he' ? 'כותרת' : 'Title'}</th>
-                  <th className="px-6 py-3">{locale === 'he' ? 'משתמש' : 'User'}</th>
-                  <th className="px-6 py-3">{locale === 'he' ? 'תאריך יצירה' : 'Date'}</th>
-                  <th className="px-6 py-3">{locale === 'he' ? 'סטטוס' : 'Status'}</th>
+                  <th className="px-6 py-3 w-[8%]">{locale === 'he' ? 'מספר' : 'ID'}</th>
+                  <th className="px-6 py-3 w-[35%]">{locale === 'he' ? 'כותרת' : 'Title'}</th>
+                  <th className="px-6 py-3 w-[22%]">{locale === 'he' ? 'משתמש' : 'User'}</th>
+                  <th className="px-6 py-3 w-[20%]">{locale === 'he' ? 'תאריך יצירה' : 'Date'}</th>
+                  <th className="px-6 py-3 w-[15%]">{locale === 'he' ? 'סטטוס' : 'Status'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

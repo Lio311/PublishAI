@@ -263,6 +263,8 @@ export default function SystemFlowModal({
         setAnimPhase("idle");
         setIsFinished(true);
         setCompletedSteps(new Set(FLOW_STEPS.map((_, i) => i)));
+        // Scroll to marketing message after render
+        setTimeout(() => scrollToFinish(), 400);
       } else {
         // Start animation from beginning
         if (typeof window !== 'undefined') {
@@ -281,7 +283,7 @@ export default function SystemFlowModal({
     }
 
     return () => clearTimer();
-  }, [isOpen, clearTimer]);
+  }, [isOpen, clearTimer, scrollToFinish]);
 
   // Main animation state machine
   useEffect(() => {
@@ -342,6 +344,8 @@ export default function SystemFlowModal({
 
   const handleClose = useCallback(() => {
     clearTimer();
+    // Always restore body scroll immediately when closing
+    document.body.style.overflow = "";
     setIsClosing(true);
     setTimeout(() => {
       onClose();
@@ -497,10 +501,10 @@ export default function SystemFlowModal({
               <span>
                 {currentStepIndex >= 0
                   ? (isRtl 
-                    ? `${FLOW_STEPS.length} מתוך ${Math.min(currentStepIndex + 1, FLOW_STEPS.length)}` 
+                    ? `${Math.min(currentStepIndex + 1, FLOW_STEPS.length)} מתוך ${FLOW_STEPS.length}` 
                     : `${Math.min(currentStepIndex + 1, FLOW_STEPS.length)} / ${FLOW_STEPS.length}`)
                   : (isRtl 
-                    ? `${FLOW_STEPS.length} מתוך 0` 
+                    ? `0 מתוך ${FLOW_STEPS.length}` 
                     : `0 / ${FLOW_STEPS.length}`)}
               </span>
             </div>
@@ -515,7 +519,9 @@ export default function SystemFlowModal({
         {/* Flow Steps */}
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto p-8 space-y-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className={`flex-1 overflow-y-auto p-8 space-y-0 ${
+            !isFinished ? "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" : ""
+          }`}
         >
           {FLOW_STEPS.map((step, index) => {
             const isCurrentOrPast = index <= currentStepIndex;
