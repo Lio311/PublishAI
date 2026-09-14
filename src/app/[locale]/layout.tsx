@@ -6,6 +6,8 @@ import { getMessages } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { notFound } from 'next/navigation';
 import GlobalPasswordProtection from '@/components/layout/GlobalPasswordProtection';
+import { SessionProvider } from 'next-auth/react';
+import { auth } from '@/auth';
 
 const openSans = Open_Sans({ subsets: ["latin", "hebrew"] });
 
@@ -30,6 +32,7 @@ export default async function RootLayout({
   // Providing all messages to the client
   // side is the easiest way to get started
   const messages = await getMessages();
+  const session = await auth();
 
   // Determine direction
   const dir = locale === 'he' ? 'rtl' : 'ltr';
@@ -38,9 +41,11 @@ export default async function RootLayout({
     <html lang={locale} dir={dir}>
       <body className={`${openSans.className} bg-gray-50 min-h-screen text-slate-900`}>
         <NextIntlClientProvider messages={messages}>
-          <GlobalPasswordProtection>
-            {children}
-          </GlobalPasswordProtection>
+          <SessionProvider session={session}>
+            <GlobalPasswordProtection>
+              {children}
+            </GlobalPasswordProtection>
+          </SessionProvider>
         </NextIntlClientProvider>
       </body>
     </html>

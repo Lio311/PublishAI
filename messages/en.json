@@ -57,47 +57,47 @@
     "steps": {
       "upload": {
         "title": "Upload Paper",
-        "desc": "Upload your raw academic paper in Word or PDF format via drag & drop. The system extracts the text and prepares it for processing."
+        "desc": "Upload your raw manuscript (Word or PDF) directly to our system in one click. The system scans, extracts, and parses the text, tables, and visual data. This process creates a clean digital foundation that allows our agents to read and deeply understand your research. All data is stored securely."
       },
       "clarification": {
         "title": "Clarification Agent",
-        "desc": "An AI agent analyzes your paper and identifies the topic, field, and structure. It asks short questions about the target journal requirements."
+        "desc": "The first agent reads the paper and builds the research strategy. It analyzes the scientific field, objectives, and target audience. If crucial details like the target journal or word limits are missing, it will verify them to ensure the system has all the necessary context and guidelines."
       },
       "planning": {
         "title": "Planning Agent",
-        "desc": "An advanced AI agent (Opus) reviews the entire paper and creates a detailed revision plan: identifying weaknesses, setting goals, and outlining the workflow."
+        "desc": "Our core agent performs a comprehensive deep read and builds an architectural work plan for the entire paper. It identifies weak arguments, methodological gaps, and decides which paragraphs need rewriting or expansion. It produces an actionable objective document to guide the editing process."
       },
       "knowledge": {
-        "title": "Knowledge & References Agent",
-        "desc": "Automatic search across PubMed, Semantic Scholar, and arXiv to find relevant sources, fill in missing references, and update the bibliography."
+        "title": "Knowledge & Reference Agent",
+        "desc": "This agent connects in real-time to academic databases to find missing sources or verify existing citations. It ensures all references are accurate, checks for newly published literature you might have missed, and formats the bibliography exactly according to your target journal's citation rules."
       },
       "review": {
         "title": "Scientific Review Agent",
-        "desc": "Internal peer review: the agent identifies logical flaws, methodological issues, data contradictions, and suggests evidence-based improvements."
+        "desc": "Acting as a rigorous peer reviewer, this agent actively looks for logical flaws, statistical issues, or conclusions that aren't well-supported by the results. It generates a detailed report highlighting weaknesses and offers targeted solutions to strengthen your paper before submission."
       },
       "writing": {
         "title": "Academic Writing Agent",
-        "desc": "Professional rewriting in precise academic language, removal of AI markers, adaptation to the target journal's style, while preserving the author's voice."
+        "desc": "At this stage, the writing agent rewrites the text to the highest academic standards. It improves sentence flow, refines vocabulary, and removes redundancies. Simultaneously, it uses advanced techniques to eliminate AI-writing markers while preserving your unique, original authorial voice."
       },
       "execution": {
         "title": "Execution Agent",
-        "desc": "Physical implementation of all changes in the text: the agent applies all corrections and edits in Track Changes format so you can approve each change."
+        "desc": "This is where everything happens. The execution agent takes all recommendations and applies them directly into your document. Every modification is fully transparent and marked in 'Track Changes' format, allowing you to review section by section and approve or reject edits as you see fit."
       },
       "qa": {
         "title": "Quality Assurance Agent",
-        "desc": "Final check for consistency, spelling and grammar errors, table and figure references, correct numbering, and compliance with journal format."
+        "desc": "The final rigorous check. This agent reviews the document with a magnifying glass, ensuring there are no subtle typos, all links work, and figure references are accurate. It guarantees strict adherence to the target journal's formatting guidelines - from line spacing to heading styles."
       },
       "verification": {
         "title": "Verification Agent",
-        "desc": "Generates a simulated peer review report and a professional cover letter for journal submission."
+        "desc": "This agent generates all the supplementary materials required for submission. It writes a compelling and professional Cover Letter for the journal editor, and produces a simulated peer-review report showing how your paper is likely to be evaluated, giving you confidence before submitting."
       },
       "compilation": {
         "title": "Compilation Agent",
-        "desc": "Merges all changes back into the original file format (Word/PDF) while fully preserving formatting, fonts, page numbers, and headers."
+        "desc": "In this technical step, the system gathers all applied changes and repacks them into a clean, ready file. The system accurately preserves your original formatting, page structure, headings, and fonts, ensuring the final output looks exactly like your original upload, just perfectly polished."
       },
       "export": {
         "title": "Export & Publish",
-        "desc": "Download the finalized paper in Word/PDF format, along with a cover letter, simulated review report, and a summary of all changes made."
+        "desc": "The journey is complete! You can now download your full publication package: the polished manuscript, the tracked-changes version, the cover letter, and the verification report. Everything is available for immediate download in one click, ready to take your research to the next level."
       }
     }
   }

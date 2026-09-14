@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
-import { useTranslations } from "next-intl";
 import { 
-  Upload, MessageSquareText, FileText, Brain, Search, 
-  Microscope, PenTool, CheckCircle, ShieldCheck, FileCheck, Loader2
+  Upload, MessageSquareText, ClipboardList, BookOpen, Microscope, 
+  PenTool, Play, ShieldCheck, FileCheck, Package, Download, Loader2, CheckCircle
 } from "lucide-react";
 
 type FlowStep = {
@@ -16,6 +14,7 @@ type FlowStep = {
   bgColor: string;
   borderColor: string;
   glowColor: string;
+  model: string;
 };
 
 const FLOW_STEPS: FlowStep[] = [
@@ -28,6 +27,7 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-slate-50",
     borderColor: "border-slate-300",
     glowColor: "shadow-slate-200/60",
+    model: "",
   },
   {
     id: 1,
@@ -38,79 +38,76 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-sky-50",
     borderColor: "border-sky-300",
     glowColor: "shadow-sky-200/60",
+    model: "Sonnet",
   },
   {
     id: 2,
-    icon: FileText,
+    icon: ClipboardList,
     titleKey: "steps.planning.title",
     descKey: "steps.planning.desc",
-    color: "text-blue-700",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-300",
-    glowColor: "shadow-blue-200/60",
-  },
-  {
-    id: 3,
-    icon: Brain,
-    titleKey: "steps.knowledge.title",
-    descKey: "steps.knowledge.desc",
-    color: "text-indigo-700",
-    bgColor: "bg-indigo-50",
-    borderColor: "border-indigo-300",
-    glowColor: "shadow-indigo-200/60",
-  },
-  {
-    id: 4,
-    icon: Search,
-    titleKey: "steps.figures.title",
-    descKey: "steps.figures.desc",
     color: "text-violet-700",
     bgColor: "bg-violet-50",
     borderColor: "border-violet-300",
     glowColor: "shadow-violet-200/60",
+    model: "Opus",
   },
   {
-    id: 5,
+    id: 3,
+    icon: BookOpen,
+    titleKey: "steps.knowledge.title",
+    descKey: "steps.knowledge.desc",
+    color: "text-amber-700",
+    bgColor: "bg-amber-50",
+    borderColor: "border-amber-300",
+    glowColor: "shadow-amber-200/60",
+    model: "Sonnet",
+  },
+  {
+    id: 4,
     icon: Microscope,
-    titleKey: "steps.scientific.title",
-    descKey: "steps.scientific.desc",
-    color: "text-purple-700",
-    bgColor: "bg-purple-50",
-    borderColor: "border-purple-300",
-    glowColor: "shadow-purple-200/60",
-  },
-  {
-    id: 6,
-    icon: PenTool,
-    titleKey: "steps.writing.title",
-    descKey: "steps.writing.desc",
-    color: "text-fuchsia-700",
-    bgColor: "bg-fuchsia-50",
-    borderColor: "border-fuchsia-300",
-    glowColor: "shadow-fuchsia-200/60",
-  },
-  {
-    id: 7,
-    icon: CheckCircle,
-    titleKey: "steps.execution.title",
-    descKey: "steps.execution.desc",
-    color: "text-pink-700",
-    bgColor: "bg-pink-50",
-    borderColor: "border-pink-300",
-    glowColor: "shadow-pink-200/60",
-  },
-  {
-    id: 8,
-    icon: ShieldCheck,
-    titleKey: "steps.qa.title",
-    descKey: "steps.qa.desc",
+    titleKey: "steps.review.title",
+    descKey: "steps.review.desc",
     color: "text-rose-700",
     bgColor: "bg-rose-50",
     borderColor: "border-rose-300",
     glowColor: "shadow-rose-200/60",
+    model: "Opus",
   },
   {
-    id: 9,
+    id: 5,
+    icon: PenTool,
+    titleKey: "steps.writing.title",
+    descKey: "steps.writing.desc",
+    color: "text-emerald-700",
+    bgColor: "bg-emerald-50",
+    borderColor: "border-emerald-300",
+    glowColor: "shadow-emerald-200/60",
+    model: "Opus",
+  },
+  {
+    id: 6,
+    icon: Play,
+    titleKey: "steps.execution.title",
+    descKey: "steps.execution.desc",
+    color: "text-indigo-700",
+    bgColor: "bg-indigo-50",
+    borderColor: "border-indigo-300",
+    glowColor: "shadow-indigo-200/60",
+    model: "Opus",
+  },
+  {
+    id: 7,
+    icon: ShieldCheck,
+    titleKey: "steps.qa.title",
+    descKey: "steps.qa.desc",
+    color: "text-teal-700",
+    bgColor: "bg-teal-50",
+    borderColor: "border-teal-300",
+    glowColor: "shadow-teal-200/60",
+    model: "Sonnet",
+  },
+  {
+    id: 8,
     icon: FileCheck,
     titleKey: "steps.verification.title",
     descKey: "steps.verification.desc",
@@ -118,18 +115,32 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-orange-50",
     borderColor: "border-orange-300",
     glowColor: "shadow-orange-200/60",
+    model: "Sonnet",
   },
   {
-    id: 10,
-    icon: CheckCircle,
-    titleKey: "steps.submission.title",
-    descKey: "steps.submission.desc",
+    id: 9,
+    icon: Package,
+    titleKey: "steps.compilation.title",
+    descKey: "steps.compilation.desc",
     color: "text-green-700",
     bgColor: "bg-green-50",
     borderColor: "border-green-300",
     glowColor: "shadow-green-200/60",
-  }
+    model: "Sonnet",
+  },
+  {
+    id: 10,
+    icon: Download,
+    titleKey: "steps.export.title",
+    descKey: "steps.export.desc",
+    color: "text-blue-700",
+    bgColor: "bg-blue-50",
+    borderColor: "border-blue-300",
+    glowColor: "shadow-blue-200/60",
+    model: "",
+  },
 ];
+
 
 export default function PaperProcessingUI({ paperId, initialStatus }: { paperId: number, initialStatus: string }) {
   const t = useTranslations("Dashboard.SystemFlow");

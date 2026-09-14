@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 export default function DashboardLayout({ 
   children,
@@ -19,6 +20,7 @@ export default function DashboardLayout({
   const t = useTranslations("Sidebar");
   const locale = useLocale();
   const router = useRouter();
+  const { data: session } = useSession();
 
   const toggleLanguage = () => {
     const nextLocale = locale === 'he' ? 'en' : 'he';
@@ -88,13 +90,23 @@ export default function DashboardLayout({
             {locale === 'he' ? 'English' : 'עברית'}
           </button>
           
-          <button 
-            onClick={() => window.location.href = '/api/auth/signin'} 
-            className="flex w-full items-center gap-3 px-4 py-3 rounded-lg font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-          >
-            <LogOut className="w-5 h-5 text-slate-400" />
-            {t("logout")} / התחבר
-          </button>
+          {session ? (
+            <button 
+              onClick={() => signOut()} 
+              className="flex w-full items-center gap-3 px-4 py-3 rounded-lg font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              <LogOut className="w-5 h-5 text-slate-400" />
+              {t("logout")}
+            </button>
+          ) : (
+            <button 
+              onClick={() => signIn()} 
+              className="flex w-full items-center gap-3 px-4 py-3 rounded-lg font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              <LogOut className="w-5 h-5 text-slate-400" />
+              {locale === 'he' ? 'התחבר' : 'Login'}
+            </button>
+          )}
         </div>
       </aside>
 
