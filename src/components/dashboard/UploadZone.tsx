@@ -12,11 +12,13 @@ export default function UploadZone() {
   const router = useRouter();
   const t = useTranslations("Dashboard.upload");
 
-  const handleUpload = async (file: File) => {
+  const handleUpload = async (files: FileList | File[]) => {
     setIsUploading(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      Array.from(files).forEach((file) => {
+        formData.append("file", file);
+      });
 
       const res = await fetch("/api/upload", {
         method: "POST",
@@ -34,7 +36,7 @@ export default function UploadZone() {
       
       // Navigate to the paper details page after 1.5 seconds
       setTimeout(() => {
-        // router.push(`/papers/${data.paper.id}`); // Uncomment when page exists
+        // router.push(`/papers/${data.papers[0]?.paper?.id}`); // Uncomment when page exists
       }, 1500);
 
     } catch (error) {
@@ -60,7 +62,7 @@ export default function UploadZone() {
     setIsDragging(false);
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleUpload(e.dataTransfer.files[0]);
+      handleUpload(e.dataTransfer.files);
     }
   }, []);
 
@@ -97,12 +99,12 @@ export default function UploadZone() {
       <div className="relative mt-2">
         <input 
           type="file" 
+          multiple
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
-          accept=".docx,.pdf"
           disabled={isUploading || uploadSuccess}
           onChange={(e) => {
             if (e.target.files?.length) {
-              handleUpload(e.target.files[0]);
+              handleUpload(e.target.files);
             }
           }}
         />

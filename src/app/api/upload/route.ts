@@ -10,59 +10,71 @@ import { inngest } from "@/inngest/client";
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File;
+    const files = formData.getAll("file") as File[];
 
-    if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    if (!files || files.length === 0) {
+      return NextResponse.json({ error: "No files provided" }, { status: 400 });
     }
 
-    // 1. Upload to Vercel Blob
-    const blob = await put(`articles/${file.name}`, file, {
-      access: "public", // We'll keep it public for easy downloading in the prototype, or switch to private if preferred.
-    });
+    const uploadedPapers = [];
 
-    // 2. Extract Text
-    let extractedText = "";
-    const buffer = Buffer.from(await file.arrayBuffer());
+    for (const file of files) {
+      // 1. Upload to Vercel Blob
+      const blob = await put(`articles/${file.name}`, file, {
+        access: "public",
+      });
 
-    if (file.name.endsWith(".docx")) {
-      const result = await mammoth.extractRawText({ buffer });
-      extractedText = result.value;
-    } else if (file.name.endsWith(".pdf")) {
-      const result = await pdfParse(buffer);
-      extractedText = result.text;
-    } else {
-      return NextResponse.json(
-        { error: "Unsupported file format. Please upload .docx or .pdf" },
-        { status: 400 }
-      );
-    }
+      // 2. Extract Text
+      let extractedText = "";
+      const buffer = Buffer.from(await file.arrayBuffer());
 
-    // 3. Save to Database
-    // Note: We'll save the initial extracted text in the 'paper_stages' or we can just create the paper entry first.
-    // Since we don't have authentication wired up completely yet, we'll leave userId as null or mock it.
-    
-    const [newPaper] = await db.insert(papers).values({
-      title: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
-      originalFileUrl: blob.url,
-      originalFormat: file.name.endsWith(".docx") ? "docx" : "pdf",
-      status: "pending",
-    }).returning();
-
-    // Trigger Inngest background job
-    await inngest.send({
-      name: "paper/uploaded",
-      data: {
-        paperId: newPaper.id,
-        textContent: extractedText,
+      if (file.name.toLowerCase().endsWith(".docx")) {
+        try {
+          const result = await mammoth.extractRawText({ buffer });
+          extractedText = result.value;
+        } catch (e) {
+          console.error(`Failed to extract text from docx: ${file.name}`, e);
+        }
+      } else if (file.name.toLowerCase().endsWith(".pdf")) {
+        try {
+          const result = await pdfParse(buffer);
+          extractedText = result.text;
+        } catch (e) {
+          console.error(`Failed to extract text from pdf: ${file.name}`, e);
+        }
       }
-    });
+
+      const fileExtension = file.name.split('.').pop()?.toLowerCase() || "unknown";
+
+      // 3. Save to Database
+      const [newPaper] = await db.insert(papers).values({
+        title: file.name.replace(/\.[^/.]+$/, ""),
+        originalFileUrl: blob.url,
+        originalFormat: fileExtension,
+        status: "pending",
+      }).returning();
+
+      // Trigger Inngest background job if we have text
+      if (extractedText) {
+        await inngest.send({
+          name: "paper/uploaded",
+          data: {
+            paperId: newPaper.id,
+            textContent: extractedText,
+          }
+        });
+      }
+
+      uploadedPapers.push({
+        paper: newPaper,
+        blobUrl: blob.url,
+        textPreview: extractedText ? extractedText.substring(0, 200) + "..." : null
+      });
+    }
 
     return NextResponse.json({ 
       success: true, 
-      paper: newPaper,
-      blobUrl: blob.url,
-      textPreview: extractedText.substring(0, 200) + "..."
+      papers: uploadedPapers
     });
 
   } catch (error: any) {

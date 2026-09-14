@@ -17,7 +17,7 @@
       "dragTitle": "Drag your paper here",
       "processing": "Processing and extracting text...",
       "success": "File uploaded successfully!",
-      "description": "Supports Word (.docx) or PDF. We will analyze the document and begin the automatic revision process.",
+      "description": "Supports all file types (images, excel, etc.). These files will be uploaded and analyzed if possible.",
       "button": "Or select file",
       "uploading": "Uploading..."
     },
