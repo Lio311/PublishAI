@@ -163,7 +163,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                                 className="w-56 h-auto flex items-center justify-center mb-6"
                             >
-                                <Image src="/logo.png" alt="PublishAI Logo" width={224} height={224} className="w-full h-auto object-contain drop-shadow-xl" priority />
+                                <Image src="/logo.png" alt="PublishAI Logo" width={224} height={224} className="w-full h-auto object-contain" priority />
                             </motion.div>
                             
                             <p className="text-slate-600 font-medium text-sm mb-8 tracking-widest text-center w-full block uppercase">אזור מאובטח</p>

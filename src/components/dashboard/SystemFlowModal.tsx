@@ -661,14 +661,11 @@ export default function SystemFlowModal({
           })}
 
           {/* Final success message */}
-          <div
-            ref={finishRef}
-            className={`mt-8 text-center transition-all duration-700 ${
-              isFinished
-                ? "opacity-100 translate-y-0 scale-100"
-                : "opacity-0 translate-y-8 scale-90"
-            }`}
-          >
+          {isFinished && (
+            <div
+              ref={finishRef}
+              className="mt-8 text-center animate-step-in"
+            >
             <div className="inline-flex flex-col items-center gap-3 px-8 py-6 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 border-2 border-green-200 rounded-3xl shadow-lg shadow-green-100/50">
               <div className="relative">
                 <CircleCheckBig className="w-8 h-8 text-green-600" />
@@ -676,7 +673,7 @@ export default function SystemFlowModal({
               <span className="font-bold text-xl text-green-700">{t("complete")}</span>
               <span className="text-sm text-green-600/80">{t("subtitle")}</span>
             </div>
-          </div>
+          )}
 
           {/* Extra bottom padding so last items can scroll into view */}
           <div className="h-32" />
