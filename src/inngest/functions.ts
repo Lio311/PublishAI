@@ -1,6 +1,6 @@
 import { inngest } from "./client";
 import { db } from "@/db";
-import { papers } from "@/db/schema";
+import { papers, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { AgentOrchestrator } from "@/lib/agents/orchestrator";
 import { ClarificationAgent } from "@/lib/agents/clarification-agent";
@@ -16,8 +16,8 @@ import { CompilationAgent } from "@/lib/agents/compilation-agent";
 import { AgentContext, AgentResult, Stage } from "@/lib/agents/base-agent";
 
 export const processPaper = inngest.createFunction(
-  { id: "process-paper", event: "paper/uploaded" } as unknown,
-  async ({ event, step }: { event: unknown, step: unknown }) => {
+  { id: "process-paper", event: "paper/uploaded" } as any,
+  async ({ event, step }: { event: any, step: any }) => {
     const { paperId, textContent } = event.data;
     
     const orchestrator = new AgentOrchestrator(step);
@@ -59,6 +59,13 @@ export const processPaper = inngest.createFunction(
     const execution = await orchestrator.runStage(new ExecutionAgent(), context);
     context.previousStageOutputs.set("execution", execution);
 
+    // 6.5 Integrity Scan
+    await step.run("integrity-scan", async () => {
+      const { IntegrityScanner } = await import("@/lib/security/integrity-scanner");
+      const report = await IntegrityScanner.scanManuscript(context.manuscriptText);
+      console.log(`[Integrity] Passed: ${report.passed}. Plagiarism: ${report.plagiarismScore}%. AI: ${report.aiGeneratedScore}%.`);
+    });
+
     // 7. QA
     const qa = await orchestrator.runStage(new QaAgent(), context);
     context.previousStageOutputs.set("qa", qa);
@@ -75,11 +82,28 @@ export const processPaper = inngest.createFunction(
     context.previousStageOutputs.set("compilation", compilation);
 
     // Finalize
-    await step.run("mark-completed", async () => {
+    await step.run("mark-awaiting-approval", async () => {
       await db
         .update(papers)
-        .set({ status: "completed" })
+        .set({ status: "awaiting_approval" })
         .where(eq(papers.id, paperId));
+
+      const paperResult = await db.select({
+        title: papers.title,
+        userEmail: users.email
+      }).from(papers)
+        .leftJoin(users, eq(papers.userId, users.id))
+        .where(eq(papers.id, paperId));
+
+      if (paperResult.length > 0 && paperResult[0].userEmail) {
+        const { title, userEmail } = paperResult[0];
+        try {
+          const { sendAwaitingApprovalEmail } = await import("@/lib/email/notification-service");
+          await sendAwaitingApprovalEmail(userEmail, title, paperId.toString());
+        } catch (e) {
+          console.error("Failed to send email notification", e);
+        }
+      }
     });
 
     return { success: true, stagesCompleted: 9 };
@@ -87,8 +111,8 @@ export const processPaper = inngest.createFunction(
 );
 
 export const sendWeeklyDigest = inngest.createFunction(
-  { id: "send-weekly-digest", cron: "0 9 * * 1" } as unknown, // Every Monday at 9:00 AM
-  async ({ step }: { step: unknown }) => {
+  { id: "send-weekly-digest", cron: "0 9 * * 1" } as any, // Every Monday at 9:00 AM
+  async ({ step }: { step: any }) => {
     await step.run("send-emails", async () => {
       console.log("Sending weekly digest to users with weeklyDigest enabled...");
       return { sent: true };

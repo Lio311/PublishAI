@@ -5,8 +5,8 @@ import { submissions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export const processSubmission = inngest.createFunction(
-  { id: "process-submission", event: "submission/process", retries: 3 } as unknown,
-  async ({ event, step }: { event: unknown, step: unknown }) => {
+  { id: "process-submission", event: "submission/process", retries: 3 } as any,
+  async ({ event, step }: { event: any, step: any }) => {
     const { submissionId } = event.data;
 
     // Increment attempt count
