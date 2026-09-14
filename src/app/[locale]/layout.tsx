@@ -18,11 +18,9 @@ export default async function RootLayout({
   params
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }>) {
-  // Await the params before using its properties (Next.js 15+ requirement/best practice)
-  const resolvedParams = await params;
-  const locale = resolvedParams.locale;
+  const { locale } = await params;
   
   if (!routing.locales.includes(locale as any)) {
     notFound();

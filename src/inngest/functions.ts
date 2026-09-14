@@ -5,9 +5,8 @@ import { eq } from "drizzle-orm";
 import { askClaude } from "@/lib/agents/claude-client";
 
 export const processPaper = inngest.createFunction(
-  { id: "process-paper" },
-  { event: "paper/uploaded" },
-  async ({ event, step }) => {
+  { id: "process-paper", event: "paper/uploaded" } as any,
+  async ({ event, step }: { event: any, step: any }) => {
     const { paperId, textContent } = event.data;
 
     // Step 0: Mark as in_progress

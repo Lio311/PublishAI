@@ -4,7 +4,8 @@ import {
   text, 
   timestamp, 
   jsonb,
-  pgEnum 
+  pgEnum,
+  integer 
 } from "drizzle-orm/pg-core";
 
 export const statusEnum = pgEnum("status", [
@@ -49,7 +50,7 @@ export const accounts = pgTable(
     providerAccountId: text("providerAccountId").notNull(),
     refresh_token: text("refresh_token"),
     access_token: text("access_token"),
-    expires_at: timestamp("expires_at"),
+    expires_at: integer("expires_at"),
     token_type: text("token_type"),
     scope: text("scope"),
     id_token: text("id_token"),
