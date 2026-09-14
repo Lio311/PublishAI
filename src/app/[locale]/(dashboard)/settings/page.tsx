@@ -1,6 +1,7 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { User, Bell, Shield, Key } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { checkIsAdmin } from "@/lib/auth-utils";
 
 export default async function SettingsPage({
   params
@@ -9,10 +10,11 @@ export default async function SettingsPage({
 }) {
   const resolvedParams = await params;
   const locale = resolvedParams.locale;
+  const isAdmin = await checkIsAdmin();
   const t = await getTranslations("Dashboard");
 
   return (
-    <DashboardLayout>
+    <DashboardLayout isAdmin={isAdmin}>
       <div className="max-w-4xl space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">

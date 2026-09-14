@@ -8,7 +8,13 @@ import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({ 
+  children,
+  isAdmin = false 
+}: { 
+  children: React.ReactNode;
+  isAdmin?: boolean;
+}) {
   const pathname = usePathname();
   const t = useTranslations("Sidebar");
   const locale = useLocale();
@@ -16,10 +22,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const toggleLanguage = () => {
     const nextLocale = locale === 'he' ? 'en' : 'he';
-    // The middleware handles redirects, so we can just replace the prefix
     const newPath = pathname.replace(`/${locale}`, `/${nextLocale}`);
-    // If we're at root and the pathname didn't contain the locale (e.g. middleware rewrote it),
-    // we should forcefully route to the new locale.
     if (pathname === '/' || pathname === `/${locale}`) {
       router.push(`/${nextLocale}`);
     } else {
@@ -33,6 +36,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: "Journal Rules", icon: Book, href: `/${locale}/journals` },
     { name: t("settings"), icon: Settings, href: `/${locale}/settings` },
   ];
+
+  if (isAdmin) {
+    menuItems.push({ name: locale === 'he' ? 'ניהול מערכת' : 'Admin Dashboard', icon: Globe, href: `/${locale}/admin` });
+  }
 
   return (
     <div className="min-h-screen flex bg-gray-50 text-slate-900 font-sans" dir={locale === 'he' ? 'rtl' : 'ltr'}>

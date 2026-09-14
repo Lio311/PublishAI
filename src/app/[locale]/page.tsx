@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { papers, journals } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { getTranslations } from "next-intl/server";
+import { checkIsAdmin } from "@/lib/auth-utils";
 
 export default async function Home({
   params
@@ -13,6 +14,7 @@ export default async function Home({
 }) {
   const resolvedParams = await params;
   const locale = resolvedParams.locale;
+  const isAdmin = await checkIsAdmin();
   
   const t = await getTranslations("Dashboard");
 
@@ -91,7 +93,7 @@ export default async function Home({
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout isAdmin={isAdmin}>
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-slate-800 mb-2">{t("title")}</h1>
         <p className="text-slate-600">{t("subtitle")}</p>

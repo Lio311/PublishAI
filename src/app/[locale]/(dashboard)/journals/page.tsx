@@ -2,12 +2,14 @@ import { db } from "@/db";
 import { journals } from "@/db/schema";
 import { Book, Plus, ExternalLink } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { checkIsAdmin } from "@/lib/auth-utils";
 
 export default async function JournalsPage() {
   const allJournals = await db.select().from(journals);
+  const isAdmin = await checkIsAdmin();
 
   return (
-    <DashboardLayout>
+    <DashboardLayout isAdmin={isAdmin}>
       <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>

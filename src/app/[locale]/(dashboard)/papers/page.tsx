@@ -5,6 +5,7 @@ import { FileText, Clock, CheckCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { checkIsAdmin } from "@/lib/auth-utils";
 
 export default async function PapersPage({
   params
@@ -13,6 +14,7 @@ export default async function PapersPage({
 }) {
   const resolvedParams = await params;
   const locale = resolvedParams.locale;
+  const isAdmin = await checkIsAdmin();
   const t = await getTranslations("Dashboard");
 
   // Fetch all papers
@@ -79,7 +81,7 @@ export default async function PapersPage({
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout isAdmin={isAdmin}>
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
