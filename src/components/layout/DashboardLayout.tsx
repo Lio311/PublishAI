@@ -36,7 +36,7 @@ export default function DashboardLayout({
     { name: t("home"), icon: Home, href: `/${locale}` },
     { name: t("myPapers"), icon: FileText, href: `/${locale}/papers` },
     { name: locale === 'he' ? 'חיבור לעיתונים' : 'Journal Connections', icon: LinkIcon, href: `/${locale}/connections` },
-    { name: "Journal Rules", icon: Book, href: `/${locale}/journals` },
+    { name: locale === 'he' ? 'חוקי עיתונים' : 'Journal Rules', icon: Book, href: `/${locale}/journals` },
     { name: t("settings"), icon: Settings, href: `/${locale}/settings` },
   ];
 

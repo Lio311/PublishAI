@@ -5,17 +5,19 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { checkIsAdmin } from "@/lib/auth-utils";
 import AddJournalButton from "@/components/journals/AddJournalButton";
 
-export default async function JournalsPage() {
+export default async function JournalsPage({ params: { locale } }: { params: { locale: string } }) {
   const allJournals = await db.select().from(journals);
   const isAdmin = await checkIsAdmin();
+
+  const isHe = locale === 'he';
 
   return (
     <DashboardLayout isAdmin={isAdmin}>
       <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Journal Rules</h1>
-          <p className="text-slate-500 mt-1">Manage formatting and submission rules for target journals.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">{isHe ? 'חוקי עיתונים' : 'Journal Rules'}</h1>
+          <p className="text-slate-500 mt-1">{isHe ? 'ניהול חוקי עיצוב והגשה לעיתוני יעד שונים.' : 'Manage formatting and submission rules for target journals.'}</p>
         </div>
         <AddJournalButton />
       </div>
@@ -32,16 +34,16 @@ export default async function JournalsPage() {
               
               <div className="space-y-2 text-sm text-slate-700">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Word Limit:</span>
-                  <span className="font-medium">{journal.wordLimit || 'None'}</span>
+                  <span className="text-slate-500">{isHe ? 'מגבלת מילים:' : 'Word Limit:'}</span>
+                  <span className="font-medium">{journal.wordLimit || (isHe ? 'ללא' : 'None')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Abstract Limit:</span>
-                  <span className="font-medium">{journal.abstractLimit || 'None'}</span>
+                  <span className="text-slate-500">{isHe ? 'מגבלת תקציר:' : 'Abstract Limit:'}</span>
+                  <span className="font-medium">{journal.abstractLimit || (isHe ? 'ללא' : 'None')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Citation Style:</span>
-                  <span className="font-medium">{journal.citationStyle || 'Default'}</span>
+                  <span className="text-slate-500">{isHe ? 'סגנון ציטוט:' : 'Citation Style:'}</span>
+                  <span className="font-medium">{journal.citationStyle || (isHe ? 'ברירת מחדל' : 'Default')}</span>
                 </div>
               </div>
             </div>
@@ -53,7 +55,7 @@ export default async function JournalsPage() {
                   rel="noreferrer"
                   className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1"
                 >
-                  Instructions for Authors
+                  {isHe ? 'הוראות למחברים' : 'Instructions for Authors'}
                   <ExternalLink className="w-4 h-4" />
                 </a>
               </div>

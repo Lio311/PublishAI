@@ -3,11 +3,14 @@
 import { useState } from "react";
 import { Plus, X, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 
 export default function AddJournalButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const locale = useLocale();
+  const isHe = locale === 'he';
 
   // Form state
   const [name, setName] = useState("");
@@ -48,11 +51,11 @@ export default function AddJournalButton() {
         // Refresh the page data
         router.refresh();
       } else {
-        alert("Failed to add journal");
+        alert(isHe ? "נכשל להוסיף עיתון" : "Failed to add journal");
       }
     } catch (error) {
       console.error(error);
-      alert("An error occurred");
+      alert(isHe ? "אירעה שגיאה" : "An error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -65,14 +68,14 @@ export default function AddJournalButton() {
         className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
       >
         <Plus className="w-5 h-5" />
-        Add Journal
+        {isHe ? 'הוספת עיתון' : 'Add Journal'}
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 text-start">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
             <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100">
-              <h2 className="text-lg font-semibold text-slate-800">Add New Journal</h2>
+              <h2 className="text-lg font-semibold text-slate-800">{isHe ? 'הוסף עיתון חדש' : 'Add New Journal'}</h2>
               <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
@@ -81,60 +84,60 @@ export default function AddJournalButton() {
             <form onSubmit={handleSubmit} className="p-6 overflow-y-auto">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Journal Name *</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{isHe ? 'שם העיתון *' : 'Journal Name *'}</label>
                   <input 
                     type="text" 
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                    placeholder="e.g. Science"
+                    placeholder={isHe ? "לדוגמה: Science" : "e.g. Science"}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Field / Discipline</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{isHe ? 'תחום / דיסציפלינה' : 'Field / Discipline'}</label>
                   <input 
                     type="text" 
                     value={field}
                     onChange={(e) => setField(e.target.value)}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                    placeholder="e.g. Multidisciplinary"
+                    placeholder={isHe ? "לדוגמה: רב-תחומי" : "e.g. Multidisciplinary"}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Word Limit</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">{isHe ? 'מגבלת מילים' : 'Word Limit'}</label>
                     <input 
                       type="number" 
                       value={wordLimit}
                       onChange={(e) => setWordLimit(e.target.value)}
                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                      placeholder="e.g. 3000"
+                      placeholder={isHe ? "לדוגמה: 3000" : "e.g. 3000"}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Abstract Limit</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">{isHe ? 'מגבלת תקציר' : 'Abstract Limit'}</label>
                     <input 
                       type="number" 
                       value={abstractLimit}
                       onChange={(e) => setAbstractLimit(e.target.value)}
                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                      placeholder="e.g. 150"
+                      placeholder={isHe ? "לדוגמה: 150" : "e.g. 150"}
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Citation Style</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{isHe ? 'סגנון ציטוט' : 'Citation Style'}</label>
                   <input 
                     type="text" 
                     value={citationStyle}
                     onChange={(e) => setCitationStyle(e.target.value)}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                    placeholder="e.g. APA, IEEE, Nature"
+                    placeholder={isHe ? "לדוגמה: APA, IEEE, Nature" : "e.g. APA, IEEE, Nature"}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Instructions URL</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{isHe ? 'כתובת URL להוראות' : 'Instructions URL'}</label>
                   <input 
                     type="url" 
                     value={instructionsUrl}
@@ -151,7 +154,7 @@ export default function AddJournalButton() {
                   onClick={() => setIsOpen(false)}
                   className="px-4 py-2 text-slate-600 font-medium hover:text-slate-900 transition-colors"
                 >
-                  Cancel
+                  {isHe ? 'ביטול' : 'Cancel'}
                 </button>
                 <button 
                   type="submit" 
@@ -159,7 +162,7 @@ export default function AddJournalButton() {
                   className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 disabled:opacity-50"
                 >
                   {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Save Journal
+                  {isHe ? 'שמור עיתון' : 'Save Journal'}
                 </button>
               </div>
             </form>
