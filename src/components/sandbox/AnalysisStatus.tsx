@@ -11,7 +11,7 @@ export function AnalysisStatus({ paperId }: { paperId: number }) {
 
     const fetchStatus = async () => {
       try {
-        const res = await fetch(\`/api/papers/\${paperId}/sandbox\`);
+        const res = await fetch(`/api/papers/${paperId}/sandbox`);
         const data = await res.json();
         
         if (data.run) {

@@ -5,12 +5,11 @@ import { debateAgents, debates } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export const scientificReviewDebate = inngest.createFunction(
-  { id: "scientific-review-debate" },
-  { event: "submission.review.started" },
-  async ({ event, step }) => {
-    const { submissionId } = event.data;
+  { id: "scientific-review-debate", event: "submission.review.started" } as any,
+  async ({ event, step }: { event: any, step: any }) => {
+    const { paperId } = event.data;
 
-    const debateId = await step.run("initialize-debate", () => initializeDebate(submissionId));
+    const debateId = await step.run("initialize-debate", () => initializeDebate(paperId));
     
     let reachedConsensus = false;
     let round = 1;

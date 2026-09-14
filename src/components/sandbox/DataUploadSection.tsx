@@ -65,9 +65,9 @@ export function DataUploadSection({ paperId }: { paperId: number }) {
     <div className="my-6">
       <h3 className="text-lg font-semibold mb-2">Upload Data Files</h3>
       <div 
-        className={\`border-2 border-dashed p-10 text-center rounded-lg transition-colors \${
+        className={`border-2 border-dashed p-10 text-center rounded-lg transition-colors ${
           isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50"
-        }\`}
+        }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}

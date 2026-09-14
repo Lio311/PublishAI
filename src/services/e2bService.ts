@@ -1,4 +1,4 @@
-import { CodeInterpreter } from '@e2b/code-interpreter';
+import CodeInterpreter from '@e2b/code-interpreter';
 
 export async function runPythonInSandbox(
   code: string,

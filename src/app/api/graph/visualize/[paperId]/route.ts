@@ -5,8 +5,9 @@ import { inArray } from "drizzle-orm";
 
 export async function GET(
   request: Request,
-  { params }: { params: { paperId: string } }
+  { params }: { params: Promise<{ paperId: string }> }
 ) {
+  const { paperId } = await params;
   try {
     // For visualization, we fetch all relationships (and we can filter by paperId if needed)
     // To show a nice graph, we might want to just fetch a subset of the global graph.

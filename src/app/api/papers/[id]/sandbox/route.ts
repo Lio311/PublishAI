@@ -5,10 +5,11 @@ import { eq, desc } from "drizzle-orm";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
-    const paperId = parseInt(params.id, 10);
+    const paperId = parseInt(id, 10);
     if (isNaN(paperId)) {
       return NextResponse.json({ error: "Invalid paper ID" }, { status: 400 });
     }

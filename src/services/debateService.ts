@@ -2,9 +2,9 @@ import { db } from "@/db";
 import { debates, debateAgents, debateMessages } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function initializeDebate(submissionId: string): Promise<string> {
+export async function initializeDebate(paperId: number): Promise<string> {
   const [debate] = await db.insert(debates).values({
-    submissionId,
+    paperId,
     topic: "Scientific Review Debate",
   }).returning();
 

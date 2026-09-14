@@ -25,9 +25,10 @@ export default function DashboardLayout({
       <AnimatedSidebar isAdmin={isAdmin} />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto relative">
-        {/* Subtle page background glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <main className="flex-1 overflow-auto relative bg-slate-50/30">
+        {/* Subtle page background glows (Mesh Gradient effect) */}
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-400/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-sky-400/5 rounded-full blur-[100px] pointer-events-none" />
         
         <div className="p-8 max-w-6xl mx-auto relative z-10">
           {children}

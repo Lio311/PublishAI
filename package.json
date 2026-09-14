@@ -12,6 +12,7 @@
     "@ai-sdk/openai": "^4.0.66",
     "@anthropic-ai/sdk": "^0.125.0",
     "@auth/drizzle-adapter": "^1.11.3",
+    "@e2b/code-interpreter": "^2.8.0",
     "@monaco-editor/react": "^4.7.0",
     "@neondatabase/serverless": "^1.1.0",
     "@types/nodemailer": "^8.0.1",

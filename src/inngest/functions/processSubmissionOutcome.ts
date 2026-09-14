@@ -2,9 +2,8 @@ import { inngest } from "@/inngest/client";
 import { logFeedbackOutcome } from "@/services/rlhfService";
 
 export const processSubmissionOutcome = inngest.createFunction(
-  { id: "process-submission-outcome" },
-  { event: "submission.status.updated" },
-  async ({ event, step }) => {
+  { id: "process-submission-outcome", event: "submission.status.updated" } as any,
+  async ({ event, step }: { event: any, step: any }) => {
     const { submissionId, status, comments } = event.data;
     
     let outcome: 'accepted' | 'rejected' | 'revision_required' | null = null;

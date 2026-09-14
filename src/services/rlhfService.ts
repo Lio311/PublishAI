@@ -6,7 +6,7 @@ import path from "path";
 import os from "os";
 
 export async function logFeedbackOutcome(
-  submissionId: string, 
+  submissionId: number, 
   outcome: 'accepted' | 'rejected' | 'revision_required', 
   reviewerComments?: string
 ): Promise<void> {
@@ -20,8 +20,8 @@ export async function logFeedbackOutcome(
 
   await db.insert(rlhfFeedbackLogs).values({
     submissionId,
-    paperVersionId: paper_version_id as string,
-    journalId: journal_id as string,
+    paperVersionId: paper_version_id as number,
+    journalId: journal_id as number,
     outcome,
     reviewerComments,
     correctionData: {}
@@ -29,7 +29,7 @@ export async function logFeedbackOutcome(
 }
 
 export async function exportDatasetForFineTuning(
-  journalId?: string, 
+  journalId?: number, 
   outcomeFilter?: 'accepted' | 'rejected' | 'revision_required'
 ): Promise<string> {
   let conditions = [];
@@ -53,7 +53,7 @@ export async function exportDatasetForFineTuning(
   return filePath;
 }
 
-export async function assignPromptStrategy(submissionId: string): Promise<string> {
+export async function assignPromptStrategy(submissionId: number): Promise<string> {
   const strategies = await db.select().from(promptStrategies).where(eq(promptStrategies.isActive, true));
   
   if (strategies.length === 0) {
@@ -70,7 +70,7 @@ export async function assignPromptStrategy(submissionId: string): Promise<string
   return selected.id;
 }
 
-export async function getJournalAnalytics(journalId: string): Promise<any> {
+export async function getJournalAnalytics(journalId: number): Promise<any> {
   const stats = await db.select({
     outcome: rlhfFeedbackLogs.outcome,
     count: sql<number>`count(*)`
