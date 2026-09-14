@@ -4,9 +4,8 @@ import { db } from "../../db";
 import { figures, figureAnalyses } from "../../db/schema";
 
 export const processPaperFigures = inngest.createFunction(
-  { id: "process-paper-figures", name: "Process Paper Figures & Vision AI" },
-  { event: "paper.uploaded" },
-  async ({ event, step }) => {
+  { id: "process-paper-figures", name: "Process Paper Figures & Vision AI", event: "paper.uploaded" } as any,
+  async ({ event, step }: { event: any, step: any }) => {
     const { paperId, paperVersionId, documentUrl } = event.data;
 
     const extractedFigures = await step.run("extract-figures", async () => {
@@ -14,7 +13,7 @@ export const processPaperFigures = inngest.createFunction(
     });
 
     const savedFigures = await step.run("save-figures-to-db", async () => {
-      const inserts = extractedFigures.map(fig => ({
+      const inserts = extractedFigures.map((fig: any) => ({
         paperId,
         paperVersionId,
         figureNumber: fig.figureNumber,

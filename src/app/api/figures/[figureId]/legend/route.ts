@@ -3,10 +3,10 @@ import { db } from "@/db";
 import { figures } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function PUT(request: Request, { params }: { params: { figureId: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ figureId: string }> }) {
   try {
     const { legend } = await request.json();
-    const figureId = params.figureId;
+    const { figureId } = await params;
 
     if (!legend) {
       return NextResponse.json({ error: "Legend text is required" }, { status: 400 });

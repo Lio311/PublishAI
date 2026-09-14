@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+// @ts-ignore
 import ForceGraph2D from "react-force-graph-2d";
 
 interface Node {
@@ -24,7 +25,7 @@ interface GraphData {
 
 export default function KnowledgeGraphViewer({ paperId }: { paperId: number }) {
   const [data, setData] = useState<GraphData | null>(null);
-  const fgRef = useRef<any>();
+  const fgRef = useRef<any>(null);
 
   useEffect(() => {
     fetch(`/api/graph/visualize/${paperId}`)
@@ -45,7 +46,7 @@ export default function KnowledgeGraphViewer({ paperId }: { paperId: number }) {
         linkDirectionalArrowRelPos={1}
         linkCurvature={0.25}
         linkLabel={(link: any) => `${link.label}\\n${link.evidence}`}
-        onNodeClick={(node) => {
+        onNodeClick={(node: any) => {
           // Center/zoom on node
           if (fgRef.current) {
             fgRef.current.centerAt(node.x, node.y, 1000);

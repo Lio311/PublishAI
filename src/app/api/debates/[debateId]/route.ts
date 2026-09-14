@@ -3,8 +3,11 @@ import { db } from "@/db";
 import { debates, debateMessages } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function GET(req: NextRequest, { params }: { params: { debateId: string } }) {
-  const { debateId } = params;
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ debateId: string }> }
+) {
+  const { debateId } = await params;
   
   const [debate] = await db.select().from(debates).where(eq(debates.id, debateId));
   const messages = await db.select().from(debateMessages).where(eq(debateMessages.debateId, debateId));

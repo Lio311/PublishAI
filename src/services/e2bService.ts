@@ -1,14 +1,14 @@
-import CodeInterpreter from '@e2b/code-interpreter';
+import { Sandbox } from '@e2b/code-interpreter';
 
 export async function runPythonInSandbox(
   code: string,
   dataFiles: Array<{ filename: string; url: string }>
 ): Promise<{ logs: string; results: any; chartUrls: string[] }> {
-  let sandbox: CodeInterpreter | null = null;
+  let sandbox: Sandbox | null = null;
   
   try {
     // 1. Initialize E2B Sandbox
-    sandbox = await CodeInterpreter.create();
+    sandbox = await Sandbox.create();
 
     // 2. Download files from URLs and write to Sandbox
     for (const file of dataFiles) {
@@ -18,11 +18,11 @@ export async function runPythonInSandbox(
       }
       const buffer = await response.arrayBuffer();
       // Write the file to the sandbox workspace
-      await sandbox.writeBytes(file.filename, new Uint8Array(buffer));
+      await sandbox.files.write(file.filename, buffer);
     }
 
     // 3. Execute `code`
-    const execution = await sandbox.notebook.execCell(code);
+    const execution = await sandbox.runCode(code);
 
     // 4. Collect standard output, errors
     const logs = [
@@ -34,11 +34,8 @@ export async function runPythonInSandbox(
     const chartUrls: string[] = [];
 
     // 5. Upload generated charts to storage
-    // CodeInterpreter captures results, including images (e.g. matplotlib plots)
     for (const result of execution.results) {
       if (result.png) {
-        // In a real scenario we'd upload the buffer to Vercel Blob / S3
-        // For demonstration, we create a mock URL or base64 data URI
         const chartUrl = `data:image/png;base64,${result.png}`;
         chartUrls.push(chartUrl);
       }
@@ -51,7 +48,7 @@ export async function runPythonInSandbox(
   } finally {
     // 6. Close Sandbox
     if (sandbox) {
-      await sandbox.close();
+      await sandbox.kill();
     }
   }
 }

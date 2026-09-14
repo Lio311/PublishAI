@@ -4,10 +4,10 @@ import { figures, figureAnalyses } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { analyzeFigureWithVisionAi } from "@/services/visionAi.service";
 
-export async function POST(request: Request, { params }: { params: { figureId: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ figureId: string }> }) {
   try {
     const { claims } = await request.json();
-    const figureId = params.figureId;
+    const { figureId } = await params;
 
     const [figure] = await db.select().from(figures).where(eq(figures.id, figureId));
     if (!figure) {

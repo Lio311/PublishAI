@@ -3,8 +3,8 @@ import { db } from "@/db";
 import { debateMessages } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function GET(req: NextRequest, { params }: { params: { debateId: string } }) {
-  const { debateId } = params;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ debateId: string }> }) {
+  const { debateId } = await params;
 
   let isClosed = false;
 

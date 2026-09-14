@@ -3,12 +3,13 @@ import { getJournalAnalytics } from "@/services/rlhfService";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const journalId = params.id;
-    if (!journalId) {
-      return NextResponse.json({ error: "Missing journal ID" }, { status: 400 });
+    const { id } = await params;
+    const journalId = parseInt(id, 10);
+    if (isNaN(journalId)) {
+      return NextResponse.json({ error: "Missing or invalid journal ID" }, { status: 400 });
     }
 
     const analytics = await getJournalAnalytics(journalId);

@@ -6,9 +6,8 @@ import { dataFiles, sandboxRuns, generatedCharts, papers } from "../../db/schema
 import { eq } from "drizzle-orm";
 
 export const processPaperAnalysis = inngest.createFunction(
-  { id: "process-paper-analysis" },
-  { event: "paper.uploaded" },
-  async ({ event, step }) => {
+  { id: "process-paper-analysis", event: "paper.uploaded" } as any,
+  async ({ event, step }: { event: any, step: any }) => {
     const paperId = event.data.paperId;
 
     // 1. Fetch uploaded data files
@@ -19,8 +18,8 @@ export const processPaperAnalysis = inngest.createFunction(
     if (files.length === 0) return; // No data files to process
 
     const paperContent = await step.run("fetch-paper-content", async () => {
-      const [paper] = await db.select({ content: papers.content }).from(papers).where(eq(papers.id, paperId));
-      return paper?.content || "";
+      const [paper] = await db.select({ title: papers.title }).from(papers).where(eq(papers.id, paperId));
+      return paper?.title || "";
     });
 
     if (!paperContent) return;
@@ -28,7 +27,7 @@ export const processPaperAnalysis = inngest.createFunction(
     // 2. Generate Python Script
     const script = await step.run("generate-python-script", async () => {
       // Create basic schemas from the file names and assumed structure
-      const fileSchemas = files.map(f => `${f.filename}: Unknown columns (load to see)`);
+      const fileSchemas = files.map((f: any) => `${f.filename}: Unknown columns (load to see)`);
       return await generateAnalysisScript(paperContent, fileSchemas);
     });
 
@@ -45,7 +44,7 @@ export const processPaperAnalysis = inngest.createFunction(
     try {
       // 4. Run Sandbox Execution
       const executionResult = await step.run("execute-sandbox", async () => {
-        const fileUrls = files.map(f => ({
+        const fileUrls = files.map((f: any) => ({
           filename: f.filename,
           url: f.fileUrl
         }));
