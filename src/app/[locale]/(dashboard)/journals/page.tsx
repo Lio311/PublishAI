@@ -1,8 +1,9 @@
 import { db } from "@/db";
 import { journals } from "@/db/schema";
-import { Book, Plus, ExternalLink } from "lucide-react";
+import { Book, ExternalLink } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { checkIsAdmin } from "@/lib/auth-utils";
+import AddJournalButton from "@/components/journals/AddJournalButton";
 
 export default async function JournalsPage() {
   const allJournals = await db.select().from(journals);
@@ -16,10 +17,7 @@ export default async function JournalsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Journal Rules</h1>
           <p className="text-slate-500 mt-1">Manage formatting and submission rules for target journals.</p>
         </div>
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
-          <Plus className="w-5 h-5" />
-          Add Journal
-        </button>
+        <AddJournalButton />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

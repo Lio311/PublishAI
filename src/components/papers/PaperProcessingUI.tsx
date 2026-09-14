@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { SubmissionPanel } from "../submission/SubmissionPanel";
 import { useEffect, useState, useRef, useCallback } from "react";
 
 import { 
@@ -239,6 +240,12 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
           <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
           <h3 className="text-2xl font-bold text-green-800 mb-2">{t("processComplete")}</h3>
           <p className="text-green-700">{t("processCompleteDesc")}</p>
+        </div>
+      )}
+
+      {isFinished && (
+        <div className="mt-8">
+          <SubmissionPanel paperId={paperId} />
         </div>
       )}
     </div>
