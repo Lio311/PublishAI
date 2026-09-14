@@ -6,10 +6,9 @@ import { toast } from "sonner";
 
 type Tab = "profile" | "notifications" | "privacy" | "api_keys";
 
-import { useLocale } from "next-intl";
 
 export default function SettingsClient({ locale }: { locale: string }) {
-  const locale = useLocale();
+  
   const isHe = locale === "he";
 
   const [activeTab, setActiveTab] = useState<Tab>("profile");
