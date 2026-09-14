@@ -1,10 +1,47 @@
 "use client";
 
-import { UploadCloud } from "lucide-react";
+import { UploadCloud, Loader2, CheckCircle } from "lucide-react";
 import { useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function UploadZone() {
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const router = useRouter();
+
+  const handleUpload = async (file: File) => {
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const data = await res.json();
+      console.log("Success:", data);
+      
+      setUploadSuccess(true);
+      
+      // Navigate to the paper details page after 1.5 seconds
+      setTimeout(() => {
+        // router.push(`/papers/${data.paper.id}`); // Uncomment when page exists
+      }, 1500);
+
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      alert("שגיאה בהעלאת הקובץ. אנא נסה שוב.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -21,9 +58,7 @@ export default function UploadZone() {
     setIsDragging(false);
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      console.log("File dropped:", file.name);
-      // TODO: Handle upload to server/blob storage
+      handleUpload(e.dataTransfer.files[0]);
     }
   }, []);
 
@@ -33,31 +68,47 @@ export default function UploadZone() {
       onDragLeave={onDragLeave}
       onDrop={onDrop}
       className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center transition-colors duration-200 ease-in-out cursor-pointer
-        ${isDragging ? "border-blue-500 bg-blue-50" : "border-slate-300 bg-white hover:border-slate-400"}`}
+        ${isDragging ? "border-blue-500 bg-blue-50" : "border-slate-300 bg-white hover:border-slate-400"}
+        ${isUploading ? "opacity-75 cursor-not-allowed" : ""}
+      `}
     >
-      <div className="bg-blue-100 p-4 rounded-full mb-4">
-        <UploadCloud className="w-8 h-8 text-blue-600" />
+      <div className={`p-4 rounded-full mb-4 ${uploadSuccess ? 'bg-green-100' : 'bg-blue-100'}`}>
+        {isUploading ? (
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+        ) : uploadSuccess ? (
+          <CheckCircle className="w-8 h-8 text-green-600" />
+        ) : (
+          <UploadCloud className="w-8 h-8 text-blue-600" />
+        )}
       </div>
-      <h3 className="text-xl font-bold text-slate-800 mb-2">
-        גרור את המאמר שלך לכאן
-      </h3>
-      <p className="text-slate-500 mb-6 max-w-md">
-        תומך בקבצי Word (.docx) או PDF. אנחנו ננתח את המסמך ונתחיל את תהליך הריוויזיה האוטומטי.
-      </p>
       
-      <div className="relative">
+      <h3 className="text-xl font-bold text-slate-800 mb-2">
+        {isUploading ? "מעבד ומחלץ טקסט..." : uploadSuccess ? "הקובץ הועלה בהצלחה!" : "גרור את המאמר שלך לכאן"}
+      </h3>
+      
+      {!isUploading && !uploadSuccess && (
+        <p className="text-slate-500 mb-6 max-w-md">
+          תומך בקבצי Word (.docx) או PDF. אנחנו ננתח את המסמך ונתחיל את תהליך הריוויזיה האוטומטי.
+        </p>
+      )}
+      
+      <div className="relative mt-2">
         <input 
           type="file" 
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
           accept=".docx,.pdf"
+          disabled={isUploading || uploadSuccess}
           onChange={(e) => {
             if (e.target.files?.length) {
-              console.log("File selected:", e.target.files[0].name);
+              handleUpload(e.target.files[0]);
             }
           }}
         />
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors pointer-events-none">
-          או בחר קובץ
+        <button 
+          disabled={isUploading || uploadSuccess}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+        >
+          {isUploading ? "מעלה..." : "או בחר קובץ"}
         </button>
       </div>
     </div>
