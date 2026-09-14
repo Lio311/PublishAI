@@ -226,25 +226,7 @@ export default function SystemFlowModal({
     }
   }, []);
 
-  // Block user scroll on the container during animation
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    // If modal is closed or animation is finished, allow scrolling
-    if (!container || !isOpen || isFinished) return;
-
-    const blockScroll = (e: Event) => {
-      e.preventDefault();
-      e.stopPropagation();
-    };
-
-    container.addEventListener("wheel", blockScroll, { passive: false });
-    container.addEventListener("touchmove", blockScroll, { passive: false });
-
-    return () => {
-      container.removeEventListener("wheel", blockScroll);
-      container.removeEventListener("touchmove", blockScroll);
-    };
-  }, [isOpen, isFinished]);
+  
 
   // Reset state when opening
   useEffect(() => {
