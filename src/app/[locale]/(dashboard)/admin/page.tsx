@@ -7,6 +7,7 @@ import { users, papers } from "@/db/schema";
 import { desc, eq, count, sql } from "drizzle-orm";
 import DashboardCharts from "@/components/admin/DashboardCharts";
 import UsersList from "@/components/admin/UsersList";
+import RLHFAnalytics from "@/components/rlhf/AnalyticsDashboard";
 
 export default async function AdminDashboardPage({
   params
@@ -233,6 +234,11 @@ export default async function AdminDashboardPage({
               </tbody>
             </table>
           </div>
+        </div>
+        
+        {/* RLHF Analytics */}
+        <div className="mb-8">
+          <RLHFAnalytics />
         </div>
       </div>
     </DashboardLayout>

@@ -3,7 +3,7 @@ import { papers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import PaperProcessingUI from "@/components/papers/PaperProcessingUI";
+import PaperTabs from "./PaperTabs";
 
 export default async function PaperPage({ params }: { params: Promise<{ id: string, locale: string }> | { id: string, locale: string } }) {
   const resolvedParams = await params;
@@ -25,8 +25,8 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
         ) : (isHe ? "לא ידוע" : "Unknown")}
       </p>
 
-      {/* Visual processing UI */}
-      <PaperProcessingUI paperId={paper.id} initialStatus={paper.status || "pending"} />
+      {/* Tabs interface for advanced AI features */}
+      <PaperTabs paperId={paper.id} initialStatus={paper.status || "pending"} />
     </div>
   );
 }
