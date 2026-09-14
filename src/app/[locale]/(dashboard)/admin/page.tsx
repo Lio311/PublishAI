@@ -199,7 +199,7 @@ export default async function AdminDashboardPage({
             </h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left table-fixed" dir={locale === 'he' ? 'rtl' : 'ltr'}>
+            <table className="w-[95%] mx-auto text-sm text-center table-fixed" dir={locale === 'he' ? 'rtl' : 'ltr'}>
               <thead className="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
                 <tr>
                   <th className="px-6 py-3 w-[8%]">{locale === 'he' ? 'מספר' : 'ID'}</th>

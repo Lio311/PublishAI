@@ -113,7 +113,7 @@ export default async function PapersPage({
               <p className="text-lg font-medium">{t("recentPapers.empty")}</p>
             </div>
           ) : (
-            <table className={`w-full text-sm ${locale === 'he' ? 'text-right' : 'text-left'}`}>
+            <table className="w-[95%] mx-auto text-sm text-center">
               <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
                 <tr>
                   <th className="px-6 py-4 font-medium">{t("recentPapers.headers.name")}</th>

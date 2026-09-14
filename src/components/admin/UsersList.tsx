@@ -11,7 +11,7 @@ export default function UsersList({ users, locale }: { users: { id: string; name
         </h2>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left table-fixed" dir={locale === 'he' ? 'rtl' : 'ltr'}>
+        <table className="w-[80%] mx-auto text-sm text-center table-fixed" dir={locale === 'he' ? 'rtl' : 'ltr'}>
           <thead className="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
             <tr>
               <th className="px-6 py-3 w-1/2">{locale === 'he' ? 'שם' : 'Name'}</th>
