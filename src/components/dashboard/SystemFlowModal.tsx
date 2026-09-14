@@ -687,20 +687,34 @@ export default function SystemFlowModal({
           {isFinished && (
             <div
               ref={finishRef}
-              className="mt-8 text-center animate-step-in"
+              className="mt-12 text-center animate-step-in pb-12"
             >
-            <div className="inline-flex flex-col items-center gap-3 px-8 py-6 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 border-2 border-green-200 rounded-3xl shadow-lg shadow-green-100/50">
-              <div className="relative">
-                <CircleCheckBig className="w-8 h-8 text-green-600" />
+              <div className="inline-flex flex-col items-center gap-4 px-10 py-8 bg-gradient-to-br from-indigo-50 via-blue-50 to-sky-50 border-2 border-blue-200 rounded-3xl shadow-xl shadow-blue-100/50">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-blue-400 rounded-full blur-xl opacity-30 animate-pulse" />
+                  <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-4 rounded-full shadow-lg">
+                    <CircleCheckBig className="w-10 h-10" />
+                  </div>
+                </div>
+                
+                <div className="flex flex-col items-center gap-1 mt-2">
+                  <h2 className="font-bold text-2xl text-slate-800">{t("marketingTitle")}</h2>
+                  <p className="text-slate-600 max-w-sm leading-relaxed">{t("marketingSubtitle")}</p>
+                </div>
+
+                <button
+                  onClick={handleClose}
+                  className="mt-4 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
+                >
+                  <Play className="w-5 h-5 fill-current" />
+                  <span>{t("startNow")}</span>
+                </button>
               </div>
-              <span className="font-bold text-xl text-green-700">{t("complete")}</span>
-              <span className="text-sm text-green-600/80">{t("subtitle")}</span>
-            </div>
             </div>
           )}
 
           {/* Extra bottom padding so last items can scroll into view */}
-          <div className="h-32" />
+          <div className="h-16" />
         </div>
       </div>
 

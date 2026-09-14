@@ -2,7 +2,7 @@
 
 import { UploadCloud, Loader2, CheckCircle } from "lucide-react";
 import { useCallback, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
 export default function UploadZone() {
@@ -36,7 +36,7 @@ export default function UploadZone() {
       
       // Navigate to the paper details page after 1.5 seconds
       setTimeout(() => {
-        // router.push(`/papers/${data.papers[0]?.paper?.id}`); // Uncomment when page exists
+        router.push(`/papers/${data.papers[0]?.paper?.id}`); 
       }, 1500);
 
     } catch (error) {

@@ -46,7 +46,14 @@
     "subtitle": "Complete pipeline from upload to publication",
     "replay": "Replay",
     "paused": "Paused",
-    "complete": "Paper ready for publication",
+    "complete": "Your paper is ready for publication",
+    "marketingTitle": "Now it's your turn!",
+    "marketingSubtitle": "Upload your research and let our agent team transform it into a polished academic paper.",
+    "startNow": "Start Now",
+    "workingProcess": "Working Process",
+    "agentWorking": "The agent is currently working on this step...",
+    "processComplete": "Process Complete!",
+    "processCompleteDesc": "Your paper has passed all stages and is now ready.",
     "steps": {
       "upload": {
         "title": "Upload Paper",
