@@ -1,5 +1,6 @@
 import { FileText, Home, Settings, LogOut } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,9 +9,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className="w-64 bg-white border-l border-slate-200 flex flex-col justify-between">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-8">
-            <div className="bg-blue-600 p-2 rounded-lg">
-              <FileText className="w-6 h-6 text-white" />
-            </div>
+            <Image 
+              src="/logo.png" 
+              alt="PublishAI Logo" 
+              width={40} 
+              height={40} 
+              className="rounded-lg object-contain"
+            />
             <h1 className="text-2xl font-bold text-slate-800">PublishAI</h1>
           </div>
           
