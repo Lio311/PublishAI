@@ -495,7 +495,7 @@ export default function SystemFlowModal({
         {/* Flow Steps */}
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto p-8 space-y-0 scrollbar-hide"
+          className="flex-1 overflow-y-auto p-8 space-y-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {FLOW_STEPS.map((step, index) => {
             const isCurrentOrPast = index <= currentStepIndex;

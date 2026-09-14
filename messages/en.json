@@ -58,7 +58,7 @@
       },
       "planning": {
         "title": "Planning Agent",
-        "desc": "An advanced AI agent (Opus) reviews the entire paper and creates a detailed revision plan — identifying weaknesses, setting goals, and outlining the workflow."
+        "desc": "An advanced AI agent (Opus) reviews the entire paper and creates a detailed revision plan: identifying weaknesses, setting goals, and outlining the workflow."
       },
       "knowledge": {
         "title": "Knowledge & References Agent",
@@ -66,7 +66,7 @@
       },
       "review": {
         "title": "Scientific Review Agent",
-        "desc": "Internal peer review — the agent identifies logical flaws, methodological issues, data contradictions, and suggests evidence-based improvements."
+        "desc": "Internal peer review: the agent identifies logical flaws, methodological issues, data contradictions, and suggests evidence-based improvements."
       },
       "writing": {
         "title": "Academic Writing Agent",
@@ -74,7 +74,7 @@
       },
       "execution": {
         "title": "Execution Agent",
-        "desc": "Physical implementation of all changes in the text — the agent applies all corrections and edits in Track Changes format so you can approve each change."
+        "desc": "Physical implementation of all changes in the text: the agent applies all corrections and edits in Track Changes format so you can approve each change."
       },
       "qa": {
         "title": "Quality Assurance Agent",
