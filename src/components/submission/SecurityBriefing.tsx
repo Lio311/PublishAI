@@ -87,7 +87,7 @@ export function SecurityBriefing({ onAccept, onCancel }: SecurityBriefingProps) 
         <button 
           onClick={onAccept}
           disabled={!accepted}
-          className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-2 bg-gradient-to-r from-blue-900 via-blue-700 to-sky-400 text-white font-medium rounded-lg hover:from-blue-800 hover:via-blue-600 hover:to-sky-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {t("continue")}
         </button>

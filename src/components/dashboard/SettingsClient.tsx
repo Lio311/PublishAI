@@ -114,7 +114,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
       <button 
         onClick={handleSave}
         disabled={isSaving}
-        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-70 flex items-center gap-2"
+        className="bg-gradient-to-r from-blue-900 via-blue-700 to-sky-400 hover:from-blue-800 hover:via-blue-600 hover:to-sky-300 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-70 flex items-center gap-2"
       >
         {isSaving && (
           <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
