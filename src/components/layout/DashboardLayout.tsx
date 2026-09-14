@@ -80,9 +80,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {locale === 'he' ? 'English' : 'עברית'}
           </button>
           
-          <button className="flex w-full items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50 transition-colors">
-            <LogOut className="w-5 h-5 text-red-400" />
-            {t("logout")}
+          <button 
+            onClick={() => window.location.href = '/api/auth/signin'} 
+            className="flex w-full items-center gap-3 px-4 py-3 rounded-lg font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+          >
+            <LogOut className="w-5 h-5 text-slate-400" />
+            {t("logout")} / התחבר
           </button>
         </div>
       </aside>
