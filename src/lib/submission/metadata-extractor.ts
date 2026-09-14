@@ -13,20 +13,11 @@ export class MetadataExtractor {
       throw new Error(`Paper ${paperId} not found`);
     }
 
-    // Attempt to extract title from content if no specific field
-    let title = paper.title;
-    if (!title && paper.content) {
-      const firstLine = paper.content.split("\n").find(l => l.trim().startsWith("# "));
-      if (firstLine) {
-        title = firstLine.replace("# ", "").trim();
-      }
-    }
-
     return {
-      title: title || "Untitled Paper",
-      content: paper.content || "",
-      abstract: "Abstract extracted from paper content...", // In reality, use LLM or specific regex
-      keywords: ["Research", "PublishAI"], // Example
+      title: paper.title || "Untitled Paper",
+      content: "Content will be extracted from the latest version file...",
+      abstract: "Abstract extracted from paper...", 
+      keywords: ["Research", "PublishAI"],
       authors: [
         { name: "Current User", email: "user@example.com", affiliation: "University" }
       ],

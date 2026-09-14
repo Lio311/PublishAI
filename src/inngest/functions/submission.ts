@@ -5,9 +5,8 @@ import { submissions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export const processSubmission = inngest.createFunction(
-  { id: "process-submission", retries: 3 },
-  { event: "submission/process" },
-  async ({ event, step }) => {
+  { id: "process-submission", event: "submission/process", retries: 3 } as any,
+  async ({ event, step }: { event: any, step: any }) => {
     const { submissionId } = event.data;
 
     // Increment attempt count
@@ -34,8 +33,8 @@ export const processSubmission = inngest.createFunction(
     // Step to send confirmation email
     await step.run("send-confirmation-email", async () => {
       // Email sending logic here
-      // import { sendEmail } from "@/lib/email/sender";
-      // await sendEmail({ to: user.email, subject: "Submission Successful", ... });
+      // import { sendSubmissionSuccessEmail } from "@/lib/email/submission-email";
+      // await sendSubmissionSuccessEmail(user.email, paper.title, result.postUrl);
     });
 
     return { success: true, confirmationId: result.confirmationId };

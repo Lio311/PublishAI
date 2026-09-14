@@ -1,5 +1,3 @@
-import { sendEmail } from "./nodemailer-client"; // Assuming this exists or similar
-
 export async function sendSubmissionSuccessEmail(userEmail: string, paperTitle: string, postUrl: string) {
   const subject = `Your paper "${paperTitle}" was successfully submitted`;
   const html = `
@@ -9,8 +7,6 @@ export async function sendSubmissionSuccessEmail(userEmail: string, paperTitle: 
     <p><br>Best regards,<br>The PublishAI Team</p>
   `;
 
-  // Commented out to prevent actual sending if nodemailer isn't fully configured
-  // await sendEmail({ to: userEmail, subject, html });
   console.log(`[Email Mock] Sent to ${userEmail}: ${subject}`);
 }
 
@@ -24,6 +20,5 @@ export async function sendSubmissionFailedEmail(userEmail: string, paperTitle: s
     <p><br>Best regards,<br>The PublishAI Team</p>
   `;
 
-  // await sendEmail({ to: userEmail, subject, html });
   console.log(`[Email Mock] Sent to ${userEmail}: ${subject}`);
 }
