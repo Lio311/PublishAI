@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { SecurityBriefing } from "./SecurityBriefing";
 import { ConnectionForm } from "./ConnectionForm";
 import { Loader2, ExternalLink, RefreshCw, Send, CheckCircle2, AlertCircle } from "lucide-react";
@@ -12,6 +12,8 @@ interface SubmissionPanelProps {
 
 export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
   const t = useTranslations("submission");
+  const locale = useLocale();
+  const isHe = locale === "he";
   const [step, setStep] = useState<"briefing" | "list" | "form" | "confirm" | "progress">("list");
   const [connections, setConnections] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -176,7 +178,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
                   <div>
                     <div className="font-medium text-slate-800 capitalize">{sub.status}</div>
                     <div className="text-sm text-slate-500">
-                      {new Date(sub.createdAt).toLocaleString()} • Mode: {sub.publishMode}
+                      {new Date(sub.createdAt).toLocaleString()} • {isHe ? "מצב:" : "Mode:"} {sub.publishMode}
                     </div>
                   </div>
                 </div>

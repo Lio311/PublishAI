@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Shield, Lock, Trash2, Info, CheckCircle, AlertTriangle } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface SecurityBriefingProps {
   onAccept: () => void;
@@ -12,6 +12,8 @@ interface SecurityBriefingProps {
 export function SecurityBriefing({ onAccept, onCancel }: SecurityBriefingProps) {
   const [accepted, setAccepted] = useState(false);
   const t = useTranslations("submission.security");
+  const locale = useLocale();
+  const isHe = locale === "he";
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden max-w-2xl mx-auto">
@@ -53,9 +55,9 @@ export function SecurityBriefing({ onAccept, onCancel }: SecurityBriefingProps) 
         <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm flex gap-3">
           <AlertTriangle className="w-5 h-5 text-blue-600 shrink-0" />
           <div>
-            <span className="font-semibold text-blue-900 block mb-1">WordPress Application Passwords</span>
+            <span className="font-semibold text-blue-900 block mb-1">{isHe ? "סיסמאות יישום (Application Passwords) בוורדפרס" : "WordPress Application Passwords"}</span>
             <p className="text-blue-800">
-              עבור אתרי WordPress, מומלץ ליצור Application Password ייעודי במקום להשתמש בסיסמה הראשית שלך. ניתן למצוא זאת תחת Users → Profile.
+              {isHe ? "עבור אתרי WordPress, מומלץ ליצור Application Password ייעודי במקום להשתמש בסיסמה הראשית שלך. ניתן למצוא זאת תחת Users → Profile." : "For WordPress sites, it is recommended to create a dedicated Application Password instead of using your main password. You can find this under Users → Profile."}
             </p>
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Loader2, Link as LinkIcon, CheckCircle, XCircle } from "lucide-react";
 
 interface ConnectionFormProps {
@@ -11,6 +11,8 @@ interface ConnectionFormProps {
 
 export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
   const t = useTranslations("submission.connection");
+  const locale = useLocale();
+  const isHe = locale === "he";
   const [platform, setPlatform] = useState<"wordpress" | "ojs">("wordpress");
   const [siteUrl, setSiteUrl] = useState("");
   const [username, setUsername] = useState("");
@@ -38,7 +40,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
       const data = await res.json();
       setTestResult(data);
     } catch (err: any) {
-      setTestResult({ success: false, message: "Network error occurred." });
+      setTestResult({ success: false, message: isHe ? "אירעה שגיאת רשת." : "Network error occurred." });
     } finally {
       setIsTesting(false);
     }
@@ -49,7 +51,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
     
     // Auto-test if not tested yet
     if (!testResult?.success) {
-      setSaveError("Please run a successful connection test first.");
+      setSaveError(isHe ? "אנא הפעל בדיקת התחברות מוצלחת תחילה." : "Please run a successful connection test first.");
       return;
     }
     
@@ -77,7 +79,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
       const data = await res.json();
       onSuccess(data.id);
     } catch (err: any) {
-      setSaveError(err.message || "Failed to save connection.");
+      setSaveError(err.message || (isHe ? "נכשל בשמירת החיבור." : "Failed to save connection."));
     } finally {
       setIsSaving(false);
     }
@@ -132,7 +134,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">{t("displayName")} (Optional)</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1">{t("displayName")} {isHe ? "(אופציונלי)" : "(Optional)"}</label>
           <input 
             type="text" 
             placeholder="My Medical Journal"

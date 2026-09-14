@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { SecurityBriefing } from "./SecurityBriefing";
 import { ConnectionForm } from "./ConnectionForm";
 import { Loader2, ExternalLink, RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export function ConnectionsManager() {
   const t = useTranslations("submission");
+  const locale = useLocale();
+  const isHe = locale === "he";
   const [step, setStep] = useState<"list" | "briefing" | "form">("list");
   const [connections, setConnections] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
@@ -78,9 +80,9 @@ export function ConnectionsManager() {
 
         {connections.length === 0 ? (
           <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-            <p className="mb-4">You don't have any journal connections yet.</p>
+            <p className="mb-4">{isHe ? "עדיין אין לך חיבורים לעיתונים." : "You don't have any journal connections yet."}</p>
             <button onClick={handleStartNewConnection} className="text-indigo-600 font-medium hover:underline">
-              Add your first connection
+              {isHe ? "הוסף חיבור ראשון" : "Add your first connection"}
             </button>
           </div>
         ) : (
@@ -97,7 +99,7 @@ export function ConnectionsManager() {
                   {conn.siteUrl}
                 </div>
                 <div className="flex items-center text-xs text-slate-400">
-                  Added: {new Date(conn.createdAt).toLocaleDateString()}
+                  {isHe ? "נוסף ב:" : "Added:"} {new Date(conn.createdAt).toLocaleDateString()}
                 </div>
               </div>
             ))}
@@ -113,7 +115,7 @@ export function ConnectionsManager() {
 
         {submissions.length === 0 ? (
           <div className="text-center py-8 text-slate-500">
-            No submissions found.
+            {isHe ? "לא נמצאו הגשות." : "No submissions found."}
           </div>
         ) : (
           <div className="space-y-4">
@@ -132,7 +134,7 @@ export function ConnectionsManager() {
                       <span>•</span>
                       <span>{new Date(sub.createdAt).toLocaleString()}</span>
                       <span>•</span>
-                      <span className="capitalize text-indigo-600">Mode: {sub.publishMode}</span>
+                      <span className="capitalize text-indigo-600">{isHe ? "מצב:" : "Mode:"} {sub.publishMode}</span>
                     </div>
                   </div>
                 </div>

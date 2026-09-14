@@ -14,11 +14,6 @@ export default function AddJournalButton() {
 
   // Form state
   const [name, setName] = useState("");
-  const [field, setField] = useState("");
-  const [wordLimit, setWordLimit] = useState("");
-  const [abstractLimit, setAbstractLimit] = useState("");
-  const [citationStyle, setCitationStyle] = useState("");
-  const [instructionsUrl, setInstructionsUrl] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,25 +23,13 @@ export default function AddJournalButton() {
       const res = await fetch("/api/journals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          field,
-          wordLimit: wordLimit ? parseInt(wordLimit) : null,
-          abstractLimit: abstractLimit ? parseInt(abstractLimit) : null,
-          citationStyle,
-          instructionsUrl,
-        }),
+        body: JSON.stringify({ name }),
       });
 
       if (res.ok) {
         setIsOpen(false);
         // Reset form
         setName("");
-        setField("");
-        setWordLimit("");
-        setAbstractLimit("");
-        setCitationStyle("");
-        setInstructionsUrl("");
         
         // Refresh the page data
         router.refresh();
@@ -93,58 +76,12 @@ export default function AddJournalButton() {
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
                     placeholder={isHe ? "לדוגמה: Science" : "e.g. Science"}
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">{isHe ? 'תחום / דיסציפלינה' : 'Field / Discipline'}</label>
-                  <input 
-                    type="text" 
-                    value={field}
-                    onChange={(e) => setField(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                    placeholder={isHe ? "לדוגמה: רב-תחומי" : "e.g. Multidisciplinary"}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">{isHe ? 'מגבלת מילים' : 'Word Limit'}</label>
-                    <input 
-                      type="number" 
-                      value={wordLimit}
-                      onChange={(e) => setWordLimit(e.target.value)}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                      placeholder={isHe ? "לדוגמה: 3000" : "e.g. 3000"}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">{isHe ? 'מגבלת תקציר' : 'Abstract Limit'}</label>
-                    <input 
-                      type="number" 
-                      value={abstractLimit}
-                      onChange={(e) => setAbstractLimit(e.target.value)}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                      placeholder={isHe ? "לדוגמה: 150" : "e.g. 150"}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">{isHe ? 'סגנון ציטוט' : 'Citation Style'}</label>
-                  <input 
-                    type="text" 
-                    value={citationStyle}
-                    onChange={(e) => setCitationStyle(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                    placeholder={isHe ? "לדוגמה: APA, IEEE, Nature" : "e.g. APA, IEEE, Nature"}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">{isHe ? 'כתובת URL להוראות' : 'Instructions URL'}</label>
-                  <input 
-                    type="url" 
-                    value={instructionsUrl}
-                    onChange={(e) => setInstructionsUrl(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                    placeholder="https://..."
-                  />
+                  {isLoading && (
+                    <p className="text-sm text-slate-500 mt-2 flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {isHe ? 'מושך נתונים אוטומטית...' : 'Fetching journal details automatically...'}
+                    </p>
+                  )}
                 </div>
               </div>
               
@@ -161,8 +98,8 @@ export default function AddJournalButton() {
                   disabled={isLoading || !name}
                   className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 disabled:opacity-50"
                 >
-                  {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {isHe ? 'שמור עיתון' : 'Save Journal'}
+                  {isLoading && <Loader2 className="w-4 h-4 animate-spin hidden" />}
+                  {isLoading ? (isHe ? 'שומר...' : 'Saving...') : (isHe ? 'שמור עיתון' : 'Save Journal')}
                 </button>
               </div>
             </form>
