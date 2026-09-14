@@ -169,6 +169,8 @@ const COMPLETION_DELAY = 600;
 
 type AnimPhase = "idle" | "appearing" | "opening" | "holding" | "closing";
 
+let globalHasSeenPresentation = false;
+
 export default function SystemFlowModal({
   isOpen,
   onClose,
@@ -177,6 +179,8 @@ export default function SystemFlowModal({
   onClose: () => void;
 }) {
   const t = useTranslations("SystemFlow");
+
+  // State
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
   const [animPhase, setAnimPhase] = useState<AnimPhase>("idle");
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
@@ -184,12 +188,12 @@ export default function SystemFlowModal({
   const [isFinished, setIsFinished] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
+  // Refs
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
   const finishRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Clear any pending timer
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -197,14 +201,15 @@ export default function SystemFlowModal({
     }
   }, []);
 
-  // Smooth scroll to a step element
   const scrollToStep = useCallback((index: number) => {
-    const el = stepRefs.current[index];
-    if (el && scrollContainerRef.current) {
+    if (stepRefs.current[index] && scrollContainerRef.current) {
       const container = scrollContainerRef.current;
+      const el = stepRefs.current[index]!;
       const elRect = el.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
-      const offset = elRect.top - containerRect.top + container.scrollTop - 40;
+      // Scroll so the element is roughly in the middle
+      const offset = elRect.top - containerRect.top + container.scrollTop - 100;
+
       container.scrollTo({ top: offset, behavior: "smooth" });
     }
   }, []);
@@ -242,18 +247,28 @@ export default function SystemFlowModal({
   // Reset state when opening
   useEffect(() => {
     if (isOpen) {
-      setCurrentStepIndex(-1);
-      setAnimPhase("idle");
-      setCompletedSteps(new Set());
-      setIsClosing(false);
-      setIsFinished(false);
-      setIsPaused(false);
       clearTimer();
+      setIsClosing(false);
+      setIsPaused(false);
 
-      timerRef.current = setTimeout(() => {
-        setCurrentStepIndex(0);
-        setAnimPhase("appearing");
-      }, INITIAL_DELAY);
+      if (globalHasSeenPresentation) {
+        // Skip animation if already seen
+        setCurrentStepIndex(FLOW_STEPS.length);
+        setAnimPhase("idle");
+        setIsFinished(true);
+        setCompletedSteps(new Set(FLOW_STEPS.map((_, i) => i)));
+      } else {
+        // Start animation from beginning
+        setCurrentStepIndex(-1);
+        setAnimPhase("idle");
+        setCompletedSteps(new Set());
+        setIsFinished(false);
+
+        timerRef.current = setTimeout(() => {
+          setCurrentStepIndex(0);
+          setAnimPhase("appearing");
+        }, INITIAL_DELAY);
+      }
     }
 
     return () => clearTimer();
@@ -302,6 +317,7 @@ export default function SystemFlowModal({
             setAnimPhase("idle");
             timerRef.current = setTimeout(() => {
               setIsFinished(true);
+              globalHasSeenPresentation = true;
               setTimeout(() => scrollToFinish(), 200);
             }, COMPLETION_DELAY);
           }
@@ -500,7 +516,7 @@ export default function SystemFlowModal({
           {FLOW_STEPS.map((step, index) => {
             const isCurrentOrPast = index <= currentStepIndex;
             const isCurrent = index === currentStepIndex;
-            const isExpanded = isCurrent && (animPhase === "opening" || animPhase === "holding");
+            const isExpanded = isFinished || (isCurrent && (animPhase === "opening" || animPhase === "holding"));
             const isCompleted = completedSteps.has(index);
             const IconComponent = step.icon;
             const isLast = index === FLOW_STEPS.length - 1;
