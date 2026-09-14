@@ -519,9 +519,7 @@ export default function SystemFlowModal({
         {/* Flow Steps */}
         <div
           ref={scrollContainerRef}
-          className={`flex-1 overflow-y-auto p-8 space-y-0 ${
-            !isFinished ? "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" : ""
-          }`}
+          className="flex-1 overflow-y-auto p-8 space-y-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {FLOW_STEPS.map((step, index) => {
             const isCurrentOrPast = index <= currentStepIndex;
@@ -567,25 +565,17 @@ export default function SystemFlowModal({
                       <div
                         className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500
                           ${
-                            isCurrent && !isCompleted
-                              ? `${step.bgColor} shadow-md`
-                              : isCompleted
-                              ? "bg-green-100"
+                            (isCurrent || isCompleted)
+                              ? `${step.bgColor} ${isCurrent && !isCompleted ? 'shadow-md' : ''}`
                               : "bg-slate-100"
                           }
                         `}
                       >
-                        {isCompleted ? (
-                          <svg className="w-7 h-7 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        ) : (
-                          <IconComponent
-                            className={`w-7 h-7 transition-all duration-300 ${
-                              isCurrent ? step.color : "text-slate-400"
-                            }`}
-                          />
-                        )}
+                        <IconComponent
+                          className={`w-7 h-7 transition-all duration-300 ${
+                            (isCurrent || isCompleted) ? step.color : "text-slate-400"
+                          }`}
+                        />
                       </div>
                       {/* Step number badge */}
                       <div
@@ -697,7 +687,7 @@ export default function SystemFlowModal({
           {isFinished && (
             <div
               ref={finishRef}
-              className="mt-12 text-center animate-step-in pb-12"
+              className="mt-12 text-center animate-step-in pb-4"
             >
               <div className="inline-flex flex-col items-center gap-4 px-10 py-8 bg-gradient-to-br from-indigo-50 via-blue-50 to-sky-50 border-2 border-blue-200 rounded-3xl shadow-xl shadow-blue-100/50">
                 <div className="relative">
@@ -724,7 +714,7 @@ export default function SystemFlowModal({
           )}
 
           {/* Extra bottom padding so last items can scroll into view */}
-          <div className="h-16" />
+          <div className="h-2" />
         </div>
       </div>
 
