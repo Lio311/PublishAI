@@ -79,8 +79,36 @@ export default function GlobalPasswordProtection({ children }: { children: React
     if (!isAuthenticated) {
         return (
             <div className="fixed inset-0 z-[100] min-h-screen w-full bg-slate-50 flex items-center justify-center overflow-hidden" dir="ltr">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-[100px] opacity-50 animate-pulse"></div>
-                <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-slate-200 rounded-full mix-blend-multiply filter blur-[120px] opacity-40"></div>
+                {/* Dynamic animated background */}
+                <motion.div 
+                    animate={{ 
+                        x: [0, 100, -100, 0],
+                        y: [0, 50, -50, 0],
+                        scale: [1, 1.2, 0.8, 1]
+                    }}
+                    transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
+                    className="absolute top-0 left-0 w-[50vw] h-[50vw] max-w-[800px] max-h-[800px] bg-blue-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-40"
+                />
+                <motion.div 
+                    animate={{ 
+                        x: [0, -150, 100, 0],
+                        y: [0, -100, 100, 0],
+                        scale: [1, 1.5, 1, 1]
+                    }}
+                    transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+                    className="absolute bottom-0 right-0 w-[60vw] h-[60vw] max-w-[900px] max-h-[900px] bg-indigo-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-40"
+                />
+                <motion.div 
+                    animate={{ 
+                        x: [0, 50, -150, 0],
+                        y: [0, 150, -50, 0],
+                        scale: [1, 0.9, 1.3, 1]
+                    }}
+                    transition={{ repeat: Infinity, duration: 18, ease: "linear" }}
+                    className="absolute top-1/2 left-1/4 w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-[100px] opacity-50"
+                />
+                
+                <div className="absolute inset-0 bg-white/30 backdrop-blur-[10px]"></div>
                 
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
@@ -93,17 +121,15 @@ export default function GlobalPasswordProtection({ children }: { children: React
                         
                         <div className="relative z-10 flex flex-col items-center">
                             <motion.div 
-                                initial={{ scale: 0.8 }}
-                                animate={{ scale: 1 }}
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
                                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                                className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8 border border-slate-100 shadow-sm overflow-hidden p-2"
+                                className="w-56 h-auto flex items-center justify-center mb-6"
                             >
-                                <Image src="/logo.png" alt="PublishAI Logo" width={48} height={48} className="w-full h-full object-contain" />
+                                <Image src="/logo.png" alt="PublishAI Logo" width={224} height={224} className="w-full h-auto object-contain drop-shadow-xl" priority />
                             </motion.div>
                             
-                            <h2 className="text-slate-800 text-2xl font-bold tracking-wider mb-2 uppercase">PublishAI</h2>
-                            
-                            <p className="text-slate-500 text-sm mb-8 tracking-widest text-center w-full block uppercase">אזור מאובטח</p>
+                            <p className="text-slate-600 font-medium text-sm mb-8 tracking-widest text-center w-full block uppercase">אזור מאובטח</p>
 
                             <form onSubmit={handleSubmit} className="w-full">
                                 <div className="relative mb-6" dir="rtl">
