@@ -57,9 +57,9 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
           <Image 
             src="/logo.png" 
             alt="PublishAI Logo" 
-            width={150} 
-            height={50} 
-            className="object-contain mix-blend-multiply"
+            width={240} 
+            height={160} 
+            className="object-contain"
             priority
           />
         </div>
