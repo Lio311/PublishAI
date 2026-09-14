@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { Users, FileText, Activity, CheckCircle, List } from "lucide-react";
 import { db } from "@/db";
 import { users, papers } from "@/db/schema";
-import { desc, eq, count } from "drizzle-orm";
+import { desc, eq, count, sql } from "drizzle-orm";
+import DashboardCharts from "@/components/admin/DashboardCharts";
+import UsersList from "@/components/admin/UsersList";
 
 export default async function AdminDashboardPage({
   params
@@ -48,6 +50,56 @@ export default async function AdminDashboardPage({
     .leftJoin(users, eq(papers.userId, users.id))
     .orderBy(desc(papers.createdAt))
     .limit(10);
+    
+  // Fetch users for list
+  const recentUsers = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      emailVerified: users.emailVerified,
+    })
+    .from(users)
+    .limit(20);
+
+  // Fetch data for charts (Papers created per day, last 30 days)
+  const papersChartRaw = await db.execute(sql`
+    SELECT 
+      DATE(created_at) as date, 
+      COUNT(*) as count
+    FROM papers
+    WHERE created_at >= NOW() - INTERVAL '30 days'
+    GROUP BY DATE(created_at)
+    ORDER BY date ASC
+  `);
+  
+  // Format for Recharts
+  const papersData = papersChartRaw.rows.map((row: any) => {
+    const d = new Date(row.date);
+    return {
+      date: `${d.getDate()}/${d.getMonth() + 1}`,
+      count: Number(row.count)
+    };
+  });
+  
+  // If no emailVerified, we can't reliably get users over time, so we will just pass a dummy or use emailVerified as proxy
+  const usersChartRaw = await db.execute(sql`
+    SELECT 
+      DATE(COALESCE("emailVerified", NOW())) as date, 
+      COUNT(*) as count
+    FROM users
+    GROUP BY DATE(COALESCE("emailVerified", NOW()))
+    ORDER BY date ASC
+    LIMIT 30
+  `);
+  
+  const usersData = usersChartRaw.rows.map((row: any) => {
+    const d = new Date(row.date);
+    return {
+      date: `${d.getDate()}/${d.getMonth() + 1}`,
+      count: Number(row.count)
+    };
+  });
 
   const getStatusBadge = (status: string | null) => {
     switch (status) {
@@ -132,8 +184,14 @@ export default async function AdminDashboardPage({
           </div>
         </div>
 
+        {/* Charts */}
+        <DashboardCharts papersData={papersData} usersData={usersData} />
+        
+        {/* Users List */}
+        <UsersList users={recentUsers} locale={locale} />
+
         {/* Recent Activity Table */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-8">
           <div className="p-6 border-b border-slate-200">
             <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
               <List className="w-5 h-5 text-indigo-500" />
@@ -141,7 +199,7 @@ export default async function AdminDashboardPage({
             </h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+            <table className="w-full text-sm text-left" dir={locale === 'he' ? 'rtl' : 'ltr'}>
               <thead className="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
                 <tr>
                   <th className="px-6 py-3">{locale === 'he' ? 'מספר' : 'ID'}</th>
