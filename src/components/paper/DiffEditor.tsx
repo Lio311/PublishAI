@@ -28,7 +28,7 @@ export function DiffEditor({ original, modified, onAccept, onReject }: DiffEdito
           {onAccept && (
             <button 
               onClick={onAccept}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-900 via-blue-700 to-sky-400 rounded-md hover:from-blue-800 hover:via-blue-600 hover:to-sky-300"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 rounded-md hover:from-blue-500 hover:via-sky-500 hover:to-sky-400"
             >
               <Check className="w-4 h-4" />
               Accept Changes

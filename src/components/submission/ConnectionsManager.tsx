@@ -71,7 +71,7 @@ export function ConnectionsManager() {
             </button>
             <button 
               onClick={handleStartNewConnection}
-              className="px-4 py-2 bg-gradient-to-r from-blue-900 via-blue-700 to-sky-400 text-white font-medium rounded-lg hover:from-blue-800 hover:via-blue-600 hover:to-sky-300 transition-colors"
+              className="px-4 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 transition-colors"
             >
               {t("panel.addNewConnection")}
             </button>

@@ -439,7 +439,7 @@ export default function SystemFlowModal({
         }}
       >
         {/* Header */}
-        <div className="flex-shrink-0 bg-gradient-to-r from-blue-900 via-blue-700 to-sky-400 px-8 py-6">
+        <div className="flex-shrink-0 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 px-8 py-6">
           <div className="flex items-start justify-between relative z-10">
             <div className="flex-1">
               <div className="flex items-center gap-3">
@@ -583,7 +583,7 @@ export default function SystemFlowModal({
                           transition-all duration-300
                           ${
                             isCurrent && !isCompleted
-                              ? "bg-gradient-to-br from-blue-700 to-sky-500 text-white shadow-md scale-110"
+                              ? "bg-gradient-to-br from-blue-400 to-sky-400 text-white shadow-md scale-110"
                               : isCompleted
                               ? "bg-green-500 text-white"
                               : "bg-slate-200 text-slate-600"
@@ -692,7 +692,7 @@ export default function SystemFlowModal({
               <div className="inline-flex flex-col items-center gap-4 px-10 py-8 bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-50 border-2 border-blue-200 rounded-3xl shadow-xl shadow-blue-100/50">
                 <div className="relative">
                   <div className="absolute inset-0 bg-sky-400 rounded-full blur-xl opacity-30 animate-pulse" />
-                  <div className="relative bg-gradient-to-br from-blue-700 to-sky-500 text-white p-4 rounded-full shadow-lg">
+                  <div className="relative bg-gradient-to-br from-blue-400 to-sky-400 text-white p-4 rounded-full shadow-lg">
                     <CircleCheckBig className="w-10 h-10" />
                   </div>
                 </div>
@@ -703,7 +703,7 @@ export default function SystemFlowModal({
 
                 <button
                   onClick={handleClose}
-                  className="mt-4 px-8 py-3 bg-gradient-to-r from-blue-700 to-sky-500 hover:from-blue-600 hover:to-sky-400 text-white font-bold rounded-xl shadow-lg shadow-sky-500/30 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
+                  className="mt-4 px-8 py-3 bg-gradient-to-r from-blue-400 to-sky-400 hover:from-blue-500 hover:to-sky-500 text-white font-bold rounded-xl shadow-lg shadow-sky-300/30 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
                 >
                   <span>{t("startNow")}</span>
                 </button>

@@ -48,7 +48,7 @@ export default function AddJournalButton() {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="bg-gradient-to-r from-blue-900 via-blue-700 to-sky-400 hover:from-blue-800 hover:via-blue-600 hover:to-sky-300 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+        className="bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
       >
         <Plus className="w-5 h-5" />
         {isHe ? 'הוספת עיתון' : 'Add Journal'}
@@ -96,7 +96,7 @@ export default function AddJournalButton() {
                 <button 
                   type="submit" 
                   disabled={isLoading || !name}
-                  className="px-6 py-2 bg-gradient-to-r from-blue-900 via-blue-700 to-sky-400 text-white font-medium rounded-lg hover:from-blue-800 hover:via-blue-600 hover:to-sky-300 transition-colors flex items-center gap-2 disabled:opacity-50"
+                  className="px-6 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 transition-colors flex items-center gap-2 disabled:opacity-50"
                 >
                   {isLoading && <Loader2 className="w-4 h-4 animate-spin hidden" />}
                   {isLoading ? (isHe ? 'שומר...' : 'Saving...') : (isHe ? 'שמור עיתון' : 'Save Journal')}

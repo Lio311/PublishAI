@@ -103,11 +103,11 @@ export default function ArtifactDashboard({ paperId, originalText, modifiedText,
               
             <button 
               onClick={() => setIsReviewerModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-900 via-blue-700 to-sky-400 rounded-lg text-white font-medium hover:from-blue-800 hover:via-blue-600 hover:to-sky-300 ml-2">
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 rounded-lg text-white font-medium hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 ml-2">
               <FileDown className="w-4 h-4" /> {/* Or a message icon */}
               Submit Reviewer Comments
             </button>
-            <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-900 via-blue-700 to-sky-400 rounded-lg text-white font-medium hover:from-blue-800 hover:via-blue-600 hover:to-sky-300 ml-2">
+            <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 rounded-lg text-white font-medium hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 ml-2">
                 <Send className="w-5 h-5" /> Auto-Submit to Journal
               </button>
             </div>

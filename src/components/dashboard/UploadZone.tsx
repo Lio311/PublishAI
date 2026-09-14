@@ -111,7 +111,7 @@ export default function UploadZone() {
         />
         <button 
           disabled={isUploading || uploadSuccess}
-          className="bg-gradient-to-r from-blue-900 via-blue-700 to-sky-400 hover:from-blue-800 hover:via-blue-600 hover:to-sky-300 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+          className="bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
         >
           {isUploading ? t("uploading") : t("button")}
         </button>

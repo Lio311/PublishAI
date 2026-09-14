@@ -45,53 +45,26 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
     menuItems.push({ name: locale === 'he' ? 'ניהול מערכת' : 'Admin Dashboard', icon: Globe, href: `/${locale}/admin` });
   }
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.08, delayChildren: 0.1 }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, x: locale === 'he' ? 20 : -20 },
-    show: { opacity: 1, x: 0, transition: { type: "spring" as const, stiffness: 300, damping: 24 } }
-  };
-
-  if (!mounted) return <aside className="w-72 bg-transparent" />; // Prevent hydration mismatch
-
   return (
-    <motion.aside 
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    <aside 
       className="relative w-[280px] m-4 lg:m-6 flex flex-col justify-between rounded-[2rem] bg-white/70 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden z-20"
     >
       {/* Subtle animated gradient background inside sidebar */}
       <div className="absolute inset-0 bg-gradient-to-b from-blue-50/30 to-transparent pointer-events-none" />
       
       <div className="p-6 relative z-10 flex-1 flex flex-col">
-        <motion.div 
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="flex items-center justify-center mb-10 pt-2"
-        >
+        <div className="flex items-center justify-center mb-10 pt-2">
           <Image 
             src="/logo.png" 
             alt="PublishAI Logo" 
             width={150} 
             height={50} 
-            className="object-contain drop-shadow-sm"
+            className="object-contain mix-blend-multiply"
             priority
           />
-        </motion.div>
+        </div>
         
         <motion.nav 
-          variants={containerVariants}
-          initial="hidden"
-          animate="show"
           className="space-y-2 flex-1"
           onMouseLeave={() => setHoveredIndex(null)}
         >
@@ -101,7 +74,6 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
             return (
               <motion.div
                 key={item.name}
-                variants={itemVariants}
                 className="relative"
                 onMouseEnter={() => setHoveredIndex(index)}
               >
