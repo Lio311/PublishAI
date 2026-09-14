@@ -169,7 +169,7 @@ const COMPLETION_DELAY = 600;
 
 type AnimPhase = "idle" | "appearing" | "opening" | "holding" | "closing";
 
-let globalHasSeenPresentation = false;
+
 
 export default function SystemFlowModal({
   isOpen,
@@ -251,7 +251,9 @@ export default function SystemFlowModal({
       setIsClosing(false);
       setIsPaused(false);
 
-      if (globalHasSeenPresentation) {
+      
+      const hasSeen = typeof window !== 'undefined' && localStorage.getItem('publishAiHasSeenFlow') === 'true';
+      if (hasSeen) {
         // Skip animation if already seen
         setCurrentStepIndex(FLOW_STEPS.length);
         setAnimPhase("idle");
@@ -317,7 +319,10 @@ export default function SystemFlowModal({
             setAnimPhase("idle");
             timerRef.current = setTimeout(() => {
               setIsFinished(true);
-              globalHasSeenPresentation = true;
+              
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('publishAiHasSeenFlow', 'true');
+              }
               setTimeout(() => scrollToFinish(), 200);
             }, COMPLETION_DELAY);
           }
@@ -352,6 +357,11 @@ export default function SystemFlowModal({
       setCurrentStepIndex(0);
       setAnimPhase("appearing");
     }, INITIAL_DELAY);
+
+    timerRef.current = setTimeout(() => {
+      setCurrentStepIndex(0);
+      setAnimPhase("appearing");
+    }, INITIAL_DELAY);
   };
 
   const handlePauseResume = () => {
@@ -365,26 +375,7 @@ export default function SystemFlowModal({
     }
   };
 
-  // Resume from pause: re-enter the state machine
-  useEffect(() => {
-    if (!isPaused && isOpen) {
-      if (currentStepIndex === -1) {
-        // Resumed before it even started
-        timerRef.current = setTimeout(() => {
-          setCurrentStepIndex(0);
-          setAnimPhase("appearing");
-        }, INITIAL_DELAY);
-      } else if (currentStepIndex >= 0 && animPhase !== "idle") {
-        // Force a re-trigger by setting the phase again
-        const currentPhase = animPhase;
-        setAnimPhase("idle");
-        requestAnimationFrame(() => {
-          setAnimPhase(currentPhase);
-        });
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPaused]);
+  
 
   // Close on escape
   useEffect(() => {

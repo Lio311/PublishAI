@@ -51,7 +51,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
     }, [mouseX, mouseY]);
 
     useEffect(() => {
-        const authTime = localStorage.getItem('publishai_global_auth_time');
+        const authTime = localStorage.getItem('publishai_global_auth_time_v2');
         const now = new Date().getTime();
         
         // 24 hours in milliseconds = 86400000
@@ -59,7 +59,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
             setIsAuthenticated(true);
         } else {
             setIsAuthenticated(false);
-            localStorage.removeItem('publishai_global_auth_time');
+            localStorage.removeItem('publishai_global_auth_time_v2');
         }
     }, []);
 
@@ -70,7 +70,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
         await new Promise(resolve => setTimeout(resolve, 400));
         
         if (currentPin === '3197') {
-            localStorage.setItem('publishai_global_auth_time', new Date().getTime().toString());
+            localStorage.setItem('publishai_global_auth_time_v2', new Date().getTime().toString());
             setIsAuthenticated(true);
         } else {
             setPinError(true);

@@ -6,5 +6,7 @@ export async function checkIsAdmin() {
   if (!session?.user?.email || !process.env.ADMIN_EMAIL) {
     return false;
   }
-  return session.user.email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase();
+  
+  const adminEmails = process.env.ADMIN_EMAIL.split(',').map(email => email.trim().toLowerCase());
+  return adminEmails.includes(session.user.email.toLowerCase());
 }
