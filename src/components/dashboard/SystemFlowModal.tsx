@@ -706,7 +706,6 @@ export default function SystemFlowModal({
                   className="mt-4 px-8 py-3 bg-gradient-to-r from-blue-700 to-sky-500 hover:from-blue-600 hover:to-sky-400 text-white font-bold rounded-xl shadow-lg shadow-sky-500/30 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
                 >
                   <span>{t("startNow")}</span>
-                  <Play className="w-5 h-5 fill-current" />
                 </button>
               </div>
             </div>
