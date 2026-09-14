@@ -124,12 +124,7 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
       </div>
 
       {/* Bottom Section */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6, duration: 0.5 }}
-        className="p-6 relative z-10"
-      >
+      <div className="p-6 relative z-10">
         <div className="p-1.5 bg-slate-100/50 rounded-2xl border border-slate-200/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] backdrop-blur-md">
           <button 
             onClick={toggleLanguage}
@@ -171,7 +166,7 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
             </button>
           )}
         </div>
-      </motion.div>
-    </motion.aside>
+      </div>
+    </aside>
   );
 }
