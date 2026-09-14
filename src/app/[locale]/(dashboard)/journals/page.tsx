@@ -1,12 +1,14 @@
 import { db } from "@/db";
 import { journals } from "@/db/schema";
 import { Book, Plus, ExternalLink } from "lucide-react";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 export default async function JournalsPage() {
   const allJournals = await db.select().from(journals);
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Journal Rules</h1>
@@ -60,5 +62,6 @@ export default async function JournalsPage() {
         ))}
       </div>
     </div>
+    </DashboardLayout>
   );
 }

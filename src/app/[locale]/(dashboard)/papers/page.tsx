@@ -4,6 +4,7 @@ import { desc, eq } from "drizzle-orm";
 import { FileText, Clock, CheckCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 export default async function PapersPage({
   params
@@ -78,6 +79,7 @@ export default async function PapersPage({
   };
 
   return (
+    <DashboardLayout>
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
@@ -136,5 +138,6 @@ export default async function PapersPage({
         </div>
       </div>
     </div>
+    </DashboardLayout>
   );
 }
