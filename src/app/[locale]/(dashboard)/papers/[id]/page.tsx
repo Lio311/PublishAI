@@ -1,18 +1,29 @@
 import { db } from "@/db";
 import { papers } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
+import { eq, and } from "drizzle-orm";
+import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import PaperTabs from "./PaperTabs";
+import { auth } from "@/auth";
 
 export default async function PaperPage({ params }: { params: Promise<{ id: string, locale: string }> | { id: string, locale: string } }) {
   const resolvedParams = await params;
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect('/api/auth/signin');
+  }
+
   const t = await getTranslations("common");
   const isHe = resolvedParams.locale === "he";
   const paperId = parseInt(resolvedParams.id);
   if (isNaN(paperId)) return notFound();
 
-  const [paper] = await db.select().from(papers).where(eq(papers.id, paperId));
+  const [paper] = await db.select().from(papers).where(
+    and(
+      eq(papers.id, paperId),
+      eq(papers.userId, session.user.id)
+    )
+  );
   
   if (!paper) return notFound();
 

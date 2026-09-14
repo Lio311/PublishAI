@@ -6,9 +6,15 @@ import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import { db } from "@/db";
 import { papers } from "@/db/schema";
 import { inngest } from "@/inngest/client";
+import { auth } from "@/auth";
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const formData = await request.formData();
     const files = formData.getAll("file") as File[];
 
@@ -52,6 +58,7 @@ export async function POST(request: Request) {
         originalFileUrl: blob.url,
         originalFormat: fileExtension,
         status: "pending",
+        userId: session.user.id,
       }).returning();
 
       // Trigger Inngest background job if we have text

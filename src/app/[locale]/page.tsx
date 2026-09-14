@@ -7,6 +7,8 @@ import { papers, journals } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { getTranslations } from "next-intl/server";
 import { checkIsAdmin } from "@/lib/auth-utils";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function Home({
   params
@@ -17,6 +19,11 @@ export default async function Home({
   const locale = resolvedParams.locale;
   const isAdmin = await checkIsAdmin();
   
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect('/api/auth/signin');
+  }
+
   const t = await getTranslations("Dashboard");
 
   // Fetch real data from the database
@@ -30,6 +37,7 @@ export default async function Home({
     })
     .from(papers)
     .leftJoin(journals, eq(papers.targetJournalId, journals.id))
+    .where(eq(papers.userId, session.user.id))
     .orderBy(desc(papers.createdAt));
 
   // Calculate real stats

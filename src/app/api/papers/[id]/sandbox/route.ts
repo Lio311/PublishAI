@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { sandboxRuns, generatedCharts } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { auth } from "@/auth";
 
 export async function GET(
   req: Request,
@@ -9,6 +10,11 @@ export async function GET(
 ) {
   const { id } = await params;
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const paperId = parseInt(id, 10);
     if (isNaN(paperId)) {
       return NextResponse.json({ error: "Invalid paper ID" }, { status: 400 });

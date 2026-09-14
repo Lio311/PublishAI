@@ -6,6 +6,8 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { checkIsAdmin } from "@/lib/auth-utils";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function PapersPage({
   params
@@ -15,6 +17,12 @@ export default async function PapersPage({
   const resolvedParams = await params;
   const locale = resolvedParams.locale;
   const isAdmin = await checkIsAdmin();
+  
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect('/api/auth/signin');
+  }
+
   const t = await getTranslations("Dashboard");
 
   // Fetch all papers
@@ -28,6 +36,7 @@ export default async function PapersPage({
     })
     .from(papers)
     .leftJoin(journals, eq(papers.targetJournalId, journals.id))
+    .where(eq(papers.userId, session.user.id))
     .orderBy(desc(papers.createdAt));
 
   // Format date helper
