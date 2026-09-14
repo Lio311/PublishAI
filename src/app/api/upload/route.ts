@@ -4,6 +4,7 @@ import mammoth from "mammoth";
 import pdfParse from "pdf-parse";
 import { db } from "@/db";
 import { papers } from "@/db/schema";
+import { inngest } from "@/inngest/client";
 
 export async function POST(request: Request) {
   try {
@@ -47,7 +48,14 @@ export async function POST(request: Request) {
       status: "pending",
     }).returning();
 
-    // Ideally, we also create the first stage (Clarification/Planning) with the extracted text here.
+    // Trigger Inngest background job
+    await inngest.send({
+      name: "paper/uploaded",
+      data: {
+        paperId: newPaper.id,
+        textContent: extractedText,
+      }
+    });
 
     return NextResponse.json({ 
       success: true, 
