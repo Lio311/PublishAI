@@ -84,6 +84,14 @@ export const processPaper = inngest.createFunction(
       return "Verification confirmed. (Stub)";
     });
 
+    // Step 8.5: Cover Letter Agent
+    const coverLetter = await step.run("agent-cover-letter", async () => {
+      // Typically we would use CoverLetterAgent class, but using raw askClaude for simplicity here
+      const prompt = `Write a professional academic cover letter based on this paper intro: ${textContent.substring(0, 1000)}`;
+      const { text } = await askClaude(prompt, "claude-3-7-sonnet-20250219");
+      return text;
+    });
+
     // Step 9: Compilation Agent
     const compilation = await step.run("agent-compilation", async () => {
       await db

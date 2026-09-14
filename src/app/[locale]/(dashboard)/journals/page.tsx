@@ -1,0 +1,64 @@
+import { db } from "@/db";
+import { journals } from "@/db/schema";
+import { Book, Plus, ExternalLink } from "lucide-react";
+
+export default async function JournalsPage() {
+  const allJournals = await db.select().from(journals);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Journal Rules</h1>
+          <p className="text-slate-500 mt-1">Manage formatting and submission rules for target journals.</p>
+        </div>
+        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+          <Plus className="w-5 h-5" />
+          Add Journal
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {allJournals.map(journal => (
+          <div key={journal.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div className="p-6 flex-1">
+              <div className="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center mb-4 text-indigo-600">
+                <Book className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-1">{journal.name}</h3>
+              <p className="text-sm text-slate-500 mb-4">{journal.field}</p>
+              
+              <div className="space-y-2 text-sm text-slate-700">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Word Limit:</span>
+                  <span className="font-medium">{journal.wordLimit || 'None'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Abstract Limit:</span>
+                  <span className="font-medium">{journal.abstractLimit || 'None'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Citation Style:</span>
+                  <span className="font-medium">{journal.citationStyle || 'Default'}</span>
+                </div>
+              </div>
+            </div>
+            {journal.instructionsUrl && (
+              <div className="px-6 py-3 bg-slate-50 border-t border-slate-100">
+                <a 
+                  href={journal.instructionsUrl} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1"
+                >
+                  Instructions for Authors
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

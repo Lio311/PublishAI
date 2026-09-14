@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Home, Settings, LogOut, Globe } from "lucide-react";
+import { FileText, Home, Settings, LogOut, Globe, Book } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -30,6 +30,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const menuItems = [
     { name: t("home"), icon: Home, href: `/${locale}` },
     { name: t("myPapers"), icon: FileText, href: `/${locale}/papers` },
+    { name: "Journal Rules", icon: Book, href: `/${locale}/journals` },
     { name: t("settings"), icon: Settings, href: `/${locale}/settings` },
   ];
 

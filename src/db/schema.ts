@@ -82,8 +82,8 @@ export const journals = pgTable("journals", {
   instructionsUrl: text("instructions_url"),
   rules: jsonb("rules"), // Storing limits, styles, etc.
   citationStyle: text("citation_style"),
-  wordLimit: serial("word_limit"),
-  abstractLimit: serial("abstract_limit"),
+  wordLimit: integer("word_limit"),
+  abstractLimit: integer("abstract_limit"),
 });
 
 export const papers = pgTable("papers", {
