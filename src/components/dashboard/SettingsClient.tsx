@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { User, Bell, Shield, Key } from "lucide-react";
+import { toast } from "sonner";
 
 type Tab = "profile" | "notifications" | "privacy" | "api_keys";
 
 export default function SettingsClient({ locale }: { locale: string }) {
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const [isSaving, setIsSaving] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   
   const [settings, setSettings] = useState({
     name: "",
@@ -58,7 +58,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
     
     if (isChecked) {
       if (!("Notification" in window)) {
-        alert(locale === "he" ? "הדפדפן שלך אינו תומך בהתראות." : "Your browser does not support notifications.");
+        toast.error(locale === "he" ? "הדפדפן שלך אינו תומך בהתראות." : "Your browser does not support notifications.");
         return;
       }
       
@@ -70,7 +70,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
           body: locale === "he" ? "התראות דפדפן הופעלו בהצלחה!" : "Browser notifications successfully enabled!"
         });
       } else {
-        alert(locale === "he" ? "עליך לאשר התראות בהגדרות הדפדפן." : "You must allow notifications in browser settings.");
+        toast.error(locale === "he" ? "עליך לאשר התראות בהגדרות הדפדפן." : "You must allow notifications in browser settings.");
         handleSettingChange("browserNotifications", false);
       }
     } else {
@@ -80,7 +80,6 @@ export default function SettingsClient({ locale }: { locale: string }) {
 
   const handleSave = async () => {
     setIsSaving(true);
-    setIsSaved(false);
     
     try {
       const response = await fetch("/api/settings", {
@@ -90,14 +89,13 @@ export default function SettingsClient({ locale }: { locale: string }) {
       });
       
       if (response.ok) {
-        setIsSaved(true);
-        setTimeout(() => setIsSaved(false), 3000);
+        toast.success(locale === "he" ? "השינויים נשמרו בהצלחה!" : "Changes saved successfully!");
       } else {
         throw new Error("Failed to save");
       }
     } catch (error) {
       console.error("Error saving settings:", error);
-      alert(locale === "he" ? "שגיאה בשמירת ההגדרות." : "Error saving settings.");
+      toast.error(locale === "he" ? "שגיאה בשמירת ההגדרות." : "Error saving settings.");
     } finally {
       setIsSaving(false);
     }
@@ -119,11 +117,6 @@ export default function SettingsClient({ locale }: { locale: string }) {
         )}
         {locale === "he" ? "שמור שינויים" : "Save Changes"}
       </button>
-      {isSaved && (
-        <span className="text-sm text-emerald-600 font-medium">
-          {locale === "he" ? "השינויים נשמרו בהצלחה!" : "Changes saved successfully!"}
-        </span>
-      )}
     </div>
   );
 

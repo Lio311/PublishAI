@@ -4,6 +4,7 @@ import { UploadCloud, Loader2, CheckCircle } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 export default function UploadZone() {
   const [isDragging, setIsDragging] = useState(false);
@@ -41,7 +42,7 @@ export default function UploadZone() {
 
     } catch (error) {
       console.error("Error uploading file:", error);
-      // alert("שגיאה בהעלאת הקובץ. אנא נסה שוב.");
+      toast.error(t('error_uploading') || "שגיאה בהעלאת הקובץ. אנא נסה שוב.");
     } finally {
       setIsUploading(false);
     }

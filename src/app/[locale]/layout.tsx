@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation';
 import GlobalPasswordProtection from '@/components/layout/GlobalPasswordProtection';
 import { SessionProvider } from 'next-auth/react';
 import { auth } from '@/auth';
+import { Toaster } from 'sonner';
 
 const openSans = Open_Sans({ subsets: ["latin", "hebrew"] });
 
@@ -47,6 +48,17 @@ export default async function RootLayout({
             </GlobalPasswordProtection>
           </SessionProvider>
         </NextIntlClientProvider>
+        <Toaster 
+          position="top-center" 
+          dir={dir}
+          richColors 
+          closeButton
+          toastOptions={{
+            style: {
+              direction: dir,
+            },
+          }}
+        />
       </body>
     </html>
   );
