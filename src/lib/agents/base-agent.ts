@@ -17,6 +17,7 @@ export interface AgentContext {
   previousStageOutputs: Map<Stage, AgentResult>;
   references?: unknown[];
   userPreferences?: Record<string, unknown>;
+  reviewerComments?: string;
 }
 
 export interface AgentResult {

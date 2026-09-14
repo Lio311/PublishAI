@@ -1,6 +1,6 @@
 import { inngest } from "./client";
 import { db } from "@/db";
-import { papers, users } from "@/db/schema";
+import { papers, users, paperVersions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { AgentOrchestrator } from "@/lib/agents/orchestrator";
 import { ClarificationAgent } from "@/lib/agents/clarification-agent";
@@ -13,6 +13,7 @@ import { QaAgent } from "@/lib/agents/qa-agent";
 import { VerificationAgent } from "@/lib/agents/verification-agent";
 import { CoverLetterAgent } from "@/lib/agents/cover-letter-agent";
 import { CompilationAgent } from "@/lib/agents/compilation-agent";
+import { RebuttalAgent } from "@/lib/agents/rebuttal-agent";
 import { AgentContext, AgentResult, Stage } from "@/lib/agents/base-agent";
 
 export const processPaper = inngest.createFunction(
@@ -117,5 +118,66 @@ export const sendWeeklyDigest = inngest.createFunction(
       console.log("Sending weekly digest to users with weeklyDigest enabled...");
       return { sent: true };
     });
+  }
+);
+
+
+export const processResubmission = inngest.createFunction(
+  { id: "process-resubmission", event: "paper/reviewer-comments-received" } as any,
+  async ({ event, step }: { event: any, step: any }) => {
+    const { paperId, reviewerComments, versionId } = event.data;
+    
+    const orchestrator = new AgentOrchestrator(step);
+    
+    await step.run("update-status-resubmission", async () => {
+      await db
+        .update(papers)
+        .set({ status: "in_progress" })
+        .where(eq(papers.id, paperId));
+        
+      if (versionId) {
+        await db.update(paperVersions)
+          .set({ reviewerComments })
+          .where(eq(paperVersions.id, versionId));
+      }
+    });
+
+    const paperRec = await step.run("fetch-paper-text", async () => {
+       const [rec] = await db.select().from(papers).where(eq(papers.id, paperId));
+       return rec;
+    });
+
+    // In reality, we'd fetch the latest version text.
+    // For this MVP, we pass the reviewer comments to the context.
+    const context: AgentContext = {
+      paperId: paperId.toString(),
+      manuscriptText: paperRec?.title || "Latest Manuscript Text Here",
+      reviewerComments,
+      previousStageOutputs: new Map<Stage, AgentResult>(),
+    };
+
+    // Run the Rebuttal Agent to generate a strategy
+    const rebuttal = await orchestrator.runStage(new RebuttalAgent(), context);
+    
+    // Save strategy to DB
+    await step.run("save-rebuttal-strategy", async () => {
+      if (versionId) {
+        await db.update(paperVersions)
+          .set({ rebuttalStrategy: rebuttal.output })
+          .where(eq(paperVersions.id, versionId));
+      }
+    });
+
+    // Here we would run Knowledge, Execution, and QA again as described in characterization
+    // For MVP phase 5 step 1, we just await user approval of the strategy.
+    
+    await step.run("mark-awaiting-strategy-approval", async () => {
+      await db
+        .update(papers)
+        .set({ status: "awaiting_approval" })
+        .where(eq(papers.id, paperId));
+    });
+
+    return { success: true, rebuttalGenerated: true };
   }
 );

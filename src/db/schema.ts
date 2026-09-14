@@ -106,6 +106,8 @@ export const paperVersions = pgTable("paper_versions", {
   fileUrl: text("file_url"),
   format: text("format"),
   changesSummary: text("changes_summary"),
+  reviewerComments: text("reviewer_comments"),
+  rebuttalStrategy: text("rebuttal_strategy"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
