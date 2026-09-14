@@ -443,13 +443,13 @@ export default function SystemFlowModal({
           <div className="flex items-start justify-between relative z-10">
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
-                  <Workflow className="w-6 h-6 text-white" />
+                <div className="p-2 bg-blue-900/10 rounded-lg backdrop-blur-sm">
+                  <Workflow className="w-6 h-6 text-blue-900" />
                 </div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">{t("title")}</h2>
+                <h2 className="text-2xl font-bold text-blue-900 tracking-tight">{t("title")}</h2>
               </div>
-              <div className="mt-2 text-blue-100 text-sm max-w-lg leading-relaxed opacity-90">
-                <p className="text-blue-100 text-sm mt-0.5">{t("subtitle")}</p>
+              <div className="mt-2 text-blue-800 text-sm max-w-lg leading-relaxed opacity-90">
+                <p className="text-blue-800 text-sm mt-0.5">{t("subtitle")}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -457,36 +457,36 @@ export default function SystemFlowModal({
               {!isFinished && currentStepIndex >= 0 && (
                 <button
                   onClick={handlePauseResume}
-                  className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 group"
+                  className="p-2.5 hover:bg-blue-900/10 rounded-xl transition-all duration-200 group"
                   title={isPaused ? "Resume" : "Pause"}
                 >
                   {isPaused ? (
-                    <Play className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
+                    <Play className="w-5 h-5 text-blue-800 group-hover:text-blue-900 transition-colors" />
                   ) : (
-                    <Pause className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
+                    <Pause className="w-5 h-5 text-blue-800 group-hover:text-blue-900 transition-colors" />
                   )}
                 </button>
               )}
               <button
                 onClick={handleReplay}
-                className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 group"
+                className="p-2.5 hover:bg-blue-900/10 rounded-xl transition-all duration-200 group"
                 title={t("replay")}
               >
-                <RotateCcw className="w-5 h-5 text-white/80 group-hover:text-white transition-colors group-hover:rotate-[-360deg] duration-500" />
+                <RotateCcw className="w-5 h-5 text-blue-800 group-hover:text-blue-900 transition-colors group-hover:rotate-[-360deg] duration-500" />
               </button>
               <button
                 onClick={handleClose}
-                className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 group"
+                className="p-2.5 hover:bg-blue-900/10 rounded-xl transition-all duration-200 group"
               >
-                <X className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
+                <X className="w-5 h-5 text-blue-800 group-hover:text-blue-900 transition-colors" />
               </button>
             </div>
           </div>
 
           {/* Progress bar */}
-          <div className="mt-4 h-1.5 bg-white/20 rounded-full overflow-hidden">
+          <div className="mt-4 h-1.5 bg-blue-900/10 rounded-full overflow-hidden">
             <div
-              className="h-full bg-white/80 rounded-full transition-all duration-700 ease-out"
+              className="h-full bg-blue-900/60 rounded-full transition-all duration-700 ease-out"
               style={{
                 width: `${Math.min(progressPercent, 100)}%`,
               }}
@@ -494,8 +494,8 @@ export default function SystemFlowModal({
           </div>
 
           {/* Step counter */}
-          <div className="mt-2 flex items-center justify-between text-xs text-blue-200">
-            <div className="text-white/80 text-sm font-medium">
+          <div className="mt-2 flex items-center justify-between text-xs text-blue-800">
+            <div className="text-blue-800 text-sm font-medium">
               <span>
                 {currentStepIndex >= 0
                   ? (isRtl 
@@ -507,7 +507,7 @@ export default function SystemFlowModal({
               </span>
             </div>
             {isPaused && (
-              <span className="flex items-center gap-1 text-amber-200 font-medium animate-pulse">
+              <span className="flex items-center gap-1 text-blue-900 font-bold animate-pulse">
                 {t("paused")}
               </span>
             )}
