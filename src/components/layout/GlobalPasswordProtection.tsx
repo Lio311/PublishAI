@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { Delete } from 'lucide-react';
 import Image from 'next/image';
+import { useSession, signIn } from 'next-auth/react';
 
 export default function GlobalPasswordProtection({ children }: { children: React.ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -11,6 +12,13 @@ export default function GlobalPasswordProtection({ children }: { children: React
     const [pinError, setPinError] = useState(false);
     const [isAuthLoading, setIsAuthLoading] = useState(false);
     const [shake, setShake] = useState(false);
+    const { status } = useSession();
+
+    useEffect(() => {
+        if (isAuthenticated && status === 'unauthenticated') {
+            signIn();
+        }
+    }, [isAuthenticated, status]);
 
     // Mouse parallax effects for background blobs
     const mouseX = useMotionValue(0);
@@ -212,6 +220,10 @@ export default function GlobalPasswordProtection({ children }: { children: React
                 </motion.div>
             </div>
         );
+    }
+
+    if (status === 'loading' || status === 'unauthenticated') {
+        return null; // or you could return a simple loading spinner here
     }
 
     return <>{children}</>;
