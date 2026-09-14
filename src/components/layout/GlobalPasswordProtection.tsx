@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, useMotionValue, useTransform, animate, useSpring } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
@@ -20,6 +20,31 @@ export default function GlobalPasswordProtection({ children }: { children: React
         [0, containerWidth > 0 ? containerWidth - 56 : 0],
         ['rgba(0, 0, 0, 0.02)', 'rgba(0, 0, 0, 0.1)']
     );
+
+    // Mouse parallax effects for background blobs
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
+    
+    const springConfig = { damping: 25, stiffness: 120 };
+    const springX = useSpring(mouseX, springConfig);
+    const springY = useSpring(mouseY, springConfig);
+
+    const blob1X = useTransform(springX, v => v * 1.2);
+    const blob1Y = useTransform(springY, v => v * 1.2);
+
+    const blob2X = useTransform(springX, v => v * -0.8);
+    const blob2Y = useTransform(springY, v => v * -0.8);
+
+    const blob3X = useTransform(springX, v => v * 0.5);
+    const blob3Y = useTransform(springY, v => v * 0.5);
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        const { clientX, clientY } = e;
+        const moveX = (clientX - window.innerWidth / 2) * 0.1;
+        const moveY = (clientY - window.innerHeight / 2) * 0.1;
+        mouseX.set(moveX);
+        mouseY.set(moveY);
+    };
 
     useEffect(() => {
         const authTime = localStorage.getItem('publishai_global_auth_time');
@@ -78,37 +103,49 @@ export default function GlobalPasswordProtection({ children }: { children: React
 
     if (!isAuthenticated) {
         return (
-            <div className="fixed inset-0 z-[100] min-h-screen w-full bg-slate-50 flex items-center justify-center overflow-hidden" dir="ltr">
+            <div 
+                className="fixed inset-0 z-[100] min-h-screen w-full bg-slate-50 flex items-center justify-center overflow-hidden" 
+                dir="ltr"
+                onMouseMove={handleMouseMove}
+            >
                 {/* Dynamic animated background */}
-                <motion.div 
-                    animate={{ 
-                        x: [0, 100, -100, 0],
-                        y: [0, 50, -50, 0],
-                        scale: [1, 1.2, 0.8, 1]
-                    }}
-                    transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
-                    className="absolute top-0 left-0 w-[50vw] h-[50vw] max-w-[800px] max-h-[800px] bg-blue-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-40"
-                />
-                <motion.div 
-                    animate={{ 
-                        x: [0, -150, 100, 0],
-                        y: [0, -100, 100, 0],
-                        scale: [1, 1.5, 1, 1]
-                    }}
-                    transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
-                    className="absolute bottom-0 right-0 w-[60vw] h-[60vw] max-w-[900px] max-h-[900px] bg-indigo-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-40"
-                />
-                <motion.div 
-                    animate={{ 
-                        x: [0, 50, -150, 0],
-                        y: [0, 150, -50, 0],
-                        scale: [1, 0.9, 1.3, 1]
-                    }}
-                    transition={{ repeat: Infinity, duration: 18, ease: "linear" }}
-                    className="absolute top-1/2 left-1/4 w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-[100px] opacity-50"
-                />
+                <motion.div style={{ x: blob1X, y: blob1Y }} className="absolute top-0 left-0 w-[50vw] h-[50vw] max-w-[800px] max-h-[800px]">
+                    <motion.div 
+                        animate={{ 
+                            x: [0, 100, -100, 0],
+                            y: [0, 50, -50, 0],
+                            scale: [1, 1.2, 0.8, 1]
+                        }}
+                        transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
+                        className="w-full h-full bg-blue-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-40"
+                    />
+                </motion.div>
+
+                <motion.div style={{ x: blob2X, y: blob2Y }} className="absolute bottom-0 right-0 w-[60vw] h-[60vw] max-w-[900px] max-h-[900px]">
+                    <motion.div 
+                        animate={{ 
+                            x: [0, -150, 100, 0],
+                            y: [0, -100, 100, 0],
+                            scale: [1, 1.5, 1, 1]
+                        }}
+                        transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+                        className="w-full h-full bg-indigo-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-40"
+                    />
+                </motion.div>
+
+                <motion.div style={{ x: blob3X, y: blob3Y }} className="absolute top-1/2 left-1/4 w-[40vw] h-[40vw] max-w-[600px] max-h-[600px]">
+                    <motion.div 
+                        animate={{ 
+                            x: [0, 50, -150, 0],
+                            y: [0, 150, -50, 0],
+                            scale: [1, 0.9, 1.3, 1]
+                        }}
+                        transition={{ repeat: Infinity, duration: 18, ease: "linear" }}
+                        className="w-full h-full bg-cyan-200 rounded-full mix-blend-multiply filter blur-[100px] opacity-50"
+                    />
+                </motion.div>
                 
-                <div className="absolute inset-0 bg-white/30 backdrop-blur-[10px]"></div>
+                <div className="absolute inset-0 bg-white/30 backdrop-blur-[10px] pointer-events-none"></div>
                 
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}

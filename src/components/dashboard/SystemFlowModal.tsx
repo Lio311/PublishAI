@@ -219,10 +219,11 @@ export default function SystemFlowModal({
     }
   }, []);
 
-  // Block user scroll on the container
+  // Block user scroll on the container during animation
   useEffect(() => {
     const container = scrollContainerRef.current;
-    if (!container || !isOpen) return;
+    // If modal is closed or animation is finished, allow scrolling
+    if (!container || !isOpen || isFinished) return;
 
     const blockScroll = (e: Event) => {
       e.preventDefault();
@@ -236,7 +237,7 @@ export default function SystemFlowModal({
       container.removeEventListener("wheel", blockScroll);
       container.removeEventListener("touchmove", blockScroll);
     };
-  }, [isOpen]);
+  }, [isOpen, isFinished]);
 
   // Reset state when opening
   useEffect(() => {
@@ -484,11 +485,10 @@ export default function SystemFlowModal({
           </div>
         </div>
 
-        {/* Flow Steps — scroll locked */}
+        {/* Flow Steps */}
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-hidden p-8 space-y-0"
-          style={{ overscrollBehavior: "none" }}
+          className="flex-1 overflow-y-auto p-8 space-y-0 scrollbar-hide"
         >
           {FLOW_STEPS.map((step, index) => {
             const isCurrentOrPast = index <= currentStepIndex;
@@ -497,6 +497,11 @@ export default function SystemFlowModal({
             const isCompleted = completedSteps.has(index);
             const IconComponent = step.icon;
             const isLast = index === FLOW_STEPS.length - 1;
+
+            // Hide future steps entirely so they don't take up space and make the modal artificially tall
+            if (!isCurrentOrPast) {
+              return null;
+            }
 
             // When a step is expanded, blur everything else
             const isFocusMode = animPhase === "opening" || animPhase === "holding";
@@ -511,13 +516,7 @@ export default function SystemFlowModal({
                 }`}
               >
                 {/* Step Card */}
-                <div
-                  className={`transition-all duration-500 ease-out ${
-                    isCurrentOrPast
-                      ? "opacity-100 translate-y-0 scale-100"
-                      : "opacity-0 translate-y-12 scale-95"
-                  }`}
-                >
+                <div className="animate-step-in">
                   <div
                     className={`relative flex items-start gap-5 p-5 rounded-2xl border-2
                       transition-all duration-500 ease-out
