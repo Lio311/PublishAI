@@ -29,13 +29,18 @@ export default function GlobalPasswordProtection({ children }: { children: React
     const blob3X = useTransform(springX, v => v * 0.5);
     const blob3Y = useTransform(springY, v => v * 0.5);
 
-    const handleMouseMove = (e: React.MouseEvent) => {
-        const { clientX, clientY } = e;
-        const moveX = (clientX - window.innerWidth / 2) * 0.4;
-        const moveY = (clientY - window.innerHeight / 2) * 0.4;
-        mouseX.set(moveX);
-        mouseY.set(moveY);
-    };
+    useEffect(() => {
+        const handleGlobalMouseMove = (e: MouseEvent) => {
+            const { clientX, clientY } = e;
+            const moveX = (clientX - window.innerWidth / 2) * 1.2;
+            const moveY = (clientY - window.innerHeight / 2) * 1.2;
+            mouseX.set(moveX);
+            mouseY.set(moveY);
+        };
+
+        window.addEventListener('mousemove', handleGlobalMouseMove);
+        return () => window.removeEventListener('mousemove', handleGlobalMouseMove);
+    }, [mouseX, mouseY]);
 
     useEffect(() => {
         const authTime = localStorage.getItem('publishai_global_auth_time');
@@ -93,7 +98,6 @@ export default function GlobalPasswordProtection({ children }: { children: React
             <div 
                 className="fixed inset-0 z-[100] min-h-screen w-full bg-slate-50 flex items-center justify-center overflow-hidden" 
                 dir="ltr"
-                onMouseMove={handleMouseMove}
             >
                 {/* Dynamic animated background */}
                 <motion.div style={{ x: blob1X, y: blob1Y }} className="absolute top-0 left-0 w-[50vw] h-[50vw] max-w-[800px] max-h-[800px]">
