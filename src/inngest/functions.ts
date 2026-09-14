@@ -105,3 +105,17 @@ export const processPaper = inngest.createFunction(
     return { success: true, stagesCompleted: 9 };
   }
 );
+
+export const sendWeeklyDigest = inngest.createFunction(
+  { id: "send-weekly-digest" },
+  { cron: "0 9 * * 1" }, // Every Monday at 9:00 AM
+  async ({ step }) => {
+    await step.run("send-emails", async () => {
+      // In a real application, we would fetch users with weeklyDigest = true
+      // and send them an email via Resend/SendGrid.
+      console.log("Sending weekly digest to users with weeklyDigest enabled...");
+      // For now, it just simulates the job running.
+      return { sent: true };
+    });
+  }
+);

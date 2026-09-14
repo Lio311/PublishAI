@@ -5,7 +5,8 @@ import {
   timestamp, 
   jsonb,
   pgEnum,
-  integer 
+  integer,
+  boolean
 } from "drizzle-orm/pg-core";
 
 export const statusEnum = pgEnum("status", [
@@ -129,4 +130,18 @@ export const references = pgTable("references", {
   doi: text("doi"),
   source: text("source"),
   bibtexEntry: text("bibtex_entry"),
+});
+
+export const userSettings = pgTable("user_settings", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }).unique().notNull(),
+  academicRole: text("academic_role"),
+  language: text("language").default("he"),
+  emailNotifications: boolean("email_notifications").default(true),
+  browserNotifications: boolean("browser_notifications").default(false),
+  weeklyDigest: boolean("weekly_digest").default(true),
+  publicProfile: boolean("public_profile").default(true),
+  dataCollectionForAi: boolean("data_collection_for_ai").default(false),
+  openaiApiKey: text("openai_api_key"),
+  anthropicApiKey: text("anthropic_api_key"),
 });

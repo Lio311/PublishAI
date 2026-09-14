@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Bell, Shield, Key } from "lucide-react";
 
 type Tab = "profile" | "notifications" | "privacy" | "api_keys";
@@ -9,17 +9,103 @@ export default function SettingsClient({ locale }: { locale: string }) {
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  
+  const [settings, setSettings] = useState({
+    name: "",
+    email: "",
+    academicRole: "Researcher",
+    emailNotifications: true,
+    browserNotifications: false,
+    weeklyDigest: true,
+    publicProfile: true,
+    dataCollectionForAi: false,
+    openaiApiKey: "",
+    anthropicApiKey: "",
+  });
 
-  const handleSave = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        setSettings({
+          name: data.name || "",
+          email: data.email || "",
+          academicRole: data.academicRole || "Researcher",
+          emailNotifications: data.emailNotifications ?? true,
+          browserNotifications: data.browserNotifications ?? false,
+          weeklyDigest: data.weeklyDigest ?? true,
+          publicProfile: data.publicProfile ?? true,
+          dataCollectionForAi: data.dataCollectionForAi ?? false,
+          openaiApiKey: data.openaiApiKey || "",
+          anthropicApiKey: data.anthropicApiKey || "",
+        });
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to load settings:", err);
+        setIsLoading(false);
+      });
+  }, []);
+
+  const handleSettingChange = (key: string, value: string | boolean) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleBrowserNotificationsToggle = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = e.target.checked;
+    
+    if (isChecked) {
+      if (!("Notification" in window)) {
+        alert(locale === "he" ? "הדפדפן שלך אינו תומך בהתראות." : "Your browser does not support notifications.");
+        return;
+      }
+      
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        handleSettingChange("browserNotifications", true);
+        // Maybe show a test notification
+        new Notification("PublishAI", {
+          body: locale === "he" ? "התראות דפדפן הופעלו בהצלחה!" : "Browser notifications successfully enabled!"
+        });
+      } else {
+        alert(locale === "he" ? "עליך לאשר התראות בהגדרות הדפדפן." : "You must allow notifications in browser settings.");
+        handleSettingChange("browserNotifications", false);
+      }
+    } else {
+      handleSettingChange("browserNotifications", false);
+    }
+  };
+
+  const handleSave = async () => {
     setIsSaving(true);
     setIsSaved(false);
-    // Simulate API call
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings),
+      });
+      
+      if (response.ok) {
+        setIsSaved(true);
+        setTimeout(() => setIsSaved(false), 3000);
+      } else {
+        throw new Error("Failed to save");
+      }
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      alert(locale === "he" ? "שגיאה בשמירת ההגדרות." : "Error saving settings.");
+    } finally {
       setIsSaving(false);
-      setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 3000);
-    }, 800);
+    }
   };
+
+  if (isLoading) {
+    return <div className="p-8 text-center">{locale === "he" ? "טוען הגדרות..." : "Loading settings..."}</div>;
+  }
 
   const renderSaveButton = () => (
     <div className="mt-8 flex items-center gap-4 border-t border-slate-200 pt-6">
@@ -123,7 +209,8 @@ export default function SettingsClient({ locale }: { locale: string }) {
                       </label>
                       <input
                         type="text"
-                        defaultValue="Dr. Researcher"
+                        value={settings.name}
+                        onChange={(e) => handleSettingChange("name", e.target.value)}
                         className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -133,19 +220,24 @@ export default function SettingsClient({ locale }: { locale: string }) {
                       </label>
                       <input
                         type="email"
-                        defaultValue="researcher@university.edu"
-                        className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={settings.email}
+                        disabled
+                        className="max-w-md px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 focus:outline-none text-slate-500 cursor-not-allowed"
                       />
                     </div>
                     <div className="grid grid-cols-1 gap-1">
                       <label className="text-sm font-medium text-slate-700">
                         {locale === "he" ? "תפקיד אקדמי" : "Academic Role"}
                       </label>
-                      <select className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option>{locale === "he" ? "פרופסור" : "Professor"}</option>
-                        <option>{locale === "he" ? "חוקר/ת" : "Researcher"}</option>
-                        <option>{locale === "he" ? "סטודנט/ית לתואר שלישי" : "PhD Student"}</option>
-                        <option>{locale === "he" ? "אחר" : "Other"}</option>
+                      <select 
+                        value={settings.academicRole}
+                        onChange={(e) => handleSettingChange("academicRole", e.target.value)}
+                        className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      >
+                        <option value="Professor">{locale === "he" ? "פרופסור" : "Professor"}</option>
+                        <option value="Researcher">{locale === "he" ? "חוקר/ת" : "Researcher"}</option>
+                        <option value="PhD Student">{locale === "he" ? "סטודנט/ית לתואר שלישי" : "PhD Student"}</option>
+                        <option value="Other">{locale === "he" ? "אחר" : "Other"}</option>
                       </select>
                     </div>
                   </div>
@@ -179,7 +271,12 @@ export default function SettingsClient({ locale }: { locale: string }) {
                         <p className="text-sm text-slate-500">{locale === "he" ? "קבל עדכונים על מאמרים וביקורות." : "Receive updates about papers and reviews."}</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" defaultChecked className="sr-only peer" />
+                        <input 
+                          type="checkbox" 
+                          checked={settings.emailNotifications}
+                          onChange={(e) => handleSettingChange("emailNotifications", e.target.checked)}
+                          className="sr-only peer" 
+                        />
                         <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                       </label>
                     </div>
@@ -190,7 +287,12 @@ export default function SettingsClient({ locale }: { locale: string }) {
                         <p className="text-sm text-slate-500">{locale === "he" ? "התראות בזמן אמת במסך שלך." : "Real-time notifications on your screen."}</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" />
+                        <input 
+                          type="checkbox" 
+                          checked={settings.browserNotifications}
+                          onChange={handleBrowserNotificationsToggle}
+                          className="sr-only peer" 
+                        />
                         <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                       </label>
                     </div>
@@ -201,7 +303,12 @@ export default function SettingsClient({ locale }: { locale: string }) {
                         <p className="text-sm text-slate-500">{locale === "he" ? "אימייל שבועי עם סיכום הפעילות." : "Weekly email summarizing your activity."}</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" defaultChecked className="sr-only peer" />
+                        <input 
+                          type="checkbox" 
+                          checked={settings.weeklyDigest}
+                          onChange={(e) => handleSettingChange("weeklyDigest", e.target.checked)}
+                          className="sr-only peer" 
+                        />
                         <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                       </label>
                     </div>
@@ -226,7 +333,12 @@ export default function SettingsClient({ locale }: { locale: string }) {
                         <p className="text-sm text-slate-500">{locale === "he" ? "הפוך את הפרופיל שלך לגלוי לחוקרים אחרים." : "Make your profile visible to other researchers."}</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" defaultChecked className="sr-only peer" />
+                        <input 
+                          type="checkbox" 
+                          checked={settings.publicProfile}
+                          onChange={(e) => handleSettingChange("publicProfile", e.target.checked)}
+                          className="sr-only peer" 
+                        />
                         <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                       </label>
                     </div>
@@ -237,7 +349,12 @@ export default function SettingsClient({ locale }: { locale: string }) {
                         <p className="text-sm text-slate-500">{locale === "he" ? "אישור שימוש במאמרים שלך לשיפור המודל." : "Allow usage of your papers to improve AI models."}</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" />
+                        <input 
+                          type="checkbox" 
+                          checked={settings.dataCollectionForAi}
+                          onChange={(e) => handleSettingChange("dataCollectionForAi", e.target.checked)}
+                          className="sr-only peer" 
+                        />
                         <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                       </label>
                     </div>
@@ -272,6 +389,8 @@ export default function SettingsClient({ locale }: { locale: string }) {
                       <input
                         type="password"
                         placeholder="sk-..."
+                        value={settings.openaiApiKey}
+                        onChange={(e) => handleSettingChange("openaiApiKey", e.target.value)}
                         className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -281,6 +400,8 @@ export default function SettingsClient({ locale }: { locale: string }) {
                       <input
                         type="password"
                         placeholder="sk-ant-..."
+                        value={settings.anthropicApiKey}
+                        onChange={(e) => handleSettingChange("anthropicApiKey", e.target.value)}
                         className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
