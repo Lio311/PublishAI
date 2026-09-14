@@ -1,6 +1,7 @@
 "use client";
 
 import { MessageSquare, AlertTriangle, CheckCircle, Info } from "lucide-react";
+import { useLocale } from "next-intl";
 
 export type ReviewItem = {
   id: string;
@@ -14,18 +15,20 @@ interface ReviewPanelProps {
 }
 
 export function ReviewPanel({ reviews }: ReviewPanelProps) {
+  const locale = useLocale();
+  const isHe = locale === "he";
   return (
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm h-full flex flex-col">
       <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center gap-2">
         <MessageSquare className="w-5 h-5 text-indigo-600" />
-        <h3 className="font-semibold text-slate-800">Peer Review Simulator</h3>
+        <h3 className="font-semibold text-slate-800">{isHe ? "סימולטור ביקורת עמיתים" : "Peer Review Simulator"}</h3>
       </div>
       
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {reviews.length === 0 ? (
           <div className="text-center text-slate-500 py-8">
             <Info className="w-8 h-8 mx-auto mb-2 text-slate-400" />
-            <p>No reviews generated yet.</p>
+            <p>{isHe ? "טרם נוצרו ביקורות." : "No reviews generated yet."}</p>
           </div>
         ) : (
           reviews.map((review) => (

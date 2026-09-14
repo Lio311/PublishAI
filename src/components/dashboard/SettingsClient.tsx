@@ -6,7 +6,12 @@ import { toast } from "sonner";
 
 type Tab = "profile" | "notifications" | "privacy" | "api_keys";
 
+import { useLocale } from "next-intl";
+
 export default function SettingsClient({ locale }: { locale: string }) {
+  const locale = useLocale();
+  const isHe = locale === "he";
+
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const [isSaving, setIsSaving] = useState(false);
   
@@ -378,7 +383,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
                   
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 gap-1">
-                      <label className="text-sm font-medium text-slate-700">OpenAI API Key</label>
+                      <label className="text-sm font-medium text-slate-700">{isHe ? "מפתח API של OpenAI" : "OpenAI API Key"}</label>
                       <input
                         type="password"
                         placeholder="sk-..."
@@ -389,7 +394,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
                     </div>
                     
                     <div className="grid grid-cols-1 gap-1 mt-4">
-                      <label className="text-sm font-medium text-slate-700">Anthropic API Key</label>
+                      <label className="text-sm font-medium text-slate-700">{isHe ? "מפתח API של Anthropic" : "Anthropic API Key"}</label>
                       <input
                         type="password"
                         placeholder="sk-ant-..."

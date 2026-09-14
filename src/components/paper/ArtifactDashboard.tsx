@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 import { DiffEditor } from "./DiffEditor";
 import { ReviewPanel, ReviewItem } from "./ReviewPanel";
 import { FileText, Download, FileArchive } from "lucide-react";
@@ -13,6 +14,8 @@ interface ArtifactDashboardProps {
 }
 
 export function ArtifactDashboard({ originalText, revisedText, reviews, coverLetter }: ArtifactDashboardProps) {
+  const locale = useLocale();
+  const isHe = locale === "he";
   const [activeTab, setActiveTab] = useState<"manuscript" | "reviews" | "cover-letter">("manuscript");
 
   return (
@@ -26,7 +29,7 @@ export function ArtifactDashboard({ originalText, revisedText, reviews, coverLet
           }`}
         >
           <FileText className="w-4 h-4" />
-          Revised Manuscript
+          {isHe ? "כתב יד מתוקן" : "Revised Manuscript"}
         </button>
         <button
           onClick={() => setActiveTab("reviews")}
@@ -35,7 +38,7 @@ export function ArtifactDashboard({ originalText, revisedText, reviews, coverLet
           }`}
         >
           <FileArchive className="w-4 h-4" />
-          Peer Review
+          {isHe ? "ביקורת עמיתים" : "Peer Review"}
         </button>
         <button
           onClick={() => setActiveTab("cover-letter")}
@@ -44,7 +47,7 @@ export function ArtifactDashboard({ originalText, revisedText, reviews, coverLet
           }`}
         >
           <FileText className="w-4 h-4" />
-          Cover Letter
+          {isHe ? "מכתב נלווה" : "Cover Letter"}
         </button>
       </div>
 
@@ -54,7 +57,7 @@ export function ArtifactDashboard({ originalText, revisedText, reviews, coverLet
           <DiffEditor 
             original={originalText} 
             modified={revisedText} 
-            onAccept={() => alert("Changes accepted!")} 
+            onAccept={() => alert(isHe ? "שינויים התקבלו!" : "Changes accepted!")} 
           />
         )}
         
@@ -65,10 +68,10 @@ export function ArtifactDashboard({ originalText, revisedText, reviews, coverLet
         {activeTab === "cover-letter" && (
           <div className="h-full flex flex-col">
             <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-              <h3 className="font-semibold text-slate-800">Generated Cover Letter</h3>
+              <h3 className="font-semibold text-slate-800">{isHe ? "מכתב נלווה שנוצר" : "Generated Cover Letter"}</h3>
               <button className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium">
                 <Download className="w-4 h-4" />
-                Export DOCX
+                {isHe ? "ייצוא ל-DOCX" : "Export DOCX"}
               </button>
             </div>
             <div className="flex-1 p-8 overflow-y-auto bg-white">
@@ -76,7 +79,7 @@ export function ArtifactDashboard({ originalText, revisedText, reviews, coverLet
                 {coverLetter ? (
                   <div dangerouslySetInnerHTML={{ __html: coverLetter.replace(/\n/g, '<br/>') }} />
                 ) : (
-                  <p className="text-slate-500 text-center mt-10">Cover letter not yet generated.</p>
+                  <p className="text-slate-500 text-center mt-10">{isHe ? "מכתב נלווה טרם נוצר." : "Cover letter not yet generated."}</p>
                 )}
               </div>
             </div>
