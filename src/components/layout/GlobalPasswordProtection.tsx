@@ -22,11 +22,15 @@ export default function GlobalPasswordProtection({ children }: { children: React
     );
 
     useEffect(() => {
-        const auth = sessionStorage.getItem('publishai_global_auth');
-        if (auth === 'true') {
+        const authTime = localStorage.getItem('publishai_global_auth_time');
+        const now = new Date().getTime();
+        
+        // 24 hours in milliseconds = 86400000
+        if (authTime && (now - parseInt(authTime, 10)) < 86400000) {
             setIsAuthenticated(true);
         } else {
             setIsAuthenticated(false);
+            localStorage.removeItem('publishai_global_auth_time');
         }
     }, []);
 
@@ -44,7 +48,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
         await new Promise(resolve => setTimeout(resolve, 500));
 
         if (token === 'חבוב') {
-            sessionStorage.setItem('publishai_global_auth', 'true');
+            localStorage.setItem('publishai_global_auth_time', new Date().getTime().toString());
             setIsAuthenticated(true);
         } else {
             setAuthError('סיסמה שגויה');

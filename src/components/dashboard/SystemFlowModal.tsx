@@ -159,12 +159,12 @@ const FLOW_STEPS: FlowStep[] = [
 ];
 
 // Timing constants (ms)
-const INITIAL_DELAY = 600;
-const STEP_APPEAR_DURATION = 400;
-const STEP_OPEN_DURATION = 500;
-const STEP_HOLD_DURATION = 2200;
-const STEP_CLOSE_DURATION = 400;
-const NEXT_STEP_DELAY = 300;
+const INITIAL_DELAY = 700;
+const STEP_APPEAR_DURATION = 500;
+const STEP_OPEN_DURATION = 600;
+const STEP_HOLD_DURATION = 3800;
+const STEP_CLOSE_DURATION = 500;
+const NEXT_STEP_DELAY = 400;
 const COMPLETION_DELAY = 600;
 
 type AnimPhase = "idle" | "appearing" | "opening" | "holding" | "closing";
@@ -498,10 +498,17 @@ export default function SystemFlowModal({
             const IconComponent = step.icon;
             const isLast = index === FLOW_STEPS.length - 1;
 
+            // When a step is expanded, blur everything else
+            const isFocusMode = animPhase === "opening" || animPhase === "holding";
+            const isBlurred = isFocusMode && !isCurrent;
+
             return (
               <div
                 key={step.id}
                 ref={(el) => { stepRefs.current[index] = el; }}
+                className={`transition-all duration-500 ease-out ${
+                  isBlurred ? "blur-[2px] opacity-30 scale-[0.97]" : "blur-0 opacity-100 scale-100"
+                }`}
               >
                 {/* Step Card */}
                 <div
@@ -604,11 +611,11 @@ export default function SystemFlowModal({
                       <div
                         className={`overflow-hidden transition-all ease-out ${
                           isExpanded
-                            ? "max-h-40 opacity-100 mt-2 duration-500"
+                            ? "max-h-40 opacity-100 mt-2 duration-600"
                             : "max-h-0 opacity-0 mt-0 duration-400"
                         }`}
                       >
-                        <p className="text-sm text-slate-600 leading-relaxed">
+                        <p className="text-[15px] text-slate-700 leading-relaxed">
                           {t(step.descKey)}
                         </p>
                       </div>
