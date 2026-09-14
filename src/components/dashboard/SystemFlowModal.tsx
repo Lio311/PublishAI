@@ -495,11 +495,13 @@ export default function SystemFlowModal({
 
           {/* Step counter */}
           <div className="mt-2 flex items-center justify-between text-xs text-blue-200">
-            <span>
-              {currentStepIndex >= 0
-                ? `${Math.min(currentStepIndex + 1, FLOW_STEPS.length)} / ${FLOW_STEPS.length}`
-                : `0 / ${FLOW_STEPS.length}`}
-            </span>
+            <div className="text-white/80 text-sm font-medium">
+              <span dir="ltr">
+                {currentStepIndex >= 0
+                  ? `${Math.min(currentStepIndex + 1, FLOW_STEPS.length)} / ${FLOW_STEPS.length}`
+                  : `0 / ${FLOW_STEPS.length}`}
+              </span>
+            </div>
             {isPaused && (
               <span className="flex items-center gap-1 text-amber-200 font-medium animate-pulse">
                 {t("paused")}
