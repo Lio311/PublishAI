@@ -229,25 +229,6 @@ export default function SystemFlowModal({
   
 
 
-  // Block user scroll on the container during animation
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container || !isOpen || isFinished || isPaused) return;
-
-    const blockScroll = (e: Event) => {
-      e.preventDefault();
-      e.stopPropagation();
-    };
-
-    container.addEventListener("wheel", blockScroll, { passive: false });
-    container.addEventListener("touchmove", blockScroll, { passive: false });
-
-    return () => {
-      container.removeEventListener("wheel", blockScroll);
-      container.removeEventListener("touchmove", blockScroll);
-    };
-  }, [isOpen, isFinished, isPaused]);
-
   // Reset state when opening
   useEffect(() => {
     if (isOpen) {
@@ -326,6 +307,7 @@ export default function SystemFlowModal({
           } else {
             // All done
             setAnimPhase("idle");
+            setCurrentStepIndex(FLOW_STEPS.length);
             timerRef.current = setTimeout(() => {
               setIsFinished(true);
               
@@ -361,13 +343,13 @@ export default function SystemFlowModal({
     setIsFinished(false);
     setIsPaused(false);
 
+    // Clear seen flag so the animation plays again
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('publishAiHasSeenFlow');
+    }
+
     // Scroll to top
     scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-
-    timerRef.current = setTimeout(() => {
-      setCurrentStepIndex(0);
-      setAnimPhase("appearing");
-    }, INITIAL_DELAY);
 
     timerRef.current = setTimeout(() => {
       setCurrentStepIndex(0);
@@ -519,7 +501,9 @@ export default function SystemFlowModal({
         {/* Flow Steps */}
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto p-8 space-y-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className={`flex-1 p-8 space-y-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
+            !isFinished && !isPaused ? "overflow-hidden" : "overflow-y-auto"
+          }`}
         >
           {FLOW_STEPS.map((step, index) => {
             const isCurrentOrPast = index <= currentStepIndex;
