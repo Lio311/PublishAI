@@ -5,10 +5,11 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import PaperProcessingUI from "@/components/papers/PaperProcessingUI";
 
-export default async function PaperPage({ params }: { params: { id: string, locale: string } }) {
+export default async function PaperPage({ params }: { params: Promise<{ id: string, locale: string }> | { id: string, locale: string } }) {
+  const resolvedParams = await params;
   const t = await getTranslations("common");
-  const isHe = params.locale === "he";
-  const paperId = parseInt(params.id);
+  const isHe = resolvedParams.locale === "he";
+  const paperId = parseInt(resolvedParams.id);
   if (isNaN(paperId)) return notFound();
 
   const [paper] = await db.select().from(papers).where(eq(papers.id, paperId));

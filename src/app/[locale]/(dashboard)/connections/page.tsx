@@ -2,7 +2,9 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { checkIsAdmin } from "@/lib/auth-utils";
 import { ConnectionsManager } from "@/components/submission/ConnectionsManager";
 
-export default async function ConnectionsPage({ params: { locale } }: { params: { locale: string } }) {
+export default async function ConnectionsPage({ params }: { params: Promise<{ locale: string }> | { locale: string } }) {
+  const resolvedParams = await params;
+  const locale = resolvedParams.locale;
   const isAdmin = await checkIsAdmin();
   const isHe = locale === 'he';
 

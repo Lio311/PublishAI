@@ -5,6 +5,6 @@ export class ExecutionAgent extends BaseAgent {
   model = "claude-3-opus-20240229";
 
   async execute(context: AgentContext): Promise<AgentResult> {
-    return this.formatOutput("Execution complete. (Simulated Diff applied to manuscript)", "success", 0);
+    return this.formatOutput("Execution complete. (Simulated Diff applied to manuscript)", "completed", 0);
   }
 }

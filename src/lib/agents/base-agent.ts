@@ -21,7 +21,7 @@ export interface AgentContext {
 
 export interface AgentResult {
   stage: Stage;
-  status: "success" | "needs_approval" | "failed";
+  status: "completed" | "awaiting_approval" | "failed";
   output: string;
   changes?: any[];
   tokensUsed: number;

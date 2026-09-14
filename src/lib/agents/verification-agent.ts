@@ -8,6 +8,6 @@ export class VerificationAgent extends BaseAgent {
   async execute(context: AgentContext): Promise<AgentResult> {
     const prompt = `Generate a simulated peer-review report for this final manuscript.\nManuscript:\n${context.manuscriptText.substring(0, 5000)}`;
     const { text, tokensUsed } = await askClaude(prompt, this.model as any);
-    return this.formatOutput(text, "success", tokensUsed);
+    return this.formatOutput(text, "completed", tokensUsed);
   }
 }

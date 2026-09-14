@@ -22,6 +22,6 @@ export class KnowledgeAgent extends BaseAgent {
       console.error(e);
     }
     
-    return this.formatOutput(resultText, "success", tokensUsed);
+    return this.formatOutput(resultText, "completed", tokensUsed);
   }
 }

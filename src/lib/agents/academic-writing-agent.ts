@@ -9,6 +9,6 @@ export class AcademicWritingAgent extends BaseAgent {
     const review = context.previousStageOutputs.get("scientific_review")?.output || "";
     const prompt = `Rewrite the text to elevate the academic tone, address the following review feedback, and remove any generic AI-sounding phrases.\n\nReview:\n${review}\n\nManuscript:\n${context.manuscriptText.substring(0, 10000)}`;
     const { text, tokensUsed } = await askClaude(prompt, this.model as any);
-    return this.formatOutput(text, "success", tokensUsed);
+    return this.formatOutput(text, "completed", tokensUsed);
   }
 }

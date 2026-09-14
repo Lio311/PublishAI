@@ -5,7 +5,9 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { checkIsAdmin } from "@/lib/auth-utils";
 import AddJournalButton from "@/components/journals/AddJournalButton";
 
-export default async function JournalsPage({ params: { locale } }: { params: { locale: string } }) {
+export default async function JournalsPage({ params }: { params: Promise<{ locale: string }> | { locale: string } }) {
+  const resolvedParams = await params;
+  const locale = resolvedParams.locale;
   const allJournals = await db.select().from(journals);
   const isAdmin = await checkIsAdmin();
 

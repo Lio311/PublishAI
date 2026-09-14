@@ -22,6 +22,6 @@ Ensure it follows this structure:
 
     const { text, tokensUsed } = await askClaude(prompt, this.model);
     
-    return this.formatOutput(text, "success", tokensUsed);
+    return this.formatOutput(text, "completed", tokensUsed);
   }
 }
