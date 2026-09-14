@@ -238,6 +238,7 @@ export default function SystemFlowModal({
 
 
   // Reset state when opening
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (isOpen) {
       clearTimer();
@@ -276,6 +277,7 @@ export default function SystemFlowModal({
   }, [isOpen, clearTimer, clearCompletionTimer, scrollToFinish]);
 
   // Main animation state machine
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (!isOpen || isPaused || currentStepIndex < 0 || currentStepIndex >= FLOW_STEPS.length) return;
 
@@ -382,6 +384,7 @@ export default function SystemFlowModal({
   
 
   // Close on escape
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleClose();

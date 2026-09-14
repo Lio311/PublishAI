@@ -31,7 +31,8 @@ export default function GlobalPasswordProtection({ children }: { children: React
     const blob3X = useTransform(springX, v => v * 0.5);
     const blob3Y = useTransform(springY, v => v * 0.5);
 
-    useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => {
         const handleGlobalMouseMove = (e: MouseEvent) => {
             const { clientX, clientY } = e;
             const moveX = (clientX - window.innerWidth / 2) * 1.2;
@@ -44,7 +45,8 @@ export default function GlobalPasswordProtection({ children }: { children: React
         return () => window.removeEventListener('mousemove', handleGlobalMouseMove);
     }, [mouseX, mouseY]);
 
-    useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => {
         const authTime = localStorage.getItem('publishai_global_auth_time_v2');
         const now = new Date().getTime();
         

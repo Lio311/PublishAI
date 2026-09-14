@@ -12,18 +12,18 @@ export type Stage =
 export interface AgentContext {
   paperId: string;
   manuscriptText: string;
-  manuscriptStructure?: any; // To be typed later
-  journalRules?: any;
+  manuscriptStructure?: Record<string, unknown>; // To be typed later
+  journalRules?: Record<string, unknown>;
   previousStageOutputs: Map<Stage, AgentResult>;
-  references?: any[];
-  userPreferences?: any;
+  references?: unknown[];
+  userPreferences?: Record<string, unknown>;
 }
 
 export interface AgentResult {
   stage: Stage;
   status: "completed" | "awaiting_approval" | "failed";
   output: string;
-  changes?: any[];
+  changes?: unknown[];
   tokensUsed: number;
   model: string;
   metadata?: Record<string, unknown>;

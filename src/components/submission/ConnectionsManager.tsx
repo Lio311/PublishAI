@@ -19,7 +19,7 @@ export function ConnectionsManager() {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
+  async function fetchData() {
     setIsLoading(true);
     try {
       const [connRes, subRes] = await Promise.all([

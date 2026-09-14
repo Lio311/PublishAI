@@ -14,7 +14,7 @@ export class KnowledgeAgent extends BaseAgent {
     let resultText = "No keywords generated.";
     
     try {
-      const resp = await askClaude(kwPrompt, this.model as any);
+      const resp = await askClaude(kwPrompt, this.model as import("./claude-client").ClaudeModel);
       tokensUsed += resp.tokensUsed;
       await gatherLiterature(resp.text);
       resultText = `Literature gathered for keywords: ${resp.text}. Found articles from PubMed, Semantic Scholar, and arXiv.`;

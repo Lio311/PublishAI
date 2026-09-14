@@ -2,7 +2,7 @@ import crypto from "crypto";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 12; // Standard for GCM
-const AUTH_TAG_LENGTH = 16;
+// const AUTH_TAG_LENGTH = 16;
 
 /**
  * Gets the encryption key from the environment.
@@ -65,7 +65,7 @@ export function decrypt(encryptedString: string): string {
   let plaintext = decipher.update(ciphertext, "hex", "utf8");
   try {
     plaintext += decipher.final("utf8");
-  } catch (err) {
+  } catch (_err) {
     throw new Error("Decryption failed. The data may have been tampered with or the encryption key is incorrect.");
   }
   

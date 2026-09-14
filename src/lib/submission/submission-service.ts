@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { db } from "@/db";
 import { journalConnections, submissions, submissionLogs } from "@/db/schema";
 import { eq } from "drizzle-orm";

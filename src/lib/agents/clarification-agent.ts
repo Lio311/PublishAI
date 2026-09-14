@@ -15,7 +15,7 @@ Analyze the following academic text and extract:
 Text: ${context.manuscriptText.substring(0, 10000)}
 `;
 
-    const { text, tokensUsed } = await askClaude(prompt, this.model as any);
+    const { text, tokensUsed } = await askClaude(prompt, this.model as import("./claude-client").ClaudeModel);
 
     return this.formatOutput(text, "awaiting_approval", tokensUsed);
   }

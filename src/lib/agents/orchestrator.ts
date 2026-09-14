@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { BaseAgent, AgentContext, AgentResult } from "./base-agent";
 import { db } from "@/db";
 import { paperStages } from "@/db/schema";

@@ -26,7 +26,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
     fetchSubmissions();
   }, []);
 
-  const fetchConnections = async () => {
+  async function fetchConnections() {
     try {
       const res = await fetch("/api/journal-connection");
       if (res.ok) {
@@ -38,7 +38,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
     }
   };
 
-  const fetchSubmissions = async () => {
+  async function fetchSubmissions() {
     try {
       const res = await fetch("/api/submissions");
       if (res.ok) {

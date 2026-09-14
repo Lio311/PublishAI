@@ -18,7 +18,7 @@ ${context.manuscriptText.substring(0, 10000)}
 Create a structural revision plan for this paper. Identify weaknesses, required citations, and sections to rewrite.
 `;
 
-    const { text, tokensUsed } = await askClaude(prompt, this.model as any);
+    const { text, tokensUsed } = await askClaude(prompt, this.model as import("./claude-client").ClaudeModel);
 
     return this.formatOutput(text, "awaiting_approval", tokensUsed);
   }

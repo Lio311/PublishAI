@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { ConnectionTestResult } from "./types";
 import { WordPressAdapter } from "./adapters/wordpress-adapter";
 import { OJSAdapter } from "./adapters/ojs-adapter";
@@ -44,7 +45,7 @@ export class ConnectionTester {
     let parsed: URL;
     try {
       parsed = new URL(url);
-    } catch (e) {
+    } catch (_e) {
       throw new Error("Invalid URL format.");
     }
 

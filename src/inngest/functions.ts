@@ -16,8 +16,8 @@ import { CompilationAgent } from "@/lib/agents/compilation-agent";
 import { AgentContext, AgentResult, Stage } from "@/lib/agents/base-agent";
 
 export const processPaper = inngest.createFunction(
-  { id: "process-paper", event: "paper/uploaded" } as any,
-  async ({ event, step }: { event: any, step: any }) => {
+  { id: "process-paper", event: "paper/uploaded" } as unknown,
+  async ({ event, step }: { event: unknown, step: unknown }) => {
     const { paperId, textContent } = event.data;
     
     const orchestrator = new AgentOrchestrator(step);
@@ -87,8 +87,8 @@ export const processPaper = inngest.createFunction(
 );
 
 export const sendWeeklyDigest = inngest.createFunction(
-  { id: "send-weekly-digest", cron: "0 9 * * 1" } as any, // Every Monday at 9:00 AM
-  async ({ step }: { step: any }) => {
+  { id: "send-weekly-digest", cron: "0 9 * * 1" } as unknown, // Every Monday at 9:00 AM
+  async ({ step }: { step: unknown }) => {
     await step.run("send-emails", async () => {
       console.log("Sending weekly digest to users with weeklyDigest enabled...");
       return { sent: true };
