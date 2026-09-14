@@ -8,15 +8,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Sidebar */}
       <aside className="w-64 bg-white border-l border-slate-200 flex flex-col justify-between">
         <div className="p-6">
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center justify-center mb-8">
             <Image 
               src="/logo.png" 
               alt="PublishAI Logo" 
-              width={40} 
-              height={40} 
-              className="rounded-lg object-contain"
+              width={160} 
+              height={60} 
+              className="object-contain"
+              priority
             />
-            <h1 className="text-2xl font-bold text-slate-800">PublishAI</h1>
           </div>
           
           <nav className="space-y-2">

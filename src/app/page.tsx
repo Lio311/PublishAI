@@ -1,8 +1,86 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import UploadZone from "@/components/dashboard/UploadZone";
 import { FileText, Clock, CheckCircle } from "lucide-react";
+import { db } from "@/db";
+import { papers, journals } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
 
-export default function Home() {
+// Make the component async to fetch data on the server
+export default async function Home() {
+  // Fetch real data from the database
+  const allPapers = await db
+    .select({
+      id: papers.id,
+      title: papers.title,
+      status: papers.status,
+      createdAt: papers.createdAt,
+      journalName: journals.name
+    })
+    .from(papers)
+    .leftJoin(journals, eq(papers.targetJournalId, journals.id))
+    .orderBy(desc(papers.createdAt));
+
+  // Calculate real stats
+  const inProgressCount = allPapers.filter(
+    (p) => p.status === "in_progress" || p.status === "pending"
+  ).length;
+  const awaitingCount = allPapers.filter(
+    (p) => p.status === "awaiting_approval"
+  ).length;
+  const completedCount = allPapers.filter(
+    (p) => p.status === "completed" || p.status === "approved"
+  ).length;
+
+  // Format date helper
+  const formatDate = (date: Date | null) => {
+    if (!date) return "";
+    return new Intl.DateTimeFormat("he-IL", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(date));
+  };
+
+  // Status badge styling helper
+  const getStatusBadge = (status: string | null) => {
+    switch (status) {
+      case "pending":
+      case "in_progress":
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            בעריכה
+          </span>
+        );
+      case "awaiting_approval":
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+            ממתין לאישור
+          </span>
+        );
+      case "completed":
+      case "approved":
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            הושלם
+          </span>
+        );
+      case "failed":
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+            נכשל
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+            לא ידוע
+          </span>
+        );
+    }
+  };
+
   return (
     <DashboardLayout>
       <header className="mb-8">
@@ -18,7 +96,7 @@ export default function Home() {
           </div>
           <div>
             <p className="text-sm font-medium text-slate-500">מאמרים בתהליך</p>
-            <p className="text-2xl font-bold text-slate-800">2</p>
+            <p className="text-2xl font-bold text-slate-800">{inProgressCount}</p>
           </div>
         </div>
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
@@ -27,7 +105,7 @@ export default function Home() {
           </div>
           <div>
             <p className="text-sm font-medium text-slate-500">ממתינים לאישור</p>
-            <p className="text-2xl font-bold text-slate-800">1</p>
+            <p className="text-2xl font-bold text-slate-800">{awaitingCount}</p>
           </div>
         </div>
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
@@ -36,7 +114,7 @@ export default function Home() {
           </div>
           <div>
             <p className="text-sm font-medium text-slate-500">הושלמו</p>
-            <p className="text-2xl font-bold text-slate-800">5</p>
+            <p className="text-2xl font-bold text-slate-800">{completedCount}</p>
           </div>
         </div>
       </div>
@@ -51,38 +129,32 @@ export default function Home() {
         <h2 className="text-xl font-bold text-slate-800 mb-4">מאמרים אחרונים</h2>
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-0">
-            <table className="w-full text-right text-sm">
-              <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
-                <tr>
-                  <th className="px-6 py-4 font-medium">שם המאמר</th>
-                  <th className="px-6 py-4 font-medium">יעד (כתב עת)</th>
-                  <th className="px-6 py-4 font-medium">סטטוס</th>
-                  <th className="px-6 py-4 font-medium">תאריך עדכון</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                <tr className="hover:bg-slate-50 transition-colors cursor-pointer">
-                  <td className="px-6 py-4 font-medium text-slate-800">The impact of LLMs on scientific writing</td>
-                  <td className="px-6 py-4 text-slate-600">Nature Machine Intelligence</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                      ממתין לאישור סקציה
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-slate-500">לפני שעתיים</td>
-                </tr>
-                <tr className="hover:bg-slate-50 transition-colors cursor-pointer">
-                  <td className="px-6 py-4 font-medium text-slate-800">A novel approach to dataset augmentation</td>
-                  <td className="px-6 py-4 text-slate-600">IEEE Transactions</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      בעריכה (Opus)
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-slate-500">אתמול</td>
-                </tr>
-              </tbody>
-            </table>
+            {allPapers.length === 0 ? (
+              <div className="p-8 text-center text-slate-500">
+                אין עדיין מאמרים במערכת. העלה את המאמר הראשון שלך למעלה!
+              </div>
+            ) : (
+              <table className="w-full text-right text-sm">
+                <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
+                  <tr>
+                    <th className="px-6 py-4 font-medium">שם המאמר</th>
+                    <th className="px-6 py-4 font-medium">יעד (כתב עת)</th>
+                    <th className="px-6 py-4 font-medium">סטטוס</th>
+                    <th className="px-6 py-4 font-medium">תאריך העלאה</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {allPapers.slice(0, 5).map((paper) => (
+                    <tr key={paper.id} className="hover:bg-slate-50 transition-colors cursor-pointer">
+                      <td className="px-6 py-4 font-medium text-slate-800">{paper.title}</td>
+                      <td className="px-6 py-4 text-slate-600">{paper.journalName || "לא הוגדר עדיין"}</td>
+                      <td className="px-6 py-4">{getStatusBadge(paper.status)}</td>
+                      <td className="px-6 py-4 text-slate-500">{formatDate(paper.createdAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </section>
