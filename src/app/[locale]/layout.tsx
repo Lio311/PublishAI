@@ -9,6 +9,7 @@ import GlobalPasswordProtection from '@/components/layout/GlobalPasswordProtecti
 import { SessionProvider } from 'next-auth/react';
 import { auth } from '@/auth';
 import { Toaster } from 'sonner';
+import DynamicBackground from '@/components/layout/DynamicBackground';
 
 const openSans = Open_Sans({ subsets: ["latin", "hebrew"] });
 
@@ -40,7 +41,8 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} dir={dir}>
-      <body className={`${openSans.className} bg-gray-50 min-h-screen text-slate-900`}>
+      <body className={`${openSans.className} bg-transparent min-h-screen text-slate-900`}>
+        <DynamicBackground />
         <NextIntlClientProvider messages={messages}>
           <SessionProvider session={session}>
             <GlobalPasswordProtection>

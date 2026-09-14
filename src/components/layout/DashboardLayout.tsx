@@ -45,7 +45,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-50 text-slate-900 font-sans" dir={locale === 'he' ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen flex bg-transparent text-slate-900 font-sans" dir={locale === 'he' ? 'rtl' : 'ltr'}>
       {/* Sidebar */}
       <aside className={`w-64 bg-white border-${locale === 'he' ? 'l' : 'r'} border-slate-200 flex flex-col justify-between`}>
         <div className="p-6">

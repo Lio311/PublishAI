@@ -439,15 +439,17 @@ export default function SystemFlowModal({
         }}
       >
         {/* Header */}
-        <div className="flex-shrink-0 bg-gradient-to-r from-teal-600 via-teal-500 to-cyan-500 px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                <Workflow className="w-6 h-6 text-white" />
+        <div className="flex-shrink-0 bg-gradient-to-r from-blue-900 via-blue-700 to-sky-400 px-8 py-6">
+          <div className="flex items-start justify-between relative z-10">
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                  <Workflow className="w-6 h-6 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-white tracking-tight">{t("title")}</h2>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">{t("title")}</h2>
-                <p className="text-teal-100 text-sm mt-0.5">{t("subtitle")}</p>
+              <div className="mt-2 text-blue-100 text-sm max-w-lg leading-relaxed opacity-90">
+                <p className="text-blue-100 text-sm mt-0.5">{t("subtitle")}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -492,7 +494,7 @@ export default function SystemFlowModal({
           </div>
 
           {/* Step counter */}
-          <div className="mt-2 flex items-center justify-between text-xs text-teal-200">
+          <div className="mt-2 flex items-center justify-between text-xs text-blue-200">
             <div className="text-white/80 text-sm font-medium">
               <span>
                 {currentStepIndex >= 0
@@ -581,7 +583,7 @@ export default function SystemFlowModal({
                           transition-all duration-300
                           ${
                             isCurrent && !isCompleted
-                              ? "bg-gradient-to-br from-teal-500 to-cyan-600 text-white shadow-md scale-110"
+                              ? "bg-gradient-to-br from-blue-700 to-sky-500 text-white shadow-md scale-110"
                               : isCompleted
                               ? "bg-green-500 text-white"
                               : "bg-slate-200 text-slate-600"
@@ -594,7 +596,7 @@ export default function SystemFlowModal({
                       {/* Pulse animation when current */}
                       {isCurrent && !isCompleted && (
                         <div
-                          className="absolute inset-0 rounded-2xl animate-ping opacity-20 bg-teal-400"
+                          className="absolute inset-0 rounded-2xl animate-ping opacity-20 bg-sky-400"
                           style={{ animationDuration: "2s" }}
                         />
                       )}
@@ -645,9 +647,9 @@ export default function SystemFlowModal({
                     {isCurrent && isExpanded && (
                       <div className="flex-shrink-0 mt-2">
                         <div className="flex gap-1">
-                          <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                          <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-                          <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                          <div className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                          <div className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                          <div className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-bounce" style={{ animationDelay: "300ms" }} />
                         </div>
                       </div>
                     )}
@@ -687,14 +689,13 @@ export default function SystemFlowModal({
               ref={finishRef}
               className="mt-12 text-center animate-step-in pb-4"
             >
-              <div className="inline-flex flex-col items-center gap-4 px-10 py-8 bg-gradient-to-br from-teal-50 via-cyan-50 to-emerald-50 border-2 border-teal-200 rounded-3xl shadow-xl shadow-teal-100/50">
+              <div className="inline-flex flex-col items-center gap-4 px-10 py-8 bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-50 border-2 border-blue-200 rounded-3xl shadow-xl shadow-blue-100/50">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-teal-400 rounded-full blur-xl opacity-30 animate-pulse" />
-                  <div className="relative bg-gradient-to-br from-teal-500 to-cyan-600 text-white p-4 rounded-full shadow-lg">
+                  <div className="absolute inset-0 bg-sky-400 rounded-full blur-xl opacity-30 animate-pulse" />
+                  <div className="relative bg-gradient-to-br from-blue-700 to-sky-500 text-white p-4 rounded-full shadow-lg">
                     <CircleCheckBig className="w-10 h-10" />
                   </div>
                 </div>
-                
                 <div className="flex flex-col items-center gap-1 mt-2">
                   <h2 className="font-bold text-2xl text-slate-800">{t("marketingTitle")}</h2>
                   <p className="text-slate-600 max-w-sm leading-relaxed">{t("marketingSubtitle")}</p>
@@ -702,7 +703,7 @@ export default function SystemFlowModal({
 
                 <button
                   onClick={handleClose}
-                  className="mt-4 px-8 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold rounded-xl shadow-lg shadow-teal-500/30 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
+                  className="mt-4 px-8 py-3 bg-gradient-to-r from-blue-700 to-sky-500 hover:from-blue-600 hover:to-sky-400 text-white font-bold rounded-xl shadow-lg shadow-sky-500/30 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
                 >
                   <Play className="w-5 h-5 fill-current" />
                   <span>{t("startNow")}</span>

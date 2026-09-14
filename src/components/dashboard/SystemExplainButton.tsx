@@ -14,11 +14,11 @@ export default function SystemExplainButton() {
       <button
         onClick={() => setIsModalOpen(true)}
         className="group relative inline-flex items-center gap-3 px-7 py-4 
-          bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600
-          hover:from-blue-500 hover:via-indigo-500 hover:to-violet-500
+          bg-gradient-to-r from-blue-900 via-blue-700 to-sky-400
+          hover:from-blue-800 hover:via-blue-600 hover:to-sky-300
           text-white font-bold text-base rounded-2xl 
-          shadow-[0_8px_30px_rgba(79,70,229,0.35)]
-          hover:shadow-[0_12px_40px_rgba(79,70,229,0.5)]
+          shadow-[0_8px_30px_rgba(14,165,233,0.35)]
+          hover:shadow-[0_12px_40px_rgba(14,165,233,0.5)]
           transition-all duration-300 ease-out
           hover:-translate-y-0.5 active:translate-y-0
           overflow-hidden"
