@@ -195,11 +195,19 @@ export default function SystemFlowModal({
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
   const finishRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const completionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
+    }
+  }, []);
+
+  const clearCompletionTimer = useCallback(() => {
+    if (completionTimerRef.current) {
+      clearTimeout(completionTimerRef.current);
+      completionTimerRef.current = null;
     }
   }, []);
 
@@ -233,6 +241,7 @@ export default function SystemFlowModal({
   useEffect(() => {
     if (isOpen) {
       clearTimer();
+      clearCompletionTimer();
       setIsClosing(false);
       setIsPaused(false);
 
@@ -263,8 +272,8 @@ export default function SystemFlowModal({
       }
     }
 
-    return () => clearTimer();
-  }, [isOpen, clearTimer, scrollToFinish]);
+    return () => { clearTimer(); clearCompletionTimer(); };
+  }, [isOpen, clearTimer, clearCompletionTimer, scrollToFinish]);
 
   // Main animation state machine
   useEffect(() => {
@@ -308,7 +317,7 @@ export default function SystemFlowModal({
             // All done
             setAnimPhase("idle");
             setCurrentStepIndex(FLOW_STEPS.length);
-            timerRef.current = setTimeout(() => {
+            completionTimerRef.current = setTimeout(() => {
               setIsFinished(true);
               
               if (typeof window !== 'undefined') {
@@ -326,6 +335,7 @@ export default function SystemFlowModal({
 
   const handleClose = useCallback(() => {
     clearTimer();
+    clearCompletionTimer();
     // Always restore body scroll immediately when closing
     document.body.style.overflow = "";
     setIsClosing(true);
@@ -333,10 +343,11 @@ export default function SystemFlowModal({
       onClose();
       setIsClosing(false);
     }, 300);
-  }, [onClose, clearTimer]);
+  }, [onClose, clearTimer, clearCompletionTimer]);
 
   const handleReplay = () => {
     clearTimer();
+    clearCompletionTimer();
     setCurrentStepIndex(-1);
     setAnimPhase("idle");
     setCompletedSteps(new Set());
