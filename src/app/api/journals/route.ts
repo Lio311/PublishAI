@@ -33,7 +33,7 @@ Example format:
   "instructionsUrl": "https://www.nature.com/nature/for-authors"
 }`;
 
-    let dataToInsert: Record<string, string | number | null> = { name };
+    let dataToInsert: any = { name };
     try {
       const response = await askClaude(prompt);
       const jsonStr = response.text.replace(/```json/g, '').replace(/```/g, '').trim();
