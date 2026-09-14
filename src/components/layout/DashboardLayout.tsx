@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Home, Settings, LogOut, Globe, Book } from "lucide-react";
+import { FileText, Home, Settings, LogOut, Globe, Book, Link as LinkIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -35,6 +35,7 @@ export default function DashboardLayout({
   const menuItems = [
     { name: t("home"), icon: Home, href: `/${locale}` },
     { name: t("myPapers"), icon: FileText, href: `/${locale}/papers` },
+    { name: locale === 'he' ? 'חיבור לעיתונים' : 'Journal Connections', icon: LinkIcon, href: `/${locale}/connections` },
     { name: "Journal Rules", icon: Book, href: `/${locale}/journals` },
     { name: t("settings"), icon: Settings, href: `/${locale}/settings` },
   ];
