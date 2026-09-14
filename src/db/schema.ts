@@ -145,3 +145,113 @@ export const userSettings = pgTable("user_settings", {
   openaiApiKey: text("openai_api_key"),
   anthropicApiKey: text("anthropic_api_key"),
 });
+
+// ═══════════════════════════════════════════════════════
+// ENUMS FOR SUBMISSION MODULE
+// ═══════════════════════════════════════════════════════
+
+export const journalPlatformEnum = pgEnum("journal_platform", [
+  "wordpress",   // REST API — /wp-json/wp/v2/
+  "ojs",         // REST API — /api/v1/
+]);
+
+export const connectionStatusEnum = pgEnum("connection_status", [
+  "untested",
+  "connected",
+  "failed",
+  "expired",
+]);
+
+export const submissionStatusEnum = pgEnum("submission_status", [
+  "preparing",
+  "submitting",
+  "submitted",
+  "failed",
+  "draft",
+]);
+
+// ═══════════════════════════════════════════════════════
+// TABLE: journal_connections
+// ═══════════════════════════════════════════════════════
+
+export const journalConnections = pgTable("journal_connections", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  journalId: integer("journal_id")
+    .references(() => journals.id),
+  
+  platform: journalPlatformEnum("platform").notNull(),
+  siteUrl: text("site_url").notNull(),
+  displayName: text("display_name"),
+  
+  encryptedUsername: text("encrypted_username").notNull(),
+  encryptedPassword: text("encrypted_password").notNull(),
+  
+  connectionStatus: connectionStatusEnum("connection_status").default("untested"),
+  lastTestedAt: timestamp("last_tested_at"),
+  lastError: text("last_error"),
+  remoteUserDisplayName: text("remote_user_display_name"),
+  remoteUserRole: text("remote_user_role"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ═══════════════════════════════════════════════════════
+// TABLE: submissions
+// ═══════════════════════════════════════════════════════
+
+export const submissions = pgTable("submissions", {
+  id: serial("id").primaryKey(),
+  paperId: integer("paper_id")
+    .references(() => papers.id)
+    .notNull(),
+  connectionId: integer("connection_id")
+    .references(() => journalConnections.id)
+    .notNull(),
+  userId: text("user_id")
+    .references(() => users.id)
+    .notNull(),
+  
+  status: submissionStatusEnum("submission_status").default("preparing"),
+  publishMode: text("publish_mode").default("draft"),
+  
+  remotePostId: text("remote_post_id"),
+  remotePostUrl: text("remote_post_url"),
+  confirmationId: text("confirmation_id"),
+  responseData: jsonb("response_data"),
+  
+  attemptCount: integer("attempt_count").default(0),
+  maxAttempts: integer("max_attempts").default(3),
+  lastAttemptAt: timestamp("last_attempt_at"),
+  nextRetryAt: timestamp("next_retry_at"),
+  
+  errorLog: text("error_log"),
+  
+  submittedTitle: text("submitted_title"),
+  submittedAbstract: text("submitted_abstract"),
+  submittedKeywords: jsonb("submitted_keywords"),
+  submittedAuthors: jsonb("submitted_authors"),
+  submittedArticleType: text("submitted_article_type"),
+  coverLetterIncluded: boolean("cover_letter_included").default(false),
+  
+  submittedAt: timestamp("submitted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ═══════════════════════════════════════════════════════
+// TABLE: submission_logs
+// ═══════════════════════════════════════════════════════
+
+export const submissionLogs = pgTable("submission_logs", {
+  id: serial("id").primaryKey(),
+  submissionId: integer("submission_id")
+    .references(() => submissions.id, { onDelete: "cascade" })
+    .notNull(),
+  timestamp: timestamp("timestamp").defaultNow(),
+  level: text("level").notNull(),
+  message: text("message").notNull(),
+  details: jsonb("details"),
+});

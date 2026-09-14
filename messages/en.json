@@ -100,5 +100,54 @@
         "desc": "The journey is complete! You can now download your full publication package: the polished manuscript, the tracked-changes version, the cover letter, and the verification report. Everything is available for immediate download in one click, ready to take your research to the next level."
       }
     }
+  },
+  "submission": {
+    "security": {
+      "title": "Journal Connection Security Briefing",
+      "whyCredentials": "Why do we need your credentials?",
+      "whyCredentialsDesc": "To submit your paper automatically, our system needs to authenticate with the journal's platform (like WordPress or OJS) on your behalf.",
+      "howProtected": "How is your data protected?",
+      "encryption": "Credentials are encrypted using military-grade AES-256-GCM encryption before being saved.",
+      "neverPlaintext": "We never store your passwords in plain text.",
+      "deleteAnytime": "You can delete your connection at any time.",
+      "consent": "I understand and agree to securely store my credentials.",
+      "cancel": "Cancel",
+      "continue": "Continue"
+    },
+    "connection": {
+      "title": "Connect to Journal",
+      "subtitle": "Enter your journal credentials below.",
+      "siteUrl": "Journal Site URL",
+      "displayName": "Display Name",
+      "username": "Username / Email",
+      "apiToken": "API Token",
+      "password": "Password",
+      "testConnection": "Test Connection",
+      "cancel": "Cancel",
+      "saveConnection": "Save Connection"
+    },
+    "twoFactor": {
+      "title": "Two-Factor Authentication",
+      "description": "Please enter the 2FA code sent to your device.",
+      "codeLabel": "Authentication Code",
+      "verify": "Verify"
+    },
+    "confirm": {
+      "title": "Ready to Submit?",
+      "description": "Your paper will be submitted to the selected journal. How would you like to proceed?",
+      "submitAsDraft": "Submit as Draft",
+      "submitForPublishing": "Submit for Publishing"
+    },
+    "panel": {
+      "myConnections": "My Journal Connections",
+      "addNewConnection": "Add New Connection",
+      "noConnections": "You haven't connected any journals yet.",
+      "submitHere": "Submit Here",
+      "submissionHistory": "Submission History",
+      "viewPost": "View Post"
+    },
+    "common": {
+      "cancel": "Cancel"
+    }
   }
 }
