@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import mammoth from "mammoth";
-import pdfParse from "pdf-parse";
+// @ts-ignore
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import { db } from "@/db";
 import { papers } from "@/db/schema";
 import { inngest } from "@/inngest/client";
