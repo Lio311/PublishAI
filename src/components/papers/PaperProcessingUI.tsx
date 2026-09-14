@@ -1,5 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useEffect, useState, useRef, useCallback } from "react";
+
 import { 
   Upload, MessageSquareText, ClipboardList, BookOpen, Microscope, 
   PenTool, Play, ShieldCheck, FileCheck, Package, Download, Loader2, CheckCircle
@@ -160,7 +163,7 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
     }
     
     const timer = setTimeout(() => {
-      setCompletedSteps(prev => new Set([...prev, currentStepIndex]));
+      setCompletedSteps((prev: Set<number>) => new Set([...prev, currentStepIndex]));
       
       const nextIndex = currentStepIndex + 1;
       if (nextIndex < FLOW_STEPS.length) {
