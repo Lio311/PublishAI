@@ -6,7 +6,9 @@ import {
   jsonb,
   pgEnum,
   integer,
-  boolean
+  boolean,
+  uuid,
+  real
 } from "drizzle-orm/pg-core";
 
 export const statusEnum = pgEnum("status", [
@@ -256,4 +258,172 @@ export const submissionLogs = pgTable("submission_logs", {
   level: text("level").notNull(),
   message: text("message").notNull(),
   details: jsonb("details"),
+});
+
+// ═══════════════════════════════════════════════════════
+// UPGRADE 1: DATA SCIENCE SANDBOX
+// ═══════════════════════════════════════════════════════
+
+export const sandboxStatusEnum = pgEnum("sandbox_status", [
+  "pending", "running", "completed", "failed"
+]);
+
+export const dataFiles = pgTable("data_files", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  paperId: integer("paper_id").references(() => papers.id).notNull(),
+  filename: text("filename").notNull(),
+  fileUrl: text("file_url").notNull(),
+  mimeType: text("mime_type").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const sandboxRuns = pgTable("sandbox_runs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  paperId: integer("paper_id").references(() => papers.id).notNull(),
+  status: sandboxStatusEnum("status").default("pending"),
+  pythonScript: text("python_script"),
+  executionLogs: text("execution_logs"),
+  analysisResults: jsonb("analysis_results"),
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+export const generatedCharts = pgTable("generated_charts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sandboxRunId: uuid("sandbox_run_id").references(() => sandboxRuns.id).notNull(),
+  paperId: integer("paper_id").references(() => papers.id).notNull(),
+  chartUrl: text("chart_url").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ═══════════════════════════════════════════════════════
+// UPGRADE 2: KNOWLEDGE GRAPH & GraphRAG
+// ═══════════════════════════════════════════════════════
+
+export const entityTypeEnum = pgEnum("entity_type", [
+  "drug", "protein", "gene", "disease", "concept", "study", "method"
+]);
+
+export const relationshipTypeEnum = pgEnum("relationship_type", [
+  "affects", "contradicts", "supports", "causes", "treats", "correlates"
+]);
+
+export const scientificEntities = pgTable("scientific_entities", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  type: entityTypeEnum("type").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const scientificRelationships = pgTable("scientific_relationships", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sourceEntityId: uuid("source_entity_id").references(() => scientificEntities.id, { onDelete: "cascade" }).notNull(),
+  targetEntityId: uuid("target_entity_id").references(() => scientificEntities.id, { onDelete: "cascade" }).notNull(),
+  relationshipType: relationshipTypeEnum("relationship_type").notNull(),
+  evidenceText: text("evidence_text").notNull(),
+  paperId: integer("paper_id").references(() => papers.id, { onDelete: "set null" }),
+  confidenceScore: real("confidence_score").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ═══════════════════════════════════════════════════════
+// UPGRADE 3: RLHF DATA FLYWHEEL
+// ═══════════════════════════════════════════════════════
+
+export const feedbackOutcomeEnum = pgEnum("feedback_outcome", [
+  "accepted", "rejected", "revision_required"
+]);
+
+export const rlhfFeedbackLogs = pgTable("rlhf_feedback_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  submissionId: integer("submission_id").references(() => submissions.id).notNull(),
+  paperVersionId: integer("paper_version_id").references(() => paperVersions.id).notNull(),
+  journalId: integer("journal_id").references(() => journals.id).notNull(),
+  outcome: feedbackOutcomeEnum("outcome").notNull(),
+  reviewerComments: text("reviewer_comments"),
+  correctionData: jsonb("correction_data").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const promptStrategies = pgTable("prompt_strategies", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  promptTemplate: text("prompt_template").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const abTestAllocations = pgTable("ab_test_allocations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  submissionId: integer("submission_id").references(() => submissions.id).notNull(),
+  promptStrategyId: uuid("prompt_strategy_id").references(() => promptStrategies.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ═══════════════════════════════════════════════════════
+// UPGRADE 4: MULTI-AGENT DEBATE (SWARM)
+// ═══════════════════════════════════════════════════════
+
+export const debateStatusEnum = pgEnum("debate_status", [
+  "pending", "in_progress", "consensus_reached", "failed"
+]);
+
+export const debates = pgTable("debates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  paperId: integer("paper_id").references(() => papers.id).notNull(),
+  status: debateStatusEnum("status").default("pending"),
+  topic: text("topic").notNull(),
+  consensusSummary: text("consensus_summary"),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+export const debateAgents = pgTable("debate_agents", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  debateId: uuid("debate_id").references(() => debates.id, { onDelete: "cascade" }).notNull(),
+  name: text("name").notNull(),
+  persona: text("persona").notNull(),
+  systemPrompt: text("system_prompt").notNull(),
+});
+
+export const debateMessages = pgTable("debate_messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  debateId: uuid("debate_id").references(() => debates.id, { onDelete: "cascade" }).notNull(),
+  agentId: uuid("agent_id").references(() => debateAgents.id),
+  content: text("content").notNull(),
+  round: integer("round").notNull(),
+  isConsensusProposal: boolean("is_consensus_proposal").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ═══════════════════════════════════════════════════════
+// UPGRADE 5: MULTIMODAL VISION AI
+// ═══════════════════════════════════════════════════════
+
+export const figures = pgTable("figures", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  paperId: integer("paper_id").references(() => papers.id).notNull(),
+  paperVersionId: integer("paper_version_id").references(() => paperVersions.id).notNull(),
+  figureNumber: integer("figure_number").notNull(),
+  imageUrl: text("image_url").notNull(),
+  originalLegend: text("original_legend"),
+  extractedText: text("extracted_text"),
+  resolution: integer("resolution"),
+  qualityScore: integer("quality_score"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const figureAnalyses = pgTable("figure_analyses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  figureId: uuid("figure_id").references(() => figures.id, { onDelete: "cascade" }).notNull(),
+  modelUsed: text("model_used").notNull(),
+  legendAccuracyScore: integer("legend_accuracy_score"),
+  claimVerificationStatus: text("claim_verification_status"),
+  suggestedLegend: text("suggested_legend"),
+  issuesFound: jsonb("issues_found"),
+  rawAnalysis: jsonb("raw_analysis"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
