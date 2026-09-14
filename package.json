@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.66",
     "@anthropic-ai/sdk": "^0.125.0",
     "@auth/drizzle-adapter": "^1.11.3",
     "@monaco-editor/react": "^4.7.0",
@@ -17,6 +18,7 @@
     "@upstash/ratelimit": "^2.1.0",
     "@upstash/redis": "^1.38.4",
     "@vercel/blob": "^2.8.0",
+    "ai": "^7.0.100",
     "docx": "^9.7.1",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
