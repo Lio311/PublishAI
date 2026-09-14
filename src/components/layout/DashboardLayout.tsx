@@ -1,12 +1,42 @@
-import { FileText, Home, Settings, LogOut } from "lucide-react";
-import Link from "next/link";
+"use client";
+
+import { FileText, Home, Settings, LogOut, Globe } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const t = useTranslations("Sidebar");
+  const locale = useLocale();
+  const router = useRouter();
+
+  const toggleLanguage = () => {
+    const nextLocale = locale === 'he' ? 'en' : 'he';
+    // The middleware handles redirects, so we can just replace the prefix
+    const newPath = pathname.replace(`/${locale}`, `/${nextLocale}`);
+    // If we're at root and the pathname didn't contain the locale (e.g. middleware rewrote it),
+    // we should forcefully route to the new locale.
+    if (pathname === '/' || pathname === `/${locale}`) {
+      router.push(`/${nextLocale}`);
+    } else {
+      router.push(newPath);
+    }
+  };
+
+  const menuItems = [
+    { name: t("home"), icon: Home, href: `/${locale}` },
+    { name: t("myPapers"), icon: FileText, href: `/${locale}/papers` },
+    { name: t("settings"), icon: Settings, href: `/${locale}/settings` },
+  ];
+
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
+    <div className="min-h-screen flex bg-gray-50 text-slate-900 font-sans" dir={locale === 'he' ? 'rtl' : 'ltr'}>
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-l border-slate-200 flex flex-col justify-between">
+      <aside className={`w-64 bg-white border-${locale === 'he' ? 'l' : 'r'} border-slate-200 flex flex-col justify-between`}>
         <div className="p-6">
           <div className="flex items-center justify-center mb-8">
             <Image 
@@ -20,32 +50,46 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           
           <nav className="space-y-2">
-            <Link href="/" className="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-lg font-medium transition-colors">
-              <Home className="w-5 h-5" />
-              ראשי
-            </Link>
-            <Link href="/papers" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
-              <FileText className="w-5 h-5" />
-              המאמרים שלי
-            </Link>
-            <Link href="/settings" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
-              <Settings className="w-5 h-5" />
-              הגדרות
-            </Link>
+            {menuItems.map((item) => {
+              const isActive = pathname === item.href || (item.href !== `/${locale}` && pathname.startsWith(item.href));
+              
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+                    isActive 
+                      ? "bg-blue-50 text-blue-700" 
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  }`}
+                >
+                  <item.icon className={`w-5 h-5 ${isActive ? "text-blue-700" : "text-slate-400"}`} />
+                  {item.name}
+                </Link>
+              );
+            })}
           </nav>
         </div>
-        
-        <div className="p-6 border-t border-slate-100">
-          <button className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-red-50 hover:text-red-600 w-full rounded-lg font-medium transition-colors">
-            <LogOut className="w-5 h-5" />
-            התנתק
+
+        <div className="p-6 border-t border-slate-200 space-y-2">
+          <button 
+            onClick={toggleLanguage}
+            className="flex w-full items-center gap-3 px-4 py-3 rounded-lg font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+          >
+            <Globe className="w-5 h-5 text-slate-400" />
+            {locale === 'he' ? 'English' : 'עברית'}
+          </button>
+          
+          <button className="flex w-full items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50 transition-colors">
+            <LogOut className="w-5 h-5 text-red-400" />
+            {t("logout")}
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-6xl mx-auto p-8">
+      <main className="flex-1 overflow-auto">
+        <div className="p-8 max-w-6xl mx-auto">
           {children}
         </div>
       </main>

@@ -1,0 +1,43 @@
+{
+  "Sidebar": {
+    "home": "ראשי",
+    "myPapers": "המאמרים שלי",
+    "settings": "הגדרות",
+    "logout": "התנתק"
+  },
+  "Dashboard": {
+    "title": "ברוך הבא ל-PublishAI 👋",
+    "subtitle": "העלה מאמר כדי להתחיל בתהליך עריכה וריוויזיה אקדמית לקראת פרסום.",
+    "stats": {
+      "inProgress": "מאמרים בתהליך",
+      "awaiting": "ממתינים לאישור",
+      "completed": "הושלמו"
+    },
+    "upload": {
+      "dragTitle": "גרור את המאמר שלך לכאן",
+      "processing": "מעבד ומחלץ טקסט...",
+      "success": "הקובץ הועלה בהצלחה!",
+      "description": "תומך בקבצי Word (.docx) או PDF. אנחנו ננתח את המסמך ונתחיל את תהליך הריוויזיה האוטומטי.",
+      "button": "או בחר קובץ",
+      "uploading": "מעלה..."
+    },
+    "recentPapers": {
+      "title": "מאמרים אחרונים",
+      "empty": "אין עדיין מאמרים במערכת. העלה את המאמר הראשון שלך למעלה!",
+      "headers": {
+        "name": "שם המאמר",
+        "journal": "יעד (כתב עת)",
+        "status": "סטטוס",
+        "date": "תאריך העלאה"
+      },
+      "notConfigured": "לא הוגדר עדיין",
+      "status": {
+        "in_progress": "בעריכה",
+        "awaiting_approval": "ממתין לאישור",
+        "completed": "הושלם",
+        "failed": "נכשל",
+        "unknown": "לא ידוע"
+      }
+    }
+  }
+}

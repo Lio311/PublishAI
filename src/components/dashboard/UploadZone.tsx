@@ -3,12 +3,14 @@
 import { UploadCloud, Loader2, CheckCircle } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function UploadZone() {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const router = useRouter();
+  const t = useTranslations("Dashboard.upload");
 
   const handleUpload = async (file: File) => {
     setIsUploading(true);
@@ -37,7 +39,7 @@ export default function UploadZone() {
 
     } catch (error) {
       console.error("Error uploading file:", error);
-      alert("שגיאה בהעלאת הקובץ. אנא נסה שוב.");
+      // alert("שגיאה בהעלאת הקובץ. אנא נסה שוב.");
     } finally {
       setIsUploading(false);
     }
@@ -83,12 +85,12 @@ export default function UploadZone() {
       </div>
       
       <h3 className="text-xl font-bold text-slate-800 mb-2">
-        {isUploading ? "מעבד ומחלץ טקסט..." : uploadSuccess ? "הקובץ הועלה בהצלחה!" : "גרור את המאמר שלך לכאן"}
+        {isUploading ? t("processing") : uploadSuccess ? t("success") : t("dragTitle")}
       </h3>
       
       {!isUploading && !uploadSuccess && (
         <p className="text-slate-500 mb-6 max-w-md">
-          תומך בקבצי Word (.docx) או PDF. אנחנו ננתח את המסמך ונתחיל את תהליך הריוויזיה האוטומטי.
+          {t("description")}
         </p>
       )}
       
@@ -108,7 +110,7 @@ export default function UploadZone() {
           disabled={isUploading || uploadSuccess}
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
         >
-          {isUploading ? "מעלה..." : "או בחר קובץ"}
+          {isUploading ? t("uploading") : t("button")}
         </button>
       </div>
     </div>

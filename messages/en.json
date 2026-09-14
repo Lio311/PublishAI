@@ -1,0 +1,43 @@
+{
+  "Sidebar": {
+    "home": "Home",
+    "myPapers": "My Papers",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "Dashboard": {
+    "title": "Welcome to PublishAI 👋",
+    "subtitle": "Upload a paper to begin the academic revision and editing process for publication.",
+    "stats": {
+      "inProgress": "In Progress",
+      "awaiting": "Awaiting Approval",
+      "completed": "Completed"
+    },
+    "upload": {
+      "dragTitle": "Drag your paper here",
+      "processing": "Processing and extracting text...",
+      "success": "File uploaded successfully!",
+      "description": "Supports Word (.docx) or PDF. We will analyze the document and begin the automatic revision process.",
+      "button": "Or select file",
+      "uploading": "Uploading..."
+    },
+    "recentPapers": {
+      "title": "Recent Papers",
+      "empty": "No papers in the system yet. Upload your first paper above!",
+      "headers": {
+        "name": "Paper Title",
+        "journal": "Target Journal",
+        "status": "Status",
+        "date": "Upload Date"
+      },
+      "notConfigured": "Not configured yet",
+      "status": {
+        "in_progress": "Editing",
+        "awaiting_approval": "Awaiting Approval",
+        "completed": "Completed",
+        "failed": "Failed",
+        "unknown": "Unknown"
+      }
+    }
+  }
+}

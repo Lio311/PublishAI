@@ -4,9 +4,18 @@ import { FileText, Clock, CheckCircle } from "lucide-react";
 import { db } from "@/db";
 import { papers, journals } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
+import { getTranslations } from "next-intl/server";
 
-// Make the component async to fetch data on the server
-export default async function Home() {
+export default async function Home({
+  params
+}: {
+  params: { locale: string };
+}) {
+  const resolvedParams = await params;
+  const locale = resolvedParams.locale;
+  
+  const t = await getTranslations("Dashboard");
+
   // Fetch real data from the database
   const allPapers = await db
     .select({
@@ -34,7 +43,7 @@ export default async function Home() {
   // Format date helper
   const formatDate = (date: Date | null) => {
     if (!date) return "";
-    return new Intl.DateTimeFormat("he-IL", {
+    return new Intl.DateTimeFormat(locale === "he" ? "he-IL" : "en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -50,32 +59,32 @@ export default async function Home() {
       case "in_progress":
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            בעריכה
+            {t("recentPapers.status.in_progress")}
           </span>
         );
       case "awaiting_approval":
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-            ממתין לאישור
+            {t("recentPapers.status.awaiting_approval")}
           </span>
         );
       case "completed":
       case "approved":
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            הושלם
+            {t("recentPapers.status.completed")}
           </span>
         );
       case "failed":
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-            נכשל
+            {t("recentPapers.status.failed")}
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-            לא ידוע
+            {t("recentPapers.status.unknown")}
           </span>
         );
     }
@@ -84,8 +93,8 @@ export default async function Home() {
   return (
     <DashboardLayout>
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">ברוך הבא ל-PublishAI 👋</h1>
-        <p className="text-slate-600">העלה מאמר כדי להתחיל בתהליך עריכה וריוויזיה אקדמית לקראת פרסום.</p>
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">{t("title")}</h1>
+        <p className="text-slate-600">{t("subtitle")}</p>
       </header>
 
       {/* Stats row */}
@@ -95,7 +104,7 @@ export default async function Home() {
             <FileText className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">מאמרים בתהליך</p>
+            <p className="text-sm font-medium text-slate-500">{t("stats.inProgress")}</p>
             <p className="text-2xl font-bold text-slate-800">{inProgressCount}</p>
           </div>
         </div>
@@ -104,7 +113,7 @@ export default async function Home() {
             <Clock className="w-6 h-6 text-orange-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">ממתינים לאישור</p>
+            <p className="text-sm font-medium text-slate-500">{t("stats.awaiting")}</p>
             <p className="text-2xl font-bold text-slate-800">{awaitingCount}</p>
           </div>
         </div>
@@ -113,7 +122,7 @@ export default async function Home() {
             <CheckCircle className="w-6 h-6 text-green-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">הושלמו</p>
+            <p className="text-sm font-medium text-slate-500">{t("stats.completed")}</p>
             <p className="text-2xl font-bold text-slate-800">{completedCount}</p>
           </div>
         </div>
@@ -126,28 +135,28 @@ export default async function Home() {
 
       {/* Recent Papers */}
       <section className="mt-8">
-        <h2 className="text-xl font-bold text-slate-800 mb-4">מאמרים אחרונים</h2>
+        <h2 className="text-xl font-bold text-slate-800 mb-4">{t("recentPapers.title")}</h2>
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-0">
             {allPapers.length === 0 ? (
               <div className="p-8 text-center text-slate-500">
-                אין עדיין מאמרים במערכת. העלה את המאמר הראשון שלך למעלה!
+                {t("recentPapers.empty")}
               </div>
             ) : (
-              <table className="w-full text-right text-sm">
+              <table className={`w-full text-sm ${locale === 'he' ? 'text-right' : 'text-left'}`}>
                 <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
                   <tr>
-                    <th className="px-6 py-4 font-medium">שם המאמר</th>
-                    <th className="px-6 py-4 font-medium">יעד (כתב עת)</th>
-                    <th className="px-6 py-4 font-medium">סטטוס</th>
-                    <th className="px-6 py-4 font-medium">תאריך העלאה</th>
+                    <th className="px-6 py-4 font-medium">{t("recentPapers.headers.name")}</th>
+                    <th className="px-6 py-4 font-medium">{t("recentPapers.headers.journal")}</th>
+                    <th className="px-6 py-4 font-medium">{t("recentPapers.headers.status")}</th>
+                    <th className="px-6 py-4 font-medium">{t("recentPapers.headers.date")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {allPapers.slice(0, 5).map((paper) => (
                     <tr key={paper.id} className="hover:bg-slate-50 transition-colors cursor-pointer">
                       <td className="px-6 py-4 font-medium text-slate-800">{paper.title}</td>
-                      <td className="px-6 py-4 text-slate-600">{paper.journalName || "לא הוגדר עדיין"}</td>
+                      <td className="px-6 py-4 text-slate-600">{paper.journalName || t("recentPapers.notConfigured")}</td>
                       <td className="px-6 py-4">{getStatusBadge(paper.status)}</td>
                       <td className="px-6 py-4 text-slate-500">{formatDate(paper.createdAt)}</td>
                     </tr>
