@@ -15,8 +15,8 @@ export default function DiffEditor({ originalText, modifiedText, onAccept, onRej
   // For this MVP, we present a side-by-side comparison.
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-xl border border-slate-200 overflow-hidden">
-      <div className="flex justify-between items-center p-4 border-b border-slate-200 bg-slate-50">
+    <div className="flex flex-col h-full bg-white/70 backdrop-blur-xl rounded-2xl border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.03)] overflow-hidden">
+      <div className="flex justify-between items-center p-4 border-b border-slate-200/50 bg-slate-50/40">
         <h3 className="font-semibold text-slate-800">Track Changes</h3>
         <div className="flex gap-2">
           <button 

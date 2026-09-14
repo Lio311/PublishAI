@@ -35,13 +35,15 @@ export default function ArtifactDashboard({ paperId, originalText, modifiedText,
 
 
   return (
-    <div className="flex flex-col h-[800px] bg-white rounded-xl shadow-sm border border-slate-200">
+    <div className="flex flex-col h-[800px] bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-white/50 overflow-hidden">
       {/* Tabs Header */}
-      <div className="flex border-b border-slate-200 bg-slate-50 rounded-t-xl px-4 pt-4 gap-2">
+      <div className="flex border-b border-slate-200/50 bg-slate-50/30 px-6 pt-4 gap-2">
         <button
           onClick={() => setActiveTab("diff")}
-          className={`px-4 py-2 font-medium rounded-t-lg flex items-center gap-2 ${
-            activeTab === "diff" ? "bg-white text-indigo-600 border-t border-x border-slate-200 mb-[-1px]" : "text-slate-600 hover:bg-slate-200/50"
+          className={`px-5 py-2.5 font-medium rounded-t-xl flex items-center gap-2 transition-all duration-300 ${
+            activeTab === "diff" 
+              ? "bg-white/90 text-blue-800 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] mb-[-1px] border-t border-x border-white/60 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-600" 
+              : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/30"
           }`}
         >
           <GitMerge className="w-4 h-4" />
@@ -49,26 +51,30 @@ export default function ArtifactDashboard({ paperId, originalText, modifiedText,
         </button>
         <button
           onClick={() => setActiveTab("review")}
-          className={`px-4 py-2 font-medium rounded-t-lg flex items-center gap-2 ${
-            activeTab === "review" ? "bg-white text-indigo-600 border-t border-x border-slate-200 mb-[-1px]" : "text-slate-600 hover:bg-slate-200/50"
+          className={`px-5 py-2.5 font-medium rounded-t-xl flex items-center gap-2 transition-all duration-300 ${
+            activeTab === "review" 
+              ? "bg-white/90 text-blue-800 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] mb-[-1px] border-t border-x border-white/60 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-600" 
+              : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/30"
           }`}
         >
           <FileCheck2 className="w-4 h-4" />
-          Peer Review Report
+          Review Report
         </button>
         <button
           onClick={() => setActiveTab("export")}
-          className={`px-4 py-2 font-medium rounded-t-lg flex items-center gap-2 ${
-            activeTab === "export" ? "bg-white text-indigo-600 border-t border-x border-slate-200 mb-[-1px]" : "text-slate-600 hover:bg-slate-200/50"
+          className={`px-5 py-2.5 font-medium rounded-t-xl flex items-center gap-2 transition-all duration-300 ${
+            activeTab === "export" 
+              ? "bg-white/90 text-blue-800 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] mb-[-1px] border-t border-x border-white/60 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-600" 
+              : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/30"
           }`}
         >
-          <FileDown className="w-4 h-4" />
+          <Send className="w-4 h-4" />
           Export & Submit
         </button>
       </div>
 
-      {/* Tab Content */}
-      <div className="flex-1 overflow-hidden p-4 bg-slate-50/50">
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-auto p-4 bg-white/30">
         {activeTab === "diff" && (
           <DiffEditor 
             originalText={originalText} 

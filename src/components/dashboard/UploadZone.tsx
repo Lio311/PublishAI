@@ -72,8 +72,8 @@ export default function UploadZone() {
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
-      className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center transition-colors duration-200 ease-in-out cursor-pointer
-        ${isDragging ? "border-blue-500 bg-blue-50" : "border-slate-300 bg-white hover:border-slate-400"}
+      className={`border-2 border-dashed rounded-[2rem] p-12 flex flex-col items-center justify-center text-center transition-all duration-300 relative overflow-hidden cursor-pointer
+        ${isDragging ? "border-blue-500 bg-blue-50/50" : "border-slate-300/50 bg-white/40 backdrop-blur-xl hover:bg-white/60 hover:border-blue-400/50 shadow-[0_8px_32px_rgba(0,0,0,0.02)]"}
         ${isUploading ? "opacity-75 cursor-not-allowed" : ""}
       `}
     >

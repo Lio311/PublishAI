@@ -137,7 +137,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-4 min-h-[500px]">
           {/* Settings Sidebar */}
           <div

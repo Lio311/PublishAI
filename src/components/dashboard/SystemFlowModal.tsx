@@ -419,7 +419,7 @@ export default function SystemFlowModal({
     >
       {/* Backdrop */}
       <div
-        className={`absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-slate-900/30 backdrop-blur-md transition-opacity duration-300 ${
           isClosing ? "opacity-0" : "opacity-100"
         }`}
         onClick={handleClose}
@@ -427,7 +427,7 @@ export default function SystemFlowModal({
 
       {/* Modal */}
       <div
-        className={`relative w-full max-w-4xl max-h-[90vh] bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden transition-all duration-500 flex flex-col ${
+        className={`relative w-full max-w-4xl max-h-[90vh] bg-white/75 backdrop-blur-2xl rounded-3xl shadow-[0_16px_48px_rgba(0,0,0,0.1)] border border-white/60 overflow-hidden transition-all duration-500 flex flex-col ${
           isClosing
             ? "scale-95 opacity-0 translate-y-4"
             : "scale-100 opacity-100 translate-y-0"

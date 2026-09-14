@@ -178,7 +178,9 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
   }, [currentStepIndex, isFinished]);
 
   return (
-    <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+    <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] p-8 border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] relative overflow-hidden">
+      {/* Subtle background glow */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-sky-50/50 pointer-events-none" />
       <h2 className="text-2xl font-bold mb-8 text-slate-800">{t("workingProcess")}</h2>
       
       <div className="flex flex-col gap-6 relative before:absolute before:inset-0 before:ml-[2.25rem] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-slate-200 before:via-slate-200 before:to-transparent">
@@ -208,8 +210,10 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
                 )}
               </div>
               
-              <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border-2 transition-all duration-500
-                ${isCurrent ? 'bg-blue-50 border-blue-400 shadow-md shadow-blue-100' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden backdrop-blur-md
+                ${isCurrent 
+                  ? 'bg-blue-50/80 border-blue-300 shadow-[0_8px_24px_rgba(59,130,246,0.12)] scale-[1.02]' 
+                  : 'bg-white/40 border-white/60 hover:bg-white/60 shadow-[0_2px_12px_rgba(0,0,0,0.02)]'}`}>
                 <div className="flex items-center gap-3 mb-2">
                   <div className={`p-2 rounded-lg ${step.bgColor}`}>
                     <Icon className={`w-5 h-5 ${isCurrent ? step.color : 'text-slate-500'}`} />
@@ -236,10 +240,11 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
       </div>
 
       {isFinished && (
-        <div className="mt-12 text-center p-8 bg-green-50 rounded-xl border border-green-200">
-          <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-green-800 mb-2">{t("processComplete")}</h3>
-          <p className="text-green-700">{t("processCompleteDesc")}</p>
+        <div className="mt-12 text-center p-10 bg-green-50/70 backdrop-blur-md rounded-[2rem] border border-green-200/50 shadow-[0_8px_32px_rgba(34,197,94,0.08)] relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-green-100/30 to-emerald-50/20 pointer-events-none" />
+          <CheckCircle className="w-14 h-14 text-green-500 mx-auto mb-5 drop-shadow-sm" />
+          <h3 className="text-2xl font-bold text-green-800 mb-3">{t("processComplete")}</h3>
+          <p className="text-green-700/90">{t("processCompleteDesc")}</p>
         </div>
       )}
 

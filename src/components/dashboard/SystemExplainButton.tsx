@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Info } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { motion } from "framer-motion";
 import SystemFlowModal from "./SystemFlowModal";
 
 export default function SystemExplainButton() {
@@ -11,8 +12,10 @@ export default function SystemExplainButton() {
 
   return (
     <>
-      <button
+      <motion.button
         onClick={() => setIsModalOpen(true)}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         className="group relative inline-flex items-center gap-3 px-7 py-4 
           bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300
           hover:from-blue-500 hover:via-sky-500 hover:to-sky-400
@@ -43,7 +46,7 @@ export default function SystemExplainButton() {
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
         </svg>
-      </button>
+      </motion.button>
 
       <SystemFlowModal
         isOpen={isModalOpen}

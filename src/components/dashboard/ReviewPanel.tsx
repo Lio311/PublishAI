@@ -14,7 +14,7 @@ export default function ReviewPanel({ title, content, type = "review" }: ReviewP
   const Icon = type === "warning" ? AlertTriangle : type === "success" ? CheckCircle2 : FileText;
 
   return (
-    <div className={`p-6 rounded-xl border border-slate-200 ${bgColor}`}>
+    <div className={`p-6 rounded-2xl border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.03)] backdrop-blur-md ${bgColor}/70`}>
       <div className="flex items-start gap-4">
         <div className={`p-2 rounded-lg bg-white shadow-sm ${iconColor}`}>
           <Icon className="w-6 h-6" />

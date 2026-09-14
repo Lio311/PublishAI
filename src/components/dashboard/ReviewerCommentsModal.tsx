@@ -23,9 +23,9 @@ export function ReviewerCommentsModal({ paperId, isOpen, onClose, onSubmit }: Re
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl flex flex-col max-h-[90vh]">
-        <div className="px-6 py-4 border-b flex justify-between items-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-md transition-opacity">
+      <div className="bg-white/90 backdrop-blur-xl rounded-[2rem] shadow-[0_16px_48px_rgba(0,0,0,0.1)] border border-white/60 w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-200/50 bg-slate-50/30 flex justify-between items-center">
           <h2 className="text-xl font-bold">Submit Reviewer Comments</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-black">
             ✕
