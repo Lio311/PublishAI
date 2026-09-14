@@ -2,11 +2,7 @@ import { inngest } from "./client";
 import { db } from "@/db";
 import { papers, paperStages } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import Anthropic from "@anthropic-ai/sdk";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || "",
-});
+import { askClaude } from "@/lib/agents/claude-client";
 
 export const processPaper = inngest.createFunction(
   { id: "process-paper" },
@@ -14,7 +10,7 @@ export const processPaper = inngest.createFunction(
   async ({ event, step }) => {
     const { paperId, textContent } = event.data;
 
-    // Step 1: Update status to in_progress
+    // Step 0: Mark as in_progress
     await step.run("update-status-in-progress", async () => {
       await db
         .update(papers)
@@ -22,43 +18,83 @@ export const processPaper = inngest.createFunction(
         .where(eq(papers.id, paperId));
     });
 
-    // Step 2: Agent 1 - Clarification & Rules Extraction
-    const clarificationOutput = await step.run("agent-clarification", async () => {
+    // Step 1: Clarification Agent (Needs Approval)
+    const clarification = await step.run("agent-clarification", async () => {
       const prompt = `You are an expert academic editor.
       Analyze the following academic text and extract:
       1. The main thesis / objective
       2. The primary field of study
       3. Any obvious missing sections (e.g., no Conclusion)
       
-      Here is the text:
-      ${textContent.substring(0, 10000)} // Truncating for now to save tokens
+      Text: ${textContent.substring(0, 10000)}
       `;
 
-      const msg = await anthropic.messages.create({
-        model: "claude-3-7-sonnet-20250219",
-        max_tokens: 1024,
-        messages: [{ role: "user", content: prompt }],
-      });
-
-      // We extract text content safely assuming Claude's response format
-      const responseText = msg.content.find((c) => c.type === "text")?.text || "";
+      const { text, tokensUsed } = await askClaude(prompt, "claude-3-7-sonnet-20250219");
       
-      // Save to database
       await db.insert(paperStages).values({
         paperId,
         stage: "clarification",
-        status: "completed",
-        agentOutput: responseText,
+        status: "awaiting_approval", // Pauses here for user input in real UI
+        agentOutput: text,
         startedAt: new Date(),
         completedAt: new Date(),
       });
 
-      return responseText;
+      return text;
     });
 
-    // We can add more agents here (Planning, Knowledge, Scientific Review, etc.)
-    // For now, this concludes Phase 2 MVP orchestrator
+    // We can simulate pausing via Inngest `step.waitForEvent`
+    // For MVP, we proceed automatically to demonstrate the full pipeline in logs.
+    
+    // Step 2: Planning Agent
+    const planning = await step.run("agent-planning", async () => {
+      const prompt = `Based on the clarification: ${clarification}, 
+      create a structural revision plan for this paper.`;
+      
+      const { text } = await askClaude(prompt, "claude-3-opus-20240229");
+      return text;
+    });
 
-    return { success: true, clarificationOutput };
+    // Step 3: Knowledge Agent
+    const knowledge = await step.run("agent-knowledge", async () => {
+      return "Knowledge gathering complete. (Stub)";
+    });
+
+    // Step 4: Scientific Review Agent
+    const scientificReview = await step.run("agent-scientific-review", async () => {
+      return "Scientific review complete. (Stub)";
+    });
+
+    // Step 5: Academic Writing Agent
+    const writing = await step.run("agent-writing", async () => {
+      return "Writing revision complete. (Stub)";
+    });
+
+    // Step 6: Execution Agent
+    const execution = await step.run("agent-execution", async () => {
+      return "Execution applied to document. (Stub)";
+    });
+
+    // Step 7: QA Agent
+    const qa = await step.run("agent-qa", async () => {
+      return "QA check passed. (Stub)";
+    });
+
+    // Step 8: Verification Agent
+    const verification = await step.run("agent-verification", async () => {
+      return "Verification confirmed. (Stub)";
+    });
+
+    // Step 9: Compilation Agent
+    const compilation = await step.run("agent-compilation", async () => {
+      await db
+        .update(papers)
+        .set({ status: "completed" })
+        .where(eq(papers.id, paperId));
+        
+      return "Final compilation ready. (Stub)";
+    });
+
+    return { success: true, stagesCompleted: 9 };
   }
 );
