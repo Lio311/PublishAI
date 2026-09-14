@@ -45,6 +45,7 @@
     "title": "איך PublishAI עובד",
     "subtitle": "תהליך מלא מהעלאת המאמר ועד לפרסום",
     "replay": "הפעל מחדש",
+    "paused": "מושהה",
     "complete": "המאמר מוכן לפרסום! 🎉",
     "steps": {
       "upload": {

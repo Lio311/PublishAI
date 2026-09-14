@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import {
   X,
@@ -15,10 +15,10 @@ import {
   Package,
   Upload,
   Download,
-  ChevronDown,
   Sparkles,
   ArrowRight,
   RotateCcw,
+  Pause,
 } from "lucide-react";
 
 interface FlowStep {
@@ -157,6 +157,17 @@ const FLOW_STEPS: FlowStep[] = [
   },
 ];
 
+// Timing constants (ms)
+const INITIAL_DELAY = 600;
+const STEP_APPEAR_DURATION = 400;
+const STEP_OPEN_DURATION = 500;
+const STEP_HOLD_DURATION = 2200;
+const STEP_CLOSE_DURATION = 400;
+const NEXT_STEP_DELAY = 300;
+const COMPLETION_DELAY = 600;
+
+type AnimPhase = "idle" | "appearing" | "opening" | "holding" | "closing";
+
 export default function SystemFlowModal({
   isOpen,
   onClose,
@@ -165,60 +176,199 @@ export default function SystemFlowModal({
   onClose: () => void;
 }) {
   const t = useTranslations("SystemFlow");
-  const [visibleSteps, setVisibleSteps] = useState(0);
-  const [activeStep, setActiveStep] = useState<number | null>(null);
+  const [currentStepIndex, setCurrentStepIndex] = useState(-1);
+  const [animPhase, setAnimPhase] = useState<AnimPhase>("idle");
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isClosing, setIsClosing] = useState(false);
-  const [autoPlaying, setAutoPlaying] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const finishRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear any pending timer
+  const clearTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  // Smooth scroll to a step element
+  const scrollToStep = useCallback((index: number) => {
+    const el = stepRefs.current[index];
+    if (el && scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const elRect = el.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      const offset = elRect.top - containerRect.top + container.scrollTop - 40;
+      container.scrollTo({ top: offset, behavior: "smooth" });
+    }
+  }, []);
+
+  const scrollToFinish = useCallback(() => {
+    if (finishRef.current && scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const elRect = finishRef.current.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      const offset = elRect.top - containerRect.top + container.scrollTop - 80;
+      container.scrollTo({ top: offset, behavior: "smooth" });
+    }
+  }, []);
+
+  // Block user scroll on the container
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !isOpen) return;
+
+    const blockScroll = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    container.addEventListener("wheel", blockScroll, { passive: false });
+    container.addEventListener("touchmove", blockScroll, { passive: false });
+
+    return () => {
+      container.removeEventListener("wheel", blockScroll);
+      container.removeEventListener("touchmove", blockScroll);
+    };
+  }, [isOpen]);
 
   // Reset state when opening
   useEffect(() => {
     if (isOpen) {
-      setVisibleSteps(0);
-      setActiveStep(null);
+      setCurrentStepIndex(-1);
+      setAnimPhase("idle");
+      setCompletedSteps(new Set());
       setIsClosing(false);
-      setAutoPlaying(true);
-    }
-  }, [isOpen]);
+      setIsFinished(false);
+      setIsPaused(false);
+      clearTimer();
 
-  // Auto-reveal steps one by one
+      // Start the sequence after initial delay
+      timerRef.current = setTimeout(() => {
+        setCurrentStepIndex(0);
+        setAnimPhase("appearing");
+      }, INITIAL_DELAY);
+    }
+
+    return () => clearTimer();
+  }, [isOpen, clearTimer]);
+
+  // Main animation state machine
   useEffect(() => {
-    if (!isOpen || !autoPlaying) return;
+    if (!isOpen || isPaused || currentStepIndex < 0 || currentStepIndex >= FLOW_STEPS.length) return;
 
-    if (visibleSteps <= FLOW_STEPS.length) {
-      const timer = setTimeout(
-        () => {
-          setVisibleSteps((prev) => prev + 1);
-          if (visibleSteps < FLOW_STEPS.length) {
-            setActiveStep(visibleSteps);
+    clearTimer();
+
+    switch (animPhase) {
+      case "appearing":
+        // Step fades in, scroll to it
+        scrollToStep(currentStepIndex);
+        timerRef.current = setTimeout(() => {
+          setAnimPhase("opening");
+        }, STEP_APPEAR_DURATION);
+        break;
+
+      case "opening":
+        // Description expands
+        timerRef.current = setTimeout(() => {
+          setAnimPhase("holding");
+        }, STEP_OPEN_DURATION);
+        break;
+
+      case "holding":
+        // Hold open for reading
+        timerRef.current = setTimeout(() => {
+          setAnimPhase("closing");
+        }, STEP_HOLD_DURATION);
+        break;
+
+      case "closing":
+        // Description collapses, mark as completed
+        setCompletedSteps((prev) => new Set(prev).add(currentStepIndex));
+        timerRef.current = setTimeout(() => {
+          const nextIndex = currentStepIndex + 1;
+          if (nextIndex < FLOW_STEPS.length) {
+            // Move to next step
+            setCurrentStepIndex(nextIndex);
+            setAnimPhase("appearing");
+          } else {
+            // All done
+            setAnimPhase("idle");
+            timerRef.current = setTimeout(() => {
+              setIsFinished(true);
+              setTimeout(() => scrollToFinish(), 200);
+            }, COMPLETION_DELAY);
           }
-        },
-        visibleSteps === 0 ? 300 : 250
-      );
-      return () => clearTimeout(timer);
-    } else {
-      setAutoPlaying(false);
-      setActiveStep(null);
+        }, STEP_CLOSE_DURATION + NEXT_STEP_DELAY);
+        break;
     }
-  }, [isOpen, visibleSteps, autoPlaying]);
+
+    return () => clearTimer();
+  }, [isOpen, currentStepIndex, animPhase, isPaused, clearTimer, scrollToStep, scrollToFinish]);
 
   const handleClose = useCallback(() => {
+    clearTimer();
     setIsClosing(true);
     setTimeout(() => {
       onClose();
       setIsClosing(false);
     }, 300);
-  }, [onClose]);
+  }, [onClose, clearTimer]);
 
   const handleReplay = () => {
-    setVisibleSteps(0);
-    setActiveStep(null);
-    setAutoPlaying(true);
+    clearTimer();
+    setCurrentStepIndex(-1);
+    setAnimPhase("idle");
+    setCompletedSteps(new Set());
+    setIsFinished(false);
+    setIsPaused(false);
+
+    // Scroll to top
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+
+    timerRef.current = setTimeout(() => {
+      setCurrentStepIndex(0);
+      setAnimPhase("appearing");
+    }, INITIAL_DELAY);
   };
+
+  const handlePauseResume = () => {
+    if (isPaused) {
+      setIsPaused(false);
+      // Re-trigger current phase to continue
+      setAnimPhase((prev) => prev);
+    } else {
+      setIsPaused(true);
+      clearTimer();
+    }
+  };
+
+  // Resume from pause: re-enter the state machine
+  useEffect(() => {
+    if (!isPaused && isOpen && currentStepIndex >= 0 && animPhase !== "idle") {
+      // Force a re-trigger by setting the phase again
+      const currentPhase = animPhase;
+      setAnimPhase("idle");
+      requestAnimationFrame(() => {
+        setAnimPhase(currentPhase);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPaused]);
 
   // Close on escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleClose();
+      if (e.key === " ") {
+        e.preventDefault();
+        handlePauseResume();
+      }
     };
     if (isOpen) {
       document.addEventListener("keydown", handleKeyDown);
@@ -228,9 +378,15 @@ export default function SystemFlowModal({
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [isOpen, handleClose]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, handleClose, isPaused]);
 
   if (!isOpen && !isClosing) return null;
+
+  const progressPercent =
+    ((completedSteps.size + (animPhase === "holding" || animPhase === "opening" ? 0.5 : 0)) /
+      FLOW_STEPS.length) *
+    100;
 
   return (
     <div
@@ -248,17 +404,19 @@ export default function SystemFlowModal({
 
       {/* Modal */}
       <div
-        className={`relative w-full max-w-4xl max-h-[90vh] bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden transition-all duration-500 ${
+        className={`relative w-full max-w-4xl max-h-[90vh] bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden transition-all duration-500 flex flex-col ${
           isClosing
             ? "scale-95 opacity-0 translate-y-4"
             : "scale-100 opacity-100 translate-y-0"
         }`}
         style={{
-          animation: !isClosing ? "modalSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)" : undefined,
+          animation: !isClosing
+            ? "modalSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)"
+            : undefined,
         }}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 px-8 py-6">
+        <div className="flex-shrink-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
@@ -270,6 +428,20 @@ export default function SystemFlowModal({
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Pause / Play button */}
+              {!isFinished && currentStepIndex >= 0 && (
+                <button
+                  onClick={handlePauseResume}
+                  className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 group"
+                  title={isPaused ? "▶ Resume" : "⏸ Pause"}
+                >
+                  {isPaused ? (
+                    <Play className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
+                  ) : (
+                    <Pause className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
+                  )}
+                </button>
+              )}
               <button
                 onClick={handleReplay}
                 className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 group"
@@ -289,81 +461,114 @@ export default function SystemFlowModal({
           {/* Progress bar */}
           <div className="mt-4 h-1.5 bg-white/20 rounded-full overflow-hidden">
             <div
-              className="h-full bg-white/80 rounded-full transition-all duration-500 ease-out"
+              className="h-full bg-white/80 rounded-full transition-all duration-700 ease-out"
               style={{
-                width: `${(Math.min(visibleSteps, FLOW_STEPS.length) / FLOW_STEPS.length) * 100}%`,
+                width: `${Math.min(progressPercent, 100)}%`,
               }}
             />
           </div>
+
+          {/* Step counter */}
+          <div className="mt-2 flex items-center justify-between text-xs text-blue-200">
+            <span>
+              {currentStepIndex >= 0
+                ? `${Math.min(currentStepIndex + 1, FLOW_STEPS.length)} / ${FLOW_STEPS.length}`
+                : `0 / ${FLOW_STEPS.length}`}
+            </span>
+            {isPaused && (
+              <span className="flex items-center gap-1 text-amber-200 font-medium animate-pulse">
+                ⏸ {t("paused")}
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Flow Steps */}
-        <div className="overflow-y-auto p-8 space-y-0" style={{ maxHeight: "calc(90vh - 140px)" }}>
+        {/* Flow Steps — scroll locked */}
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-hidden p-8 space-y-0"
+          style={{ overscrollBehavior: "none" }}
+        >
           {FLOW_STEPS.map((step, index) => {
-            const isVisible = index < visibleSteps;
-            const isActive = activeStep === index;
+            const isCurrentOrPast = index <= currentStepIndex;
+            const isCurrent = index === currentStepIndex;
+            const isExpanded = isCurrent && (animPhase === "opening" || animPhase === "holding");
+            const isCompleted = completedSteps.has(index);
             const IconComponent = step.icon;
             const isLast = index === FLOW_STEPS.length - 1;
 
             return (
-              <div key={step.id}>
+              <div
+                key={step.id}
+                ref={(el) => { stepRefs.current[index] = el; }}
+              >
                 {/* Step Card */}
                 <div
-                  className={`transition-all duration-700 ease-out ${
-                    isVisible
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-8"
+                  className={`transition-all duration-500 ease-out ${
+                    isCurrentOrPast
+                      ? "opacity-100 translate-y-0 scale-100"
+                      : "opacity-0 translate-y-12 scale-95"
                   }`}
-                  style={{
-                    transitionDelay: `${index * 30}ms`,
-                  }}
                 >
                   <div
-                    onClick={() => setActiveStep(activeStep === index ? null : index)}
-                    className={`relative flex items-start gap-5 p-5 rounded-2xl border-2 cursor-pointer
-                      transition-all duration-300 ease-out group
+                    className={`relative flex items-start gap-5 p-5 rounded-2xl border-2
+                      transition-all duration-500 ease-out
                       ${
-                        isActive
-                          ? `${step.bgColor} ${step.borderColor} shadow-lg ${step.glowColor}`
-                          : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-md"
+                        isCurrent && !isCompleted
+                          ? `${step.bgColor} ${step.borderColor} shadow-xl ${step.glowColor} scale-[1.02]`
+                          : isCompleted
+                          ? "bg-white border-slate-200 opacity-60 scale-[0.98]"
+                          : "bg-white border-slate-200"
                       }
                     `}
                   >
                     {/* Step Number + Icon */}
                     <div className="flex-shrink-0 relative">
                       <div
-                        className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300
+                        className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500
                           ${
-                            isActive
+                            isCurrent && !isCompleted
                               ? `${step.bgColor} shadow-md`
-                              : "bg-slate-100 group-hover:bg-slate-200"
+                              : isCompleted
+                              ? "bg-green-100"
+                              : "bg-slate-100"
                           }
                         `}
                       >
-                        <IconComponent
-                          className={`w-7 h-7 transition-all duration-300 ${
-                            isActive ? step.color : "text-slate-500"
-                          }`}
-                        />
+                        {isCompleted ? (
+                          <svg className="w-7 h-7 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          <IconComponent
+                            className={`w-7 h-7 transition-all duration-300 ${
+                              isCurrent ? step.color : "text-slate-400"
+                            }`}
+                          />
+                        )}
                       </div>
                       {/* Step number badge */}
                       <div
                         className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
                           transition-all duration-300
                           ${
-                            isActive
+                            isCurrent && !isCompleted
                               ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md scale-110"
+                              : isCompleted
+                              ? "bg-green-500 text-white"
                               : "bg-slate-200 text-slate-600"
                           }
                         `}
                       >
-                        {index + 1}
+                        {isCompleted ? "✓" : index + 1}
                       </div>
 
-                      {/* Pulse animation when active */}
-                      {isActive && (
-                        <div className="absolute inset-0 rounded-2xl animate-ping opacity-20 bg-blue-400" 
-                             style={{ animationDuration: "2s" }} />
+                      {/* Pulse animation when current */}
+                      {isCurrent && !isCompleted && (
+                        <div
+                          className="absolute inset-0 rounded-2xl animate-ping opacity-20 bg-blue-400"
+                          style={{ animationDuration: "2s" }}
+                        />
                       )}
                     </div>
 
@@ -372,7 +577,11 @@ export default function SystemFlowModal({
                       <div className="flex items-center gap-2 mb-1">
                         <h3
                           className={`font-bold text-lg transition-colors duration-300 ${
-                            isActive ? step.color : "text-slate-800"
+                            isCurrent && !isCompleted
+                              ? step.color
+                              : isCompleted
+                              ? "text-slate-500"
+                              : "text-slate-800"
                           }`}
                         >
                           {t(step.titleKey)}
@@ -380,7 +589,7 @@ export default function SystemFlowModal({
                         {step.model && (
                           <span
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-all duration-300 ${
-                              isActive
+                              isCurrent && !isCompleted
                                 ? "bg-white/70 text-slate-700"
                                 : "bg-slate-100 text-slate-500"
                             }`}
@@ -390,10 +599,12 @@ export default function SystemFlowModal({
                         )}
                       </div>
 
-                      {/* Description - expandable */}
+                      {/* Description — auto-expands and collapses */}
                       <div
-                        className={`overflow-hidden transition-all duration-500 ease-out ${
-                          isActive ? "max-h-40 opacity-100 mt-1" : "max-h-0 opacity-0"
+                        className={`overflow-hidden transition-all ease-out ${
+                          isExpanded
+                            ? "max-h-40 opacity-100 mt-2 duration-500"
+                            : "max-h-0 opacity-0 mt-0 duration-400"
                         }`}
                       >
                         <p className="text-sm text-slate-600 leading-relaxed">
@@ -402,27 +613,39 @@ export default function SystemFlowModal({
                       </div>
                     </div>
 
-                    {/* Expand indicator */}
-                    <div className="flex-shrink-0 mt-1">
-                      <ChevronDown
-                        className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${
-                          isActive ? "rotate-180" : ""
-                        }`}
-                      />
-                    </div>
+                    {/* Active typing indicator */}
+                    {isCurrent && isExpanded && (
+                      <div className="flex-shrink-0 mt-2">
+                        <div className="flex gap-1">
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Connector Arrow */}
                 {!isLast && (
                   <div
-                    className={`flex justify-center py-1.5 transition-all duration-500 ${
-                      isVisible ? "opacity-100" : "opacity-0"
+                    className={`flex justify-center py-2 transition-all duration-500 ${
+                      isCurrentOrPast ? "opacity-100" : "opacity-0"
                     }`}
                   >
                     <div className="flex flex-col items-center">
-                      <div className="w-0.5 h-4 bg-gradient-to-b from-slate-300 to-slate-200" />
-                      <ArrowRight className="w-4 h-4 text-slate-300 rotate-90" />
+                      <div
+                        className={`w-0.5 h-5 rounded-full transition-all duration-500 ${
+                          isCompleted
+                            ? "bg-gradient-to-b from-green-300 to-green-200"
+                            : "bg-gradient-to-b from-slate-300 to-slate-200"
+                        }`}
+                      />
+                      <ArrowRight
+                        className={`w-4 h-4 rotate-90 transition-colors duration-500 ${
+                          isCompleted ? "text-green-300" : "text-slate-300"
+                        }`}
+                      />
                     </div>
                   </div>
                 )}
@@ -432,17 +655,27 @@ export default function SystemFlowModal({
 
           {/* Final success message */}
           <div
-            className={`mt-6 text-center transition-all duration-700 ${
-              visibleSteps > FLOW_STEPS.length
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-4"
+            ref={finishRef}
+            className={`mt-8 text-center transition-all duration-700 ${
+              isFinished
+                ? "opacity-100 translate-y-0 scale-100"
+                : "opacity-0 translate-y-8 scale-90"
             }`}
           >
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-50 to-green-50 border-2 border-green-200 rounded-2xl">
-              <Sparkles className="w-5 h-5 text-green-600" />
-              <span className="font-bold text-green-700">{t("complete")}</span>
+            <div className="inline-flex flex-col items-center gap-3 px-8 py-6 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 border-2 border-green-200 rounded-3xl shadow-lg shadow-green-100/50">
+              <div className="relative">
+                <Sparkles className="w-8 h-8 text-green-600" />
+                <div className="absolute inset-0 animate-ping opacity-30">
+                  <Sparkles className="w-8 h-8 text-green-400" />
+                </div>
+              </div>
+              <span className="font-bold text-xl text-green-700">{t("complete")}</span>
+              <span className="text-sm text-green-600/80">{t("subtitle")}</span>
             </div>
           </div>
+
+          {/* Extra bottom padding so last items can scroll into view */}
+          <div className="h-32" />
         </div>
       </div>
 

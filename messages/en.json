@@ -45,6 +45,7 @@
     "title": "How PublishAI Works",
     "subtitle": "Complete pipeline from upload to publication",
     "replay": "Replay",
+    "paused": "Paused",
     "complete": "Paper ready for publication! 🎉",
     "steps": {
       "upload": {
