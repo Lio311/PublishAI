@@ -107,9 +107,8 @@ export const processPaper = inngest.createFunction(
 );
 
 export const sendWeeklyDigest = inngest.createFunction(
-  { id: "send-weekly-digest" },
-  { cron: "0 9 * * 1" }, // Every Monday at 9:00 AM
-  async ({ step }) => {
+  { id: "send-weekly-digest", cron: "0 9 * * 1" } as any, // Every Monday at 9:00 AM
+  async ({ step }: { step: any }) => {
     await step.run("send-emails", async () => {
       // In a real application, we would fetch users with weeklyDigest = true
       // and send them an email via Resend/SendGrid.
