@@ -39,5 +39,58 @@
         "unknown": "Unknown"
       }
     }
+  },
+  "SystemFlow": {
+    "button": "How does it work?",
+    "title": "How PublishAI Works",
+    "subtitle": "Complete pipeline from upload to publication",
+    "replay": "Replay",
+    "complete": "Paper ready for publication! 🎉",
+    "steps": {
+      "upload": {
+        "title": "Upload Paper",
+        "desc": "Upload your raw academic paper in Word or PDF format via drag & drop. The system extracts the text and prepares it for processing."
+      },
+      "clarification": {
+        "title": "Clarification Agent",
+        "desc": "An AI agent analyzes your paper and identifies the topic, field, and structure. It asks short questions about the target journal requirements."
+      },
+      "planning": {
+        "title": "Planning Agent",
+        "desc": "An advanced AI agent (Opus) reviews the entire paper and creates a detailed revision plan — identifying weaknesses, setting goals, and outlining the workflow."
+      },
+      "knowledge": {
+        "title": "Knowledge & References Agent",
+        "desc": "Automatic search across PubMed, Semantic Scholar, and arXiv to find relevant sources, fill in missing references, and update the bibliography."
+      },
+      "review": {
+        "title": "Scientific Review Agent",
+        "desc": "Internal peer review — the agent identifies logical flaws, methodological issues, data contradictions, and suggests evidence-based improvements."
+      },
+      "writing": {
+        "title": "Academic Writing Agent",
+        "desc": "Professional rewriting in precise academic language, removal of AI markers, adaptation to the target journal's style, while preserving the author's voice."
+      },
+      "execution": {
+        "title": "Execution Agent",
+        "desc": "Physical implementation of all changes in the text — the agent applies all corrections and edits in Track Changes format so you can approve each change."
+      },
+      "qa": {
+        "title": "Quality Assurance Agent",
+        "desc": "Final check for consistency, spelling and grammar errors, table and figure references, correct numbering, and compliance with journal format."
+      },
+      "verification": {
+        "title": "Verification Agent",
+        "desc": "Generates a simulated peer review report and a professional cover letter for journal submission."
+      },
+      "compilation": {
+        "title": "Compilation Agent",
+        "desc": "Merges all changes back into the original file format (Word/PDF) while fully preserving formatting, fonts, page numbers, and headers."
+      },
+      "export": {
+        "title": "Export & Publish",
+        "desc": "Download the finalized paper in Word/PDF format, along with a cover letter, simulated review report, and a summary of all changes made."
+      }
+    }
   }
 }

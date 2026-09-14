@@ -1,5 +1,6 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import UploadZone from "@/components/dashboard/UploadZone";
+import SystemExplainButton from "@/components/dashboard/SystemExplainButton";
 import { FileText, Clock, CheckCircle } from "lucide-react";
 import { db } from "@/db";
 import { papers, journals } from "@/db/schema";
@@ -95,8 +96,13 @@ export default async function Home({
   return (
     <DashboardLayout isAdmin={isAdmin}>
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">{t("title")}</h1>
-        <p className="text-slate-600">{t("subtitle")}</p>
+        <div className="flex items-start justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-800 mb-2">{t("title")}</h1>
+            <p className="text-slate-600">{t("subtitle")}</p>
+          </div>
+          <SystemExplainButton />
+        </div>
       </header>
 
       {/* Stats row */}
