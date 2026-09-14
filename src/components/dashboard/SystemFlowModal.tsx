@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   X,
   MessageSquareText,
@@ -179,6 +179,8 @@ export default function SystemFlowModal({
   onClose: () => void;
 }) {
   const t = useTranslations("SystemFlow");
+  const locale = useLocale();
+  const isRtl = locale === "he";
 
   // State
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
@@ -487,10 +489,14 @@ export default function SystemFlowModal({
           {/* Step counter */}
           <div className="mt-2 flex items-center justify-between text-xs text-blue-200">
             <div className="text-white/80 text-sm font-medium">
-              <span dir="ltr">
+              <span>
                 {currentStepIndex >= 0
-                  ? `${Math.min(currentStepIndex + 1, FLOW_STEPS.length)} / ${FLOW_STEPS.length}`
-                  : `0 / ${FLOW_STEPS.length}`}
+                  ? (isRtl 
+                    ? `${FLOW_STEPS.length} מתוך ${Math.min(currentStepIndex + 1, FLOW_STEPS.length)}` 
+                    : `${Math.min(currentStepIndex + 1, FLOW_STEPS.length)} / ${FLOW_STEPS.length}`)
+                  : (isRtl 
+                    ? `${FLOW_STEPS.length} מתוך 0` 
+                    : `0 / ${FLOW_STEPS.length}`)}
               </span>
             </div>
             {isPaused && (
