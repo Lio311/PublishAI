@@ -673,6 +673,7 @@ export default function SystemFlowModal({
               <span className="font-bold text-xl text-green-700">{t("complete")}</span>
               <span className="text-sm text-green-600/80">{t("subtitle")}</span>
             </div>
+            </div>
           )}
 
           {/* Extra bottom padding so last items can scroll into view */}

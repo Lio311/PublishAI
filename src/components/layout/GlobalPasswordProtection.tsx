@@ -40,8 +40,8 @@ export default function GlobalPasswordProtection({ children }: { children: React
 
     const handleMouseMove = (e: React.MouseEvent) => {
         const { clientX, clientY } = e;
-        const moveX = (clientX - window.innerWidth / 2) * 0.1;
-        const moveY = (clientY - window.innerHeight / 2) * 0.1;
+        const moveX = (clientX - window.innerWidth / 2) * 0.4;
+        const moveY = (clientY - window.innerHeight / 2) * 0.4;
         mouseX.set(moveX);
         mouseY.set(moveY);
     };

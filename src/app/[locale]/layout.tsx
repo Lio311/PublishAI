@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Open_Sans } from "next/font/google";
 import "../globals.css";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
@@ -7,7 +7,7 @@ import { routing } from '@/i18n/routing';
 import { notFound } from 'next/navigation';
 import GlobalPasswordProtection from '@/components/layout/GlobalPasswordProtection';
 
-const inter = Inter({ subsets: ["latin"] });
+const openSans = Open_Sans({ subsets: ["latin", "hebrew"] });
 
 export const metadata: Metadata = {
   title: "PublishAI - Automated Academic Paper Revision",
@@ -36,7 +36,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} dir={dir}>
-      <body className={`${inter.className} bg-gray-50 min-h-screen text-slate-900`}>
+      <body className={`${openSans.className} bg-gray-50 min-h-screen text-slate-900`}>
         <NextIntlClientProvider messages={messages}>
           <GlobalPasswordProtection>
             {children}
