@@ -3,6 +3,8 @@
 import { useState } from "react";
 import DiffEditor from "./DiffEditor";
 import ReviewPanel from "./ReviewPanel";
+import { ReviewerCommentsModal } from "./ReviewerCommentsModal";
+import { toast } from "sonner";
 import { FileDown, GitMerge, FileCheck2, Send } from "lucide-react";
 
 interface ArtifactDashboardProps {
@@ -17,6 +19,20 @@ type Tab = "diff" | "review" | "export";
 
 export default function ArtifactDashboard({ paperId, originalText, modifiedText, peerReviewReport, onApproveAll }: ArtifactDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>("diff");
+  const [isReviewerModalOpen, setIsReviewerModalOpen] = useState(false);
+
+  const handleReviewerCommentsSubmit = async (comments: string) => {
+    try {
+      const res = await fetch("/api/papers/reviewer-comments", { 
+        method: "POST", 
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify({ paperId, comments }) 
+      });
+      if(res.ok) toast.success("Reviewer comments submitted. AI is working on a rebuttal strategy.");
+      else toast.error("Failed to submit comments.");
+    } catch(e) { toast.error("Error submitting comments."); }
+  };
+
 
   return (
     <div className="flex flex-col h-[800px] bg-white rounded-xl shadow-sm border border-slate-200">
@@ -84,13 +100,21 @@ export default function ArtifactDashboard({ paperId, originalText, modifiedText,
               <button className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50">
                 <FileDown className="w-5 h-5" /> Download PDF
               </button>
-              <button className="flex items-center gap-2 px-6 py-3 bg-indigo-600 rounded-lg text-white font-medium hover:bg-indigo-700">
+              
+            <button 
+              onClick={() => setIsReviewerModalOpen(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-purple-600 rounded-lg text-white font-medium hover:bg-purple-700 ml-2">
+              <FileDown className="w-4 h-4" /> {/* Or a message icon */}
+              Submit Reviewer Comments
+            </button>
+            <button className="flex items-center gap-2 px-6 py-3 bg-indigo-600 rounded-lg text-white font-medium hover:bg-indigo-700 ml-2">
                 <Send className="w-5 h-5" /> Auto-Submit to Journal
               </button>
             </div>
           </div>
         )}
       </div>
+      <ReviewerCommentsModal paperId={Number(paperId)} isOpen={isReviewerModalOpen} onClose={() => setIsReviewerModalOpen(false)} onSubmit={handleReviewerCommentsSubmit} />
     </div>
   );
 }
