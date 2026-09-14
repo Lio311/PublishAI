@@ -250,7 +250,6 @@ export default function SystemFlowModal({
       setIsPaused(false);
       clearTimer();
 
-      // Start the sequence after initial delay
       timerRef.current = setTimeout(() => {
         setCurrentStepIndex(0);
         setAnimPhase("appearing");
@@ -352,13 +351,21 @@ export default function SystemFlowModal({
 
   // Resume from pause: re-enter the state machine
   useEffect(() => {
-    if (!isPaused && isOpen && currentStepIndex >= 0 && animPhase !== "idle") {
-      // Force a re-trigger by setting the phase again
-      const currentPhase = animPhase;
-      setAnimPhase("idle");
-      requestAnimationFrame(() => {
-        setAnimPhase(currentPhase);
-      });
+    if (!isPaused && isOpen) {
+      if (currentStepIndex === -1) {
+        // Resumed before it even started
+        timerRef.current = setTimeout(() => {
+          setCurrentStepIndex(0);
+          setAnimPhase("appearing");
+        }, INITIAL_DELAY);
+      } else if (currentStepIndex >= 0 && animPhase !== "idle") {
+        // Force a re-trigger by setting the phase again
+        const currentPhase = animPhase;
+        setAnimPhase("idle");
+        requestAnimationFrame(() => {
+          setAnimPhase(currentPhase);
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPaused]);
@@ -691,6 +698,19 @@ export default function SystemFlowModal({
             opacity: 1;
             transform: scale(1) translateY(0);
           }
+        }
+        @keyframes stepSlideIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        .animate-step-in {
+          animation: stepSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
       `}</style>
     </div>
