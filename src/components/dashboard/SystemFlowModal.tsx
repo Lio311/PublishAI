@@ -228,6 +228,26 @@ export default function SystemFlowModal({
 
   
 
+
+  // Block user scroll on the container during animation
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !isOpen || isFinished || isPaused) return;
+
+    const blockScroll = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    container.addEventListener("wheel", blockScroll, { passive: false });
+    container.addEventListener("touchmove", blockScroll, { passive: false });
+
+    return () => {
+      container.removeEventListener("wheel", blockScroll);
+      container.removeEventListener("touchmove", blockScroll);
+    };
+  }, [isOpen, isFinished, isPaused]);
+
   // Reset state when opening
   useEffect(() => {
     if (isOpen) {
@@ -245,6 +265,9 @@ export default function SystemFlowModal({
         setCompletedSteps(new Set(FLOW_STEPS.map((_, i) => i)));
       } else {
         // Start animation from beginning
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('publishAiHasSeenFlow', 'true');
+        }
         setCurrentStepIndex(-1);
         setAnimPhase("idle");
         setCompletedSteps(new Set());
