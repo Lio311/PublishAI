@@ -1,25 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { motion, useMotionValue, useTransform, animate, useSpring } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { Delete } from 'lucide-react';
 import Image from 'next/image';
 
 export default function GlobalPasswordProtection({ children }: { children: React.ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-    const [token, setToken] = useState('');
-    const [authError, setAuthError] = useState<string | false>(false);
+    const [pin, setPin] = useState('');
+    const [pinError, setPinError] = useState(false);
     const [isAuthLoading, setIsAuthLoading] = useState(false);
-    
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [containerWidth, setContainerWidth] = useState(0);
-
-    const x = useMotionValue(0);
-    const background = useTransform(
-        x,
-        [0, containerWidth > 0 ? containerWidth - 56 : 0],
-        ['rgba(0, 0, 0, 0.02)', 'rgba(0, 0, 0, 0.1)']
-    );
+    const [shake, setShake] = useState(false);
 
     // Mouse parallax effects for background blobs
     const mouseX = useMotionValue(0);
@@ -59,44 +50,40 @@ export default function GlobalPasswordProtection({ children }: { children: React
         }
     }, []);
 
-    useEffect(() => {
-        if (!isAuthenticated && containerRef.current) {
-            setContainerWidth(containerRef.current.offsetWidth);
-        }
-    }, [isAuthenticated]);
-
-    const handleLogin = async () => {
-        if (isAuthLoading || token.length < 1) return;
-        setAuthError(false);
+    const verifyPin = async (currentPin: string) => {
+        if (isAuthLoading) return;
         setIsAuthLoading(true);
-
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        if (token === 'חבוב') {
+        
+        await new Promise(resolve => setTimeout(resolve, 400));
+        
+        if (currentPin === '3197') {
             localStorage.setItem('publishai_global_auth_time', new Date().getTime().toString());
             setIsAuthenticated(true);
         } else {
-            setAuthError('סיסמה שגויה');
-            setToken('');
-            animate(x, 0, { type: 'spring', bounce: 0.2 });
+            setPinError(true);
+            setShake(true);
+            setTimeout(() => {
+                setShake(false);
+                setPin('');
+                setPinError(false);
+            }, 400);
         }
         setIsAuthLoading(false);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        handleLogin();
+    const handleKeyPress = (num: string) => {
+        if (pin.length < 4 && !isAuthLoading && !pinError) {
+            const newPin = pin + num;
+            setPin(newPin);
+            if (newPin.length === 4) {
+                verifyPin(newPin);
+            }
+        }
     };
 
-    const disabled = isAuthLoading || token.length < 1;
-
-    const handleDragEnd = () => {
-        if (x.get() > containerWidth * 0.55 && !disabled) {
-            handleLogin();
-            animate(x, containerWidth - 56, { type: 'spring', bounce: 0, duration: 0.3 });
-        } else {
-            animate(x, 0, { type: 'spring', bounce: 0.2, duration: 0.4 });
-        }
+    const handleDelete = () => {
+        if (isAuthLoading || pinError) return;
+        setPin(prev => prev.slice(0, -1));
     };
 
     if (isAuthenticated === null) return null;
@@ -168,53 +155,54 @@ export default function GlobalPasswordProtection({ children }: { children: React
                             
                             <p className="text-slate-600 font-medium text-sm mb-8 tracking-widest text-center w-full block uppercase">אזור מאובטח</p>
 
-                            <form onSubmit={handleSubmit} className="w-full">
-                                <div className="relative mb-6" dir="rtl">
-                                    <input
-                                        type="password"
-                                        value={token}
-                                        onChange={(e) => {
-                                            setToken(e.target.value);
-                                            setAuthError(false);
-                                            animate(x, 0, { type: 'spring', bounce: 0.2 });
-                                        }}
-                                        className={`w-full bg-slate-50 border text-center text-xl tracking-wider font-mono ${authError ? 'border-red-300 focus:border-red-400' : 'border-slate-200 focus:border-slate-300'} rounded-xl py-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 ${authError ? 'focus:ring-red-100' : 'focus:ring-slate-100'} transition-all duration-300`}
-                                        placeholder="סיסמה"
-                                        disabled={isAuthLoading}
-                                        autoFocus
-                                    />
-                                    {authError && <p className="text-red-500 text-sm mt-2 text-center">{authError}</p>}
-                                </div>
+                            <div className="w-full flex flex-col items-center">
+                                {/* PIN Dots */}
+                                <motion.div 
+                                    animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
+                                    transition={{ duration: 0.4 }}
+                                    className="flex gap-6 mb-8 mt-2 justify-center"
+                                    dir="ltr"
+                                >
+                                    {[0, 1, 2, 3].map(i => (
+                                        <div 
+                                            key={i} 
+                                            className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${
+                                                pinError ? 'border-red-400 bg-red-400' :
+                                                i < pin.length ? 'border-slate-800 bg-slate-800' : 'border-slate-300 bg-transparent'
+                                            }`} 
+                                        />
+                                    ))}
+                                </motion.div>
 
-                                <div dir="ltr" ref={containerRef} className="relative w-full h-14 bg-slate-50 rounded-full overflow-hidden flex items-center justify-center border border-slate-200 mt-4">
-                                    <motion.div style={{ background }} className="absolute inset-0 z-0" />
-                                    <span className="text-slate-400 font-medium z-0 select-none text-sm tracking-wider uppercase">
-                                        {isAuthLoading ? 'Unlocking...' : 'Slide to unlock'}
-                                    </span>
-                                    
-                                    {!isAuthLoading && (
-                                        <motion.div
-                                            drag={disabled ? false : "x"}
-                                            dragConstraints={{ left: 0, right: containerWidth > 0 ? containerWidth - 56 : 0 }}
-                                            dragElastic={0.05}
-                                            onDragEnd={handleDragEnd}
-                                            style={{ x }}
-                                            className={`absolute left-1 w-12 h-12 bg-white rounded-full z-10 flex items-center justify-center shadow-md border border-slate-100 ${disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'}`}
+                                {/* Keypad */}
+                                <div className="grid grid-cols-3 gap-x-8 gap-y-6 w-full max-w-[280px]" dir="ltr">
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                                        <button
+                                            key={num}
+                                            onClick={() => handleKeyPress(num.toString())}
+                                            disabled={isAuthLoading}
+                                            className="w-16 h-16 rounded-full bg-slate-50/50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-2xl font-medium text-slate-800 transition-colors active:bg-slate-200 disabled:opacity-50"
                                         >
-                                            <ChevronRight className="w-5 h-5 text-slate-800" />
-                                        </motion.div>
-                                    )}
-                                    {isAuthLoading && (
-                                        <div className="absolute right-1 w-12 h-12 bg-white rounded-full z-10 flex items-center justify-center shadow-md border border-slate-100">
-                                            <motion.div
-                                                animate={{ rotate: 360 }}
-                                                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                                                className="w-5 h-5 border-2 border-slate-200 border-t-slate-800 rounded-full"
-                                            />
-                                        </div>
-                                    )}
+                                            {num}
+                                        </button>
+                                    ))}
+                                    <div></div>
+                                    <button
+                                        onClick={() => handleKeyPress('0')}
+                                        disabled={isAuthLoading}
+                                        className="w-16 h-16 rounded-full bg-slate-50/50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-2xl font-medium text-slate-800 transition-colors active:bg-slate-200 disabled:opacity-50"
+                                    >
+                                        0
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        disabled={isAuthLoading || pin.length === 0}
+                                        className="w-16 h-16 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors active:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                                    >
+                                        <Delete className="w-6 h-6" />
+                                    </button>
                                 </div>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 </motion.div>
