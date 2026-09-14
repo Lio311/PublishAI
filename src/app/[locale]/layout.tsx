@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { notFound } from 'next/navigation';
+import GlobalPasswordProtection from '@/components/layout/GlobalPasswordProtection';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,7 +38,9 @@ export default async function RootLayout({
     <html lang={locale} dir={dir}>
       <body className={`${inter.className} bg-gray-50 min-h-screen text-slate-900`}>
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <GlobalPasswordProtection>
+            {children}
+          </GlobalPasswordProtection>
         </NextIntlClientProvider>
       </body>
     </html>

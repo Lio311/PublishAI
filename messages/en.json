@@ -6,7 +6,7 @@
     "logout": "Logout"
   },
   "Dashboard": {
-    "title": "Welcome to PublishAI 👋",
+    "title": "Welcome to PublishAI",
     "subtitle": "Upload a paper to begin the academic revision and editing process for publication.",
     "stats": {
       "inProgress": "In Progress",
@@ -46,7 +46,7 @@
     "subtitle": "Complete pipeline from upload to publication",
     "replay": "Replay",
     "paused": "Paused",
-    "complete": "Paper ready for publication! 🎉",
+    "complete": "Paper ready for publication",
     "steps": {
       "upload": {
         "title": "Upload Paper",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Info } from "lucide-react";
 import { useTranslations } from "next-intl";
 import SystemFlowModal from "./SystemFlowModal";
 
@@ -27,11 +27,9 @@ export default function SystemExplainButton() {
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
           translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-out" />
         
-        {/* Sparkle icon with animation */}
+        {/* Icon */}
         <div className="relative">
-          <Sparkles className="w-5 h-5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
-          {/* Glow dot */}
-          <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-amber-300 rounded-full animate-pulse" />
+          <Info className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
         </div>
 
         <span className="relative">{t("button")}</span>

@@ -15,7 +15,8 @@ import {
   Package,
   Upload,
   Download,
-  Sparkles,
+  Workflow,
+  CircleCheckBig,
   ArrowRight,
   RotateCcw,
   Pause,
@@ -420,7 +421,7 @@ export default function SystemFlowModal({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                <Sparkles className="w-6 h-6 text-white" />
+                <Workflow className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-white">{t("title")}</h2>
@@ -433,7 +434,7 @@ export default function SystemFlowModal({
                 <button
                   onClick={handlePauseResume}
                   className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 group"
-                  title={isPaused ? "▶ Resume" : "⏸ Pause"}
+                  title={isPaused ? "Resume" : "Pause"}
                 >
                   {isPaused ? (
                     <Play className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
@@ -477,7 +478,7 @@ export default function SystemFlowModal({
             </span>
             {isPaused && (
               <span className="flex items-center gap-1 text-amber-200 font-medium animate-pulse">
-                ⏸ {t("paused")}
+                {t("paused")}
               </span>
             )}
           </div>
@@ -664,10 +665,7 @@ export default function SystemFlowModal({
           >
             <div className="inline-flex flex-col items-center gap-3 px-8 py-6 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 border-2 border-green-200 rounded-3xl shadow-lg shadow-green-100/50">
               <div className="relative">
-                <Sparkles className="w-8 h-8 text-green-600" />
-                <div className="absolute inset-0 animate-ping opacity-30">
-                  <Sparkles className="w-8 h-8 text-green-400" />
-                </div>
+                <CircleCheckBig className="w-8 h-8 text-green-600" />
               </div>
               <span className="font-bold text-xl text-green-700">{t("complete")}</span>
               <span className="text-sm text-green-600/80">{t("subtitle")}</span>
