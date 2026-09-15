@@ -17,7 +17,7 @@ describe('debateService', () => {
 
   describe('initializeDebate', () => {
     it('initializes a debate and agents', async () => {
-      const mockInsertReturning = jest.fn().mockResolvedValue([{ id: 'debate-123' }]);
+      const mockInsertReturning = jest.fn().mockReturnValue({ returning: jest.fn().mockResolvedValue([{ id: 'debate-123' }]) });
       (db.insert as jest.Mock).mockReturnValue({
         values: mockInsertReturning
       });
@@ -31,7 +31,7 @@ describe('debateService', () => {
 
   describe('addDebateMessage', () => {
     it('adds a message to the debate', async () => {
-      const mockInsertReturning = jest.fn().mockResolvedValue([{ id: 'msg-1' }]);
+      const mockInsertReturning = jest.fn().mockReturnValue({ returning: jest.fn().mockResolvedValue([{ id: 'msg-1' }]) });
       (db.insert as jest.Mock).mockReturnValue({
         values: mockInsertReturning
       });

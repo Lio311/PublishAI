@@ -2,11 +2,14 @@ import { extractFiguresFromDocument, analyzeFigureWithVisionAi, suggestImprovedL
 import Anthropic from '@anthropic-ai/sdk';
 
 jest.mock('@anthropic-ai/sdk', () => {
-  return jest.fn().mockImplementation(() => ({
+  const mCreate = jest.fn();
+  const mockAnthropic = jest.fn().mockImplementation(() => ({
     messages: {
-      create: jest.fn()
+      create: mCreate
     }
   }));
+  (mockAnthropic as any).mockCreate = mCreate;
+  return mockAnthropic;
 });
 
 jest.mock('@/db', () => ({
@@ -14,11 +17,11 @@ jest.mock('@/db', () => ({
 }));
 
 describe('visionAiService', () => {
-  let anthropicMock: any;
+  let mockCreate: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    anthropicMock = new Anthropic();
+    mockCreate = (Anthropic as any).mockCreate;
   });
 
   describe('extractFiguresFromDocument', () => {
@@ -38,7 +41,7 @@ describe('visionAiService', () => {
         issuesFound: ['none']
       };
 
-      anthropicMock.messages.create.mockResolvedValue({
+      mockCreate.mockResolvedValue({
         content: [{ text: JSON.stringify(mockParsed) }]
       });
 
@@ -47,11 +50,11 @@ describe('visionAiService', () => {
       expect(result.legendAccuracyScore).toBe(90);
       expect(result.claimVerificationStatus).toBe('verified');
       expect(result.suggestedLegend).toBe('Better legend');
-      expect(anthropicMock.messages.create).toHaveBeenCalled();
+      expect(mockCreate).toHaveBeenCalled();
     });
 
     it('throws error if parsing fails', async () => {
-      anthropicMock.messages.create.mockRejectedValue(new Error('API error'));
+      mockCreate.mockRejectedValue(new Error('API error'));
 
       await expect(analyzeFigureWithVisionAi('imgUrl', 'legend', ['claim1']))
         .rejects.toThrow('Failed to analyze figure');
@@ -60,7 +63,7 @@ describe('visionAiService', () => {
 
   describe('suggestImprovedLegend', () => {
     it('returns improved legend', async () => {
-      anthropicMock.messages.create.mockResolvedValue({
+      mockCreate.mockResolvedValue({
         content: [{ text: 'Improved legend text' }]
       });
 
@@ -69,7 +72,7 @@ describe('visionAiService', () => {
     });
 
     it('returns current legend on error', async () => {
-      anthropicMock.messages.create.mockRejectedValue(new Error('API error'));
+      mockCreate.mockRejectedValue(new Error('API error'));
 
       const result = await suggestImprovedLegend('imgUrl', 'current', 'context');
       expect(result).toBe('current');
