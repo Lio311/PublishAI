@@ -50,7 +50,7 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
       className="relative w-[280px] m-4 lg:m-6 flex flex-col justify-between rounded-[2rem] bg-white/70 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden z-20"
     >
       {/* Subtle animated gradient background inside sidebar */}
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-50/30 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-sky-50/30 to-transparent pointer-events-none" />
       
       <div className="p-6 relative z-10 flex-1 flex flex-col">
         <div className="flex items-center justify-center mb-10 pt-2">
@@ -80,18 +80,18 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
                 <Link
                   href={item.href}
                   className={`relative flex items-center justify-between px-4 py-3.5 rounded-2xl font-medium transition-colors duration-300 z-10 ${
-                    isActive ? "text-blue-900" : "text-slate-500 hover:text-slate-800"
+                    isActive ? "text-sky-800" : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
                   <div className="flex items-center gap-3.5">
-                    <item.icon className={`w-5 h-5 transition-transform duration-300 ${isActive ? "text-blue-600 scale-110" : "text-slate-400 group-hover:text-slate-600"}`} />
+                    <item.icon className={`w-5 h-5 transition-transform duration-300 ${isActive ? "text-sky-500 scale-110" : "text-slate-400 group-hover:text-slate-600"}`} />
                     <span className="tracking-wide text-[15px]">{item.name}</span>
                   </div>
                   
                   {isActive && (
                     <motion.div
                       layoutId="active-arrow"
-                      className="w-1.5 h-1.5 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.6)]"
+                      className="w-1.5 h-1.5 rounded-full bg-sky-500 shadow-[0_0_8px_rgba(37,99,235,0.6)]"
                     />
                   )}
                 </Link>
@@ -113,7 +113,7 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-active"
-                    className="absolute inset-0 bg-gradient-to-r from-blue-100/80 to-blue-50/30 rounded-2xl border border-blue-200/50 shadow-[inset_0_2px_10px_rgba(255,255,255,1)] z-0"
+                    className="absolute inset-0 bg-gradient-to-r from-sky-100/80 to-sky-50/30 rounded-2xl border border-sky-200/50 shadow-[inset_0_2px_10px_rgba(255,255,255,1)] z-0"
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 )}
@@ -131,7 +131,7 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
             className="flex w-full items-center justify-between px-4 py-3 rounded-xl font-medium text-slate-600 hover:bg-white hover:shadow-sm transition-all duration-300 group"
           >
             <div className="flex items-center gap-3">
-              <div className="p-1.5 rounded-lg bg-slate-200/50 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+              <div className="p-1.5 rounded-lg bg-slate-200/50 group-hover:bg-sky-100 group-hover:text-sky-500 transition-colors">
                 <Globe className="w-4 h-4" />
               </div>
               <span className="text-[14px]">{locale === 'he' ? 'English' : 'עברית'}</span>
@@ -155,10 +155,10 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
           ) : (
             <button 
               onClick={() => signIn()} 
-              className="flex w-full items-center justify-between px-4 py-3 rounded-xl font-medium text-slate-600 hover:bg-white hover:text-blue-700 hover:shadow-sm transition-all duration-300 group"
+              className="flex w-full items-center justify-between px-4 py-3 rounded-xl font-medium text-slate-600 hover:bg-white hover:text-sky-600 hover:shadow-sm transition-all duration-300 group"
             >
               <div className="flex items-center gap-3">
-                <div className="p-1.5 rounded-lg bg-slate-200/50 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                <div className="p-1.5 rounded-lg bg-slate-200/50 group-hover:bg-sky-100 group-hover:text-sky-500 transition-colors">
                   <LogOut className="w-4 h-4" />
                 </div>
                 <span className="text-[14px]">{locale === 'he' ? 'התחבר' : 'Login'}</span>

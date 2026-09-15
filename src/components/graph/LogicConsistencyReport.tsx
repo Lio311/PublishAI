@@ -40,7 +40,7 @@ export default function LogicConsistencyReport({ paperId }: { paperId: number })
       <button 
         onClick={handleCheck}
         disabled={loading || !claimsInput}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+        className="px-4 py-2 bg-sky-500 text-white rounded hover:bg-sky-600 disabled:opacity-50"
       >
         {loading ? "Checking..." : "Run Logic Check"}
       </button>

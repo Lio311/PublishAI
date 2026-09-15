@@ -18,7 +18,7 @@ export default function SystemExplainButton() {
         whileTap={{ scale: 0.98 }}
         className="group relative inline-flex items-center gap-3 px-7 py-4 
           bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300
-          hover:from-blue-500 hover:via-sky-500 hover:to-sky-400
+          hover:from-sky-500 hover:via-sky-500 hover:to-sky-400
           text-white font-bold text-base rounded-2xl 
           shadow-[0_8px_30px_rgba(56,189,248,0.25)]
           hover:shadow-[0_12px_40px_rgba(56,189,248,0.35)]

@@ -69,7 +69,7 @@ export default async function Home({
       case "pending":
       case "in_progress":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-blue-800">
             {t("recentPapers.status.in_progress")}
           </span>
         );
@@ -116,8 +116,8 @@ export default async function Home({
       {/* Stats row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="bg-blue-100 p-3 rounded-lg">
-            <FileText className="w-6 h-6 text-blue-600" />
+          <div className="bg-sky-100 p-3 rounded-lg">
+            <FileText className="w-6 h-6 text-sky-500" />
           </div>
           <div>
             <p className="text-sm font-medium text-slate-500">{t("stats.inProgress")}</p>

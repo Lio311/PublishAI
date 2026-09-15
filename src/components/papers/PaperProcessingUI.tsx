@@ -93,10 +93,10 @@ const FLOW_STEPS: FlowStep[] = [
     icon: Play,
     titleKey: "steps.execution.title",
     descKey: "steps.execution.desc",
-    color: "text-indigo-700",
-    bgColor: "bg-indigo-50",
-    borderColor: "border-indigo-300",
-    glowColor: "shadow-indigo-200/60",
+    color: "text-sky-600",
+    bgColor: "bg-sky-50",
+    borderColor: "border-blue-300",
+    glowColor: "shadow-sky-200/60",
     model: "Opus",
   },
   {
@@ -137,10 +137,10 @@ const FLOW_STEPS: FlowStep[] = [
     icon: Download,
     titleKey: "steps.export.title",
     descKey: "steps.export.desc",
-    color: "text-blue-700",
-    bgColor: "bg-blue-50",
+    color: "text-sky-600",
+    bgColor: "bg-sky-50",
     borderColor: "border-blue-300",
-    glowColor: "shadow-blue-200/60",
+    glowColor: "shadow-sky-200/60",
     model: "",
   },
 ];
@@ -180,7 +180,7 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
   return (
     <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] p-8 border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] relative overflow-hidden">
       {/* Subtle background glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-sky-50/50 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-sky-50/50 via-transparent to-sky-50/50 pointer-events-none" />
       <h2 className="text-2xl font-bold mb-8 text-slate-800">{t("workingProcess")}</h2>
       
       <div className="flex flex-col gap-6 relative before:absolute before:inset-0 before:ml-[2.25rem] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-slate-200 before:via-slate-200 before:to-transparent">
@@ -204,7 +204,7 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
                 {isCompleted ? (
                   <CheckCircle className="w-5 h-5 text-green-500" />
                 ) : isCurrent ? (
-                  <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                  <Loader2 className="w-5 h-5 text-sky-500 animate-spin" />
                 ) : (
                   <Icon className="w-5 h-5 text-slate-400" />
                 )}
@@ -212,13 +212,13 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
               
               <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden backdrop-blur-md
                 ${isCurrent 
-                  ? 'bg-blue-50/80 border-blue-300 shadow-[0_8px_24px_rgba(59,130,246,0.12)] scale-[1.02]' 
+                  ? 'bg-sky-50/80 border-blue-300 shadow-[0_8px_24px_rgba(59,130,246,0.12)] scale-[1.02]' 
                   : 'bg-white/40 border-white/60 hover:bg-white/60 shadow-[0_2px_12px_rgba(0,0,0,0.02)]'}`}>
                 <div className="flex items-center gap-3 mb-2">
                   <div className={`p-2 rounded-lg ${step.bgColor}`}>
                     <Icon className={`w-5 h-5 ${isCurrent ? step.color : 'text-slate-500'}`} />
                   </div>
-                  <h3 className={`font-bold text-lg ${isCurrent ? 'text-blue-900' : 'text-slate-700'}`}>
+                  <h3 className={`font-bold text-lg ${isCurrent ? 'text-sky-800' : 'text-slate-700'}`}>
                     {t(step.titleKey)}
                   </h3>
                 </div>
@@ -228,7 +228,7 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
                 </p>
 
                 {isCurrent && (
-                  <div className="mt-4 flex items-center gap-2 text-sm text-blue-600 bg-blue-100/50 p-2 rounded-lg">
+                  <div className="mt-4 flex items-center gap-2 text-sm text-sky-500 bg-sky-100/50 p-2 rounded-lg">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>{t("agentWorking")}</span>
                   </div>

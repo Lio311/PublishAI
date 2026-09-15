@@ -9,8 +9,8 @@ interface ReviewPanelProps {
 }
 
 export default function ReviewPanel({ title, content, type = "review" }: ReviewPanelProps) {
-  const bgColor = type === "warning" ? "bg-amber-50" : type === "success" ? "bg-emerald-50" : "bg-blue-50";
-  const iconColor = type === "warning" ? "text-amber-600" : type === "success" ? "text-emerald-600" : "text-blue-600";
+  const bgColor = type === "warning" ? "bg-amber-50" : type === "success" ? "bg-emerald-50" : "bg-sky-50";
+  const iconColor = type === "warning" ? "text-amber-600" : type === "success" ? "text-emerald-600" : "text-sky-500";
   const Icon = type === "warning" ? AlertTriangle : type === "success" ? CheckCircle2 : FileText;
 
   return (

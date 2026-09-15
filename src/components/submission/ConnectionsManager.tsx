@@ -48,7 +48,7 @@ export function ConnectionsManager() {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-indigo-600" /></div>;
+    return <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-sky-500" /></div>;
   }
 
   if (step === "briefing") {
@@ -66,12 +66,12 @@ export function ConnectionsManager() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-slate-800">{t("panel.myConnections")}</h2>
           <div className="flex items-center gap-2">
-            <button onClick={fetchData} className="text-slate-400 hover:text-indigo-600 p-2" title="Refresh">
+            <button onClick={fetchData} className="text-slate-400 hover:text-sky-500 p-2" title="Refresh">
               <RefreshCw className="w-5 h-5" />
             </button>
             <button 
               onClick={handleStartNewConnection}
-              className="px-4 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 transition-colors"
+              className="px-4 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 transition-colors"
             >
               {t("panel.addNewConnection")}
             </button>
@@ -81,14 +81,14 @@ export function ConnectionsManager() {
         {connections.length === 0 ? (
           <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
             <p className="mb-4">{isHe ? "עדיין אין לך חיבורים לעיתונים." : "You don't have any journal connections yet."}</p>
-            <button onClick={handleStartNewConnection} className="text-indigo-600 font-medium hover:underline">
+            <button onClick={handleStartNewConnection} className="text-sky-500 font-medium hover:underline">
               {isHe ? "הוסף חיבור ראשון" : "Add your first connection"}
             </button>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {connections.map(conn => (
-              <div key={conn.id} className="p-5 border border-slate-200 rounded-xl hover:border-indigo-200 hover:shadow-md transition-all">
+              <div key={conn.id} className="p-5 border border-slate-200 rounded-xl hover:border-sky-200 hover:shadow-md transition-all">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-semibold text-lg text-slate-800">{conn.displayName || conn.siteUrl}</h3>
                   <span className="text-xs font-medium px-2 py-1 bg-slate-100 text-slate-600 rounded-md capitalize">
@@ -125,7 +125,7 @@ export function ConnectionsManager() {
                   <div className="mt-1">
                     {sub.status === 'submitted' && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
                     {sub.status === 'failed' && <AlertCircle className="w-5 h-5 text-rose-500" />}
-                    {['preparing', 'submitting'].includes(sub.status) && <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />}
+                    {['preparing', 'submitting'].includes(sub.status) && <Loader2 className="w-5 h-5 text-sky-500 animate-spin" />}
                   </div>
                   <div>
                     <div className="font-semibold text-slate-800">{sub.submittedTitle || `Paper #${sub.paperId}`}</div>
@@ -134,7 +134,7 @@ export function ConnectionsManager() {
                       <span>•</span>
                       <span>{new Date(sub.createdAt).toLocaleString()}</span>
                       <span>•</span>
-                      <span className="capitalize text-indigo-600">{isHe ? "מצב:" : "Mode:"} {sub.publishMode}</span>
+                      <span className="capitalize text-sky-500">{isHe ? "מצב:" : "Mode:"} {sub.publishMode}</span>
                     </div>
                   </div>
                 </div>
@@ -144,7 +144,7 @@ export function ConnectionsManager() {
                     href={sub.remotePostUrl} 
                     target="_blank" 
                     rel="noreferrer"
-                    className="shrink-0 flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:border-indigo-200 transition-colors"
+                    className="shrink-0 flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-sky-500 hover:text-sky-600 hover:border-sky-200 transition-colors"
                   >
                     {t("panel.viewPost")} <ExternalLink className="w-4 h-4" />
                   </a>

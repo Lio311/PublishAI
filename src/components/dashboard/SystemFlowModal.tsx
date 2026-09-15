@@ -106,10 +106,10 @@ const FLOW_STEPS: FlowStep[] = [
     icon: Play,
     titleKey: "steps.execution.title",
     descKey: "steps.execution.desc",
-    color: "text-indigo-700",
-    bgColor: "bg-indigo-50",
-    borderColor: "border-indigo-300",
-    glowColor: "shadow-indigo-200/60",
+    color: "text-sky-600",
+    bgColor: "bg-sky-50",
+    borderColor: "border-blue-300",
+    glowColor: "shadow-sky-200/60",
     model: "Opus",
   },
   {
@@ -150,10 +150,10 @@ const FLOW_STEPS: FlowStep[] = [
     icon: Download,
     titleKey: "steps.export.title",
     descKey: "steps.export.desc",
-    color: "text-blue-700",
-    bgColor: "bg-blue-50",
+    color: "text-sky-600",
+    bgColor: "bg-sky-50",
     borderColor: "border-blue-300",
-    glowColor: "shadow-blue-200/60",
+    glowColor: "shadow-sky-200/60",
     model: "",
   },
 ];
@@ -443,10 +443,10 @@ export default function SystemFlowModal({
           <div className="flex items-start justify-between relative z-10">
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-900/10 rounded-lg backdrop-blur-sm">
-                  <Workflow className="w-6 h-6 text-blue-900" />
+                <div className="p-2 bg-sky-800/10 rounded-lg backdrop-blur-sm">
+                  <Workflow className="w-6 h-6 text-sky-800" />
                 </div>
-                <h2 className="text-2xl font-bold text-blue-900 tracking-tight">{t("title")}</h2>
+                <h2 className="text-2xl font-bold text-sky-800 tracking-tight">{t("title")}</h2>
               </div>
               <div className="mt-2 text-blue-800 text-sm max-w-lg leading-relaxed opacity-90">
                 <p className="text-blue-800 text-sm mt-0.5">{t("subtitle")}</p>
@@ -457,36 +457,36 @@ export default function SystemFlowModal({
               {!isFinished && currentStepIndex >= 0 && (
                 <button
                   onClick={handlePauseResume}
-                  className="p-2.5 hover:bg-blue-900/10 rounded-xl transition-all duration-200 group"
+                  className="p-2.5 hover:bg-sky-800/10 rounded-xl transition-all duration-200 group"
                   title={isPaused ? "Resume" : "Pause"}
                 >
                   {isPaused ? (
-                    <Play className="w-5 h-5 text-blue-800 group-hover:text-blue-900 transition-colors" />
+                    <Play className="w-5 h-5 text-blue-800 group-hover:text-sky-800 transition-colors" />
                   ) : (
-                    <Pause className="w-5 h-5 text-blue-800 group-hover:text-blue-900 transition-colors" />
+                    <Pause className="w-5 h-5 text-blue-800 group-hover:text-sky-800 transition-colors" />
                   )}
                 </button>
               )}
               <button
                 onClick={handleReplay}
-                className="p-2.5 hover:bg-blue-900/10 rounded-xl transition-all duration-200 group"
+                className="p-2.5 hover:bg-sky-800/10 rounded-xl transition-all duration-200 group"
                 title={t("replay")}
               >
-                <RotateCcw className="w-5 h-5 text-blue-800 group-hover:text-blue-900 transition-colors group-hover:rotate-[-360deg] duration-500" />
+                <RotateCcw className="w-5 h-5 text-blue-800 group-hover:text-sky-800 transition-colors group-hover:rotate-[-360deg] duration-500" />
               </button>
               <button
                 onClick={handleClose}
-                className="p-2.5 hover:bg-blue-900/10 rounded-xl transition-all duration-200 group"
+                className="p-2.5 hover:bg-sky-800/10 rounded-xl transition-all duration-200 group"
               >
-                <X className="w-5 h-5 text-blue-800 group-hover:text-blue-900 transition-colors" />
+                <X className="w-5 h-5 text-blue-800 group-hover:text-sky-800 transition-colors" />
               </button>
             </div>
           </div>
 
           {/* Progress bar */}
-          <div className="mt-4 h-1.5 bg-blue-900/10 rounded-full overflow-hidden">
+          <div className="mt-4 h-1.5 bg-sky-800/10 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-900/60 rounded-full transition-all duration-700 ease-out"
+              className="h-full bg-sky-800/60 rounded-full transition-all duration-700 ease-out"
               style={{
                 width: `${Math.min(progressPercent, 100)}%`,
               }}
@@ -507,7 +507,7 @@ export default function SystemFlowModal({
               </span>
             </div>
             {isPaused && (
-              <span className="flex items-center gap-1 text-blue-900 font-bold animate-pulse">
+              <span className="flex items-center gap-1 text-sky-800 font-bold animate-pulse">
                 {t("paused")}
               </span>
             )}
@@ -689,7 +689,7 @@ export default function SystemFlowModal({
               ref={finishRef}
               className="mt-12 text-center animate-step-in pb-4"
             >
-              <div className="inline-flex flex-col items-center gap-4 px-10 py-8 bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-50 border-2 border-blue-200 rounded-3xl shadow-xl shadow-blue-100/50">
+              <div className="inline-flex flex-col items-center gap-4 px-10 py-8 bg-gradient-to-br from-sky-50 via-sky-50 to-sky-50 border-2 border-sky-200 rounded-3xl shadow-xl shadow-sky-100/50">
                 <div className="relative">
                   <div className="absolute inset-0 bg-sky-400 rounded-full blur-xl opacity-30 animate-pulse" />
                   <div className="relative bg-gradient-to-br from-blue-400 to-sky-400 text-white p-4 rounded-full shadow-lg">
@@ -703,7 +703,7 @@ export default function SystemFlowModal({
 
                 <button
                   onClick={handleClose}
-                  className="mt-4 px-8 py-3 bg-gradient-to-r from-blue-400 to-sky-400 hover:from-blue-500 hover:to-sky-500 text-white font-bold rounded-xl shadow-lg shadow-sky-300/30 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
+                  className="mt-4 px-8 py-3 bg-gradient-to-r from-blue-400 to-sky-400 hover:from-sky-500 hover:to-sky-500 text-white font-bold rounded-xl shadow-lg shadow-sky-300/30 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
                 >
                   <span>{t("startNow")}</span>
                 </button>

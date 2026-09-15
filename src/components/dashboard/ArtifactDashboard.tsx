@@ -42,7 +42,7 @@ export default function ArtifactDashboard({ paperId, originalText, modifiedText,
           onClick={() => setActiveTab("diff")}
           className={`px-5 py-2.5 font-medium rounded-t-xl flex items-center gap-2 transition-all duration-300 ${
             activeTab === "diff" 
-              ? "bg-white/90 text-blue-800 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] mb-[-1px] border-t border-x border-white/60 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-600" 
+              ? "bg-white/90 text-blue-800 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] mb-[-1px] border-t border-x border-white/60 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-sky-500" 
               : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/30"
           }`}
         >
@@ -53,7 +53,7 @@ export default function ArtifactDashboard({ paperId, originalText, modifiedText,
           onClick={() => setActiveTab("review")}
           className={`px-5 py-2.5 font-medium rounded-t-xl flex items-center gap-2 transition-all duration-300 ${
             activeTab === "review" 
-              ? "bg-white/90 text-blue-800 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] mb-[-1px] border-t border-x border-white/60 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-600" 
+              ? "bg-white/90 text-blue-800 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] mb-[-1px] border-t border-x border-white/60 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-sky-500" 
               : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/30"
           }`}
         >
@@ -64,7 +64,7 @@ export default function ArtifactDashboard({ paperId, originalText, modifiedText,
           onClick={() => setActiveTab("export")}
           className={`px-5 py-2.5 font-medium rounded-t-xl flex items-center gap-2 transition-all duration-300 ${
             activeTab === "export" 
-              ? "bg-white/90 text-blue-800 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] mb-[-1px] border-t border-x border-white/60 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-600" 
+              ? "bg-white/90 text-blue-800 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] mb-[-1px] border-t border-x border-white/60 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-sky-500" 
               : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/30"
           }`}
         >
@@ -109,11 +109,11 @@ export default function ArtifactDashboard({ paperId, originalText, modifiedText,
               
             <button 
               onClick={() => setIsReviewerModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 rounded-lg text-white font-medium hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 ml-2">
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 rounded-lg text-white font-medium hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 ml-2">
               <FileDown className="w-4 h-4" /> {/* Or a message icon */}
               Submit Reviewer Comments
             </button>
-            <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 rounded-lg text-white font-medium hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 ml-2">
+            <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 rounded-lg text-white font-medium hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 ml-2">
                 <Send className="w-5 h-5" /> Auto-Submit to Journal
               </button>
             </div>

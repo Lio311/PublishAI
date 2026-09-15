@@ -51,7 +51,7 @@ export default function LegendEditor({ figureId, originalLegend, suggestedLegend
         <textarea
           value={currentLegend}
           onChange={(e) => setCurrentLegend(e.target.value)}
-          className="w-full border rounded p-2 text-sm focus:ring-blue-500 focus:border-blue-500"
+          className="w-full border rounded p-2 text-sm focus:ring-sky-500 focus:border-sky-500"
           rows={4}
         />
       </div>
@@ -67,7 +67,7 @@ export default function LegendEditor({ figureId, originalLegend, suggestedLegend
         <button 
           onClick={handleSave}
           disabled={isSaving}
-          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          className="px-3 py-1 text-sm bg-sky-500 text-white rounded hover:bg-sky-600 disabled:opacity-50"
         >
           {isSaving ? "Saving..." : "Save Legend"}
         </button>

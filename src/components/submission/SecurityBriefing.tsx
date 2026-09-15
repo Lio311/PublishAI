@@ -18,14 +18,14 @@ export function SecurityBriefing({ onAccept, onCancel }: SecurityBriefingProps) 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden max-w-2xl mx-auto">
       <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-3">
-        <Shield className="w-6 h-6 text-indigo-600" />
+        <Shield className="w-6 h-6 text-sky-500" />
         <h2 className="text-xl font-bold text-slate-800">{t("title")}</h2>
       </div>
       
       <div className="p-6 space-y-6 text-slate-600">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-slate-800 font-semibold">
-            <Info className="w-5 h-5 text-blue-500" />
+            <Info className="w-5 h-5 text-sky-500" />
             <h3>{t("whyCredentials")}</h3>
           </div>
           <p className="text-sm pl-7">{t("whyCredentialsDesc")}</p>
@@ -52,10 +52,10 @@ export function SecurityBriefing({ onAccept, onCancel }: SecurityBriefingProps) 
           </ul>
         </div>
 
-        <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm flex gap-3">
-          <AlertTriangle className="w-5 h-5 text-blue-600 shrink-0" />
+        <div className="bg-sky-50 border border-sky-100 rounded-lg p-4 text-sm flex gap-3">
+          <AlertTriangle className="w-5 h-5 text-sky-500 shrink-0" />
           <div>
-            <span className="font-semibold text-blue-900 block mb-1">{isHe ? "סיסמאות יישום (Application Passwords) בוורדפרס" : "WordPress Application Passwords"}</span>
+            <span className="font-semibold text-sky-800 block mb-1">{isHe ? "סיסמאות יישום (Application Passwords) בוורדפרס" : "WordPress Application Passwords"}</span>
             <p className="text-blue-800">
               {isHe ? "עבור אתרי WordPress, מומלץ ליצור Application Password ייעודי במקום להשתמש בסיסמה הראשית שלך. ניתן למצוא זאת תחת Users → Profile." : "For WordPress sites, it is recommended to create a dedicated Application Password instead of using your main password. You can find this under Users → Profile."}
             </p>
@@ -66,7 +66,7 @@ export function SecurityBriefing({ onAccept, onCancel }: SecurityBriefingProps) 
           <label className="flex items-center gap-3 cursor-pointer group">
             <input 
               type="checkbox" 
-              className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-600"
+              className="w-5 h-5 text-sky-500 rounded border-slate-300 focus:ring-sky-500"
               checked={accepted}
               onChange={(e) => setAccepted(e.target.checked)}
             />
@@ -87,7 +87,7 @@ export function SecurityBriefing({ onAccept, onCancel }: SecurityBriefingProps) 
         <button 
           onClick={onAccept}
           disabled={!accepted}
-          className="px-6 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {t("continue")}
         </button>

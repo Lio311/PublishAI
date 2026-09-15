@@ -28,7 +28,7 @@ export default async function JournalsPage({ params }: { params: Promise<{ local
         {allJournals.map(journal => (
           <div key={journal.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
             <div className="p-6 flex-1">
-              <div className="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center mb-4 text-indigo-600">
+              <div className="w-12 h-12 bg-sky-50 rounded-lg flex items-center justify-center mb-4 text-sky-500">
                 <Book className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-semibold text-slate-900 mb-1">{journal.name}</h3>
@@ -55,7 +55,7 @@ export default async function JournalsPage({ params }: { params: Promise<{ local
                   href={journal.instructionsUrl} 
                   target="_blank" 
                   rel="noreferrer"
-                  className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1"
+                  className="text-sky-500 hover:text-sky-600 text-sm font-medium flex items-center gap-1"
                 >
                   {isHe ? 'הוראות למחברים' : 'Instructions for Authors'}
                   <ExternalLink className="w-4 h-4" />

@@ -37,7 +37,7 @@ export function ReviewerCommentsModal({ paperId, isOpen, onClose, onSubmit }: Re
             Paste the feedback received from the journal reviewers below. Our Rebuttal Agent will analyze these comments and propose a "Response to Reviewers" strategy.
           </p>
           <textarea
-            className="w-full h-64 p-4 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+            className="w-full h-64 p-4 border rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 font-mono text-sm"
             placeholder="Reviewer 1:&#10;The methodology section lacks detail regarding the sampling technique...&#10;&#10;Reviewer 2:&#10;Figure 3 is unclear..."
             value={comments}
             onChange={(e) => setComments(e.target.value)}
@@ -55,7 +55,7 @@ export function ReviewerCommentsModal({ paperId, isOpen, onClose, onSubmit }: Re
           <button 
             onClick={handleSubmit}
             disabled={!comments.trim() || isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 rounded-md hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 disabled:opacity-50 flex items-center"
+            className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 rounded-md hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 disabled:opacity-50 flex items-center"
           >
             {isSubmitting ? (
               <>

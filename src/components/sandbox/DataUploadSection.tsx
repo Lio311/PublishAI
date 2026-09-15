@@ -66,7 +66,7 @@ export function DataUploadSection({ paperId }: { paperId: number }) {
       <h3 className="text-lg font-semibold mb-2">Upload Data Files</h3>
       <div 
         className={`border-2 border-dashed p-10 text-center rounded-lg transition-colors ${
-          isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50"
+          isDragging ? "border-sky-500 bg-sky-50" : "border-gray-300 bg-gray-50"
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -77,12 +77,12 @@ export function DataUploadSection({ paperId }: { paperId: number }) {
         <p className="text-gray-600 mb-2">
           Drag and drop your CSV or Excel files here, or click to select
         </p>
-        <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition">
+        <label className="cursor-pointer bg-sky-500 text-white px-4 py-2 rounded shadow hover:bg-sky-600 transition">
           Browse Files
           <input type="file" className="hidden" accept=".csv, .xlsx, .xls" onChange={handleChange} />
         </label>
       </div>
-      {uploading && <p className="mt-2 text-blue-600">Uploading...</p>}
+      {uploading && <p className="mt-2 text-sky-500">Uploading...</p>}
       {message && <p className="mt-2 text-sm font-medium text-gray-800">{message}</p>}
     </div>
   );

@@ -48,7 +48,7 @@ export default function AddJournalButton() {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+        className="bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
       >
         <Plus className="w-5 h-5" />
         {isHe ? 'הוספת עיתון' : 'Add Journal'}
@@ -73,7 +73,7 @@ export default function AddJournalButton() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none"
                     placeholder={isHe ? "לדוגמה: Science" : "e.g. Science"}
                   />
                   {isLoading && (
@@ -96,7 +96,7 @@ export default function AddJournalButton() {
                 <button 
                   type="submit" 
                   disabled={isLoading || !name}
-                  className="px-6 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 transition-colors flex items-center gap-2 disabled:opacity-50"
+                  className="px-6 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 transition-colors flex items-center gap-2 disabled:opacity-50"
                 >
                   {isLoading && <Loader2 className="w-4 h-4 animate-spin hidden" />}
                   {isLoading ? (isHe ? 'שומר...' : 'Saving...') : (isHe ? 'שמור עיתון' : 'Save Journal')}

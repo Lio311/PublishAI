@@ -82,7 +82,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-indigo-600" /></div>;
+    return <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-sky-500" /></div>;
   }
 
   if (step === "briefing") {
@@ -110,7 +110,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
           </button>
           <button 
             onClick={() => handleConfirmSubmit("publish")}
-            className="px-6 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 transition-colors flex items-center gap-2"
+            className="px-6 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 transition-colors flex items-center gap-2"
           >
             <Send className="w-4 h-4" /> {t("confirm.submitForPublishing")}
           </button>
@@ -126,7 +126,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
           <h2 className="text-xl font-bold text-slate-800">{t("panel.myConnections")}</h2>
           <button 
             onClick={handleStartNewConnection}
-            className="px-4 py-2 bg-indigo-50 text-indigo-600 font-medium rounded-lg hover:bg-indigo-100 transition-colors"
+            className="px-4 py-2 bg-sky-50 text-sky-500 font-medium rounded-lg hover:bg-sky-100 transition-colors"
           >
             {t("panel.addNewConnection")}
           </button>
@@ -139,7 +139,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
         ) : (
           <div className="grid gap-4">
             {connections.map(conn => (
-              <div key={conn.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:border-indigo-200 transition-colors">
+              <div key={conn.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:border-sky-200 transition-colors">
                 <div>
                   <h3 className="font-semibold text-slate-800">{conn.displayName || conn.siteUrl}</h3>
                   <div className="text-sm text-slate-500 flex gap-2 mt-1">
@@ -149,7 +149,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
                 </div>
                 <button 
                   onClick={() => handleInitiateSubmission(conn.id)}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 transition-colors flex items-center gap-2"
                 >
                   <Send className="w-4 h-4" /> {t("panel.submitHere")}
                 </button>
@@ -163,7 +163,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-slate-800">{t("panel.submissionHistory")}</h2>
-            <button onClick={fetchSubmissions} className="text-slate-400 hover:text-indigo-600" title="Refresh">
+            <button onClick={fetchSubmissions} className="text-slate-400 hover:text-sky-500" title="Refresh">
               <RefreshCw className="w-5 h-5" />
             </button>
           </div>
@@ -173,7 +173,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
                 <div className="flex items-center gap-3">
                   {sub.status === 'submitted' && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
                   {sub.status === 'failed' && <AlertCircle className="w-5 h-5 text-rose-500" />}
-                  {['preparing', 'submitting'].includes(sub.status) && <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />}
+                  {['preparing', 'submitting'].includes(sub.status) && <Loader2 className="w-5 h-5 text-sky-500 animate-spin" />}
                   
                   <div>
                     <div className="font-medium text-slate-800 capitalize">{sub.status}</div>
@@ -188,7 +188,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
                     href={sub.remotePostUrl} 
                     target="_blank" 
                     rel="noreferrer"
-                    className="flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                    className="flex items-center gap-1 text-sm font-medium text-sky-500 hover:text-sky-600"
                   >
                     {t("panel.viewPost")} <ExternalLink className="w-4 h-4" />
                   </a>

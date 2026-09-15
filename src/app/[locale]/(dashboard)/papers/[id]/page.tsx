@@ -32,7 +32,7 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
       <h1 className="text-3xl font-bold mb-2">{paper.title}</h1>
       <p className="text-slate-500 mb-8">
         {isHe ? "קובץ מקורי:" : "Original File:"} {paper.originalFileUrl ? (
-          <a href={paper.originalFileUrl} target="_blank" className="text-blue-600 hover:underline">{isHe ? "הורדה" : "Download"}</a>
+          <a href={paper.originalFileUrl} target="_blank" className="text-sky-500 hover:underline">{isHe ? "הורדה" : "Download"}</a>
         ) : (isHe ? "לא ידוע" : "Unknown")}
       </p>
 

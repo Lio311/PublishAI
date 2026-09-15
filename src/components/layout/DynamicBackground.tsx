@@ -57,7 +57,7 @@ export default function DynamicBackground() {
                         scale: [1, 1.5, 1, 1]
                     }}
                     transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
-                    className="w-full h-full bg-indigo-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-40"
+                    className="w-full h-full bg-blue-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-40"
                 />
             </motion.div>
 

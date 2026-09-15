@@ -74,7 +74,7 @@ export default function FigureAnalysisCard({ figure }: FigureAnalysisCardProps) 
           ) : (
             <button 
               onClick={() => setIsEditingLegend(true)}
-              className="w-full bg-blue-50 text-blue-600 py-2 rounded-md hover:bg-blue-100 transition-colors text-sm font-medium"
+              className="w-full bg-sky-50 text-sky-500 py-2 rounded-md hover:bg-sky-100 transition-colors text-sm font-medium"
             >
               Review Legend Suggestions
             </button>

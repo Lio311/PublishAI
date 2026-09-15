@@ -57,7 +57,7 @@ export default async function PapersPage({
       case "pending":
       case "in_progress":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-blue-800">
             {t("recentPapers.status.in_progress")}
           </span>
         );
@@ -110,7 +110,7 @@ export default async function PapersPage({
             <input 
               type="text"
               placeholder={locale === 'he' ? 'חיפוש מאמרים...' : 'Search papers...'}
-              className={`w-full ${locale === 'he' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+              className={`w-full ${locale === 'he' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500`}
             />
           </div>
         </div>

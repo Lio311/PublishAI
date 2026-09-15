@@ -53,7 +53,7 @@ export default function PromptStrategyManager() {
           onChange={e => setNewStrategy({...newStrategy, promptTemplate: e.target.value})}
           required
         />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-fit">
+        <button type="submit" className="bg-sky-500 text-white px-4 py-2 rounded w-fit">
           Add Strategy
         </button>
       </form>

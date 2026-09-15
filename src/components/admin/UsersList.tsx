@@ -6,7 +6,7 @@ export default function UsersList({ users, locale }: { users: { id: string; name
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-8">
       <div className="p-6 border-b border-slate-200">
         <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-          <UsersIcon className="w-5 h-5 text-blue-500" />
+          <UsersIcon className="w-5 h-5 text-sky-500" />
           {locale === 'he' ? 'רשימת משתמשים' : 'Users List'}
         </h2>
       </div>

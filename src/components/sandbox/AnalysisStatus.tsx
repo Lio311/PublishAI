@@ -39,7 +39,7 @@ export function AnalysisStatus({ paperId }: { paperId: number }) {
   return (
     <div className="p-4 bg-gray-100 rounded-lg flex items-center gap-3 my-4">
       {(status === "pending" || status === "running") && (
-        <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+        <Loader2 className="h-5 w-5 animate-spin text-sky-500" />
       )}
       <span className="font-medium text-gray-800">
         Sandbox Status: <span className="capitalize">{status}</span>

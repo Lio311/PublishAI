@@ -20,7 +20,7 @@ export function ReviewPanel({ reviews }: ReviewPanelProps) {
   return (
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm h-full flex flex-col">
       <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center gap-2">
-        <MessageSquare className="w-5 h-5 text-indigo-600" />
+        <MessageSquare className="w-5 h-5 text-sky-500" />
         <h3 className="font-semibold text-slate-800">{isHe ? "סימולטור ביקורת עמיתים" : "Peer Review Simulator"}</h3>
       </div>
       

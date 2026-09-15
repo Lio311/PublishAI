@@ -26,9 +26,9 @@ export default function AnalyticsDashboard() {
         <p>Loading analytics...</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="p-4 border rounded shadow-sm bg-blue-50 dark:bg-gray-800">
+          <div className="p-4 border rounded shadow-sm bg-sky-50 dark:bg-gray-800">
             <h2 className="text-xl font-semibold mb-2">Total Submissions</h2>
-            <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">{stats?.totalSubmissions || 0}</p>
+            <p className="text-4xl font-bold text-sky-500 dark:text-blue-400">{stats?.totalSubmissions || 0}</p>
           </div>
           {stats?.outcomes?.map((outcome: any) => (
             <div key={outcome.status} className="p-4 border rounded shadow-sm bg-gray-50 dark:bg-gray-800">

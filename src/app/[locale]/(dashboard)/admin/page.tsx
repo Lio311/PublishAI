@@ -108,7 +108,7 @@ export default async function AdminDashboardPage({
       case 'approved':
         return <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">{locale === 'he' ? 'הושלם' : 'Completed'}</span>;
       case 'in_progress':
-        return <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">{locale === 'he' ? 'בתהליך' : 'In Progress'}</span>;
+        return <span className="px-2 py-1 bg-sky-100 text-sky-600 rounded-full text-xs">{locale === 'he' ? 'בתהליך' : 'In Progress'}</span>;
       case 'pending':
         return <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded-full text-xs">{locale === 'he' ? 'ממתין' : 'Pending'}</span>;
       case 'failed':
@@ -142,8 +142,8 @@ export default async function AdminDashboardPage({
                 <p className="text-sm font-medium text-slate-500">{locale === 'he' ? 'סה״כ משתמשים' : 'Total Users'}</p>
                 <p className="text-2xl font-bold text-slate-900 mt-1">{totalUsers}</p>
               </div>
-              <div className="bg-blue-100 p-2 rounded-lg">
-                <Users className="w-5 h-5 text-blue-600" />
+              <div className="bg-sky-100 p-2 rounded-lg">
+                <Users className="w-5 h-5 text-sky-500" />
               </div>
             </div>
           </div>
@@ -154,8 +154,8 @@ export default async function AdminDashboardPage({
                 <p className="text-sm font-medium text-slate-500">{locale === 'he' ? 'סה״כ מאמרים' : 'Total Papers'}</p>
                 <p className="text-2xl font-bold text-slate-900 mt-1">{totalPapers}</p>
               </div>
-              <div className="bg-indigo-100 p-2 rounded-lg">
-                <FileText className="w-5 h-5 text-indigo-600" />
+              <div className="bg-sky-100 p-2 rounded-lg">
+                <FileText className="w-5 h-5 text-sky-500" />
               </div>
             </div>
           </div>
@@ -195,7 +195,7 @@ export default async function AdminDashboardPage({
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-8">
           <div className="p-6 border-b border-slate-200">
             <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-              <List className="w-5 h-5 text-indigo-500" />
+              <List className="w-5 h-5 text-sky-500" />
               {locale === 'he' ? 'פעילות אחרונה (מעקב מאמרים)' : 'Recent Activity (Paper Tracking)'}
             </h2>
           </div>

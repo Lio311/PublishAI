@@ -27,7 +27,7 @@ export default function DiffEditor({ originalText, modifiedText, onAccept, onRej
           </button>
           <button 
             onClick={onAccept}
-            className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 rounded-lg hover:from-blue-500 hover:via-sky-500 hover:to-sky-400"
+            className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 rounded-lg hover:from-sky-500 hover:via-sky-500 hover:to-sky-400"
           >
             Accept Changes
           </button>

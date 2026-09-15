@@ -73,17 +73,17 @@ export default function UploadZone() {
       onDragLeave={onDragLeave}
       onDrop={onDrop}
       className={`border-2 border-dashed rounded-[2rem] p-12 flex flex-col items-center justify-center text-center transition-all duration-300 relative overflow-hidden cursor-pointer
-        ${isDragging ? "border-blue-500 bg-blue-50/50" : "border-slate-300/50 bg-white/40 backdrop-blur-xl hover:bg-white/60 hover:border-blue-400/50 shadow-[0_8px_32px_rgba(0,0,0,0.02)]"}
+        ${isDragging ? "border-sky-500 bg-sky-50/50" : "border-slate-300/50 bg-white/40 backdrop-blur-xl hover:bg-white/60 hover:border-blue-400/50 shadow-[0_8px_32px_rgba(0,0,0,0.02)]"}
         ${isUploading ? "opacity-75 cursor-not-allowed" : ""}
       `}
     >
-      <div className={`p-4 rounded-full mb-4 ${uploadSuccess ? 'bg-green-100' : 'bg-blue-100'}`}>
+      <div className={`p-4 rounded-full mb-4 ${uploadSuccess ? 'bg-green-100' : 'bg-sky-100'}`}>
         {isUploading ? (
-          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+          <Loader2 className="w-8 h-8 text-sky-500 animate-spin" />
         ) : uploadSuccess ? (
           <CheckCircle className="w-8 h-8 text-green-600" />
         ) : (
-          <UploadCloud className="w-8 h-8 text-blue-600" />
+          <UploadCloud className="w-8 h-8 text-sky-500" />
         )}
       </div>
       
@@ -111,7 +111,7 @@ export default function UploadZone() {
         />
         <button 
           disabled={isUploading || uploadSuccess}
-          className="bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+          className="bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
         >
           {isUploading ? t("uploading") : t("button")}
         </button>

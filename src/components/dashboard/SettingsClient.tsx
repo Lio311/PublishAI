@@ -114,7 +114,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
       <button 
         onClick={handleSave}
         disabled={isSaving}
-        className="bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-70 flex items-center gap-2"
+        className="bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-70 flex items-center gap-2"
       >
         {isSaving && (
           <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
@@ -149,7 +149,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
               onClick={() => setActiveTab("profile")}
               className={`w-full flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg transition-colors ${
                 activeTab === "profile"
-                  ? "bg-indigo-50 text-indigo-700"
+                  ? "bg-sky-50 text-sky-600"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -160,7 +160,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
               onClick={() => setActiveTab("notifications")}
               className={`w-full flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg transition-colors ${
                 activeTab === "notifications"
-                  ? "bg-indigo-50 text-indigo-700"
+                  ? "bg-sky-50 text-sky-600"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -171,7 +171,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
               onClick={() => setActiveTab("privacy")}
               className={`w-full flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg transition-colors ${
                 activeTab === "privacy"
-                  ? "bg-indigo-50 text-indigo-700"
+                  ? "bg-sky-50 text-sky-600"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -182,7 +182,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
               onClick={() => setActiveTab("api_keys")}
               className={`w-full flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg transition-colors ${
                 activeTab === "api_keys"
-                  ? "bg-indigo-50 text-indigo-700"
+                  ? "bg-sky-50 text-sky-600"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -208,7 +208,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
                         type="text"
                         value={settings.name}
                         onChange={(e) => handleSettingChange("name", e.target.value)}
-                        className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                       />
                     </div>
                     <div className="grid grid-cols-1 gap-1">
@@ -229,7 +229,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
                       <select 
                         value={settings.academicRole}
                         onChange={(e) => handleSettingChange("academicRole", e.target.value)}
-                        className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                       >
                         <option value="Professor">{locale === "he" ? "פרופסור" : "Professor"}</option>
                         <option value="Researcher">{locale === "he" ? "חוקר/ת" : "Researcher"}</option>
@@ -274,7 +274,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
                           onChange={(e) => handleSettingChange("emailNotifications", e.target.checked)}
                           className="sr-only peer" 
                         />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
                       </label>
                     </div>
 
@@ -290,7 +290,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
                           onChange={handleBrowserNotificationsToggle}
                           className="sr-only peer" 
                         />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
                       </label>
                     </div>
 
@@ -306,7 +306,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
                           onChange={(e) => handleSettingChange("weeklyDigest", e.target.checked)}
                           className="sr-only peer" 
                         />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
                       </label>
                     </div>
 
@@ -336,7 +336,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
                           onChange={(e) => handleSettingChange("publicProfile", e.target.checked)}
                           className="sr-only peer" 
                         />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
                       </label>
                     </div>
 
@@ -352,7 +352,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
                           onChange={(e) => handleSettingChange("dataCollectionForAi", e.target.checked)}
                           className="sr-only peer" 
                         />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
                       </label>
                     </div>
 
@@ -388,7 +388,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
                         placeholder="sk-..."
                         value={settings.openaiApiKey}
                         onChange={(e) => handleSettingChange("openaiApiKey", e.target.value)}
-                        className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                       />
                     </div>
                     
@@ -399,7 +399,7 @@ export default function SettingsClient({ locale }: { locale: string }) {
                         placeholder="sk-ant-..."
                         value={settings.anthropicApiKey}
                         onChange={(e) => handleSettingChange("anthropicApiKey", e.target.value)}
-                        className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="max-w-md px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                       />
                     </div>
                   </div>

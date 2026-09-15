@@ -94,7 +94,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
 
       <div className="p-6 space-y-5">
         <div className="grid grid-cols-2 gap-4">
-          <label className={`border rounded-lg p-4 cursor-pointer transition-colors ${platform === "wordpress" ? "border-indigo-600 bg-indigo-50" : "border-slate-200 hover:border-indigo-300"}`}>
+          <label className={`border rounded-lg p-4 cursor-pointer transition-colors ${platform === "wordpress" ? "border-sky-500 bg-sky-50" : "border-slate-200 hover:border-blue-300"}`}>
             <input 
               type="radio" 
               name="platform" 
@@ -107,7 +107,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
             <div className="text-xs text-slate-500 mt-1">REST API (Application Password)</div>
           </label>
           
-          <label className={`border rounded-lg p-4 cursor-pointer transition-colors ${platform === "ojs" ? "border-indigo-600 bg-indigo-50" : "border-slate-200 hover:border-indigo-300"}`}>
+          <label className={`border rounded-lg p-4 cursor-pointer transition-colors ${platform === "ojs" ? "border-sky-500 bg-sky-50" : "border-slate-200 hover:border-blue-300"}`}>
             <input 
               type="radio" 
               name="platform" 
@@ -127,7 +127,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
             type="url" 
             required 
             placeholder="https://journal.example.com"
-            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none"
             value={siteUrl}
             onChange={(e) => { setSiteUrl(e.target.value); setTestResult(null); }}
           />
@@ -138,7 +138,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
           <input 
             type="text" 
             placeholder="My Medical Journal"
-            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
           />
@@ -151,7 +151,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
           <input 
             type="text" 
             required 
-            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none"
             value={username}
             onChange={(e) => { setUsername(e.target.value); setTestResult(null); }}
           />
@@ -164,7 +164,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
               type="password" 
               required 
               placeholder="Application Password"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setTestResult(null); }}
             />
@@ -208,7 +208,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
         <button 
           type="submit"
           disabled={isSaving || !testResult?.success}
-          className="px-6 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-blue-500 hover:via-sky-500 hover:to-sky-400 disabled:opacity-50 transition-colors flex items-center gap-2"
+          className="px-6 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 disabled:opacity-50 transition-colors flex items-center gap-2"
         >
           {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
           {t("saveConnection")}

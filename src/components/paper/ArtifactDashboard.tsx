@@ -25,7 +25,7 @@ export function ArtifactDashboard({ originalText, revisedText, reviews, coverLet
         <button
           onClick={() => setActiveTab("manuscript")}
           className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-md transition-colors ${
-            activeTab === "manuscript" ? "bg-white text-indigo-700 shadow-sm" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+            activeTab === "manuscript" ? "bg-white text-sky-600 shadow-sm" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
           }`}
         >
           <FileText className="w-4 h-4" />
@@ -34,7 +34,7 @@ export function ArtifactDashboard({ originalText, revisedText, reviews, coverLet
         <button
           onClick={() => setActiveTab("reviews")}
           className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-md transition-colors ${
-            activeTab === "reviews" ? "bg-white text-indigo-700 shadow-sm" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+            activeTab === "reviews" ? "bg-white text-sky-600 shadow-sm" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
           }`}
         >
           <FileArchive className="w-4 h-4" />
@@ -43,7 +43,7 @@ export function ArtifactDashboard({ originalText, revisedText, reviews, coverLet
         <button
           onClick={() => setActiveTab("cover-letter")}
           className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-md transition-colors ${
-            activeTab === "cover-letter" ? "bg-white text-indigo-700 shadow-sm" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+            activeTab === "cover-letter" ? "bg-white text-sky-600 shadow-sm" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
           }`}
         >
           <FileText className="w-4 h-4" />
@@ -69,7 +69,7 @@ export function ArtifactDashboard({ originalText, revisedText, reviews, coverLet
           <div className="h-full flex flex-col">
             <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
               <h3 className="font-semibold text-slate-800">{isHe ? "מכתב נלווה שנוצר" : "Generated Cover Letter"}</h3>
-              <button className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+              <button className="flex items-center gap-2 text-sm text-sky-500 hover:text-sky-600 font-medium">
                 <Download className="w-4 h-4" />
                 {isHe ? "ייצוא ל-DOCX" : "Export DOCX"}
               </button>
