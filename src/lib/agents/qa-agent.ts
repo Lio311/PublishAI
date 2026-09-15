@@ -6,7 +6,7 @@ export class QaAgent extends BaseAgent {
   model = "claude-3-7-sonnet-20250219";
 
   async execute(context: AgentContext): Promise<AgentResult> {
-    const prompt = `Check this academic text for spelling errors, inconsistency, and unreferenced figures/tables.\nManuscript:\n${context.manuscriptText.substring(0, 5000)}`;
+    const prompt = `Check the academic text provided between <manuscript> tags for spelling errors, inconsistency, and unreferenced figures/tables.\n\n<manuscript>\n${context.manuscriptText}\n</manuscript>`;
     const { text, tokensUsed } = await askClaude(prompt, this.model as import("./claude-client").ClaudeModel);
     return this.formatOutput(text, "completed", tokensUsed);
   }

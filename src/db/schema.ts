@@ -8,7 +8,8 @@ import {
   integer,
   boolean,
   uuid,
-  real
+  real,
+  index
 } from "drizzle-orm/pg-core";
 
 export const statusEnum = pgEnum("status", [
@@ -96,7 +97,7 @@ export const journals = pgTable("journals", {
 
 export const papers = pgTable("papers", {
   id: serial("id").primaryKey(),
-  userId: text("user_id").references(() => users.id),
+  userId: text("user_id").notNull().references(() => users.id),
   title: text("title").notNull(),
   status: statusEnum("status").default("pending"),
   targetJournalId: serial("target_journal_id").references(() => journals.id),
@@ -104,7 +105,10 @@ export const papers = pgTable("papers", {
   originalFormat: text("original_format"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  userIdIdx: index("papers_user_id_idx").on(table.userId),
+  statusIdx: index("papers_status_idx").on(table.status),
+}));
 
 export const paperVersions = pgTable("paper_versions", {
   id: serial("id").primaryKey(),
@@ -116,7 +120,9 @@ export const paperVersions = pgTable("paper_versions", {
   reviewerComments: text("reviewer_comments"),
   rebuttalStrategy: text("rebuttal_strategy"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  paperIdIdx: index("paper_versions_paper_id_idx").on(table.paperId),
+}));
 
 export const paperStages = pgTable("paper_stages", {
   id: serial("id").primaryKey(),
@@ -127,7 +133,10 @@ export const paperStages = pgTable("paper_stages", {
   userFeedback: text("user_feedback"),
   startedAt: timestamp("started_at"),
   completedAt: timestamp("completed_at"),
-});
+}, (table) => ({
+  paperIdIdx: index("paper_stages_paper_id_idx").on(table.paperId),
+  stageIdx: index("paper_stages_stage_idx").on(table.stage),
+}));
 
 export const references = pgTable("references", {
   id: serial("id").primaryKey(),
@@ -139,7 +148,9 @@ export const references = pgTable("references", {
   doi: text("doi"),
   source: text("source"),
   bibtexEntry: text("bibtex_entry"),
-});
+}, (table) => ({
+  paperIdIdx: index("references_paper_id_idx").on(table.paperId),
+}));
 
 export const userSettings = pgTable("user_settings", {
   id: serial("id").primaryKey(),
@@ -248,7 +259,11 @@ export const submissions = pgTable("submissions", {
   
   submittedAt: timestamp("submitted_at"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  paperIdIdx: index("submissions_paper_id_idx").on(table.paperId),
+  userIdIdx: index("submissions_user_id_idx").on(table.userId),
+  statusIdx: index("submissions_status_idx").on(table.status),
+}));
 
 // ═══════════════════════════════════════════════════════
 // TABLE: submission_logs

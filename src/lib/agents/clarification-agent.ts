@@ -7,12 +7,14 @@ export class ClarificationAgent extends BaseAgent {
 
   async execute(context: AgentContext): Promise<AgentResult> {
     const prompt = `You are an expert academic editor.
-Analyze the following academic text and extract:
+Analyze the academic text provided between <manuscript> tags and extract:
 1. The main thesis / objective
 2. The primary field of study
 3. Any obvious missing sections (e.g., no Conclusion)
 
-Text: ${context.manuscriptText.substring(0, 10000)}
+<manuscript>
+${context.manuscriptText}
+</manuscript>
 `;
 
     const { text, tokensUsed } = await askClaude(prompt, this.model as import("./claude-client").ClaudeModel);

@@ -7,12 +7,18 @@ import { db } from "@/db";
 import { papers } from "@/db/schema";
 import { inngest } from "@/inngest/client";
 import { auth } from "@/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateLimitResult = await checkRateLimit(session.user.id);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
     }
 
     const formData = await request.formData();
@@ -27,7 +33,7 @@ export async function POST(request: Request) {
     for (const file of files) {
       // 1. Upload to Vercel Blob
       const blob = await put(`articles/${file.name}`, file, {
-        access: "public",
+        access: "private",
       });
 
       // 2. Extract Text
@@ -36,7 +42,7 @@ export async function POST(request: Request) {
 
       if (file.name.toLowerCase().endsWith(".docx")) {
         try {
-          const result = await mammoth.extractRawText({ buffer });
+          const result = await mammoth.convertToHtml({ buffer });
           extractedText = result.value;
         } catch (e) {
           console.error(`Failed to extract text from docx: ${file.name}`, e);
@@ -51,6 +57,25 @@ export async function POST(request: Request) {
       }
 
       const fileExtension = file.name.split('.').pop()?.toLowerCase() || "unknown";
+
+      if (!extractedText) {
+        // Still save the paper but with error status
+        const [newPaper] = await db.insert(papers).values({
+          title: file.name.replace(/\.[^/.]+$/, ""),
+          originalFileUrl: blob.url,
+          originalFormat: fileExtension,
+          status: "failed",
+          userId: session.user.id,
+        }).returning();
+        
+        uploadedPapers.push({
+          paper: newPaper,
+          blobUrl: blob.url,
+          textPreview: null,
+          error: "Failed to extract text from document"
+        });
+        continue;
+      }
 
       // 3. Save to Database
       const [newPaper] = await db.insert(papers).values({

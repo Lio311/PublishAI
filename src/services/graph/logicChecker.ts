@@ -4,6 +4,8 @@ import { generateObject } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';
 
+import { eq } from "drizzle-orm";
+
 export interface LogicCheckResult {
   claim: string;
   isConsistent: boolean;
@@ -12,15 +14,21 @@ export interface LogicCheckResult {
 }
 
 export async function checkLogicalConsistency(claims: string[], paperId?: number): Promise<LogicCheckResult[]> {
-  const allRels = await db.select({
+  let query: any = db.select({
     id: scientificRelationships.id,
     sourceId: scientificRelationships.sourceEntityId,
     targetId: scientificRelationships.targetEntityId,
     relType: scientificRelationships.relationshipType,
     evidence: scientificRelationships.evidenceText
-  }).from(scientificRelationships).limit(200);
+  }).from(scientificRelationships);
+
+  if (paperId) {
+    query = query.where(eq(scientificRelationships.paperId, paperId));
+  }
+
+  const allRels = await query.limit(200);
   
-  const graphContext = allRels.map(r => `Relationship: [Entity ${r.sourceId}] ${r.relType} [Entity ${r.targetId}] - Evidence: "${r.evidence}"`).join("\\n");
+  const graphContext = allRels.map((r: { sourceId: string; targetId: string; relType: string; evidence: string }) => `Relationship: [Entity ${r.sourceId}] ${r.relType} [Entity ${r.targetId}] - Evidence: "${r.evidence}"`).join("\\n");
 
   const results: LogicCheckResult[] = [];
   

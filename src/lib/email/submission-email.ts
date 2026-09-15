@@ -1,3 +1,6 @@
+import nodemailer from "nodemailer";
+import { getTransporter } from "./notification-service";
+
 export async function sendSubmissionSuccessEmail(userEmail: string, paperTitle: string, postUrl: string) {
   const subject = `Your paper "${paperTitle}" was successfully submitted`;
   const html = `
@@ -7,7 +10,19 @@ export async function sendSubmissionSuccessEmail(userEmail: string, paperTitle: 
     <p><br>Best regards,<br>The PublishAI Team</p>
   `;
 
-  console.log(`[Email Mock] Sent to ${userEmail}: ${subject}`);
+  const mailer = await getTransporter();
+  const info = await mailer.sendMail({
+    from: '"Publish AI" <noreply@publish-ai.com>',
+    to: userEmail,
+    subject,
+    html,
+  });
+
+  console.log(`[Email Service] Success email sent to ${userEmail}. Message ID: ${info.messageId}`);
+  
+  if (info.messageId && (mailer.transporter.name === 'smtp.ethereal.email' || (mailer.options as any).host === 'smtp.ethereal.email')) {
+    console.log(`[Email Service] Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+  }
 }
 
 export async function sendSubmissionFailedEmail(userEmail: string, paperTitle: string, errorMsg: string) {
@@ -20,5 +35,17 @@ export async function sendSubmissionFailedEmail(userEmail: string, paperTitle: s
     <p><br>Best regards,<br>The PublishAI Team</p>
   `;
 
-  console.log(`[Email Mock] Sent to ${userEmail}: ${subject}`);
+  const mailer = await getTransporter();
+  const info = await mailer.sendMail({
+    from: '"Publish AI" <noreply@publish-ai.com>',
+    to: userEmail,
+    subject,
+    html,
+  });
+
+  console.log(`[Email Service] Failed email sent to ${userEmail}. Message ID: ${info.messageId}`);
+  
+  if (info.messageId && (mailer.transporter.name === 'smtp.ethereal.email' || (mailer.options as any).host === 'smtp.ethereal.email')) {
+    console.log(`[Email Service] Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+  }
 }

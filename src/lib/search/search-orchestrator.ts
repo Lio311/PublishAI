@@ -4,16 +4,37 @@ import { searchArxiv } from "./arxiv-client";
 
 export async function gatherLiterature(query: string) {
   const [pubmedResults, scholarResults, arxivResults] = await Promise.all([
-    searchPubMed(query),
-    searchSemanticScholar(query),
-    searchArxiv(query)
+    searchPubMed(query).catch(e => { console.error(e); return []; }),
+    searchSemanticScholar(query).catch(e => { console.error(e); return []; }),
+    searchArxiv(query).catch(e => { console.error(e); return []; })
   ]);
 
-  // Deduplication and relevance ranking logic would go here.
+  const allResults = [...pubmedResults, ...scholarResults, ...arxivResults];
+  const combined: any[] = [];
+  const seenDois = new Set<string>();
+  const seenTitles = new Set<string>();
+
+  for (const item of allResults) {
+    const normalizedTitle = item.title.toLowerCase().replace(/[^a-z0-9]/g, '');
+    let duplicate = false;
+
+    if (item.doi && seenDois.has(item.doi)) {
+      duplicate = true;
+    } else if (normalizedTitle && seenTitles.has(normalizedTitle)) {
+      duplicate = true;
+    }
+
+    if (!duplicate) {
+      if (item.doi) seenDois.add(item.doi);
+      if (normalizedTitle) seenTitles.add(normalizedTitle);
+      combined.push(item);
+    }
+  }
+
   return {
     pubmedResults,
     scholarResults,
     arxivResults,
-    combined: []
+    combined
   };
 }

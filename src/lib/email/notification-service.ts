@@ -6,7 +6,7 @@ import nodemailer from "nodemailer";
  */
 let transporter: nodemailer.Transporter | null = null;
 
-async function getTransporter() {
+export async function getTransporter() {
   if (!transporter) {
     if (process.env.NODE_ENV === "production" && process.env.SMTP_HOST) {
       transporter = nodemailer.createTransport({

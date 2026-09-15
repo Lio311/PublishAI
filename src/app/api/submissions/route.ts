@@ -5,12 +5,18 @@ import { auth } from "@/auth";
 import { inngest } from "@/inngest/client";
 import { eq, desc } from "drizzle-orm";
 import { MetadataExtractor } from "@/lib/submission/metadata-extractor";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateLimitResult = await checkRateLimit(session.user.id);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
     }
 
     const body = await req.json();
@@ -57,6 +63,11 @@ export async function GET() {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateLimitResult = await checkRateLimit(session.user.id);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
     }
 
     const userSubmissions = await db.query.submissions.findMany({

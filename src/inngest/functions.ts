@@ -55,16 +55,23 @@ export const processPaper = inngest.createFunction(
     // 5. Academic Writing
     const writing = await orchestrator.runStage(new AcademicWritingAgent(), context);
     context.previousStageOutputs.set("writing", writing);
+    context.manuscriptText = writing.output;
 
     // 6. Execution
     const execution = await orchestrator.runStage(new ExecutionAgent(), context);
     context.previousStageOutputs.set("execution", execution);
+    if (execution.metadata?.updatedText) {
+      context.manuscriptText = execution.metadata.updatedText as string;
+    }
 
     // 6.5 Integrity Scan
     await step.run("integrity-scan", async () => {
       const { IntegrityScanner } = await import("@/lib/security/integrity-scanner");
       const report = await IntegrityScanner.scanManuscript(context.manuscriptText);
       console.log(`[Integrity] Passed: ${report.passed}. Plagiarism: ${report.plagiarismScore}%. AI: ${report.aiGeneratedScore}%.`);
+      if (!report.passed) {
+        throw new Error(`Integrity check failed: Plagiarism ${report.plagiarismScore}%, AI ${report.aiGeneratedScore}%`);
+      }
     });
 
     // 7. QA

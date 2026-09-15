@@ -12,8 +12,10 @@ export class PlanningAgent extends BaseAgent {
 Based on the following clarification analysis:
 ${clarificationOutput}
 
-And the following manuscript excerpt:
-${context.manuscriptText.substring(0, 10000)}
+And the manuscript provided between <manuscript> tags:
+<manuscript>
+${context.manuscriptText}
+</manuscript>
 
 Create a structural revision plan for this paper. Identify weaknesses, required citations, and sections to rewrite.
 `;
