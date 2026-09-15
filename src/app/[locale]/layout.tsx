@@ -40,7 +40,7 @@ export default async function RootLayout({
   const dir = locale === 'he' ? 'rtl' : 'ltr';
 
   return (
-    <html lang={locale} dir={dir}>
+    <html lang={locale} dir={dir} translate="no">
       <body className={`${openSans.className} bg-transparent min-h-screen text-slate-900`}>
         <DynamicBackground />
         <NextIntlClientProvider messages={messages}>
