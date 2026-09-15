@@ -23,8 +23,8 @@ export default async function Home({
   const userId = session?.user?.id;
   
   if (session && !userId) {
-    // Session exists but is missing user.id (old JWT format). Force signout.
-    redirect('/api/auth/signout');
+    // Session exists but is missing user.id (old JWT format). Force signout via custom route.
+    redirect('/api/auth/clear-session');
   }
 
   if (!userId) {
