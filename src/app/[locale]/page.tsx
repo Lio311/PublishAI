@@ -20,7 +20,14 @@ export default async function Home({
   const isAdmin = await checkIsAdmin();
   
   const session = await auth();
-  if (!session?.user?.id) {
+  
+  if (session && !session.user?.id) {
+    // Session exists but is missing user.id (old JWT format). Force signout.
+    redirect('/api/auth/signout');
+  }
+
+  if (!session) {
+    // Not authenticated. Let GlobalPasswordProtection handle the UI.
     return null;
   }
 
