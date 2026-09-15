@@ -20,7 +20,7 @@ export const processPaper = inngest.createFunction(
   { 
     id: "process-paper", 
     event: "paper/uploaded",
-    onFailure: async ({ event, step }) => {
+    onFailure: async ({ event, step }: { event: any, step: any }) => {
       const paperId = event.data.event.data.paperId;
       if (paperId) {
         await step.run("mark-failed", async () => {
@@ -144,7 +144,7 @@ export const processResubmission = inngest.createFunction(
   { 
     id: "process-resubmission", 
     event: "paper/reviewer-comments-received",
-    onFailure: async ({ event, step }) => {
+    onFailure: async ({ event, step }: { event: any, step: any }) => {
       const paperId = event.data.event.data.paperId;
       if (paperId) {
         await step.run("mark-failed", async () => {

@@ -31,7 +31,8 @@ export const stageEnum = pgEnum("stage", [
   "execution", 
   "qa", 
   "verification", 
-  "compilation"
+  "compilation",
+  "rebuttal"
 ]);
 
 export const users = pgTable("users", {
