@@ -70,6 +70,7 @@ export const accounts = pgTable(
     compoundKey: primaryKey({
       columns: [account.provider, account.providerAccountId],
     }),
+    userIdIdx: index("account_userId_idx").on(account.userId),
   })
 );
 
@@ -79,7 +80,9 @@ export const sessions = pgTable("session", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   expires: timestamp("expires", { mode: "date" }).notNull(),
-});
+}, (table) => ({
+  userIdIdx: index("session_userId_idx").on(table.userId),
+}));
 
 export const verificationTokens = pgTable(
   "verificationToken",
@@ -103,10 +106,10 @@ export const journals = pgTable("journals", {
 
 export const papers = pgTable("papers", {
   id: serial("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   status: statusEnum("status").default("pending"),
-  targetJournalId: serial("target_journal_id").references(() => journals.id),
+  targetJournalId: integer("target_journal_id").references(() => journals.id),
   originalFileUrl: text("original_file_url"),
   originalFormat: text("original_format"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -118,8 +121,8 @@ export const papers = pgTable("papers", {
 
 export const paperVersions = pgTable("paper_versions", {
   id: serial("id").primaryKey(),
-  paperId: serial("paper_id").references(() => papers.id),
-  versionNumber: serial("version_number"),
+  paperId: integer("paper_id").references(() => papers.id, { onDelete: "cascade" }),
+  versionNumber: integer("version_number"),
   fileUrl: text("file_url"),
   format: text("format"),
   changesSummary: text("changes_summary"),
@@ -132,7 +135,7 @@ export const paperVersions = pgTable("paper_versions", {
 
 export const paperStages = pgTable("paper_stages", {
   id: serial("id").primaryKey(),
-  paperId: serial("paper_id").references(() => papers.id),
+  paperId: integer("paper_id").references(() => papers.id, { onDelete: "cascade" }),
   stage: stageEnum("stage"),
   status: statusEnum("status").default("pending"),
   agentOutput: text("agent_output"), // Storing markdown output
@@ -146,7 +149,7 @@ export const paperStages = pgTable("paper_stages", {
 
 export const references = pgTable("references", {
   id: serial("id").primaryKey(),
-  paperId: serial("paper_id").references(() => papers.id),
+  paperId: integer("paper_id").references(() => papers.id, { onDelete: "cascade" }),
   citationKey: text("citation_key"),
   title: text("title"),
   authors: text("authors"),
@@ -223,7 +226,9 @@ export const journalConnections = pgTable("journal_connections", {
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  userIdIdx: index("journal_connections_user_id_idx").on(table.userId),
+}));
 
 // ═══════════════════════════════════════════════════════
 // TABLE: submissions
@@ -232,13 +237,13 @@ export const journalConnections = pgTable("journal_connections", {
 export const submissions = pgTable("submissions", {
   id: serial("id").primaryKey(),
   paperId: integer("paper_id")
-    .references(() => papers.id)
+    .references(() => papers.id, { onDelete: "cascade" })
     .notNull(),
   connectionId: integer("connection_id")
     .references(() => journalConnections.id)
     .notNull(),
   userId: text("user_id")
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   
   status: submissionStatusEnum("submission_status").default("preparing"),
@@ -296,16 +301,18 @@ export const sandboxStatusEnum = pgEnum("sandbox_status", [
 
 export const dataFiles = pgTable("data_files", {
   id: uuid("id").primaryKey().defaultRandom(),
-  paperId: integer("paper_id").references(() => papers.id).notNull(),
+  paperId: integer("paper_id").references(() => papers.id, { onDelete: "cascade" }).notNull(),
   filename: text("filename").notNull(),
   fileUrl: text("file_url").notNull(),
   mimeType: text("mime_type").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  paperIdIdx: index("data_files_paper_id_idx").on(table.paperId),
+}));
 
 export const sandboxRuns = pgTable("sandbox_runs", {
   id: uuid("id").primaryKey().defaultRandom(),
-  paperId: integer("paper_id").references(() => papers.id).notNull(),
+  paperId: integer("paper_id").references(() => papers.id, { onDelete: "cascade" }).notNull(),
   status: sandboxStatusEnum("status").default("pending"),
   pythonScript: text("python_script"),
   executionLogs: text("execution_logs"),
@@ -317,7 +324,7 @@ export const sandboxRuns = pgTable("sandbox_runs", {
 export const generatedCharts = pgTable("generated_charts", {
   id: uuid("id").primaryKey().defaultRandom(),
   sandboxRunId: uuid("sandbox_run_id").references(() => sandboxRuns.id).notNull(),
-  paperId: integer("paper_id").references(() => papers.id).notNull(),
+  paperId: integer("paper_id").references(() => papers.id, { onDelete: "cascade" }).notNull(),
   chartUrl: text("chart_url").notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -398,7 +405,7 @@ export const debateStatusEnum = pgEnum("debate_status", [
 
 export const debates = pgTable("debates", {
   id: uuid("id").primaryKey().defaultRandom(),
-  paperId: integer("paper_id").references(() => papers.id).notNull(),
+  paperId: integer("paper_id").references(() => papers.id, { onDelete: "cascade" }).notNull(),
   status: debateStatusEnum("status").default("pending"),
   topic: text("topic").notNull(),
   consensusSummary: text("consensus_summary"),
@@ -430,7 +437,7 @@ export const debateMessages = pgTable("debate_messages", {
 
 export const figures = pgTable("figures", {
   id: uuid("id").primaryKey().defaultRandom(),
-  paperId: integer("paper_id").references(() => papers.id).notNull(),
+  paperId: integer("paper_id").references(() => papers.id, { onDelete: "cascade" }).notNull(),
   paperVersionId: integer("paper_version_id").references(() => paperVersions.id).notNull(),
   figureNumber: integer("figure_number").notNull(),
   imageUrl: text("image_url").notNull(),

@@ -81,8 +81,8 @@ export async function GET() {
     // Strip sensitive info from connections
     const safeSubmissions = userSubmissions.map((s: any) => {
       if (s.connection) {
-        delete s.connection.encryptedUsername;
-        delete s.connection.encryptedPassword;
+        const { encryptedUsername, encryptedPassword, ...safeConnection } = s.connection;
+        return { ...s, connection: safeConnection };
       }
       return s;
     });

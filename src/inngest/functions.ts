@@ -1,6 +1,6 @@
 import { inngest } from "./client";
 import { db } from "@/db";
-import { papers, users, paperVersions } from "@/db/schema";
+import { papers, users, paperVersions, paperStages } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { AgentOrchestrator } from "@/lib/agents/orchestrator";
 import { ClarificationAgent } from "@/lib/agents/clarification-agent";
@@ -17,7 +17,18 @@ import { RebuttalAgent } from "@/lib/agents/rebuttal-agent";
 import { AgentContext, AgentResult, Stage } from "@/lib/agents/base-agent";
 
 export const processPaper = inngest.createFunction(
-  { id: "process-paper", event: "paper/uploaded" } as any,
+  { 
+    id: "process-paper", 
+    event: "paper/uploaded",
+    onFailure: async ({ event, step }) => {
+      const paperId = event.data.event.data.paperId;
+      if (paperId) {
+        await step.run("mark-failed", async () => {
+          await db.update(papers).set({ status: "failed" }).where(eq(papers.id, paperId));
+        });
+      }
+    }
+  } as any,
   async ({ event, step }: { event: any, step: any }) => {
     const { paperId, textContent } = event.data;
     
@@ -130,7 +141,18 @@ export const sendWeeklyDigest = inngest.createFunction(
 
 
 export const processResubmission = inngest.createFunction(
-  { id: "process-resubmission", event: "paper/reviewer-comments-received" } as any,
+  { 
+    id: "process-resubmission", 
+    event: "paper/reviewer-comments-received",
+    onFailure: async ({ event, step }) => {
+      const paperId = event.data.event.data.paperId;
+      if (paperId) {
+        await step.run("mark-failed", async () => {
+          await db.update(papers).set({ status: "failed" }).where(eq(papers.id, paperId));
+        });
+      }
+    }
+  } as any,
   async ({ event, step }: { event: any, step: any }) => {
     const { paperId, reviewerComments, versionId } = event.data;
     
@@ -149,16 +171,21 @@ export const processResubmission = inngest.createFunction(
       }
     });
 
-    const paperRec = await step.run("fetch-paper-text", async () => {
+    const manuscriptText = await step.run("fetch-paper-text", async () => {
+       const stages = await db.select().from(paperStages).where(eq(paperStages.paperId, paperId));
+       const sorted = stages.sort((a, b) => (b.completedAt?.getTime() || 0) - (a.completedAt?.getTime() || 0));
+       const latestText = sorted.find(s => s.agentOutput)?.agentOutput;
+       if (latestText) return latestText;
+
        const [rec] = await db.select().from(papers).where(eq(papers.id, paperId));
-       return rec;
+       return rec?.title || "Latest Manuscript Text Here";
     });
 
     // In reality, we'd fetch the latest version text.
     // For this MVP, we pass the reviewer comments to the context.
     const context: AgentContext = {
       paperId: paperId.toString(),
-      manuscriptText: paperRec?.title || "Latest Manuscript Text Here",
+      manuscriptText: manuscriptText,
       reviewerComments,
       previousStageOutputs: new Map<Stage, AgentResult>(),
     };

@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     
     return NextResponse.json({ 
       message: "Export successful", 
-      downloadUrl: `/api/download?file=${encodeURIComponent(filePath)}` 
+      downloadUrl: filePath 
     });
   } catch (error) {
     return NextResponse.json({ error: "Export failed" }, { status: 500 });

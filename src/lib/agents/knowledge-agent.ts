@@ -8,7 +8,7 @@ export class KnowledgeAgent extends BaseAgent {
 
   async execute(context: AgentContext): Promise<AgentResult> {
     const clarification = context.previousStageOutputs.get("clarification")?.output || "";
-    const kwPrompt = `Extract 3 main search queries for academic literature based on this text:\n${clarification}\nOutput ONLY the 3 queries, separated by commas.`;
+    const kwPrompt = `Extract 3 main search queries for academic literature based on this text:\n${clarification}\nOutput ONLY the 3 queries, separated by commas, with no additional text, numbering, or formatting.`;
     
     let tokensUsed = 0;
     let resultText = "No keywords generated.";
@@ -16,7 +16,8 @@ export class KnowledgeAgent extends BaseAgent {
     try {
       const resp = await askClaude(kwPrompt, this.model as import("./claude-client").ClaudeModel);
       tokensUsed += resp.tokensUsed;
-      await gatherLiterature(resp.text);
+      const literature = await gatherLiterature(resp.text);
+      context.references = literature.combined;
       resultText = `Literature gathered for keywords: ${resp.text}. Found articles from PubMed, Semantic Scholar, and arXiv.`;
     } catch(e) {
       console.error(e);

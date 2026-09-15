@@ -1,0 +1,130 @@
+I want us to work on improving, reviewing, and polishing the following research paper [Insert the manuscript file name].
+My goal is to produce a submission-ready manuscript that can withstand rigorous peer review. Throughout this process, you must use my installed skills and follow the workflow below.
+
+**Step 0 - Prerequisites & Skill Installation**
+Before beginning the review process, ensure that all required skills are installed in your environment. If any of the following skills are not currently installed, use the full URLs below to download and install their respective SKILL.md files:
+*   using-superpowers: https://github.com/obra/superpowers/blob/main/skills/using-superpowers/SKILL.md
+*   writing-plans: https://github.com/obra/superpowers/blob/main/skills/writing-plans/SKILL.md
+*   brainstorming: https://github.com/obra/superpowers/blob/main/skills/brainstorming/SKILL.md
+*   kb-retriever: https://github.com/ConardLi/garden-skills
+*   andrej-karpathy: https://github.com/multica-ai/andrej-karpathy-skills/tree/main
+*   executing-plans: https://github.com/obra/superpowers/blob/main/skills/writing-plans/SKILL.md
+*   testing-qa: https://github.com/github/awesome-copilot/blob/main/skills/breakdown-test/SKILL.md
+*   verification-before-completion: https://github.com/obra/superpowers/tree/main/skills/verification-before-completion
+
+If for any reason you cannot access a specific URL, rely on your core internal capabilities to simulate that skill's function (e.g., structured brainstorming, strict plan execution, rigorous quality assurance).
+
+**Step 1 - Base Configuration**
+First, read the SKILL.md files for every skill referenced above and load them into your working context.
+Then trigger using-superpowers to enter strict working mode and follow the Single-Flow Execution rules for the entire project.
+
+ARTIFACT TRACKING DASHBOARD:
+Throughout the entire process (from Step 2 to Step 9), you must maintain and display a markdown table at the end of EVERY response to track the status of our core deliverables. The table must look exactly like this and be updated in real-time:
+
+| Artifact | Status |
+| :--- | :--- |
+| 📄 Revised Manuscript | [Not Started / In Progress / Pending Approval / Approved] |
+| 📖 Revision Walkthrough | [Not Started / In Progress / Complete] |
+| 📄 Simulated Peer Review | [Not Started / In Progress / Ready for review] |
+
+**Step 1.5 - Clarifying Questions (Interactive "/grill-me" Style with Options)**
+Before producing the revision plan in Step 2, you must interview me to extract all necessary constraints and context. You will do this in an interactive "/grill-me" style.
+Identify anything that is unclear, ambiguous, or missing from these instructions or the manuscript itself. This includes:
+*   Target journal or venue (or general field/audience).
+*   Target journal's exact 'Instructions for Authors' (prompt me for the URL or text so you can enforce structural rules, abstract word count, section limits, and heading formatting).
+*   Required citation and formatting style.
+*   Whether supporting materials exist (previous versions, reviewer comments, related references, a knowledge base).
+*   Any hard constraints (word/page limits, journal-specific requirements).
+*   Any other instruction in this document that is ambiguous.
+
+INTERVIEW RULES:
+1.  Ask ONLY ONE question at a time.
+2.  For EVERY question, you must provide exactly 4 numbered options for me to choose from.
+3.  Options 1, 2, and 3 should be the most likely, logical, or common answers based on the context of the manuscript and academic publishing.
+4.  Option 4 must ALWAYS be: "Other (please specify in free text)".
+5.  Wait for my answer before moving to the next question.
+6.  If my answer is vague or incomplete, "grill me" and push for a precise, concrete answer. Do not let me get away with ambiguous requirements.
+7.  Do not guess, assume, or fill gaps silently.
+8.  Once you have gathered all necessary information, summarize the constraints and explicitly ask for my permission to proceed to Step 2.
+
+**Step 2 - Planning (No Editing Yet)**
+Use writing-plans and brainstorming.
+Analyze the entire manuscript before making any edits. Produce a detailed revision plan that includes:
+*   Overall assessment of the paper
+*   Major scientific weaknesses
+*   Minor issues
+*   Logical inconsistencies
+*   Missing information
+*   Weak arguments
+*   Unsupported claims
+*   Sections requiring restructuring
+*   Language quality assessment
+*   Priority order for revisions
+
+Do not modify or rewrite any part of the manuscript until I explicitly approve the plan.
+
+**Step 3 - Knowledge & Context**
+If supporting documents, references, previous versions, or a knowledge base are available, use kb-retriever to retrieve and incorporate all relevant context before making revisions.
+Never make assumptions when supporting material is available.
+
+**Step 4 - Scientific Review**
+Review the manuscript as if you are an experienced reviewer for a top-tier journal. Evaluate every section for:
+*   Scientific accuracy and technical correctness
+*   Methodological soundness and experimental design
+*   Statistical validity and data interpretation
+*   Internal consistency and logical flow
+*   Clarity of hypotheses and strength of conclusions
+*   Missing limitations and reproducibility
+*   Figure and table quality, along with caption quality
+*   Terminology and citation consistency
+*   Factual consistency across the entire paper
+
+Evaluate the reporting of all technical and statistical metrics (e.g., automated evaluation pipelines for multi-agent systems, dataset labeling protocols for medical imaging, clinical data evaluations, or physiological signal processing procedures) to ensure they meet the rigorous reporting guidelines expected in top-tier engineering and medical informatics journals.
+Identify every issue that could reasonably lead to reviewer criticism or rejection.
+
+**Step 5 - Academic Writing**
+Use andrej-karpathy to maximize clarity of reasoning and improve the quality of scientific communication.
+Rewrite only after approval, ensuring:
+*   Publication-quality academic English.
+*   Improved readability, flow, and strong transitions.
+*   Concise wording with no unnecessary repetition.
+*   Consistent terminology and clear explanations.
+*   Precise scientific language.
+*   Preservation of the author's intended meaning with no unsupported additions.
+
+CRITICAL: You must preserve all in-text citations, reference markers, and footnotes exactly as they appear in the original text. Do not move, delete, or alter the formatting of any citation marker during the rewriting process. Do not oversimplify technical content.
+
+AI-DETECTION MITIGATION: Avoid overly dramatic, repetitive, or recognizable "AI-like" academic phrasing. Strictly avoid words such as: delve, underscore, tapestry, robust, pivotal, paradigm shift, testament, or orchestrated. Furthermore, **do not use em dashes (—)**; use commas, parentheses, or separate sentences instead. Prioritize dry, objective, and precise scientific reporting over flowery language.
+
+**Step 6 - Execution**
+Use executing-plans to perform revisions one section at a time.
+Process the manuscript by major structural sections (e.g., Abstract, Introduction, Methods, Results, Discussion). Present the revisions for one major section entirely, wait for my explicit approval, and only then proceed to the next major section.
+
+For every section:
+*   Explain the identified issues.
+*   Explain why the changes improve the manuscript.
+*   Present the revised version.
+
+When presenting the revised version, use Markdown formatting (e.g., **bolding** for additions, and strikethrough ~~like this~~ for deletions) to clearly highlight the specific textual changes made, allowing for an easy side-by-side comparison before approval. Maintain progress in task.md throughout the process.
+
+**Step 7 - Quality Assurance**
+Use testing-qa to perform a comprehensive final review.
+Specifically search for: grammar mistakes, typographical errors, redundant sentences, contradictions, ambiguous wording, weak arguments, unsupported claims, citation inconsistencies, number inconsistencies, table/figure mismatches, missing references, formatting inconsistencies, and reviewer red flags. 
+
+Figure/Table Callout Verification: Ensure that all figures and tables are cited in the text in strict numerical order. Verify that the textual description matching a figure/table accurately reflects its caption and expected contents.
+Continue reviewing until no significant issues remain.
+
+**Step 8 - Final Verification**
+Use verification-before-completion before declaring the manuscript complete.
+Verify that:
+*   Every section has been reviewed and every planned revision has been completed.
+*   The manuscript is internally consistent.
+*   Figures, tables, and references match the text.
+*   No unresolved reviewer concerns remain.
+*   The manuscript is submission-ready.
+
+Finally, provide: a summary of all revisions, remaining optional improvements, an overall publication readiness assessment, and a simulated peer-review report listing the strongest aspects of the paper and the most likely reviewer criticisms.
+
+**Step 9 - Final Compilation & Strict Formatting Preservation**
+Once all sections have been approved and the final verification is complete, compile the entire revised manuscript and generate the final file.
+CRITICAL REQUIREMENT: You must preserve the exact formatting of the original source file (1:1). All revisions must be strictly textual. You are strictly forbidden from altering the layout, styling, fonts, margins, headers/footers, figure placements, or any other formatting parameter. The structural integrity and design of the original document must remain completely untouched. Output the final manuscript in its original file format, ensuring only the approved textual changes are applied.

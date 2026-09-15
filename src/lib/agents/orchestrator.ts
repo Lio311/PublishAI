@@ -11,15 +11,18 @@ export class AgentOrchestrator {
     agent: BaseAgent,
     context: AgentContext
   ): Promise<AgentResult> {
-    return await this.step.run(`agent-${agent.stage}`, async () => {
-      // 1. Insert stage record
+    // 1. Insert stage record in its own step to ensure idempotency
+    const stageRecordId = await this.step.run(`init-stage-${agent.stage}`, async () => {
       const [stageRecord] = await db.insert(paperStages).values({
         paperId: Number(context.paperId),
         stage: agent.stage,
         status: "in_progress",
         startedAt: new Date(),
       }).returning();
+      return stageRecord.id;
+    });
 
+    return await this.step.run(`agent-${agent.stage}`, async () => {
       try {
         // 2. Execute the agent logic
         const result = await agent.execute(context);
@@ -29,7 +32,7 @@ export class AgentOrchestrator {
           status: result.status,
           agentOutput: result.output,
           completedAt: new Date(),
-        }).where(eq(paperStages.id, stageRecord.id));
+        }).where(eq(paperStages.id, stageRecordId));
 
         return result;
       } catch (error: any) {
@@ -38,7 +41,7 @@ export class AgentOrchestrator {
           status: "failed",
           userFeedback: error.message || "Unknown error",
           completedAt: new Date(),
-        }).where(eq(paperStages.id, stageRecord.id));
+        }).where(eq(paperStages.id, stageRecordId));
         
         throw error;
       }

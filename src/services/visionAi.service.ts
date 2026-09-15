@@ -37,6 +37,9 @@ export async function extractFiguresFromDocument(documentText: string): Promise<
 export async function analyzeFigureWithVisionAi(imageUrl: string, legend: string, claims: string[]): Promise<any> {
   try {
     const imageResponse = await fetch(imageUrl);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to fetch image: ${imageResponse.statusText}`);
+    }
     const imageBuffer = await imageResponse.arrayBuffer();
     const base64Image = Buffer.from(imageBuffer).toString('base64');
     const mediaType = imageUrl.endsWith('.png') ? 'image/png' : 'image/jpeg';
@@ -63,7 +66,8 @@ export async function analyzeFigureWithVisionAi(imageUrl: string, legend: string
       }]
     });
 
-    const textContent = (response.content[0] as any).text;
+    let textContent = (response.content[0] as any).text;
+    textContent = textContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
     const parsed = JSON.parse(textContent);
     
     return {

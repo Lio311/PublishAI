@@ -79,7 +79,7 @@ export function DataUploadSection({ paperId }: { paperId: number }) {
         </p>
         <label className="cursor-pointer bg-sky-500 text-white px-4 py-2 rounded shadow hover:bg-sky-600 transition">
           Browse Files
-          <input type="file" className="hidden" accept=".csv, .xlsx, .xls" onChange={handleChange} />
+          <input type="file" className="sr-only" accept=".csv, .xlsx, .xls" onChange={handleChange} />
         </label>
       </div>
       {uploading && <p className="mt-2 text-sky-500">Uploading...</p>}

@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+import dynamic from "next/dynamic";
+
 // @ts-ignore
-import ForceGraph2D from "react-force-graph-2d";
+const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), { ssr: false });
 
 interface Node {
   id: string;

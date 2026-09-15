@@ -2,7 +2,7 @@ import { BaseAgent, AgentContext, AgentResult, Stage } from "./base-agent";
 import { askClaude, ClaudeModel } from "./claude-client";
 
 export class RebuttalAgent extends BaseAgent {
-  stage: Stage = "planning"; // Reusing planning stage
+  stage: Stage = "rebuttal";
   model = "claude-3-7-sonnet-20250219";
 
   async execute(context: AgentContext): Promise<AgentResult> {
@@ -20,7 +20,7 @@ ${reviewerComments}
 
 The original manuscript text:
 """
-${context.manuscriptText.substring(0, 5000)}... (truncated)
+${context.manuscriptText}
 """
 
 Generate a "Response to Reviewers" strategy document.

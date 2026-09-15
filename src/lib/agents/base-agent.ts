@@ -7,7 +7,8 @@ export type Stage =
   | "execution" 
   | "qa" 
   | "verification" 
-  | "compilation";
+  | "compilation"
+  | "rebuttal";
 
 export interface AgentContext {
   paperId: string;

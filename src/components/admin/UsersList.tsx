@@ -19,8 +19,8 @@ export default function UsersList({ users, locale }: { users: { id: string; name
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {users.map((user, i) => (
-              <tr key={user.id || i} className="hover:bg-slate-50 transition-colors">
+            {users.map((user) => (
+              <tr key={user.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4 font-medium text-slate-900">{user.name || (locale === 'he' ? 'ללא שם' : 'Unnamed')}</td>
                 <td className="px-6 py-4 text-slate-700">{user.email}</td>
               </tr>

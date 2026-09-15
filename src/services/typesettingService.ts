@@ -2,7 +2,7 @@ import { generatePdf } from "@/lib/export/pdf-generator";
 
 export async function generatePDF(markdownContent: string): Promise<Buffer> {
   // Extract title from first line if it starts with #
-  const lines = markdownContent.split('\n');
+  const lines = markdownContent.split(/\r?\n/);
   let title = 'Untitled Document';
   let content = markdownContent;
   

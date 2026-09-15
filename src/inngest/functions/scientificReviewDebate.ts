@@ -16,7 +16,7 @@ export const scientificReviewDebate = inngest.createFunction(
     const maxRounds = 5;
 
     while (!reachedConsensus && round <= maxRounds) {
-      const agents = await step.run(`get-agents`, async () => {
+      const agents = await step.run(`get-agents-round-${round}`, async () => {
         return db.select().from(debateAgents).where(eq(debateAgents.debateId, debateId));
       });
 

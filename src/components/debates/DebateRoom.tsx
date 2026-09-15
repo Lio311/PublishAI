@@ -4,24 +4,30 @@ import { useEffect, useState } from "react";
 import DebateTranscript from "./DebateTranscript";
 import ConsensusSummary from "./ConsensusSummary";
 
-export default function DebateRoom({ debateId }: { debateId: string }) {
+export default function DebateRoom({ paperId }: { paperId: number }) {
   const [messages, setMessages] = useState<any[]>([]);
   const [consensus, setConsensus] = useState<string | null>(null);
+  const [realDebateId, setRealDebateId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchInitial = async () => {
-      const res = await fetch(`/api/debates/${debateId}`);
+      const res = await fetch(`/api/debates/${paperId}`);
       if (res.ok) {
         const data = await res.json();
         setMessages(data.messages);
+        setRealDebateId(data.debate.id);
         if (data.debate.status === "consensus_reached") {
           setConsensus(data.debate.consensusSummary);
         }
       }
     };
     fetchInitial();
+  }, [paperId]);
 
-    const evtSource = new EventSource(`/api/debates/${debateId}/stream`);
+  useEffect(() => {
+    if (!realDebateId) return;
+
+    const evtSource = new EventSource(`/api/debates/${realDebateId}/stream`);
     evtSource.onmessage = (event) => {
       const newMsg = JSON.parse(event.data);
       setMessages((prev) => {
@@ -33,7 +39,7 @@ export default function DebateRoom({ debateId }: { debateId: string }) {
     };
 
     return () => evtSource.close();
-  }, [debateId]);
+  }, [realDebateId]);
 
   return (
     <div className="flex flex-col h-full bg-gray-50 p-4">

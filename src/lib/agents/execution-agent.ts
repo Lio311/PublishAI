@@ -15,8 +15,8 @@ export class ExecutionAgent extends BaseAgent {
     const prompt = `Create a structured summary of the changes made between the original manuscript and the rewritten version.\n\nOriginal:\n<manuscript>\n${context.manuscriptText}\n</manuscript>\n\nRewritten:\n<rewritten>\n${writingOutput}\n</rewritten>`;
     
     try {
-      const { text, tokensUsed } = await askClaude(prompt, this.model as import("./claude-client").ClaudeModel);
       context.manuscriptText = writingOutput;
+      const { text, tokensUsed } = await askClaude(prompt, this.model as import("./claude-client").ClaudeModel);
 
       return {
         stage: this.stage,

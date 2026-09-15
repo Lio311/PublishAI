@@ -27,7 +27,7 @@ export async function checkPlagiarism(text: string): Promise<PlagiarismResult> {
     const normalized = sentence.trim().toLowerCase().replace(/\s+/g, ' ');
     const count = seen.get(normalized) || 0;
     seen.set(normalized, count + 1);
-    if (count > 0) {
+    if (count === 1) {
       matches.push({
         text: sentence.trim(),
         similarity: 100,

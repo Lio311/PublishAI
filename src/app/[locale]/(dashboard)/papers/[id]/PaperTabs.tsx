@@ -66,7 +66,7 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
         
         {activeTab === "AI Debate" && (
           <div className="space-y-8">
-            <DebateRoom debateId={paperId.toString()} />
+            <DebateRoom paperId={paperId} />
           </div>
         )}
         

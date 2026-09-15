@@ -27,23 +27,28 @@ Paper Content:
 ${paperContent}
 `;
 
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20240620",
-    max_tokens: 4000,
-    messages: [
-      { role: "user", content: prompt }
-    ]
-  });
+  try {
+    const response = await anthropic.messages.create({
+      model: "claude-3-5-sonnet-20240620",
+      max_tokens: 4000,
+      messages: [
+        { role: "user", content: prompt }
+      ]
+    });
 
-  const content = response.content[0];
-  if (content.type === "text") {
-    let text = content.text.trim();
-    // Remove markdown code blocks if the LLM includes them despite instructions
-    if (text.startsWith("\`\`\`python")) {
-      text = text.replace(/^\`\`\`python\\n/, "").replace(/\\n\`\`\`$/, "");
+    const content = response.content[0];
+    if (content.type === "text") {
+      let text = content.text.trim();
+      // Remove markdown code blocks if the LLM includes them despite instructions
+      if (text.startsWith("```python")) {
+        text = text.replace(/^```python\r?\n/, "").replace(/\r?\n```$/, "");
+      }
+      return text;
     }
-    return text;
+    
+    throw new Error("Failed to generate Python script.");
+  } catch (error) {
+    console.error("Error generating Python script:", error);
+    throw error;
   }
-  
-  throw new Error("Failed to generate Python script.");
 }

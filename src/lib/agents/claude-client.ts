@@ -14,7 +14,7 @@ export async function askClaude(
   try {
     const msg = await claude.messages.create({
       model,
-      max_tokens: 4096,
+      max_tokens: 8192,
       system,
       messages: [{ role: "user", content: prompt }],
     });

@@ -82,6 +82,8 @@ export const processPaperAnalysis = inngest.createFunction(
           })
           .where(eq(sandboxRuns.id, runId));
       });
+      // Re-throw so Inngest can retry
+      throw error;
     }
   }
 );
