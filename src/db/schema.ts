@@ -9,7 +9,8 @@ import {
   boolean,
   uuid,
   real,
-  index
+  index,
+  primaryKey
 } from "drizzle-orm/pg-core";
 
 export const statusEnum = pgEnum("status", [
@@ -64,7 +65,12 @@ export const accounts = pgTable(
     scope: text("scope"),
     id_token: text("id_token"),
     session_state: text("session_state"),
-  }
+  },
+  (account) => ({
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
+  })
 );
 
 export const sessions = pgTable("session", {
