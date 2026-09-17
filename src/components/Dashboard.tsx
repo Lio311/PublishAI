@@ -37,52 +37,10 @@ export interface DashboardProps {
   onImportDocument?: () => void;
 }
 
-const DEFAULT_MANUSCRIPTS: ManuscriptItem[] = [
-  {
-    id: "doc-1",
-    title: "Deep Learning for Genomic Variant Interpretation: A Multi-Omics Perspective",
-    journal: "Nature Biotechnology",
-    category: "Bioinformatics",
-    status: "revision",
-    updatedAt: "2 hours ago",
-    wordCount: 6840,
-    progress: 78,
-  },
-  {
-    id: "doc-2",
-    title: "Zero-Shot Protein Structure Alignment Using Hyperbolic Geometric Transformers",
-    journal: "Cell Systems",
-    category: "Computational Biology",
-    status: "review",
-    updatedAt: "Yesterday",
-    wordCount: 8120,
-    progress: 95,
-  },
-  {
-    id: "doc-3",
-    title: "Automated Evidence Synthesis in Systematic Reviews via LLM Debate Protocols",
-    journal: "Bioinformatics (Oxford)",
-    category: "Machine Learning",
-    status: "draft",
-    updatedAt: "3 days ago",
-    wordCount: 3420,
-    progress: 42,
-  },
-  {
-    id: "doc-4",
-    title: "High-Throughput Single-Cell RNA-seq Quantification of Cardiomyocyte Differentiation",
-    journal: "Scientific Reports",
-    category: "Genomics",
-    status: "accepted",
-    updatedAt: "1 week ago",
-    wordCount: 9240,
-    progress: 100,
-  },
-];
 
 export default function Dashboard({
   userName = "Researcher",
-  manuscripts = DEFAULT_MANUSCRIPTS,
+  manuscripts = [],
   onNewDocument,
   onOpenDocument,
   onImportDocument,

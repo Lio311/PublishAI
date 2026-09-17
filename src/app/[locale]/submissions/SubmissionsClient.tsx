@@ -2,11 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import SubmissionDashboard, {
-  DEFAULT_SUBMISSIONS,
   SubmissionItem,
 } from "@/components/SubmissionDashboard";
 import ReviewResponseInterface, {
-  DEFAULT_REVIEW_COMMENTS,
   ReviewerCommentData,
 } from "@/components/ReviewResponseInterface";
 import { Send, MessageSquare, ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
@@ -18,16 +16,16 @@ interface SubmissionsClientProps {
 export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
   const isHe = locale === "he";
   const [activeTab, setActiveTab] = useState<"submissions" | "reviews">("submissions");
-  const [submissions, setSubmissions] = useState<SubmissionItem[]>(DEFAULT_SUBMISSIONS);
+  const [submissions, setSubmissions] = useState<SubmissionItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedSubmissionForReview, setSelectedSubmissionForReview] = useState<{
     paperTitle: string;
     journalName: string;
     manuscriptId: string;
   }>({
-    paperTitle: "Deep Learning for Genomic Variant Interpretation: A Multi-Omics Perspective",
-    journalName: "Nature Biotechnology",
-    manuscriptId: "NBT-2026-08942",
+    paperTitle: "",
+    journalName: "",
+    manuscriptId: "",
   });
 
   // Attempt to fetch submissions from the backend API, falling back to rich mock data
@@ -55,7 +53,7 @@ export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
               errorLog: s.errorLog,
             }));
             // Merge with mock submissions to guarantee rich presentation
-            setSubmissions([...mapped, ...DEFAULT_SUBMISSIONS]);
+            setSubmissions(mapped);
           }
         }
       } catch (err) {

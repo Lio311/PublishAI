@@ -53,84 +53,10 @@ export interface ReviewResponseInterfaceProps {
   locale?: string;
 }
 
-export const DEFAULT_REVIEW_COMMENTS: ReviewerCommentData[] = [
-  {
-    id: "rev-1-1",
-    reviewerId: "reviewer_1",
-    reviewerName: "Reviewer 1",
-    commentNumber: 1,
-    rawText:
-      "The authors claim that their hyperbolic embedding preserves phylogenetic distance with 99.2% fidelity, but they only test on synthetic benchmarks (Section 3.2). A validation on empirical SARS-CoV-2 lineages or 1000 Genomes data is essential to demonstrate clinical validity.",
-    category: "methodology",
-    severity: "major",
-    suggestedAction: "Run validation on the empirical 1000 Genomes Phase 3 variant dataset and report distortion metrics.",
-    aiDraftedResponse:
-      "We thank the reviewer for this insightful recommendation. We fully agree that empirical validation is essential. To address this, we evaluated our hyperbolic geometric transformer on 2,504 human genomes from the 1000 Genomes Project (Phase 3). Our model preserved genetic distance with 98.4% fidelity while reducing dimensional distortion by 3.8-fold compared to Euclidean t-SNE. We have added these new results to Section 3.3 and included Supplementary Figure S5.",
-    userResponse:
-      "We thank the reviewer for this insightful recommendation. We fully agree that empirical validation is essential. To address this, we evaluated our hyperbolic geometric transformer on 2,504 human genomes from the 1000 Genomes Project (Phase 3). Our model preserved genetic distance with 98.4% fidelity while reducing dimensional distortion by 3.8-fold compared to Euclidean t-SNE. We have added these new results to Section 3.3 and included Supplementary Figure S5.",
-    manuscriptChanges: "Expanded Section 3.3 (lines 214–248) with 1000 Genomes benchmark; added Supplementary Figure S5.",
-    isResolved: true,
-    pageReference: "Page 8, Section 3.2",
-  },
-  {
-    id: "rev-1-2",
-    reviewerId: "reviewer_1",
-    reviewerName: "Reviewer 1",
-    commentNumber: 2,
-    rawText:
-      "In Figure 4B, error bars are missing from the ablation study comparing standard Euclidean projections against Poincaré balls. Please clarify whether variances represent standard deviation or SEM, and report statistical significance.",
-    category: "statistics",
-    severity: "major",
-    suggestedAction: "Add error bars representing standard deviation across 10-fold cross-validation and annotate p-values.",
-    aiDraftedResponse:
-      "We apologize for the omission. Figure 4B has been revised to include error bars depicting standard deviations computed across 10-fold cross-validation experiments. Two-sided Wilcoxon signed-rank tests confirmed that hyperbolic curvature significantly outperforms Euclidean projections (p = 0.0018). The figure caption has been updated accordingly on Page 11.",
-    userResponse:
-      "We apologize for the omission. Figure 4B has been revised to include error bars depicting standard deviations computed across 10-fold cross-validation experiments. Two-sided Wilcoxon signed-rank tests confirmed that hyperbolic curvature significantly outperforms Euclidean projections (p = 0.0018). The figure caption has been updated accordingly on Page 11.",
-    manuscriptChanges: "Re-rendered Figure 4B with ±1 SD error bars and p-value brackets; updated caption on Page 11.",
-    isResolved: true,
-    pageReference: "Page 11, Figure 4B",
-  },
-  {
-    id: "rev-2-1",
-    reviewerId: "reviewer_2",
-    reviewerName: "Reviewer 2",
-    commentNumber: 1,
-    rawText:
-      "Equation 4 has a notation ambiguity where γ is defined as the Riemannian metric tensor in paragraph 2, but later used as the exponential learning rate decay factor in Section 4.1.",
-    category: "clarity",
-    severity: "minor",
-    suggestedAction: "Change the learning rate decay factor notation from γ to η_decay to prevent notation conflict.",
-    aiDraftedResponse:
-      "We appreciate the reviewer's careful reading and attention to detail. We have disambiguated the notation by reserving γ exclusively for the metric tensor in Equation 4 and re-designating the learning rate scheduler parameter as η_decay throughout Section 4.1 and Table 2.",
-    userResponse:
-      "We appreciate the reviewer's careful reading and attention to detail. We have disambiguated the notation by reserving γ exclusively for the metric tensor in Equation 4 and re-designating the learning rate scheduler parameter as η_decay throughout Section 4.1 and Table 2.",
-    manuscriptChanges: "Changed learning rate parameter to η_decay in Section 4.1 and Table 2.",
-    isResolved: false,
-    pageReference: "Page 6, Equation 4 & Page 14, Section 4.1",
-  },
-  {
-    id: "rev-2-2",
-    reviewerId: "reviewer_2",
-    reviewerName: "Reviewer 2",
-    commentNumber: 2,
-    rawText:
-      "The comparison against AlphaFold-Multimer and ESMFold should discuss runtime complexity on standard consumer hardware (e.g., single NVIDIA RTX 4090), as computational accessibility is highlighted as a primary motivation in the Abstract.",
-    category: "results",
-    severity: "minor",
-    suggestedAction: "Provide benchmark inference times and memory footprints on consumer hardware (RTX 4090 / 24GB).",
-    aiDraftedResponse:
-      "We agree that concrete hardware benchmarking is vital for readers. We executed wall-clock inference speed tests on a single NVIDIA RTX 4090 (24GB VRAM). Our model processed complexes of up to 1,200 residues in 4.2 seconds, requiring 8.1 GB VRAM, compared to 48.7 seconds and 21.4 GB for AlphaFold-Multimer. We have incorporated this hardware profile into Section 4.4 and Table 3.",
-    userResponse:
-      "We agree that concrete hardware benchmarking is vital for readers. We executed wall-clock inference speed tests on a single NVIDIA RTX 4090 (24GB VRAM). Our model processed complexes of up to 1,200 residues in 4.2 seconds, requiring 8.1 GB VRAM, compared to 48.7 seconds and 21.4 GB for AlphaFold-Multimer. We have incorporated this hardware profile into Section 4.4 and Table 3.",
-    manuscriptChanges: "Added consumer GPU (RTX 4090) memory and latency benchmarks to Table 3 and discussion in Section 4.4.",
-    isResolved: false,
-    pageReference: "Page 15, Section 4.4",
-  },
-];
 
 export default function ReviewResponseInterface({
-  comments: initialComments = DEFAULT_REVIEW_COMMENTS,
-  paperTitle = "Deep Learning for Genomic Variant Interpretation: A Multi-Omics Perspective",
+  comments: initialComments = [],
+  paperTitle = "",
   journalName = "Nature Biotechnology",
   manuscriptId = "NBT-2026-08942",
   onSaveResponse,

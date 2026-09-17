@@ -54,26 +54,11 @@ const DEFAULT_SECTIONS: DocumentSection[] = [
   { id: "references", title: "References", wordCount: 540 },
 ];
 
-const SAMPLE_CONTENT = `# Deep Learning for Genomic Variant Interpretation: A Multi-Omics Perspective
-
-## Abstract
-Recent advances in deep learning architectures, particularly foundation models pretrained on genomic, transcriptomic, and proteomic sequences, offer unprecedented opportunities to decipher non-coding variant consequences. However, systematic benchmarking across complex disease phenotypes remains limited. Here, we present PublishAI-Genetics, an end-to-end multi-modal transformer framework that unifies chromatin accessibility profiles, 3D genome conformation maps, and evolutionary conservation scores to predict functional pathogenic variants with high sensitivity and specificity.
-
-## 1. Introduction
-Deciphering the pathogenicity of non-coding genetic variants represents one of the foremost challenges in modern human genetics. While genome-wide association studies (GWAS) have identified tens of thousands of loci associated with complex human diseases, over 90% of identified variants reside in non-coding regulatory sequences [1].
-
-Traditional variant effect predictors typically rely on evolutionary conservation metrics or linear sequence motifs. While valuable, these approaches frequently overlook spatial genome organization, cell-type specific chromatin dynamics, and synergistic regulatory networks.
-
-## 2. Materials & Methods
-### 2.1 Multi-Omics Dataset Integration
-We aggregated high-resolution chromatin conformation capture (Hi-C) contact maps, single-cell ATAC-seq, and CAGE-seq expression profiles spanning 128 human tissue types from ENCODE and the Roadmap Epigenomics Project.
-
-### 2.2 Model Architecture
-The core model incorporates an axial self-attention transformer backbone with hyperbolic latent projections to capture hierarchical genomic dependencies across multi-megabase genomic loci.`;
+const SAMPLE_CONTENT = "";
 
 export default function DocumentEditor({
   documentId = "doc-new",
-  initialTitle = "Deep Learning for Genomic Variant Interpretation: A Multi-Omics Perspective",
+  initialTitle = "",
   initialJournal = "Nature Biotechnology",
   initialContent = SAMPLE_CONTENT,
   onSave,
