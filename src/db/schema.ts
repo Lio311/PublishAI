@@ -354,6 +354,73 @@ export const submissionLogs = pgTable("submission_logs", {
 });
 
 // ═══════════════════════════════════════════════════════
+// TABLE: submission_events (EPIC 3)
+// ═══════════════════════════════════════════════════════
+
+export const submissionEvents = pgTable("submission_events", {
+  id: serial("id").primaryKey(),
+  submissionId: integer("submission_id")
+    .references(() => submissions.id, { onDelete: "cascade" })
+    .notNull(),
+  fromStatus: text("from_status"),
+  toStatus: text("to_status").notNull(),
+  eventType: text("event_type"),
+  description: text("description"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  submissionIdIdx: index("submission_events_submission_id_idx").on(table.submissionId),
+}));
+
+export const submission_events = submissionEvents;
+
+// ═══════════════════════════════════════════════════════
+// TABLES: review_threads & review_comments (EPIC 3)
+// ═══════════════════════════════════════════════════════
+
+export const reviewThreads = pgTable("review_threads", {
+  id: serial("id").primaryKey(),
+  submissionId: integer("submission_id")
+    .references(() => submissions.id, { onDelete: "cascade" })
+    .notNull(),
+  title: text("title"),
+  reviewerId: text("reviewer_id"),
+  status: text("status").default("pending").notNull(),
+  roundNumber: integer("round_number").default(1),
+  rawReport: text("raw_report"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  submissionIdIdx: index("review_threads_submission_id_idx").on(table.submissionId),
+}));
+
+export const review_threads = reviewThreads;
+
+export const reviewComments = pgTable("review_comments", {
+  id: serial("id").primaryKey(),
+  threadId: integer("thread_id")
+    .references(() => reviewThreads.id, { onDelete: "cascade" })
+    .notNull(),
+  commentNumber: integer("comment_number"),
+  reviewerText: text("reviewer_text").notNull(),
+  aiDraftedResponse: text("ai_drafted_response"),
+  authorFinalResponse: text("author_final_response"),
+  status: text("status").default("pending").notNull(),
+  category: text("category"),
+  severity: text("severity"),
+  suggestedAction: text("suggested_action"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  threadIdIdx: index("review_comments_thread_id_idx").on(table.threadId),
+  statusIdx: index("review_comments_status_idx").on(table.status),
+}));
+
+export const review_comments = reviewComments;
+
+// ═══════════════════════════════════════════════════════
 // UPGRADE 1: DATA SCIENCE SANDBOX
 // ═══════════════════════════════════════════════════════
 
@@ -547,3 +614,12 @@ export type NewJournal = typeof journals.$inferInsert;
 
 export type Submission = typeof submissions.$inferSelect;
 export type NewSubmission = typeof submissions.$inferInsert;
+
+export type SubmissionEvent = typeof submissionEvents.$inferSelect;
+export type NewSubmissionEvent = typeof submissionEvents.$inferInsert;
+
+export type ReviewThread = typeof reviewThreads.$inferSelect;
+export type NewReviewThread = typeof reviewThreads.$inferInsert;
+
+export type ReviewComment = typeof reviewComments.$inferSelect;
+export type NewReviewComment = typeof reviewComments.$inferInsert;
