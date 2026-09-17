@@ -1,13 +1,15 @@
 # EPIC 1: Core Auth & User Integration
-
-| Agent | Branch | Status | Blocked On | Current Task |
-|-------|--------|--------|------------|--------------|
-| Database | agent/database/epic-1-auth | In Progress | None | Add NextAuth tables (accounts, sessions) to schema |
-| Backend | agent/backend/epic-1-auth | In Progress | Database schema | Configure NextAuth logic & Drizzle adapter |
-| Frontend | agent/frontend/epic-1-auth | In Progress | Backend | Build Login/Register pages & Auth Provider |
+- Status: Complete and merged to main.
 
 # EPIC 2: Document Management & AI Orchestration
+- Status: Complete, tested, and merged to main.
+
+# EPIC 3: Submission & Review Workflows
 
 | Agent | Branch | Status | Blocked On | Current Task |
 |-------|--------|--------|------------|--------------|
-| Literature | agent/literature/epic-2 | Complete | None | Build the API and UI glue for Citation Search |
+| Journal Submission | agent/journal-submission/epic-3 | Pending | None | Build journal submission pipeline and status tracking API |
+| Review Response | agent/review-response/epic-3 | Pending | None | Build API logic for reviewer comments parsing and AI response generation |
+| Frontend | agent/frontend/epic-3 | Pending | None | Build Submission and Review UI interfaces |
+| Database | agent/database/epic-3 | Pending | None | Expand schema for Submission tracking and Review Threads |
+
