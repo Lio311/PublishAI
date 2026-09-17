@@ -16,7 +16,7 @@ jest.mock('@/db', () => ({
           id: 101,
           paperId: 42,
           submittedTitle: "Deep Learning for Genomic Sequences",
-          status: "submitted",
+          status: "under_review",
           submittedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
           confirmationId: "MANUSCRIPT-2026-001",
           connection: {
@@ -84,7 +84,7 @@ describe('SubmissionStatusService', () => {
 
   describe('transitionStatus', () => {
     it('transitions status successfully for valid transition', async () => {
-      const result = await SubmissionStatusService.transitionStatus(101, 'under_review', {
+      const result = await SubmissionStatusService.transitionStatus(101, 'reviews_received', {
         actor: 'editor',
         notes: 'Assigned reviewers',
       });

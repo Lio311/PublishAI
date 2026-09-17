@@ -12,6 +12,10 @@ jest.mock('@anthropic-ai/sdk', () => {
   return mockAnthropic;
 });
 
+global.fetch = jest.fn();
+globalThis.fetch = global.fetch;
+if (typeof window !== 'undefined') window.fetch = global.fetch;
+
 jest.mock('@/db', () => ({
   db: {}
 }));
@@ -40,6 +44,11 @@ describe('visionAiService', () => {
         suggestedLegend: 'Better legend',
         issuesFound: ['none']
       };
+
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8))
+      });
 
       mockCreate.mockResolvedValue({
         content: [{ text: JSON.stringify(mockParsed) }]
