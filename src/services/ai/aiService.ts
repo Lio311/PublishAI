@@ -1,4 +1,5 @@
-import { generateText, streamText } from "ai";
+import { generateText, generateObject, streamText } from "ai";
+export { generateText, generateObject, streamText } from "ai";
 import { createOpenAI, openai } from "@ai-sdk/openai";
 import Anthropic from "@anthropic-ai/sdk";
 import {
