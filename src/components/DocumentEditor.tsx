@@ -107,20 +107,53 @@ export default function DocumentEditor({
     }, 600);
   };
 
-  const handleAiAction = (actionType: string) => {
+  const handleAiAction = async (actionType: string) => {
     setIsAiGenerating(true);
-    setTimeout(() => {
-      setIsAiGenerating(false);
+    try {
+      let prompt = aiPrompt;
+      let systemPrompt = "You are an elite academic co-author.";
+
       if (actionType === "abstract") {
-        setContent(
-          (prev) =>
-            prev +
-            "\n\n### AI Suggestion: Enhanced Abstract\n" +
-            "Our benchmarking across 14 independent clinical cohort datasets demonstrates a 18.4% improvement in AUROC over existing state-of-the-art predictors, providing actionable mechanistic insights for variant prioritization."
-        );
-        setSaveStatus("unsaved");
+        prompt = "Please polish this abstract for clarity:\n" + content;
+      } else if (actionType === "critique") {
+        prompt = "Please provide a peer review critique for this text:\n" + content;
+      } else if (actionType === "tone") {
+        prompt = "Please verify the academic tone of this text and suggest improvements:\n" + content;
       }
-    }, 1200);
+
+      if (!prompt) {
+        setIsAiGenerating(false);
+        return;
+      }
+
+      const response = await fetch("/api/ai/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, systemPrompt }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate AI response");
+      }
+
+      const data = await response.json();
+
+      setContent(
+        (prev) =>
+          prev +
+          `\n\n### AI Suggestion (${actionType})\n` +
+          data.text
+      );
+      setSaveStatus("unsaved");
+      if (actionType === "custom") {
+        setAiPrompt("");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to get AI response.");
+    } finally {
+      setIsAiGenerating(false);
+    }
   };
 
   const insertFormatting = (prefix: string, suffix: string = "") => {

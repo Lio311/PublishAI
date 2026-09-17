@@ -97,18 +97,17 @@ export async function callLLM(options: GenerateTextOptions): Promise<AIResponse>
     prompt: options.prompt,
     system: options.systemPrompt,
     temperature: options.temperature,
-    maxTokens: options.maxTokens,
   });
 
   return {
     text: result.text,
     provider: "openai",
     model: modelName,
-    tokensUsed: result.usage?.totalTokens,
+    tokensUsed: ((result.usage as any))?.totalTokens,
     usage: {
-      promptTokens: result.usage?.promptTokens,
-      completionTokens: result.usage?.completionTokens,
-      totalTokens: result.usage?.totalTokens,
+      promptTokens: ((result.usage as any))?.promptTokens,
+      completionTokens: ((result.usage as any))?.completionTokens,
+      totalTokens: ((result.usage as any))?.totalTokens,
     },
   };
 }
@@ -178,18 +177,17 @@ export async function chatLLM(options: ChatOptions): Promise<AIResponse> {
     })),
     system: systemMessage,
     temperature: options.temperature,
-    maxTokens: options.maxTokens,
   });
 
   return {
     text: result.text,
     provider: "openai",
     model: modelName,
-    tokensUsed: result.usage?.totalTokens,
+    tokensUsed: ((result.usage as any))?.totalTokens,
     usage: {
-      promptTokens: result.usage?.promptTokens,
-      completionTokens: result.usage?.completionTokens,
-      totalTokens: result.usage?.totalTokens,
+      promptTokens: ((result.usage as any))?.promptTokens,
+      completionTokens: ((result.usage as any))?.completionTokens,
+      totalTokens: ((result.usage as any))?.totalTokens,
     },
   };
 }
@@ -222,7 +220,6 @@ export async function streamLLMText(options: GenerateTextOptions) {
     prompt: options.prompt,
     system: options.systemPrompt,
     temperature: options.temperature,
-    maxTokens: options.maxTokens,
   });
 }
 
