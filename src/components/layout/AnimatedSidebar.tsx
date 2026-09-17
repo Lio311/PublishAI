@@ -7,7 +7,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { FileText, Home, Settings, LogOut, Globe, Book, Link as LinkIcon, ChevronRight } from "lucide-react";
+import { FileText, Home, Settings, LogOut, Globe, Book, Link as LinkIcon, ChevronRight, Send } from "lucide-react";
 
 export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
@@ -38,6 +38,7 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
     { name: t("myPapers"), icon: FileText, href: `/${locale}/papers` },
     { name: locale === 'he' ? 'חיבור לעיתונים' : 'Journal Connections', icon: LinkIcon, href: `/${locale}/connections` },
     { name: locale === 'he' ? 'חוקי עיתונים' : 'Journal Rules', icon: Book, href: `/${locale}/journals` },
+    { name: locale === 'he' ? 'מעקב הגשות וביקורת' : 'Submissions & Reviews', icon: Send, href: `/${locale}/submissions` },
     { name: t("settings"), icon: Settings, href: `/${locale}/settings` },
   ];
 
