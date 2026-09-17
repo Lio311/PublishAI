@@ -3,6 +3,7 @@ import mammoth from 'mammoth';
 import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { generateDocx } from '@/lib/export/docx-generator';
 import { generatePdf } from '@/lib/export/pdf-generator';
+import util from 'util';
 import {
   DocumentFormat,
   DocumentMetadata,

@@ -107,7 +107,7 @@ function parseTextRuns(html: string): TextRun[] {
       else if (tag === '<em>' || tag === '<i>') isItalic = true;
       else if (tag === '</em>' || tag === '</i>') isItalic = false;
     } else {
-      let text = part
+      const text = part
         .replace(/&nbsp;/g, ' ')
         .replace(/&amp;/g, '&')
         .replace(/&lt;/g, '<')

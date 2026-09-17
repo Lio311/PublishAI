@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ConnectionTestResult, SubmissionPayload, SubmissionResult } from "../types";
 
 export class OJSAdapter {

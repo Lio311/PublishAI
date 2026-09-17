@@ -1,6 +1,6 @@
 export async function generatePdf(title: string, content: string): Promise<Buffer> {
   // Strip HTML tags and basic entities
-  let textContent = content
+  const textContent = content
     .replace(/<[^>]+>/g, ' ')
     .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&')

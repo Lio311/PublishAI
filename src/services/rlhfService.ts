@@ -32,7 +32,7 @@ export async function exportDatasetForFineTuning(
   journalId?: number, 
   outcomeFilter?: 'accepted' | 'rejected' | 'revision_required'
 ): Promise<string> {
-  let conditions = [];
+  const conditions = [];
   if (journalId) conditions.push(eq(rlhfFeedbackLogs.journalId, journalId));
   if (outcomeFilter) conditions.push(eq(rlhfFeedbackLogs.outcome, outcomeFilter));
 
