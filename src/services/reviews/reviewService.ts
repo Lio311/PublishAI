@@ -40,8 +40,8 @@ export function fallbackParseReviewComments(
   let currentReviewer = "Reviewer 1";
   let currentPointNumber = 0;
   let currentCommentBuffer: string[] = [];
-  let currentCategory: ReviewPoint["category"] = "general";
-  let currentSeverity: ReviewPoint["severity"] = "minor";
+  const currentCategory: ReviewPoint["category"] = "general";
+  const currentSeverity: ReviewPoint["severity"] = "minor";
 
   const flushCurrent = () => {
     if (currentCommentBuffer.length > 0) {

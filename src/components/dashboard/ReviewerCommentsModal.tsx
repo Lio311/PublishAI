@@ -34,7 +34,7 @@ export function ReviewerCommentsModal({ paperId, isOpen, onClose, onSubmit }: Re
         
         <div className="p-6 overflow-y-auto">
           <p className="text-sm text-gray-600 mb-4">
-            Paste the feedback received from the journal reviewers below. Our Rebuttal Agent will analyze these comments and propose a "Response to Reviewers" strategy.
+            Paste the feedback received from the journal reviewers below. Our Rebuttal Agent will analyze these comments and propose a &quot;Response to Reviewers&quot; strategy.
           </p>
           <textarea
             className="w-full h-64 p-4 border rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 font-mono text-sm"

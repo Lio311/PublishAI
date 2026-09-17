@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10", 10);
     const offset = (page - 1) * limit;
 
-    let conditions = [];
+    const conditions = [];
     conditions.push(eq(documents.userId, session.user.id));
 
     if (statusFilter) {

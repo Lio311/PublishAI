@@ -19,6 +19,7 @@ import {
 // Ensure TextEncoder / TextDecoder exist in Node environment
 if (typeof global !== 'undefined') {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const util = require('util');
     if (typeof (global as any).TextEncoder === 'undefined' && util.TextEncoder) {
       (global as any).TextEncoder = util.TextEncoder;

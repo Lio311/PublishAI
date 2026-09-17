@@ -8,6 +8,7 @@ export function AnalysisStatus({ paperId }: { paperId: number }) {
   const [status, setStatus] = useState<string>("idle");
 
   useEffect(() => {
+    // eslint-disable-next-line prefer-const
     let intervalId: NodeJS.Timeout;
 
     const fetchStatus = async () => {

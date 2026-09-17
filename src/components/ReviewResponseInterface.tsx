@@ -498,7 +498,7 @@ export default function ReviewResponseInterface({
                     </span>
                   </div>
                   <div className="p-4 bg-slate-50 border border-slate-200/70 rounded-xl text-sm text-slate-800 leading-relaxed font-serif">
-                    "{comment.rawText}"
+                    &quot;{comment.rawText}&quot;
                   </div>
                 </div>
 

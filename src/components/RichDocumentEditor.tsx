@@ -1,6 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+
 import {
   Bold,
   Italic,
@@ -56,7 +60,7 @@ const DEFAULT_SECTIONS: DocumentSection[] = [
 
 const SAMPLE_CONTENT = "";
 
-export default function DocumentEditor({
+export default function RichDocumentEditor({
   documentId = "doc-new",
   initialTitle = "",
   initialJournal = "Nature Biotechnology",
@@ -73,6 +77,29 @@ export default function DocumentEditor({
   const [rightTab, setRightTab] = useState<"copilot" | "citations" | "compliance">("copilot");
   const [aiPrompt, setAiPrompt] = useState("");
   const [isAiGenerating, setIsAiGenerating] = useState(false);
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+    ],
+    content: initialContent,
+    onUpdate: ({ editor }) => {
+      setContent(editor.getHTML());
+      setSaveStatus("unsaved");
+    },
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none w-full min-h-[500px]',
+      },
+    },
+  });
+
+  useEffect(() => {
+    if (editor && initialContent !== editor.getHTML()) {
+      // Avoid resetting unnecessarily, but could be useful if initialContent changes
+    }
+  }, [editor, initialContent]);
+
 
   // Derived statistics
   const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
@@ -360,13 +387,7 @@ export default function DocumentEditor({
         {/* Center Main Editor View */}
         <main className="flex-1 flex flex-col min-w-0 bg-white overflow-y-auto">
           <div className="p-6 md:p-8 max-w-3xl mx-auto w-full flex-1 flex flex-col">
-            <textarea
-              value={content}
-              onChange={handleContentChange}
-              placeholder="Begin drafting your scientific paper here using markdown..."
-              aria-label="Document Content"
-              className="w-full flex-1 min-h-[500px] text-sm md:text-base leading-relaxed text-slate-800 placeholder-slate-400 bg-transparent border-none focus:outline-none resize-none font-mono"
-            />
+            <EditorContent editor={editor} className="w-full flex-1" />
           </div>
         </main>
 

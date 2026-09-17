@@ -1,0 +1,1786 @@
+
+> publish-ai@0.1.0 test
+> jest
+
+FAIL __tests__/submissionFrontend.test.tsx
+  ● SubmissionDashboard Component › renders default submissions and metric cards properly
+
+    TestingLibraryElementError: Unable to find an element with the text: Deep Learning for Genomic Variant Interpretation: A Multi-Omics Perspective. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"w-full space-y-6 font-sans"[39m
+          [33mdir[39m=[32m"ltr"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-6 shadow-xs"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center gap-2"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-send w-3 h-3"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m21.854 2.147-10.94 10.939"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0mSubmission Hub[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-xs text-slate-500"[39m
+                [36m>[39m
+                  [0mReal-time Journal Tracking & Automation[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<h1[39m
+                [33mclass[39m=[32m"text-2xl font-bold tracking-tight text-slate-900 mt-1"[39m
+              [36m>[39m
+                [0mJournal Submissions Dashboard[0m
+              [36m</h1>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm text-slate-600 mt-0.5"[39m
+              [36m>[39m
+                [0mMonitor direct journal submissions, confirmation IDs, and peer review progress in real-time.[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-all shadow-xs cursor-pointer"[39m
+                [33mtitle[39m=[32m"Refresh data"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-refresh-cw w-4 h-4 text-slate-500"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M21 3v5h-5"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M8 16H3v5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"hidden sm:inline"[39m
+                [36m>[39m
+                  [0mRefresh[0m
+                [36m</span>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-sm shadow-sky-200 cursor-pointer"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-send w-4 h-4"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m21.854 2.147-10.94 10.939"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0mSubmit New Manuscript[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:shadow-md transition-shadow"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center justify-between"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-xs font-semibold uppercase tracking-wider text-slate-500"[39m
+                [36m>[39m
+                  [0mTotal Submissions[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-layers lucide-layers-3 w-4 h-4"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"current...
+
+      16 |     // Check one of the paper titles
+      17 |     expect(
+    > 18 |       screen.getByText('Deep Learning for Genomic Variant Interpretation: A Multi-Omics Perspective')
+         |              ^
+      19 |     ).toBeInTheDocument();
+      20 |   });
+      21 |
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.getByText (__tests__/submissionFrontend.test.tsx:18:14)
+
+  ● SubmissionDashboard Component › filters submissions by search query
+
+    TestingLibraryElementError: Unable to find an element with the text: Zero-Shot Protein Structure Alignment Using Hyperbolic Geometric Transformers. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"w-full space-y-6 font-sans"[39m
+          [33mdir[39m=[32m"ltr"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-6 shadow-xs"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center gap-2"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-send w-3 h-3"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m21.854 2.147-10.94 10.939"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0mSubmission Hub[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-xs text-slate-500"[39m
+                [36m>[39m
+                  [0mReal-time Journal Tracking & Automation[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<h1[39m
+                [33mclass[39m=[32m"text-2xl font-bold tracking-tight text-slate-900 mt-1"[39m
+              [36m>[39m
+                [0mJournal Submissions Dashboard[0m
+              [36m</h1>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm text-slate-600 mt-0.5"[39m
+              [36m>[39m
+                [0mMonitor direct journal submissions, confirmation IDs, and peer review progress in real-time.[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-all shadow-xs cursor-pointer"[39m
+                [33mtitle[39m=[32m"Refresh data"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-refresh-cw w-4 h-4 text-slate-500"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M21 3v5h-5"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M8 16H3v5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"hidden sm:inline"[39m
+                [36m>[39m
+                  [0mRefresh[0m
+                [36m</span>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-sm shadow-sky-200 cursor-pointer"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-send w-4 h-4"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m21.854 2.147-10.94 10.939"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0mSubmit New Manuscript[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:shadow-md transition-shadow"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center justify-between"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-xs font-semibold uppercase tracking-wider text-slate-500"[39m
+                [36m>[39m
+                  [0mTotal Submissions[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-layers lucide-layers-3 w-4 h-4"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"current...
+
+      27 |
+      28 |     expect(
+    > 29 |       screen.getByText('Zero-Shot Protein Structure Alignment Using Hyperbolic Geometric Transformers')
+         |              ^
+      30 |     ).toBeInTheDocument();
+      31 |
+      32 |     expect(
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.getByText (__tests__/submissionFrontend.test.tsx:29:14)
+
+  ● SubmissionDashboard Component › triggers onNavigateToReviews when clicking rebuttal CTA
+
+    TestingLibraryElementError: Unable to find an element with the text: Draft Rebuttal Responses. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"w-full space-y-6 font-sans"[39m
+          [33mdir[39m=[32m"ltr"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-6 shadow-xs"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center gap-2"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-send w-3 h-3"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m21.854 2.147-10.94 10.939"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0mSubmission Hub[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-xs text-slate-500"[39m
+                [36m>[39m
+                  [0mReal-time Journal Tracking & Automation[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<h1[39m
+                [33mclass[39m=[32m"text-2xl font-bold tracking-tight text-slate-900 mt-1"[39m
+              [36m>[39m
+                [0mJournal Submissions Dashboard[0m
+              [36m</h1>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm text-slate-600 mt-0.5"[39m
+              [36m>[39m
+                [0mMonitor direct journal submissions, confirmation IDs, and peer review progress in real-time.[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-all shadow-xs cursor-pointer"[39m
+                [33mtitle[39m=[32m"Refresh data"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-refresh-cw w-4 h-4 text-slate-500"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M21 3v5h-5"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M8 16H3v5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"hidden sm:inline"[39m
+                [36m>[39m
+                  [0mRefresh[0m
+                [36m</span>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-sm shadow-sky-200 cursor-pointer"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-send w-4 h-4"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m21.854 2.147-10.94 10.939"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0mSubmit New Manuscript[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:shadow-md transition-shadow"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center justify-between"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-xs font-semibold uppercase tracking-wider text-slate-500"[39m
+                [36m>[39m
+                  [0mTotal Submissions[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-layers lucide-layers-3 w-4 h-4"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"current...
+
+      39 |     render(<SubmissionDashboard locale="en" onNavigateToReviews={handleNavigate} />);
+      40 |
+    > 41 |     const rebuttalBtn = screen.getByText('Draft Rebuttal Responses');
+         |                                ^
+      42 |     fireEvent.click(rebuttalBtn);
+      43 |
+      44 |     expect(handleNavigate).toHaveBeenCalled();
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.getByText (__tests__/submissionFrontend.test.tsx:41:32)
+
+  ● ReviewResponseInterface Component › renders reviewer comments and rebuttal editor
+
+    TestingLibraryElementError: Unable to find an element with the text: /The authors claim that their hyperbolic embedding preserves phylogenetic distance/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"w-full space-y-6 font-sans"[39m
+          [33mdir[39m=[32m"ltr"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center gap-2"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-message-square w-3 h-3"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0mReviewer Rebuttal Manager[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-xs text-slate-500 font-mono"[39m
+                [36m>[39m
+                  [0mNBT-2026-08942[0m
+                  [0m • [0m
+                  [0mNature Biotechnology[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<h1[39m
+                [33mclass[39m=[32m"text-2xl font-bold tracking-tight text-slate-900 mt-1"[39m
+              [36m/>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm text-slate-600 mt-0.5"[39m
+              [36m>[39m
+                [0mReview peer critique, edit AI-crafted academic rebuttals, and compile your official response letter.[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-all shadow-xs cursor-pointer"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-download w-4 h-4 text-slate-500"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 15V3"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m7 10 5 5 5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span>[39m
+                  [0mExport Response Letter[0m
+                [36m</span>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-sm shadow-sky-200 cursor-pointer"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-circle-check lucide-check-circle-2 w-4 h-4"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"12"[39m
+                    [33mcy[39m=[32m"12"[39m
+                    [33mr[39m=[32m"10"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m16 9-5.5 5.5L8 12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span>[39m
+                  [0mUnresolve All[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"w-full md:w-1/2 space-y-2"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center justify-between text-xs"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-semibold text-slate-700 flex items-center gap-1.5"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-circle-check lucide-check-circle-2 w-4 h-4 text-emerald-600"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<circle[39m
+                      [33mcx[39m=[32m"12"[39m
+                      [33mcy[39m=[32m"12"[39m
+                      [33mr[39m=[32m"10"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m16 9-5.5 5.5L8 12"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0mRebuttal Resolution Progress[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-bold text-slate-900"[39m
+                [36m>[39m
+                  [0m0[0m
+                  [0m / [0m
+                  [0m0[0m
+                  [0m [0m
+                  [0mresolved[0m
+                  [0m ([0m
+                  [0m0[0m
+                  [0m%)[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"h-full bg-gradient-to-r from-sky-500 to-emerald-500 rounded-full transition-all duration-500 ease-out"[39m
+                  [33mstyle[39m=[32m"width: 0%;"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3 w-full md:w-auto justify-end flex-wrap"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-center"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-[10px] uppercase font-semibold text-slate-400"[39m
+                [36m>[39m
+                  [0mReviewers[0m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-sm font-bold text-slate-800"[39m
+                [36m>[39m
+                  [0m0[0m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"px-3.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-center"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-[10px] uppercase font-semibold text-amber-700"[39m
+                [36m>[39m
+                  [0mPending[0m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-sm font-bold text-amber-700"[39m
+                [36m>[39m
+                  [0m0[0m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"px-3.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-[10px] uppercase font-semibold text-emerald-700"[39m
+                [36m>[39m
+                  [0mResolved[0m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-sm font-bold text-emerald-700"[39m
+                [36m>[39m
+                  [0m0[0m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-4"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-xs font-semibold text-slate-500 flex items-center gap-1"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-funnel lucide-filter w-3.5 h-3.5"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0mReviewer:[0m
+              [36m</span>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center bg-slate-100 p-1 rounded-xl text-xs"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer bg-white font-semibold text-slate-900 shadow-xs"[39m
+                [36m>[39m
+                  [0mAll Reviewers[0m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-xs font-semibold text-slate-500"[39m
+              [36m>[39m
+                [0mStatus:[0m
+              [36m</span>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center bg-slate-100 p-1 rounded-xl text-xs"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer bg-white font-semibold text-slate-900 shadow-xs"[39m
+                [36m>[39m
+                  [0mAll[0m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900"[39m
+                [36m>[39m
+                  [0mUnresolved[0m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900"[39m
+                [36m>[39m
+                  [0mResolved[0m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-xs font-semibold text-slate-500"[39m
+              [36m>[39m
+                [0mSeverity:[0m
+              [36m</span>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center bg-slate-100 p-1 rounded-xl text-xs"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer bg-white font-semibold text-slate-900 shadow-xs"[39m
+                [36m>[39m
+                  [0mAll[0m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900"[39m
+                [36m>[39m
+                  [0mMajor[0m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900"[39m
+                [36m>[39m
+                  [0mMinor[0m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"space-y-5"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"bg-white border border-slate-200 rounded-2xl p-12 text-center"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-circle-check lucide-check-circle-2 w-10 h-10 text-emerald-400 mx-auto mb-3"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"12"[39m
+                  [33mcy[39m=[32m"12"[39m
+                  [33mr[39m=[32m"10"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m16 9-5.5 5.5L8 12"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<h3[39m
+                [33mclass[39m=[32m"text-base font-semibold text-slate-800"[39m
+              [36m>[39m
+                [0mNo comments found matching filters[0m
+              [36m</h3>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-xs text-slate-500 mt-1"[39m
+              [36m>[39m
+                [0mTry resetting the reviewer or status filters above.[0m
+              [36m</p>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      56 |     // Reviewer 1 critique snippet
+      57 |     expect(
+    > 58 |       screen.getByText(/The authors claim that their hyperbolic embedding preserves phylogenetic distance/i)
+         |              ^
+      59 |     ).toBeInTheDocument();
+      60 |   });
+      61 |
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.getByText (__tests__/submissionFrontend.test.tsx:58:14)
+
+  ● ReviewResponseInterface Component › allows toggling resolution status of a comment
+
+    TestingLibraryElementError: Unable to find an element with the text: Mark Resolved. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"w-full space-y-6 font-sans"[39m
+          [33mdir[39m=[32m"ltr"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center gap-2"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-message-square w-3 h-3"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0mReviewer Rebuttal Manager[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-xs text-slate-500 font-mono"[39m
+                [36m>[39m
+                  [0mNBT-2026-08942[0m
+                  [0m • [0m
+                  [0mNature Biotechnology[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<h1[39m
+                [33mclass[39m=[32m"text-2xl font-bold tracking-tight text-slate-900 mt-1"[39m
+              [36m/>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm text-slate-600 mt-0.5"[39m
+              [36m>[39m
+                [0mReview peer critique, edit AI-crafted academic rebuttals, and compile your official response letter.[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-all shadow-xs cursor-pointer"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-download w-4 h-4 text-slate-500"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 15V3"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m7 10 5 5 5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span>[39m
+                  [0mExport Response Letter[0m
+                [36m</span>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-sm shadow-sky-200 cursor-pointer"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-circle-check lucide-check-circle-2 w-4 h-4"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"12"[39m
+                    [33mcy[39m=[32m"12"[39m
+                    [33mr[39m=[32m"10"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m16 9-5.5 5.5L8 12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span>[39m
+                  [0mUnresolve All[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"w-full md:w-1/2 space-y-2"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center justify-between text-xs"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-semibold text-slate-700 flex items-center gap-1.5"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-circle-check lucide-check-circle-2 w-4 h-4 text-emerald-600"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<circle[39m
+                      [33mcx[39m=[32m"12"[39m
+                      [33mcy[39m=[32m"12"[39m
+                      [33mr[39m=[32m"10"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m16 9-5.5 5.5L8 12"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0mRebuttal Resolution Progress[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-bold text-slate-900"[39m
+                [36m>[39m
+                  [0m0[0m
+                  [0m / [0m
+                  [0m0[0m
+                  [0m [0m
+                  [0mresolved[0m
+                  [0m ([0m
+                  [0m0[0m
+                  [0m%)[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"h-full bg-gradient-to-r from-sky-500 to-emerald-500 rounded-full transition-all duration-500 ease-out"[39m
+                  [33mstyle[39m=[32m"width: 0%;"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3 w-full md:w-auto justify-end flex-wrap"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-center"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-[10px] uppercase font-semibold text-slate-400"[39m
+                [36m>[39m
+                  [0mReviewers[0m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-sm font-bold text-slate-800"[39m
+                [36m>[39m
+                  [0m0[0m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"px-3.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-center"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-[10px] uppercase font-semibold text-amber-700"[39m
+                [36m>[39m
+                  [0mPending[0m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-sm font-bold text-amber-700"[39m
+                [36m>[39m
+                  [0m0[0m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"px-3.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-[10px] uppercase font-semibold text-emerald-700"[39m
+                [36m>[39m
+                  [0mResolved[0m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-sm font-bold text-emerald-700"[39m
+                [36m>[39m
+                  [0m0[0m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-4"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-xs font-semibold text-slate-500 flex items-center gap-1"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-funnel lucide-filter w-3.5 h-3.5"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0mReviewer:[0m
+              [36m</span>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center bg-slate-100 p-1 rounded-xl text-xs"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer bg-white font-semibold text-slate-900 shadow-xs"[39m
+                [36m>[39m
+                  [0mAll Reviewers[0m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-xs font-semibold text-slate-500"[39m
+              [36m>[39m
+                [0mStatus:[0m
+              [36m</span>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center bg-slate-100 p-1 rounded-xl text-xs"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer bg-white font-semibold text-slate-900 shadow-xs"[39m
+                [36m>[39m
+                  [0mAll[0m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900"[39m
+                [36m>[39m
+                  [0mUnresolved[0m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900"[39m
+                [36m>[39m
+                  [0mResolved[0m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-xs font-semibold text-slate-500"[39m
+              [36m>[39m
+                [0mSeverity:[0m
+              [36m</span>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center bg-slate-100 p-1 rounded-xl text-xs"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer bg-white font-semibold text-slate-900 shadow-xs"[39m
+                [36m>[39m
+                  [0mAll[0m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900"[39m
+                [36m>[39m
+                  [0mMajor[0m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900"[39m
+                [36m>[39m
+                  [0mMinor[0m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"space-y-5"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"bg-white border border-slate-200 rounded-2xl p-12 text-center"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-circle-check lucide-check-circle-2 w-10 h-10 text-emerald-400 mx-auto mb-3"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"12"[39m
+                  [33mcy[39m=[32m"12"[39m
+                  [33mr[39m=[32m"10"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m16 9-5.5 5.5L8 12"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<h3[39m
+                [33mclass[39m=[32m"text-base font-semibold text-slate-800"[39m
+              [36m>[39m
+                [0mNo comments found matching filters[0m
+              [36m</h3>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-xs text-slate-500 mt-1"[39m
+              [36m>[39m
+                [0mTry resetting the reviewer or status filters above.[0m
+              [36m</p>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      65 |
+      66 |     // Find Mark Resolved button
+    > 67 |     const markResolvedButtons = screen.getAllByText('Mark Resolved');
+         |                                        ^
+      68 |     expect(markResolvedButtons.length).toBeGreaterThan(0);
+      69 |
+      70 |     fireEvent.click(markResolvedButtons[0]);
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:109:15
+      at Object.getAllByText (__tests__/submissionFrontend.test.tsx:67:40)
+
+  ● ReviewResponseInterface Component › updates author rebuttal response text
+
+    TestingLibraryElementError: Unable to find an element with the placeholder text of: Draft your evidence-based point-by-point response to this reviewer comment...
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"w-full space-y-6 font-sans"[39m
+          [33mdir[39m=[32m"ltr"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center gap-2"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-message-square w-3 h-3"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0mReviewer Rebuttal Manager[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-xs text-slate-500 font-mono"[39m
+                [36m>[39m
+                  [0mNBT-2026-08942[0m
+                  [0m • [0m
+                  [0mNature Biotechnology[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<h1[39m
+                [33mclass[39m=[32m"text-2xl font-bold tracking-tight text-slate-900 mt-1"[39m
+              [36m/>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm text-slate-600 mt-0.5"[39m
+              [36m>[39m
+                [0mReview peer critique, edit AI-crafted academic rebuttals, and compile your official response letter.[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-all shadow-xs cursor-pointer"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-download w-4 h-4 text-slate-500"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 15V3"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m7 10 5 5 5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span>[39m
+                  [0mExport Response Letter[0m
+                [36m</span>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-sm shadow-sky-200 cursor-pointer"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-circle-check lucide-check-circle-2 w-4 h-4"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"12"[39m
+                    [33mcy[39m=[32m"12"[39m
+                    [33mr[39m=[32m"10"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m16 9-5.5 5.5L8 12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span>[39m
+                  [0mUnresolve All[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"w-full md:w-1/2 space-y-2"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center justify-between text-xs"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-semibold text-slate-700 flex items-center gap-1.5"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-circle-check lucide-check-circle-2 w-4 h-4 text-emerald-600"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<circle[39m
+                      [33mcx[39m=[32m"12"[39m
+                      [33mcy[39m=[32m"12"[39m
+                      [33mr[39m=[32m"10"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m16 9-5.5 5.5L8 12"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0mRebuttal Resolution Progress[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-bold text-slate-900"[39m
+                [36m>[39m
+                  [0m0[0m
+                  [0m / [0m
+                  [0m0[0m
+                  [0m [0m
+                  [0mresolved[0m
+                  [0m ([0m
+                  [0m0[0m
+                  [0m%)[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"h-full bg-gradient-to-r from-sky-500 to-emerald-500 rounded-full transition-all duration-500 ease-out"[39m
+                  [33mstyle[39m=[32m"width: 0%;"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3 w-full md:w-auto justify-end flex-wrap"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-center"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-[10px] uppercase font-semibold text-slate-400"[39m
+                [36m>[39m
+                  [0mReviewers[0m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-sm font-bold text-slate-800"[39m
+                [36m>[39m
+                  [0m0[0m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"px-3.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-center"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-[10px] uppercase font-semibold text-amber-700"[39m
+                [36m>[39m
+                  [0mPending[0m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-sm font-bold text-amber-700"[39m
+                [36m>[39m
+                  [0m0[0m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"px-3.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-[10px] uppercase font-semibold text-emerald-700"[39m
+                [36m>[39m
+                  [0mResolved[0m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-sm font-bold text-emerald-700"[39m
+                [36m>[39m
+                  [0m0[0m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-4"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-xs font-semibold text-slate-500 flex items-center gap-1"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-funnel lucide-filter w-3.5 h-3.5"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0mReviewer:[0m
+              [36m</span>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center bg-slate-100 p-1 rounded-xl text-xs"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer bg-white font-semibold text-slate-900 shadow-xs"[39m
+                [36m>[39m
+                  [0mAll Reviewers[0m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-xs font-semibold text-slate-500"[39m
+              [36m>[39m
+                [0mStatus:[0m
+              [36m</span>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center bg-slate-100 p-1 rounded-xl text-xs"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer bg-white font-semibold text-slate-900 shadow-xs"[39m
+                [36m>[39m
+                  [0mAll[0m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900"[39m
+                [36m>[39m
+                  [0mUnresolved[0m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900"[39m
+                [36m>[39m
+                  [0mResolved[0m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-xs font-semibold text-slate-500"[39m
+              [36m>[39m
+                [0mSeverity:[0m
+              [36m</span>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center bg-slate-100 p-1 rounded-xl text-xs"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer bg-white font-semibold text-slate-900 shadow-xs"[39m
+                [36m>[39m
+                  [0mAll[0m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900"[39m
+                [36m>[39m
+                  [0mMajor[0m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"px-3 py-1 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900"[39m
+                [36m>[39m
+                  [0mMinor[0m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"space-y-5"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"bg-white border border-slate-200 rounded-2xl p-12 text-center"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-circle-check lucide-check-circle-2 w-10 h-10 text-emerald-400 mx-auto mb-3"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"12"[39m
+                  [33mcy[39m=[32m"12"[39m
+                  [33mr[39m=[32m"10"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m16 9-5.5 5.5L8 12"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<h3[39m
+                [33mclass[39m=[32m"text-base font-semibold text-slate-800"[39m
+              [36m>[39m
+                [0mNo comments found matching filters[0m
+              [36m</h3>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-xs text-slate-500 mt-1"[39m
+              [36m>[39m
+                [0mTry resetting the reviewer or status filters above.[0m
+              [36m</p>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      75 |     render(<ReviewResponseInterface locale="en" />);
+      76 |
+    > 77 |     const textareas = screen.getAllByPlaceholderText(
+         |                              ^
+      78 |       'Draft your evidence-based point-by-point response to this reviewer comment...'
+      79 |     );
+      80 |     expect(textareas.length).toBeGreaterThan(0);
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:109:15
+      at Object.getAllByPlaceholderText (__tests__/submissionFrontend.test.tsx:77:30)
+
+PASS __tests__/apiRoutes.test.ts
+  ● Console
+
+    console.warn
+      [API auth/me] DB query failed, returning session user or dummy: TypeError: db.select is not a function
+          at select (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/src/app/api/auth/me/route.ts:14:35)
+          at Object.<anonymous> (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/__tests__/apiRoutes.test.ts:85:19)
+
+      23 |         }
+      24 |       } catch (dbErr) {
+    > 25 |         console.warn("[API auth/me] DB query failed, returning session user or dummy:", dbErr);
+         |                 ^
+      26 |       }
+      27 |     }
+      28 |
+
+      at warn (src/app/api/auth/me/route.ts:25:17)
+      at Object.<anonymous> (__tests__/apiRoutes.test.ts:85:19)
+
+    console.warn
+      [API auth/me PATCH] DB update failed: TypeError: db.update is not a function
+          at update (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/src/app/api/auth/me/route.ts:71:12)
+          at Object.<anonymous> (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/__tests__/apiRoutes.test.ts:98:19)
+
+      84 |         }
+      85 |       } catch (dbErr) {
+    > 86 |         console.warn("[API auth/me PATCH] DB update failed:", dbErr);
+         |                 ^
+      87 |       }
+      88 |     }
+      89 |
+
+      at warn (src/app/api/auth/me/route.ts:86:17)
+      at Object.<anonymous> (__tests__/apiRoutes.test.ts:98:19)
+
+    console.warn
+      [API auth/register] DB insert failed, falling back to scaffolded response: TypeError: db.select is not a function
+          at select (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/src/app/api/auth/register/route.ts:22:35)
+          at Object.<anonymous> (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/__tests__/apiRoutes.test.ts:115:19)
+
+      50 |         );
+      51 |       } catch (dbErr) {
+    > 52 |         console.warn("[API auth/register] DB insert failed, falling back to scaffolded response:", dbErr);
+         |                 ^
+      53 |       }
+      54 |     }
+      55 |
+
+      at warn (src/app/api/auth/register/route.ts:52:17)
+      at Object.<anonymous> (__tests__/apiRoutes.test.ts:115:19)
+
+PASS __tests__/reviewService.test.ts
+  ● Console
+
+    console.warn
+      [reviewService] generateObject failed or OpenAI unavailable, falling back to heuristic parser: OpenAI API key missing or quota exceeded
+
+      226 |     };
+      227 |   } catch (error: any) {
+    > 228 |     console.warn("[reviewService] generateObject failed or OpenAI unavailable, falling back to heuristic parser:", error?.message);
+          |             ^
+      229 |     return fallbackParseReviewComments(rawText, options);
+      230 |   }
+      231 | }
+
+      at warn (src/services/reviews/reviewService.ts:228:13)
+
+PASS __tests__/documentService.test.ts
+PASS __tests__/submissionService.test.ts
+PASS __tests__/submissionStatusService.test.ts
+PASS __tests__/schema.test.ts
+PASS __tests__/rlhfService.test.ts
+PASS __tests__/graphBuilder.test.ts
+PASS __tests__/debateService.test.ts
+PASS __tests__/security.test.ts
+PASS __tests__/epic2Api.test.ts
+PASS __tests__/visionAi.test.ts
+  ● Console
+
+    console.log
+      Extracting figures from document...
+
+      at log (src/services/visionAi.service.ts:12:11)
+
+    console.error
+      Error analyzing figure: Error: API error
+          at Object.<anonymous> (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/__tests__/visionAi.test.ts:66:36)
+          at Promise.finally.completed (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1834:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1774:10)
+          at _callCircusTest (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1167:40)
+          at _runTestInContext (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1103:3)
+          at runTestWithContext (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:996:5)
+          at _runTestsForDescribeBlockOnce (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1008:11)
+          at _runTestsForDescribeBlock (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:824:5)
+          at _runTestsForDescribeBlockOnce (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1003:11)
+          at _runTestsForDescribeBlock (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:824:5)
+          at _runTestsForDescribeBlockOnce (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1003:11)
+          at _runTestsForDescribeBlock (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:824:5)
+          at run (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:789:3)
+          at runAndTransformResultsToJestFormat (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:2300:21)
+          at jestAdapter (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/runner.js:111:19)
+          at runTestInternal (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-runner/build/index.js:247:16)
+          at runTest (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-runner/build/index.js:315:7)
+
+      80 |     };
+      81 |   } catch (error) {
+    > 82 |     console.error("Error analyzing figure:", error);
+         |             ^
+      83 |     throw new Error("Failed to analyze figure");
+      84 |   }
+      85 | }
+
+      at error (src/services/visionAi.service.ts:82:13)
+      at Object.<anonymous> (__tests__/visionAi.test.ts:68:7)
+
+    console.error
+      Error suggesting improved legend: Error: API error
+          at Object.<anonymous> (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/__tests__/visionAi.test.ts:84:36)
+          at Promise.finally.completed (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1834:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1774:10)
+          at _callCircusTest (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1167:40)
+          at _runTestInContext (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1103:3)
+          at runTestWithContext (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:996:5)
+          at _runTestsForDescribeBlockOnce (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1008:11)
+          at _runTestsForDescribeBlock (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:824:5)
+          at _runTestsForDescribeBlockOnce (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1003:11)
+          at _runTestsForDescribeBlock (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:824:5)
+          at _runTestsForDescribeBlockOnce (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:1003:11)
+          at _runTestsForDescribeBlock (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:824:5)
+          at run (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:789:3)
+          at runAndTransformResultsToJestFormat (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/jestAdapterInit.js:2300:21)
+          at jestAdapter (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-circus/build/runner.js:111:19)
+          at runTestInternal (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-runner/build/index.js:247:16)
+          at runTest (/Users/liorzafrir/.gemini/antigravity/scratch/publish-ai/node_modules/jest-runner/build/index.js:315:7)
+
+      100 |     return (response.content[0] as any).text;
+      101 |   } catch (error) {
+    > 102 |     console.error("Error suggesting improved legend:", error);
+          |             ^
+      103 |     return currentLegend;
+      104 |   }
+      105 | }
+
+      at error (src/services/visionAi.service.ts:102:13)
+      at Object.<anonymous> (__tests__/visionAi.test.ts:86:22)
+
+
+Test Suites: 1 failed, 12 passed, 13 total
+Tests:       6 failed, 93 passed, 99 total
+Snapshots:   0 total
+Time:        1.257 s
+Ran all test suites.
