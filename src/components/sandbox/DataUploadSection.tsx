@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { UploadCloud } from "lucide-react";
+import { UploadCloud, CheckCircle2, AlertCircle, FileSpreadsheet } from "lucide-react";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 export function DataUploadSection({ paperId }: { paperId: number }) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -37,8 +38,8 @@ export function DataUploadSection({ paperId }: { paperId: number }) {
 
   const uploadFile = async (file: File) => {
     setUploading(true);
-    setMessage("");
-    
+    setMessage(null);
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -53,37 +54,82 @@ export function DataUploadSection({ paperId }: { paperId: number }) {
         throw new Error("Upload failed");
       }
 
-      setMessage("File uploaded successfully. AI Analysis will begin shortly.");
+      setMessage({
+        text: `Uploaded "${file.name}" successfully. Python sandbox replication has been queued.`,
+        type: "success",
+      });
     } catch (err: any) {
-      setMessage("Error: " + err.message);
+      setMessage({
+        text: "Error: " + (err.message || "Failed to upload file."),
+        type: "error",
+      });
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <div className="my-6">
-      <h3 className="text-lg font-semibold mb-2">Upload Data Files</h3>
-      <div 
-        className={`border-2 border-dashed p-10 text-center rounded-lg transition-colors ${
-          isDragging ? "border-sky-500 bg-sky-50" : "border-gray-300 bg-gray-50"
+    <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="p-2.5 rounded-xl bg-teal-100 text-teal-600">
+          <FileSpreadsheet className="w-5 h-5" />
+        </div>
+        <div>
+          <h3 className="text-base font-bold text-slate-900">Upload Raw Dataset for Sandbox Replication</h3>
+          <p className="text-xs text-slate-500">
+            Attach CSV or Excel data sheets to allow the Python sandbox to independently verify statistical calculations and reconstruct plots
+          </p>
+        </div>
+      </div>
+
+      <div
+        className={`border-2 border-dashed p-8 text-center rounded-2xl transition-all ${
+          isDragging
+            ? "border-teal-500 bg-teal-50/50 scale-[1.005]"
+            : "border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300"
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
       >
-        <UploadCloud className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-        <p className="text-gray-600 mb-2">
-          Drag and drop your CSV or Excel files here, or click to select
+        <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-3">
+          <UploadCloud className="w-6 h-6" />
+        </div>
+        <p className="text-sm font-semibold text-slate-700 mb-1">
+          Drag and drop your CSV or Excel files here
         </p>
-        <label className="cursor-pointer bg-sky-500 text-white px-4 py-2 rounded shadow hover:bg-sky-600 transition">
-          Browse Files
+        <p className="text-xs text-slate-400 mb-4">Supports .csv, .xlsx, .xls up to 50MB</p>
+
+        <label className="inline-flex items-center gap-2 cursor-pointer bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl text-xs font-semibold shadow-xs transition-colors">
+          <span>Browse Dataset</span>
           <input type="file" className="sr-only" accept=".csv, .xlsx, .xls" onChange={handleChange} />
         </label>
       </div>
-      {uploading && <p className="mt-2 text-sky-500">Uploading...</p>}
-      {message && <p className="mt-2 text-sm font-medium text-gray-800">{message}</p>}
+
+      {uploading && (
+        <div className="p-4 rounded-xl bg-teal-50 border border-teal-200 flex items-center gap-3 text-teal-900 text-xs font-medium">
+          <LoadingSpinner size="xs" color="sky" />
+          <span>Uploading dataset and preparing secure container environment...</span>
+        </div>
+      )}
+
+      {message && (
+        <div
+          className={`p-4 rounded-xl text-xs font-medium flex items-center gap-2.5 ${
+            message.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+              : "bg-red-50 text-red-800 border border-red-200"
+          }`}
+        >
+          {message.type === "success" ? (
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          ) : (
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+          )}
+          <span>{message.text}</span>
+        </div>
+      )}
     </div>
   );
 }

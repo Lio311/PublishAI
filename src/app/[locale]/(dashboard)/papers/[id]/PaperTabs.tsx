@@ -9,71 +9,123 @@ import KnowledgeGraphViewer from "@/components/graph/KnowledgeGraphViewer";
 import LogicConsistencyReport from "@/components/graph/LogicConsistencyReport";
 import DebateRoom from "@/components/debates/DebateRoom";
 import FigureGallery from "@/components/vision/FigureGallery";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import { Sparkles, Database, Network, Users, Eye } from "lucide-react";
 
 interface PaperTabsProps {
   paperId: number;
   initialStatus: string;
 }
 
+interface TabDefinition {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  description: string;
+}
+
 export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
   const [activeTab, setActiveTab] = useState("Processing");
 
-  const tabs = [
-    "Processing",
-    "Data Sandbox",
-    "Knowledge Graph",
-    "AI Debate",
-    "Vision AI"
+  const tabs: TabDefinition[] = [
+    {
+      id: "Processing",
+      label: "Processing",
+      icon: Sparkles,
+      description: "Pipeline status & publication workflow",
+    },
+    {
+      id: "Data Sandbox",
+      label: "Data Sandbox",
+      icon: Database,
+      description: "Statistical analysis & data verification",
+    },
+    {
+      id: "Knowledge Graph",
+      label: "Knowledge Graph",
+      icon: Network,
+      description: "Entity relationships & logic validation",
+    },
+    {
+      id: "AI Debate",
+      label: "AI Debate",
+      icon: Users,
+      description: "Autonomous peer review & cross-examination",
+    },
+    {
+      id: "Vision AI",
+      label: "Vision AI",
+      icon: Eye,
+      description: "Figure extraction & visual artifact checks",
+    },
   ];
 
   return (
-    <div className="w-full">
-      <div className="flex border-b border-gray-200 mb-6 space-x-4">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            className={`py-2 px-4 border-b-2 font-medium text-sm focus:outline-none transition-colors ${
-              activeTab === tab
-                ? "border-sky-500 text-sky-500"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
-          </button>
-        ))}
+    <div className="w-full space-y-6">
+      {/* Modern Pill Navigation Bar */}
+      <div className="bg-white/70 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-1.5 overflow-x-auto">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-xs sm:text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                isActive
+                  ? "bg-sky-500 text-white shadow-xs font-semibold"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+              }`}
+            >
+              <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
-      <div className="mt-4">
+      {/* Tab Panels */}
+      <div className="relative">
         {activeTab === "Processing" && (
-          <PaperProcessingUI paperId={paperId} initialStatus={initialStatus} />
+          <ErrorBoundary name="Pipeline Processing">
+            <PaperProcessingUI paperId={paperId} initialStatus={initialStatus} />
+          </ErrorBoundary>
         )}
-        
+
         {activeTab === "Data Sandbox" && (
-          <div className="space-y-8">
-            <DataUploadSection paperId={paperId} />
-            <AnalysisStatus paperId={paperId} />
-            <GeneratedChartsViewer paperId={paperId} />
-          </div>
+          <ErrorBoundary name="Data Sandbox">
+            <div className="space-y-8">
+              <DataUploadSection paperId={paperId} />
+              <AnalysisStatus paperId={paperId} />
+              <GeneratedChartsViewer paperId={paperId} />
+            </div>
+          </ErrorBoundary>
         )}
-        
+
         {activeTab === "Knowledge Graph" && (
-          <div className="space-y-8">
-            <KnowledgeGraphViewer paperId={paperId} />
-            <LogicConsistencyReport paperId={paperId} />
-          </div>
+          <ErrorBoundary name="Knowledge Graph">
+            <div className="space-y-8">
+              <KnowledgeGraphViewer paperId={paperId} />
+              <LogicConsistencyReport paperId={paperId} />
+            </div>
+          </ErrorBoundary>
         )}
-        
+
         {activeTab === "AI Debate" && (
-          <div className="space-y-8">
-            <DebateRoom paperId={paperId} />
-          </div>
+          <ErrorBoundary name="AI Debate Room">
+            <div className="space-y-8">
+              <DebateRoom paperId={paperId} />
+            </div>
+          </ErrorBoundary>
         )}
-        
+
         {activeTab === "Vision AI" && (
-          <div className="space-y-8">
-            <FigureGallery paperId={paperId} />
-          </div>
+          <ErrorBoundary name="Vision AI Figure Gallery">
+            <div className="space-y-8">
+              <FigureGallery paperId={paperId} />
+            </div>
+          </ErrorBoundary>
         )}
       </div>
     </div>
