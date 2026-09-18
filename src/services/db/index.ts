@@ -8,8 +8,8 @@ const schema = { ...baseSchema, ...embeddingsSchema };
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
-  throw new Error("DATABASE_URL is not defined in the environment");
+  console.warn("DATABASE_URL is not defined in the environment. Using dummy URL for build-time evaluation.");
 }
 
-const sql = neon(databaseUrl);
+const sql = neon(databaseUrl || "postgres://dummy:dummy@dummy/dummy");
 export const db = drizzle(sql, { schema });
