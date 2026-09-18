@@ -19,4 +19,10 @@ const config: Config = {
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-export default createJestConfig(config)
+export default async () => {
+  const nextJestConfig = await createJestConfig(config)()
+  nextJestConfig.transformIgnorePatterns = [
+    '/node_modules/(?!(ai|@ai-sdk|@modelcontextprotocol|@workflow)/)'
+  ]
+  return nextJestConfig
+}

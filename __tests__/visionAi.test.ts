@@ -1,16 +1,11 @@
-import { extractFiguresFromDocument, analyzeFigureWithVisionAi, suggestImprovedLegend } from '../src/services/visionAi.service';
-import Anthropic from '@anthropic-ai/sdk';
+export const mockGenerateText = jest.fn();
+export const mockGenerateObject = jest.fn();
+jest.mock("ai", () => ({
+  generateText: (...args: any[]) => mockGenerateText(...args),
+  generateObject: (...args: any[]) => mockGenerateObject(...args)
+}));
 
-jest.mock('@anthropic-ai/sdk', () => {
-  const mCreate = jest.fn();
-  const mockAnthropic = jest.fn().mockImplementation(() => ({
-    messages: {
-      create: mCreate
-    }
-  }));
-  (mockAnthropic as any).mockCreate = mCreate;
-  return mockAnthropic;
-});
+import { extractFiguresFromDocument, analyzeFigureWithVisionAi, suggestImprovedLegend } from '../src/services/visionAi.service';
 
 global.fetch = jest.fn();
 globalThis.fetch = global.fetch;
@@ -21,11 +16,8 @@ jest.mock('@/db', () => ({
 }));
 
 describe('visionAiService', () => {
-  let mockCreate: jest.Mock;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCreate = (Anthropic as any).mockCreate;
   });
 
   describe('extractFiguresFromDocument', () => {
@@ -38,20 +30,17 @@ describe('visionAiService', () => {
 
   describe('analyzeFigureWithVisionAi', () => {
     it('analyzes figure and returns parsed json', async () => {
-      const mockParsed = {
-        accuracyScore: 90,
-        claimVerificationStatus: 'verified',
-        suggestedLegend: 'Better legend',
-        issuesFound: ['none']
-      };
+      mockGenerateObject.mockResolvedValue({
+        object: {
+          accuracyScore: 90,
+          claimVerificationStatus: 'verified',
+          suggestedLegend: 'Better legend'
+        }
+      });
 
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8))
-      });
-
-      mockCreate.mockResolvedValue({
-        content: [{ text: JSON.stringify(mockParsed) }]
       });
 
       const result = await analyzeFigureWithVisionAi('imgUrl', 'legend', ['claim1']);
@@ -59,11 +48,11 @@ describe('visionAiService', () => {
       expect(result.legendAccuracyScore).toBe(90);
       expect(result.claimVerificationStatus).toBe('verified');
       expect(result.suggestedLegend).toBe('Better legend');
-      expect(mockCreate).toHaveBeenCalled();
+      expect(mockGenerateObject).toHaveBeenCalled();
     });
 
     it('throws error if parsing fails', async () => {
-      mockCreate.mockRejectedValue(new Error('API error'));
+      mockGenerateObject.mockRejectedValue(new Error('API error'));
 
       await expect(analyzeFigureWithVisionAi('imgUrl', 'legend', ['claim1']))
         .rejects.toThrow('Failed to analyze figure');
@@ -72,19 +61,16 @@ describe('visionAiService', () => {
 
   describe('suggestImprovedLegend', () => {
     it('returns improved legend', async () => {
-      mockCreate.mockResolvedValue({
-        content: [{ text: 'Improved legend text' }]
-      });
+      mockGenerateText.mockResolvedValue({ text: 'Improved legend text' });
 
       const result = await suggestImprovedLegend('imgUrl', 'current', 'context');
       expect(result).toBe('Improved legend text');
     });
 
-    it('returns current legend on error', async () => {
-      mockCreate.mockRejectedValue(new Error('API error'));
-
-      const result = await suggestImprovedLegend('imgUrl', 'current', 'context');
-      expect(result).toBe('current');
+    it('throws error on error', async () => {
+      mockGenerateText.mockRejectedValue(new Error('API error'));
+      
+      await expect(suggestImprovedLegend('imgUrl', 'current', 'context')).rejects.toThrow('Failed to suggest improved legend.');
     });
   });
 });
