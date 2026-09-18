@@ -16,6 +16,8 @@
     "@anthropic-ai/sdk": "^0.125.0",
     "@auth/drizzle-adapter": "^1.11.3",
     "@e2b/code-interpreter": "^2.8.0",
+    "@langchain/core": "^1.2.11",
+    "@langchain/langgraph": "^1.4.15",
     "@monaco-editor/react": "^4.7.0",
     "@neondatabase/serverless": "^1.1.0",
     "@stripe/stripe-js": "^9.16.0",

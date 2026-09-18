@@ -1,12 +1,12 @@
 # PublishAI Autonomous Execution Status
 
 ## Epic 1: Advanced Editor Upgrade (Diffs & Track Changes)
-- **Frontend UI Agent:** 🔄 In Progress - Implementing Tiptap Track Changes & UI
-- **Backend AI Agent:** ✅ Complete - Updated `/api/ai/generate` to return diff patches
-- **Status:** In Progress
+- **Status:** ✅ Complete
 
 ## Epic 2: LangGraph Migration & Complex Agent Workflows
-- **Status:** Pending
+- **LangGraph Architect Agent:** ✅ Complete - Built `PublishAIState` and StateGraph.
+- **Inngest Orchestrator Agent:** 🔄 In Progress - Connecting the LangGraph runner to `orchestrator.ts`
+- **Status:** In Progress
 
 ## Epic 3: The RPA Submission Engine (Playwright + HITL)
 - **Status:** Pending
