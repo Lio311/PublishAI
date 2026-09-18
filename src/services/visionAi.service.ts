@@ -1,16 +1,14 @@
 import { db } from "@/db";
 import { figures, figureAnalyses } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import Anthropic from "@anthropic-ai/sdk";
-import { claude } from "@/lib/agents/claude-client";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || "",
-});
+import { generateObject, generateText } from "ai";
+import { AI_MODELS } from "@/lib/ai/provider";
+import { z } from "zod";
 
 export async function extractFiguresFromDocument(documentText: string): Promise<Array<{imageUrl: string, legend: string, figureNumber: number, resolution: number}>> {
   console.log(`Extracting figures from document...`);
   
+  // This should ideally be replaced with a robust PDF parsing solution, but for now we keep the mock pattern
   const figureRegex = /Figure\s+(\d+)[:.]\s*([^\n]+)/gi;
   const extractedFigures = [];
   let match;
@@ -41,54 +39,52 @@ export async function analyzeFigureWithVisionAi(imageUrl: string, legend: string
       throw new Error(`Failed to fetch image: ${imageResponse.statusText}`);
     }
     const imageBuffer = await imageResponse.arrayBuffer();
-    const base64Image = Buffer.from(imageBuffer).toString('base64');
-    const mediaType = imageUrl.endsWith('.png') ? 'image/png' : 'image/jpeg';
     
-    const response = await claude.messages.create({
-      model: 'claude-3-7-sonnet-20250219',
-      max_tokens: 2048,
-      messages: [{
-        role: 'user',
-        content: [
-          {
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: mediaType as any,
-              data: base64Image,
+    // Instead of regex parsing, we use generateObject for structured JSON output
+    const { object } = await generateObject({
+      model: AI_MODELS.vision,
+      schema: z.object({
+        accuracyScore: z.number(),
+        claimVerificationStatus: z.enum(["verified", "discrepancy", "unclear"]),
+        suggestedLegend: z.string(),
+        issuesFound: z.array(z.string())
+      }),
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              image: imageBuffer
+            },
+            {
+              type: 'text',
+              text: `Analyze this figure and its original legend: "${legend}". Claims: ${claims.join(", ")}. Provide an accuracy score (1-100), claim verification status (verified/discrepancy/unclear), a suggested legend, and an array of issues found.`
             }
-          },
-          {
-            type: 'text',
-            text: `Analyze this figure and its original legend: "${legend}". Claims: ${claims.join(", ")}. Provide accuracy score (1-100), claim verification status (verified/discrepancy/unclear), suggested legend, and an array of issues found. Format as JSON.`
-          }
-        ]
-      }]
+          ]
+        }
+      ]
     });
 
-    let textContent = (response.content[0] as any).text;
-    textContent = textContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    const parsed = JSON.parse(textContent);
-    
     return {
-      modelUsed: "claude-3-7-sonnet-20250219",
-      legendAccuracyScore: parsed.accuracyScore || 80,
-      claimVerificationStatus: parsed.claimVerificationStatus || "unclear",
-      suggestedLegend: parsed.suggestedLegend || legend,
-      issuesFound: parsed.issuesFound || [],
-      rawAnalysis: parsed,
+      modelUsed: "vision",
+      legendAccuracyScore: object.accuracyScore,
+      claimVerificationStatus: object.claimVerificationStatus,
+      suggestedLegend: object.suggestedLegend,
+      issuesFound: object.issuesFound,
+      rawAnalysis: object,
     };
   } catch (error) {
+    // We bubble up the error instead of swallowing it
     console.error("Error analyzing figure:", error);
-    throw new Error("Failed to analyze figure");
+    throw new Error("Failed to analyze figure. Please try again later.", { cause: error });
   }
 }
 
 export async function suggestImprovedLegend(imageUrl: string, currentLegend: string, context: string): Promise<string> {
   try {
-    const response = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20240620",
-      max_tokens: 500,
+    const { text } = await generateText({
+      model: AI_MODELS.fast,
       messages: [
         {
           role: "user",
@@ -97,9 +93,10 @@ export async function suggestImprovedLegend(imageUrl: string, currentLegend: str
       ]
     });
 
-    return (response.content[0] as any).text;
+    return text.trim();
   } catch (error) {
+    // Bubble up error instead of returning currentLegend silently
     console.error("Error suggesting improved legend:", error);
-    return currentLegend;
+    throw new Error("Failed to suggest improved legend.", { cause: error });
   }
 }

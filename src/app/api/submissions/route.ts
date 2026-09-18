@@ -4,7 +4,6 @@ import { submissions } from "@/db/schema";
 import { auth } from "@/auth";
 import { inngest } from "@/inngest/client";
 import { eq, desc } from "drizzle-orm";
-import { MetadataExtractor } from "@/lib/submission/metadata-extractor";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
@@ -26,32 +25,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Extract metadata
-    const metadata = await MetadataExtractor.extractFromPaper(Number(paperId));
-
-    // Create submission record
+    // Create submission record immediately without blocking on metadata extraction
     const newSubmission = await db.insert(submissions).values({
       paperId: Number(paperId),
       connectionId: Number(connectionId),
       userId: session.user.id,
       publishMode: publishMode || "draft",
-      submittedTitle: metadata.title,
-      submittedAbstract: metadata.abstract,
-      submittedKeywords: metadata.keywords,
-      submittedAuthors: metadata.authors,
-      submittedArticleType: metadata.articleType,
       status: "preparing",
     }).returning();
 
     const submissionId = newSubmission[0].id;
 
-    // Trigger Inngest background job
+    // Trigger Inngest background job (which will handle metadata extraction + processing)
     await inngest.send({
       name: "submission/process",
       data: { submissionId },
     });
 
-    return NextResponse.json(newSubmission[0]);
+    return NextResponse.json(newSubmission[0], { status: 202 });
   } catch (error: any) {
     console.error("Error creating submission:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -70,25 +61,26 @@ export async function GET() {
       return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
     }
 
+    // Fetch submissions WITHOUT including sensitive connection info initially
     const userSubmissions = await db.query.submissions.findMany({
       where: eq(submissions.userId, session.user.id),
       orderBy: (submissions, { desc }) => [desc(submissions.createdAt)],
       with: {
-        connection: true, // Assuming relation exists or can be fetched
+        connection: {
+          columns: {
+            // Exclude encryptedUsername and encryptedPassword via column projection
+            id: true,
+            journalId: true,
+            userId: true,
+            createdAt: true,
+          }
+        },
       }
     });
 
-    // Strip sensitive info from connections
-    const safeSubmissions = userSubmissions.map((s: any) => {
-      if (s.connection) {
-        const { encryptedUsername, encryptedPassword, ...safeConnection } = s.connection;
-        return { ...s, connection: safeConnection };
-      }
-      return s;
-    });
-
-    return NextResponse.json(safeSubmissions);
+    return NextResponse.json(userSubmissions);
   } catch (error: any) {
+    console.error("Error fetching submissions:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

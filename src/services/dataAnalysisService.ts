@@ -1,8 +1,5 @@
-import Anthropic from "@anthropic-ai/sdk";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || "",
-});
+import { generateText } from "ai";
+import { AI_MODELS } from "@/lib/ai/provider";
 
 /**
  * @description Analyzes the paper text and generates a Python script to verify the statistical claims against the data.
@@ -28,27 +25,23 @@ ${paperContent}
 `;
 
   try {
-    const response = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20240620",
-      max_tokens: 4000,
+    const { text } = await generateText({
+      model: AI_MODELS.coding,
       messages: [
         { role: "user", content: prompt }
       ]
     });
 
-    const content = response.content[0];
-    if (content.type === "text") {
-      let text = content.text.trim();
-      // Remove markdown code blocks if the LLM includes them despite instructions
-      if (text.startsWith("```python")) {
-        text = text.replace(/^```python\r?\n/, "").replace(/\r?\n```$/, "");
-      }
-      return text;
+    let scriptText = text.trim();
+    // Remove markdown code blocks if the LLM includes them despite instructions
+    if (scriptText.startsWith("```python")) {
+      scriptText = scriptText.replace(/^```python\r?\n/, "").replace(/\r?\n```$/, "");
     }
+    return scriptText;
     
-    throw new Error("Failed to generate Python script.");
   } catch (error) {
     console.error("Error generating Python script:", error);
-    throw error;
+    // Bubble up error
+    throw new Error("Failed to generate analysis script.", { cause: error });
   }
 }
