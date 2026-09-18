@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const JSDOMEnvironment = require('jest-environment-jsdom').default || require('jest-environment-jsdom');
 
 class CustomEnvironment extends JSDOMEnvironment {
