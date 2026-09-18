@@ -1,8 +1,8 @@
 import { inngest } from "../client";
-import { SubmissionService } from "@/lib/submission/submission-service";
 import { db } from "@/db";
 import { submissions } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { runSubmissionWorkflow } from "@/services/rpa/submission-bot";
 
 export const processSubmission = inngest.createFunction(
   { 
@@ -34,12 +34,24 @@ export const processSubmission = inngest.createFunction(
     });
 
     const result = await step.run("execute-submission", async () => {
-      return await SubmissionService.executeSubmission(submissionId);
+      return await runSubmissionWorkflow(submissionId);
     });
 
-    if (!result.success) {
+    if (result.status === "error") {
       // Throwing an error will cause Inngest to retry the function based on the retry policy
-      throw new Error(`Submission failed: ${result.error}`);
+      throw new Error(`Submission failed: ${result.message}`);
+    }
+
+    if (result.status === "requires_captcha") {
+      const captchaEvent = await step.waitForEvent("wait-for-captcha", {
+        event: "submission.captcha.solved",
+        timeout: "24h",
+        match: "data.submissionId",
+      });
+
+      if (!captchaEvent) {
+        throw new Error("Captcha not solved within 24 hours");
+      }
     }
 
     // Step to send confirmation email
@@ -49,6 +61,6 @@ export const processSubmission = inngest.createFunction(
       // await sendSubmissionSuccessEmail(user.email, paper.title, result.postUrl);
     });
 
-    return { success: true, confirmationId: result.confirmationId };
+    return { success: true };
   }
 );
