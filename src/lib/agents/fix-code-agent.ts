@@ -1,6 +1,6 @@
 import { generateObject } from 'ai';
 import { z } from 'zod';
-import { customModel } from '@/lib/ai/models';
+import { AI_MODELS } from '@/lib/ai/provider';
 
 export class FixCodeAgent {
   /**
@@ -34,7 +34,7 @@ Your task:
 Return a strictly typed JSON object containing the fixed code, the updated array of dependencies, and a brief explanation of the fix.`;
 
     const { object } = await generateObject({
-      model: customModel,
+      model: AI_MODELS.coding,
       schema: z.object({
         fixedCode: z.string().describe("The fully corrected Python script."),
         newDependencies: z.array(z.string()).describe("The complete, updated list of pip dependencies needed to run the script."),

@@ -117,7 +117,7 @@ export function ExportAgentToggle({ paperId, hasVerifiedCode, codeSnippet = '', 
           </div>
           <Switch 
             checked={exportEnabled} 
-            onCheckedChange={handleExportToggle} 
+            onChange={(e) => handleExportToggle(e.target.checked)} 
             disabled={isExporting || buildStatus === 'BUILDING'}
           />
         </div>

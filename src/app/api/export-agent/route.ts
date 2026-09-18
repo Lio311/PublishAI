@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       await createRepo({
         repo: { type: 'space', name: spaceName },
         credentials: { accessToken: hfToken },
-        spaceSdk: 'docker',
+        sdk: 'docker',
       });
     } catch (e: any) {
       if (!e.message.includes('already exists')) {
@@ -125,12 +125,12 @@ export async function GET(req: NextRequest) {
   const hfToken = process.env.HF_TOKEN;
   try {
     const info = await spaceInfo({
-      repo: { type: 'space', name: repoId },
+      name: repoId,
       credentials: hfToken ? { accessToken: hfToken } : undefined
     });
 
     return NextResponse.json({
-      status: info.runtime?.stage || 'UNKNOWN',
+      status: (info as any).runtime?.stage || 'UNKNOWN',
       url: `https://huggingface.co/spaces/${repoId}`
     });
   } catch (e: any) {
