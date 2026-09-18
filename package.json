@@ -70,7 +70,6 @@
     "tailwindcss": "^4",
     "ts-jest": "^29.4.12",
     "tsx": "^4.23.13",
-    "typescript": "^5",
-    "undici": "^8.10.2"
+    "typescript": "^5"
   }
 }

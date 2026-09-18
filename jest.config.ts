@@ -11,7 +11,7 @@ const config: Config = {
   coverageProvider: 'v8',
   setupFiles: ["<rootDir>/jest.env.js"],
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
-  testEnvironment: 'jest-environment-jsdom',
+  testEnvironment: './jest.custom-env.js',
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/e2e/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
