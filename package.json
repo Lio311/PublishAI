@@ -11,8 +11,8 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.56",
-    "@ai-sdk/openai": "^4.0.66",
+    "@ai-sdk/anthropic": "^4.0.57",
+    "@ai-sdk/openai": "^4.0.70",
     "@anthropic-ai/sdk": "^0.125.0",
     "@auth/drizzle-adapter": "^1.11.3",
     "@e2b/code-interpreter": "^2.8.0",
@@ -28,7 +28,7 @@
     "@upstash/ratelimit": "^2.1.0",
     "@upstash/redis": "^1.38.4",
     "@vercel/blob": "^2.8.0",
-    "ai": "^7.0.100",
+    "ai": "^7.0.106",
     "docx": "^9.7.1",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
