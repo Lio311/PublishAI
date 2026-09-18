@@ -10,7 +10,8 @@ import LogicConsistencyReport from "@/components/graph/LogicConsistencyReport";
 import DebateRoom from "@/components/debates/DebateRoom";
 import FigureGallery from "@/components/vision/FigureGallery";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
-import { Sparkles, Database, Network, Users, Eye } from "lucide-react";
+import { Sparkles, Database, Network, Users, Eye, Edit3 } from "lucide-react";
+import RichDocumentEditor from "@/components/RichDocumentEditor";
 
 interface PaperTabsProps {
   paperId: number;
@@ -25,9 +26,15 @@ interface TabDefinition {
 }
 
 export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
-  const [activeTab, setActiveTab] = useState("Processing");
+  const [activeTab, setActiveTab] = useState("Editor");
 
   const tabs: TabDefinition[] = [
+    {
+      id: "Editor",
+      label: "Editor",
+      icon: Edit3,
+      description: "Rich text editing with AI track changes",
+    },
     {
       id: "Processing",
       label: "Processing",
@@ -87,6 +94,12 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
 
       {/* Tab Panels */}
       <div className="relative">
+        {activeTab === "Editor" && (
+          <ErrorBoundary name="Editor">
+            <RichDocumentEditor documentId={String(paperId)} />
+          </ErrorBoundary>
+        )}
+
         {activeTab === "Processing" && (
           <ErrorBoundary name="Pipeline Processing">
             <PaperProcessingUI paperId={paperId} initialStatus={initialStatus} />
