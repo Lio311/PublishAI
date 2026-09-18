@@ -153,7 +153,7 @@ export function ExportAgentToggle({ paperId, hasVerifiedCode, codeSnippet = '', 
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-3">
-              Paste this link into your manuscript's Data Availability statement.
+              Paste this link into your manuscript&apos;s Data Availability statement.
             </p>
           </div>
         </CardContent>
