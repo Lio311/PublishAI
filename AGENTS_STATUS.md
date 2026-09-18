@@ -1,14 +1,15 @@
-# EPIC 1: Core Auth & User Integration
-- Status: Complete
+# PublishAI Autonomous Execution Status
 
-# EPIC 2: Document Management & AI Orchestration
-- Status: Complete
+## Epic 1: Advanced Editor Upgrade (Diffs & Track Changes)
+- **Frontend UI Agent:** 🔄 In Progress - Implementing Tiptap Track Changes & UI
+- **Backend AI Agent:** ✅ Complete - Updated `/api/ai/generate` to return diff patches
+- **Status:** In Progress
 
-# EPIC 3: Submission & Review Workflows
-- Status: Complete
+## Epic 2: LangGraph Migration & Complex Agent Workflows
+- **Status:** Pending
 
-# EPIC 4: UI Polish & E2E Testing
-- Status: Complete
+## Epic 3: The RPA Submission Engine (Playwright + HITL)
+- **Status:** Pending
 
----
-**ALL EPICS COMPLETE.** The MVP is ready for deployment.
+## Epic 4: The Cascade E2E Pipeline
+- **Status:** Pending

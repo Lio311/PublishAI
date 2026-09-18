@@ -42,6 +42,18 @@ test.describe('Submissions and Review Rebuttal Flows', () => {
               updatedAt: '2026-09-15T08:30:00Z',
               confirmationId: 'BCB-2026-0912',
             },
+            {
+              id: 'sub-api-2',
+              paperId: 102,
+              title: 'Genomic Variant Interpretation',
+              journalName: 'Nature Genetics',
+              platform: 'Direct Submission',
+              status: 'revision_required',
+              publishMode: 'publish',
+              createdAt: '2026-09-02T12:00:00Z',
+              updatedAt: '2026-09-16T08:30:00Z',
+              confirmationId: 'NG-2026-0913',
+            },
           ],
         }),
       });
@@ -109,7 +121,7 @@ test.describe('Submissions and Review Rebuttal Flows', () => {
     await rebuttalTabBtn.click();
 
     // Verify ReviewResponseInterface elements
-    await expect(page.getByText(/Reviewer Rebuttal & Response Matrix|Reviewer 1|Reviewer 2/i).first()).toBeVisible();
+    await expect(page.getByText(/Reviewer Rebuttal & Response Matrix/i).first()).toBeVisible();
     await expect(page.getByRole('button', { name: /Back to Submissions/i })).toBeVisible();
 
     // Switch back using 'Back to Submissions' button
@@ -129,8 +141,7 @@ test.describe('Submissions and Review Rebuttal Flows', () => {
     await rebuttalTabBtn.click();
 
     // Verify comment cards or action buttons exist
-    const reviewerBadge = page.getByText(/Reviewer 1|Reviewer 2/i).first();
-    await expect(reviewerBadge).toBeVisible();
+    // Removed as per user request to not show mock data when empty
 
     // Check presence of action buttons such as AI draft / export
     const exportButton = page.getByRole('button', { name: /Export|Download/i }).first();

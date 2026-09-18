@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from "react";
 
 import { useEditor, EditorContent } from '@tiptap/react';
+import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
+import { Insertion, Deletion } from "./Editor/extensions/TrackChanges";
 
 import {
   Bold,
@@ -81,6 +83,8 @@ export default function RichDocumentEditor({
   const editor = useEditor({
     extensions: [
       StarterKit,
+      Insertion,
+      Deletion,
     ],
     content: initialContent,
     onUpdate: ({ editor }) => {
@@ -340,6 +344,23 @@ export default function RichDocumentEditor({
         >
           + LaTeX
         </button>
+        <div className="w-px h-4 bg-slate-200 mx-1" />
+        <button
+          onClick={() => editor?.chain().focus().toggleMark('insertion').run()}
+          className={`px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
+            editor?.isActive('insertion') ? 'bg-emerald-200 text-emerald-900' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+          }`}
+        >
+          Mark Insert
+        </button>
+        <button
+          onClick={() => editor?.chain().focus().toggleMark('deletion').run()}
+          className={`px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
+            editor?.isActive('deletion') ? 'bg-rose-200 text-rose-900' : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+          }`}
+        >
+          Mark Delete
+        </button>
       </div>
 
       {/* Main Workspace Area (3 Columns: Section Navigator, Text Area, AI Drawer) */}
@@ -385,8 +406,41 @@ export default function RichDocumentEditor({
         </aside>
 
         {/* Center Main Editor View */}
-        <main className="flex-1 flex flex-col min-w-0 bg-white overflow-y-auto">
+        <main className="flex-1 flex flex-col min-w-0 bg-white overflow-y-auto relative">
           <div className="p-6 md:p-8 max-w-3xl mx-auto w-full flex-1 flex flex-col">
+            {editor && (
+              <BubbleMenu
+                editor={editor}
+                shouldShow={({ editor }: { editor: any }) => editor.isActive('insertion') || editor.isActive('deletion')}
+              >
+                <div className="flex items-center gap-1 bg-white border border-slate-200 shadow-lg rounded-lg p-1.5 z-50">
+                  <button
+                    onClick={() => {
+                      if (editor.isActive('insertion')) {
+                        editor.chain().focus().extendMarkRange('insertion').unsetInsertion().run();
+                      } else if (editor.isActive('deletion')) {
+                        editor.chain().focus().extendMarkRange('deletion').deleteSelection().run();
+                      }
+                    }}
+                    className="px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 rounded flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <Check className="w-3.5 h-3.5" /> Accept
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (editor.isActive('insertion')) {
+                        editor.chain().focus().extendMarkRange('insertion').deleteSelection().run();
+                      } else if (editor.isActive('deletion')) {
+                        editor.chain().focus().extendMarkRange('deletion').unsetDeletion().run();
+                      }
+                    }}
+                    className="px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 rounded flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <AlertCircle className="w-3.5 h-3.5" /> Reject
+                  </button>
+                </div>
+              </BubbleMenu>
+            )}
             <EditorContent editor={editor} className="w-full flex-1" />
           </div>
         </main>

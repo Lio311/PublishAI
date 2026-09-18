@@ -1,61 +1,22 @@
 import re
 
-with open("src/components/DocumentEditor.tsx", "r") as f:
+with open("e2e/submissions.spec.ts", "r") as f:
     content = f.read()
 
-# Replace imports
-new_imports = """
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-"""
+mock_submission_2 = """            {
+              id: 'sub-api-2',
+              paperId: 102,
+              title: 'Genomic Variant Interpretation',
+              journalName: 'Nature Genetics',
+              platform: 'Direct Submission',
+              status: 'revision_required',
+              publishMode: 'publish',
+              createdAt: '2026-09-02T12:00:00Z',
+              updatedAt: '2026-09-16T08:30:00Z',
+              confirmationId: 'NG-2026-0913',
+            },"""
 
-content = content.replace('import React, { useState } from "react";', 'import React, { useState, useEffect } from "react";\n' + new_imports)
+content = content.replace("confirmationId: 'BCB-2026-0912',\n            },", "confirmationId: 'BCB-2026-0912',\n            },\n" + mock_submission_2)
 
-# Replace textarea with EditorContent
-# textarea is approximately:
-#             <textarea
-#               value={content}
-#               onChange={handleContentChange}
-#               placeholder="Begin drafting your scientific paper here using markdown..."
-#               aria-label="Document Content"
-#               className="w-full flex-1 min-h-[500px] text-sm md:text-base leading-relaxed text-slate-800 placeholder-slate-400 bg-transparent border-none focus:outline-none resize-none font-mono"
-#             />
-
-textarea_pattern = re.compile(r'<textarea[\s\S]*?/>')
-
-editor_init = """
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-    ],
-    content: initialContent,
-    onUpdate: ({ editor }) => {
-      setContent(editor.getHTML());
-      setSaveStatus("unsaved");
-    },
-    editorProps: {
-      attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none w-full min-h-[500px]',
-      },
-    },
-  });
-
-  useEffect(() => {
-    if (editor && initialContent !== editor.getHTML()) {
-      // Avoid resetting unnecessarily, but could be useful if initialContent changes
-    }
-  }, [editor, initialContent]);
-"""
-
-# Insert editor_init after const [isAiGenerating, setIsAiGenerating] = useState(false);
-content = content.replace('const [isAiGenerating, setIsAiGenerating] = useState(false);', 'const [isAiGenerating, setIsAiGenerating] = useState(false);\n' + editor_init)
-
-# Replace the text area with EditorContent
-content = textarea_pattern.sub('<EditorContent editor={editor} className="w-full flex-1" />', content)
-
-# Replace DocumentEditor with RichDocumentEditor
-content = content.replace('export default function DocumentEditor', 'export default function RichDocumentEditor')
-
-with open("src/components/RichDocumentEditor.tsx", "w") as f:
+with open("e2e/submissions.spec.ts", "w") as f:
     f.write(content)
-
