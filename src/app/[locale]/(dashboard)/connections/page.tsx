@@ -1,5 +1,5 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { checkIsAdmin } from "@/lib/auth-utils";
+import { checkIsAdmin } from "@/services/auth-utils";
 import { ConnectionsManager } from "@/components/submission/ConnectionsManager";
 
 export default async function ConnectionsPage({ params }: { params: Promise<{ locale: string }> | { locale: string } }) {

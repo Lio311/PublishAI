@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DUMMY_DOCUMENTS, DocumentSection } from "@/lib/api/dummy-data";
+import { DUMMY_DOCUMENTS, DocumentSection } from "@/services/api/dummy-data";
 
 export async function GET(
   req: NextRequest,

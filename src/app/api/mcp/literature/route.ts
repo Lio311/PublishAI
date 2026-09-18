@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { server } from '@/services/mcp/literatureMcpServer';
+import { server } from "@/mcp/literatureMcpServer";
 import { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import { JSONRPCMessage, JSONRPCMessageSchema } from '@modelcontextprotocol/sdk/types.js';
 

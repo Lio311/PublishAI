@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { db } from "@/db";
-import { journals } from "@/db/schema";
-import { askClaude } from "@/lib/agents/claude-client";
+import { db } from "@/services/db";
+import { journals } from "@/services/db/schema";
+import { askClaude } from "@/services/agents/claude-client";
 
 export async function GET() {
   const allJournals = await db.select().from(journals);

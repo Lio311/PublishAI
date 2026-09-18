@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { reviewService } from "@/services/reviews/reviewService";
-import { db } from "@/db";
-import * as schema from "@/db/schema";
+import { db } from "@/services/db";
+import * as schema from "@/services/db/schema";
 import { sql } from "drizzle-orm";
 
 export async function POST(

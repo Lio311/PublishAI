@@ -1,6 +1,6 @@
-import { auth } from "@/auth";
-import { db } from "@/db";
-import { userSettings, users } from "@/db/schema";
+import { auth } from "@/app/auth";
+import { db } from "@/services/db";
+import { userSettings, users } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 

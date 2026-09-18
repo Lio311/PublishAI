@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ConnectionTestResult, SubmissionPayload, SubmissionResult } from "../types";
+import { ConnectionTestResult, SubmissionPayload, SubmissionResult } from "../connection-types";
 
 export class OJSAdapter {
   private siteUrl: string;

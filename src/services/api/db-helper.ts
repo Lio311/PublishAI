@@ -9,7 +9,7 @@ export async function getSafeDb() {
     return null;
   }
   try {
-    const { db } = await import("@/db");
+    const { db } = await import("@/services/db");
     return db;
   } catch (err) {
     console.warn("[DB Helper] Database or schema not ready. Falling back to scaffolded data.", err);
@@ -19,7 +19,7 @@ export async function getSafeDb() {
 
 export async function getSafeAuth() {
   try {
-    const { auth } = await import("@/auth");
+    const { auth } = await import("@/app/auth");
     return await auth();
   } catch (err) {
     console.warn("[Auth Helper] Auth session check failed or not configured.", err);

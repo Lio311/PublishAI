@@ -1,12 +1,12 @@
-import { db } from "@/db";
-import { papers, journals } from "@/db/schema";
+import { db } from "@/services/db";
+import { papers, journals } from "@/services/db/schema";
 import { eq, and } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import PaperTabs from "./PaperTabs";
-import { auth } from "@/auth";
+import { auth } from "@/app/auth";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { checkIsAdmin } from "@/lib/auth-utils";
+import { checkIsAdmin } from "@/services/auth-utils";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Download, FileText, Calendar, Building2, ExternalLink } from "lucide-react";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";

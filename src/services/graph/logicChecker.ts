@@ -1,5 +1,5 @@
-import { db } from "@/db";
-import { scientificRelationships, scientificEntities } from "@/db/schema";
+import { db } from "@/services/db";
+import { scientificRelationships, scientificEntities } from "@/services/db/schema";
 import { generateObject } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';

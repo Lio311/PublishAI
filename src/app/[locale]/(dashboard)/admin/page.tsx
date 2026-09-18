@@ -1,9 +1,9 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { checkIsAdmin } from "@/lib/auth-utils";
+import { checkIsAdmin } from "@/services/auth-utils";
 import { redirect } from "next/navigation";
 import { Users, FileText, Activity, CheckCircle, List } from "lucide-react";
-import { db } from "@/db";
-import { users, papers } from "@/db/schema";
+import { db } from "@/services/db";
+import { users, papers } from "@/services/db/schema";
 import { desc, eq, count, sql } from "drizzle-orm";
 import DashboardCharts from "@/components/admin/DashboardCharts";
 import UsersList from "@/components/admin/UsersList";

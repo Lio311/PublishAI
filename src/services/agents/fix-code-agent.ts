@@ -1,6 +1,6 @@
 import { generateObject } from 'ai';
 import { z } from 'zod';
-import { AI_MODELS } from '@/lib/ai/provider';
+import { AI_MODELS } from "@/services/ai/provider";
 
 export class FixCodeAgent {
   /**

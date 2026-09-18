@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { db } from "@/db";
-import { sandboxRuns, generatedCharts } from "@/db/schema";
+import { db } from "@/services/db";
+import { sandboxRuns, generatedCharts } from "@/services/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { auth } from "@/auth";
+import { auth } from "@/app/auth";
 
 export async function GET(
   req: Request,

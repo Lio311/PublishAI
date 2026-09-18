@@ -1,8 +1,8 @@
 import { inngest } from "../client";
 import { runPythonInSandbox } from "../../services/e2bService";
 import { generateAnalysisScript } from "../../services/dataAnalysisService";
-import { db } from "../../db";
-import { dataFiles, sandboxRuns, generatedCharts, papers } from "../../db/schema";
+import { db } from "../../services/db";
+import { dataFiles, sandboxRuns, generatedCharts, papers } from "../../services/db/schema";
 import { eq } from "drizzle-orm";
 
 export const processPaperAnalysis = inngest.createFunction(

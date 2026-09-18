@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { db } from "@/db";
-import { submissions } from "@/db/schema";
-import { auth } from "@/auth";
+import { db } from "@/services/db";
+import { submissions } from "@/services/db/schema";
+import { auth } from "@/app/auth";
 import { inngest } from "@/inngest/client";
 import { eq, desc } from "drizzle-orm";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit } from "@/services/rate-limit";
 
 export async function POST(req: Request) {
   try {

@@ -1,8 +1,8 @@
-import { db } from "@/db";
-import { figures, figureAnalyses } from "@/db/schema";
+import { db } from "@/services/db";
+import { figures, figureAnalyses } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import { generateObject, generateText } from "ai";
-import { AI_MODELS } from "@/lib/ai/provider";
+import { AI_MODELS } from "@/services/ai/provider";
 import { z } from "zod";
 
 export async function extractFiguresFromDocument(documentText: string): Promise<Array<{imageUrl: string, legend: string, figureNumber: number, resolution: number}>> {

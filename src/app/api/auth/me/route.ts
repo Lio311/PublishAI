@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getSafeAuth, getSafeDb } from "@/lib/api/db-helper";
-import { DUMMY_USER } from "@/lib/api/dummy-data";
+import { getSafeAuth, getSafeDb } from "@/services/api/db-helper";
+import { DUMMY_USER } from "@/services/api/dummy-data";
 
 export async function GET() {
   try {
@@ -9,7 +9,7 @@ export async function GET() {
 
     if (session?.user?.id && db) {
       try {
-        const { users } = await import("@/db/schema");
+        const { users } = await import("@/services/db/schema");
         const { eq } = await import("drizzle-orm");
         const [dbUser] = await db.select().from(users).where(eq(users.id, session.user.id));
         if (dbUser) {
@@ -65,7 +65,7 @@ export async function PATCH(req: Request) {
 
     if (session?.user?.id && db) {
       try {
-        const { users } = await import("@/db/schema");
+        const { users } = await import("@/services/db/schema");
         const { eq } = await import("drizzle-orm");
         const [updatedUser] = await db
           .update(users)

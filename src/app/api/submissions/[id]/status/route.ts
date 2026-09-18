@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { db } from "@/db";
-import { submissions } from "@/db/schema";
+import { auth } from "@/app/auth";
+import { db } from "@/services/db";
+import { submissions } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit } from "@/services/rate-limit";
 import { SubmissionService } from "@/services/submission";
 
 export async function GET(

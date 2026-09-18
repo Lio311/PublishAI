@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
+import { Link } from "@/app/i18n/routing";
 
 export default function RegisterPage() {
   const t = useTranslations();

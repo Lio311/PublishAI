@@ -1,8 +1,8 @@
-import { db } from "@/db";
-import { journals } from "@/db/schema";
+import { db } from "@/services/db";
+import { journals } from "@/services/db/schema";
 import { Book, ExternalLink } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { checkIsAdmin } from "@/lib/auth-utils";
+import { checkIsAdmin } from "@/services/auth-utils";
 import AddJournalButton from "@/components/journals/AddJournalButton";
 
 export default async function JournalsPage({ params }: { params: Promise<{ locale: string }> | { locale: string } }) {

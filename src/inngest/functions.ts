@@ -1,20 +1,20 @@
 import { inngest } from "./client";
-import { db } from "@/db";
-import { papers, users, paperVersions, paperStages } from "@/db/schema";
+import { db } from "@/services/db";
+import { papers, users, paperVersions, paperStages } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
-import { AgentOrchestrator } from "@/lib/agents/orchestrator";
-import { ClarificationAgent } from "@/lib/agents/clarification-agent";
-import { PlanningAgent } from "@/lib/agents/planning-agent";
-import { KnowledgeAgent } from "@/lib/agents/knowledge-agent";
-import { ScientificReviewAgent } from "@/lib/agents/scientific-review-agent";
-import { AcademicWritingAgent } from "@/lib/agents/academic-writing-agent";
-import { ExecutionAgent } from "@/lib/agents/execution-agent";
-import { QaAgent } from "@/lib/agents/qa-agent";
-import { VerificationAgent } from "@/lib/agents/verification-agent";
-import { CoverLetterAgent } from "@/lib/agents/cover-letter-agent";
-import { CompilationAgent } from "@/lib/agents/compilation-agent";
-import { RebuttalAgent } from "@/lib/agents/rebuttal-agent";
-import { AgentContext, AgentResult, Stage } from "@/lib/agents/base-agent";
+import { AgentOrchestrator } from "@/services/agents/orchestrator";
+import { ClarificationAgent } from "@/services/agents/clarification-agent";
+import { PlanningAgent } from "@/services/agents/planning-agent";
+import { KnowledgeAgent } from "@/services/agents/knowledge-agent";
+import { ScientificReviewAgent } from "@/services/agents/scientific-review-agent";
+import { AcademicWritingAgent } from "@/services/agents/academic-writing-agent";
+import { ExecutionAgent } from "@/services/agents/execution-agent";
+import { QaAgent } from "@/services/agents/qa-agent";
+import { VerificationAgent } from "@/services/agents/verification-agent";
+import { CoverLetterAgent } from "@/services/agents/cover-letter-agent";
+import { CompilationAgent } from "@/services/agents/compilation-agent";
+import { RebuttalAgent } from "@/services/agents/rebuttal-agent";
+import { AgentContext, AgentResult, Stage } from "@/services/agents/base-agent";
 
 export const processPaper = inngest.createFunction(
   { 
@@ -77,7 +77,7 @@ export const processPaper = inngest.createFunction(
 
     // 6.5 Integrity Scan
     await step.run("integrity-scan", async () => {
-      const { IntegrityScanner } = await import("@/lib/security/integrity-scanner");
+      const { IntegrityScanner } = await import("@/services/security/integrity-scanner");
       const report = await IntegrityScanner.scanManuscript(context.manuscriptText);
       console.log(`[Integrity] Passed: ${report.passed}. Plagiarism: ${report.plagiarismScore}%. AI: ${report.aiGeneratedScore}%.`);
       if (!report.passed) {
@@ -117,7 +117,7 @@ export const processPaper = inngest.createFunction(
       if (paperResult.length > 0 && paperResult[0].userEmail) {
         const { title, userEmail } = paperResult[0];
         try {
-          const { sendAwaitingApprovalEmail } = await import("@/lib/email/notification-service");
+          const { sendAwaitingApprovalEmail } = await import("@/services/email/notification-service");
           await sendAwaitingApprovalEmail(userEmail, title, paperId.toString());
         } catch (e) {
           console.error("Failed to send email notification", e);

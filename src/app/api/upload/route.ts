@@ -3,11 +3,11 @@ import { put } from "@vercel/blob";
 import mammoth from "mammoth";
 // @ts-ignore
 import pdfParse from "pdf-parse/lib/pdf-parse.js";
-import { db } from "@/db";
-import { papers } from "@/db/schema";
+import { db } from "@/services/db";
+import { papers } from "@/services/db/schema";
 import { inngest } from "@/inngest/client";
-import { auth } from "@/auth";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { auth } from "@/app/auth";
+import { checkRateLimit } from "@/services/rate-limit";
 
 export async function POST(request: Request) {
   try {

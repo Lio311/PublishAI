@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fixCodeAgent } from "@/lib/agents/fix-code-agent";
+import { fixCodeAgent } from "@/services/agents/fix-code-agent";
 
 export async function POST(req: NextRequest) {
   try {

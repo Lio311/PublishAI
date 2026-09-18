@@ -1,7 +1,7 @@
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
-import { db } from "@/db";
-import { dataFiles } from "@/db/schema";
+import { db } from "@/services/db";
+import { dataFiles } from "@/services/db/schema";
 import { inngest } from "@/inngest/client";
 
 export async function POST(req: Request) {

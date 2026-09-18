@@ -1,6 +1,6 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
-import { literatureService, CrossrefClient } from '../literature/literatureService';
+import { literatureService, CrossrefClient } from '@/services/literature/literatureService';
 
 const server = new Server(
   {

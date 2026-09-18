@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSafeDb } from "@/lib/api/db-helper";
+import { getSafeDb } from "@/services/api/db-helper";
 
 export async function POST(req: Request) {
   try {
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const db = await getSafeDb();
     if (db) {
       try {
-        const { users } = await import("@/db/schema");
+        const { users } = await import("@/services/db/schema");
         const { eq } = await import("drizzle-orm");
 
         const existing = await db.select().from(users).where(eq(users.email, email));

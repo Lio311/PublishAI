@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth } from "@/app/auth";
 
 export async function checkIsAdmin() {
   const session = await auth();

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@/db";
-import { scientificEntities } from "@/db/schema";
+import { db } from "@/services/db";
+import { scientificEntities } from "@/services/db/schema";
 import { ilike } from "drizzle-orm";
 
 export async function GET(request: Request) {

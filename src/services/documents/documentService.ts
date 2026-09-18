@@ -1,8 +1,8 @@
 import mammoth from 'mammoth';
 // @ts-ignore
 import pdfParse from 'pdf-parse/lib/pdf-parse.js';
-import { generateDocx } from '@/lib/export/docx-generator';
-import { generatePdf } from '@/lib/export/pdf-generator';
+import { generateDocx } from "@/services/export/docx-generator";
+import { generatePdf } from "@/services/export/pdf-generator";
 import util from 'util';
 import {
   DocumentFormat,

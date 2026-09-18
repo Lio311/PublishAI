@@ -1,6 +1,6 @@
 import { generateText, embed } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { db } from '@/db';
+import { db } from "@/services/db";
 import { sql } from 'drizzle-orm';
 
 export interface DebateState {

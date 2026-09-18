@@ -1,5 +1,5 @@
-import { db } from "@/db";
-import { rlhfFeedbackLogs, promptStrategies, abTestAllocations, journals } from "@/db/schema";
+import { db } from "@/services/db";
+import { rlhfFeedbackLogs, promptStrategies, abTestAllocations, journals } from "@/services/db/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
 import fs from "fs/promises";
 import path from "path";

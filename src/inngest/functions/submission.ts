@@ -1,6 +1,6 @@
 import { inngest } from "../client";
-import { db } from "@/db";
-import { submissions } from "@/db/schema";
+import { db } from "@/services/db";
+import { submissions } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import { runSubmissionWorkflow } from "@/services/rpa/submission-bot";
 
@@ -57,7 +57,7 @@ export const processSubmission = inngest.createFunction(
     // Step to send confirmation email
     await step.run("send-confirmation-email", async () => {
       // Email sending logic here
-      // import { sendSubmissionSuccessEmail } from "@/lib/email/submission-email";
+      // import { sendSubmissionSuccessEmail } from "@/services/email/submission-email";
       // await sendSubmissionSuccessEmail(user.email, paper.title, result.postUrl);
     });
 

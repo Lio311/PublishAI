@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getTranslations } from "next-intl/server";
-import { checkIsAdmin } from "@/lib/auth-utils";
+import { checkIsAdmin } from "@/services/auth-utils";
 import SettingsClient from "@/components/dashboard/SettingsClient";
 
 export default async function SettingsPage({

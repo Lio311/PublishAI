@@ -3,11 +3,11 @@ import { Open_Sans } from "next/font/google";
 import "../globals.css";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import { routing } from '@/i18n/routing';
+import { routing } from "@/app/i18n/routing";
 import { notFound } from 'next/navigation';
 import GlobalPasswordProtection from '@/components/layout/GlobalPasswordProtection';
 import { SessionProvider } from 'next-auth/react';
-import { auth } from '@/auth';
+import { auth } from "@/app/auth";
 import { Toaster } from 'sonner';
 import DynamicBackground from '@/components/layout/DynamicBackground';
 

@@ -1,12 +1,12 @@
-import { db } from "@/db";
-import { papers, journals } from "@/db/schema";
+import { db } from "@/services/db";
+import { papers, journals } from "@/services/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { FileText, Search, ArrowRight, ArrowLeft, UploadCloud, ChevronRight, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { checkIsAdmin } from "@/lib/auth-utils";
-import { auth } from "@/auth";
+import { checkIsAdmin } from "@/services/auth-utils";
+import { auth } from "@/app/auth";
 import { redirect } from "next/navigation";
 
 export default async function PapersPage({

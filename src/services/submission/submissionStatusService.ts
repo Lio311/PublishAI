@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { db } from "@/db";
-import { submissions, submissionLogs } from "@/db/schema";
+import { db } from "@/services/db";
+import { submissions, submissionLogs } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import {
   JournalSubmissionStatus,

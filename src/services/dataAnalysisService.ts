@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { AI_MODELS } from "@/lib/ai/provider";
+import { AI_MODELS } from "@/services/ai/provider";
 
 /**
  * @description Analyzes the paper text and generates a Python script to verify the statistical claims against the data.

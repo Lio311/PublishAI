@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { db } from "@/db";
-import { papers, submissions, submissionLogs } from "@/db/schema";
+import { db } from "@/services/db";
+import { papers, submissions, submissionLogs } from "@/services/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { pgTable, serial, text, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
 import { SubmissionStatusService } from "./submissionStatusService";

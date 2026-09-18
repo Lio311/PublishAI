@@ -1,7 +1,7 @@
 import { inngest } from "../client";
 import { extractFiguresFromDocument, analyzeFigureWithVisionAi } from "../../services/visionAi.service";
-import { db } from "../../db";
-import { figures, figureAnalyses } from "../../db/schema";
+import { db } from "../../services/db";
+import { figures, figureAnalyses } from "../../services/db/schema";
 
 export const processPaperFigures = inngest.createFunction(
   { id: "process-paper-figures", name: "Process Paper Figures & Vision AI", event: "paper.uploaded" } as any,

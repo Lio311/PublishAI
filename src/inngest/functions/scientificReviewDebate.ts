@@ -1,7 +1,7 @@
 import { inngest } from "../client";
 import { initializeDebate, addDebateMessage, checkConsensus } from "../../services/debateService";
-import { db } from "@/db";
-import { debateAgents, debates } from "@/db/schema";
+import { db } from "@/services/db";
+import { debateAgents, debates } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 
 export const scientificReviewDebate = inngest.createFunction(

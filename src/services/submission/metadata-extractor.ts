@@ -1,7 +1,7 @@
-import { db } from "@/db";
-import { papers } from "@/db/schema";
+import { db } from "@/services/db";
+import { papers } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
-import { SubmissionPayload } from "./types";
+import { SubmissionPayload } from "./connection-types";
 
 export class MetadataExtractor {
   static async extractFromPaper(paperId: number): Promise<Partial<SubmissionPayload>> {

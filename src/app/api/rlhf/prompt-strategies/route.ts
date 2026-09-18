@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@/db";
-import { promptStrategies } from "@/db/schema";
+import { db } from "@/services/db";
+import { promptStrategies } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET() {

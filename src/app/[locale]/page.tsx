@@ -3,12 +3,12 @@ import UploadZone from "@/components/dashboard/UploadZone";
 import SystemExplainButton from "@/components/dashboard/SystemExplainButton";
 import { FileText, Clock, CheckCircle, ArrowRight, ArrowLeft, ChevronRight, ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { db } from "@/db";
-import { papers, journals } from "@/db/schema";
+import { db } from "@/services/db";
+import { papers, journals } from "@/services/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { getTranslations } from "next-intl/server";
-import { checkIsAdmin } from "@/lib/auth-utils";
-import { auth } from "@/auth";
+import { checkIsAdmin } from "@/services/auth-utils";
+import { auth } from "@/app/auth";
 import { redirect } from "next/navigation";
 
 export default async function Home({

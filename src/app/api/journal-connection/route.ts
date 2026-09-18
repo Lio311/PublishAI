@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { db } from "@/db";
-import { journalConnections } from "@/db/schema";
-import { encrypt } from "@/lib/security/encryption";
-import { auth } from "@/auth"; // Assuming standard next-auth setup
+import { db } from "@/services/db";
+import { journalConnections } from "@/services/db/schema";
+import { encrypt } from "@/services/security/encryption";
+import { auth } from "@/app/auth"; // Assuming standard next-auth setup
 import { eq } from "drizzle-orm";
 
 export async function POST(req: Request) {

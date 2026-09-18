@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
-import { ConnectionTestResult } from "./types";
+import { ConnectionTestResult } from "./connection-types";
 import { WordPressAdapter } from "./adapters/wordpress-adapter";
 import { OJSAdapter } from "./adapters/ojs-adapter";
 

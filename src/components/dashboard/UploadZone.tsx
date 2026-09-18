@@ -2,7 +2,7 @@
 
 import { UploadCloud, Loader2, CheckCircle } from "lucide-react";
 import { useCallback, useState } from "react";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/app/i18n/routing";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 

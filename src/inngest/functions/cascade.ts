@@ -1,8 +1,8 @@
 import { inngest } from "../client";
-import { db } from "@/db";
-import { papers, journals } from "@/db/schema";
+import { db } from "@/services/db";
+import { papers, journals } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
-import { journalCascadeMap } from "@/lib/journal-cascade";
+import { journalCascadeMap } from "@/services/journal-cascade";
 import { runSubmissionWorkflow } from "@/services/rpa/submission-bot";
 
 export const processPaperRejected = inngest.createFunction(

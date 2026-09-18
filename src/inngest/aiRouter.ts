@@ -1,4 +1,4 @@
-import { askClaude } from "@/lib/agents/claude-client";
+import { askClaude } from "@/services/agents/claude-client";
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 

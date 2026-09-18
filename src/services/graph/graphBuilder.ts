@@ -1,5 +1,5 @@
-import { db } from "@/db";
-import { scientificEntities, scientificRelationships } from "@/db/schema";
+import { db } from "@/services/db";
+import { scientificEntities, scientificRelationships } from "@/services/db/schema";
 import { inArray } from "drizzle-orm";
 import { GraphData } from "./entityExtractor";
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@/db";
-import { rlhfFeedbackLogs } from "@/db/schema";
+import { db } from "@/services/db";
+import { rlhfFeedbackLogs } from "@/services/db/schema";
 import { sql } from "drizzle-orm";
 
 export async function GET() {

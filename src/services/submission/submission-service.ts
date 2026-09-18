@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
-import { db } from "@/db";
-import { journalConnections, submissions, submissionLogs } from "@/db/schema";
+import { db } from "@/services/db";
+import { journalConnections, submissions, submissionLogs } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
-import { decrypt } from "@/lib/security/encryption";
+import { decrypt } from "@/services/security/encryption";
 import { WordPressAdapter } from "./adapters/wordpress-adapter";
 import { OJSAdapter } from "./adapters/ojs-adapter";
-import { SubmissionPayload, SubmissionResult } from "./types";
+import { SubmissionPayload, SubmissionResult } from "./connection-types";
 
 export class SubmissionService {
   /**

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { ConnectionTester } from "@/lib/submission/connection-tester";
-import { auth } from "@/auth";
+import { ConnectionTester } from "@/services/submission/connection-tester";
+import { auth } from "@/app/auth";
 
 export async function POST(req: Request) {
   try {

@@ -2,8 +2,8 @@ import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import GitHub from "next-auth/providers/github"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
-import { db } from "@/db"
-import { accounts, sessions, users, verificationTokens } from "@/db/schema"
+import { db } from "@/services/db"
+import { accounts, sessions, users, verificationTokens } from "@/services/db/schema"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: DrizzleAdapter(db, {

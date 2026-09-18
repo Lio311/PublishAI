@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseAgent, AgentContext, AgentResult } from "./base-agent";
-import { db } from "@/db";
-import { paperStages } from "@/db/schema";
+import { db } from "@/services/db";
+import { paperStages } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 
 export class AgentOrchestrator {

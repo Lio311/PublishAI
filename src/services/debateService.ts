@@ -1,5 +1,5 @@
-import { db } from "@/db";
-import { debates, debateAgents, debateMessages } from "@/db/schema";
+import { db } from "@/services/db";
+import { debates, debateAgents, debateMessages } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function initializeDebate(paperId: number): Promise<string> {
