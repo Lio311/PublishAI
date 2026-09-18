@@ -80,3 +80,4 @@ build/
 # E2B Sandbox Local Configs
 # =========================================
 .e2b/
+test-results/
