@@ -8,24 +8,16 @@ global.ReadableStream = ReadableStream;
 global.WritableStream = WritableStream;
 global.TransformStream = TransformStream;
 
-// Node 18+ has native fetch API
-if (typeof fetch !== 'undefined') {
-  global.fetch = fetch;
-  global.Request = Request;
-  global.Response = Response;
-  global.Headers = Headers;
-} else {
-  // Fallback for older environments if needed
-  try {
-    const undici = require('undici');
-    global.fetch = undici.fetch;
-    global.Request = undici.Request;
-    global.Response = undici.Response;
-    global.Headers = undici.Headers;
-  } catch (e) {
-    console.warn('Could not load undici fallback');
-  }
-}
+const { MessageChannel, MessagePort } = require('worker_threads');
+global.MessageChannel = MessageChannel;
+global.MessagePort = MessagePort;
+
+const undici = require('undici');
+global.fetch = undici.fetch;
+global.Request = undici.Request;
+global.Response = undici.Response;
+global.Headers = undici.Headers;
+global.FormData = undici.FormData;
 
 process.env.DATABASE_URL = "postgres://dummy:dummy@dummy/dummy";
 process.env.HF_TOKEN = "dummy_token";
