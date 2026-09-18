@@ -21,8 +21,16 @@ const config: Config = {
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
 export default async () => {
   const nextJestConfig = await createJestConfig(config)()
-  nextJestConfig.transformIgnorePatterns = [
-    '/node_modules/(?!(ai|@ai-sdk|@modelcontextprotocol|@workflow)/)'
-  ]
+  
+  // Safely inject transformIgnorePatterns by modifying Next.js defaults
+  if (nextJestConfig.transformIgnorePatterns) {
+    nextJestConfig.transformIgnorePatterns = nextJestConfig.transformIgnorePatterns.map(pattern => {
+      if (typeof pattern === 'string' && pattern.includes('geist|')) {
+        return pattern.replaceAll('geist|', 'geist|ai|@ai-sdk|@modelcontextprotocol|@workflow|');
+      }
+      return pattern;
+    });
+  }
+  
   return nextJestConfig
 }
