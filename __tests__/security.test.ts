@@ -12,7 +12,7 @@ import {
   validateInput,
   getSecurityHeaders,
   validateRequestSecurity
-} from '../src/utils/security';
+} from '../src/services/utils/security';
 
 describe('Security & Privacy Utilities', () => {
   describe('PII Detection & Stripping', () => {

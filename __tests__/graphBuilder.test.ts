@@ -1,7 +1,7 @@
 import { buildGraphFromRelationships } from '../src/services/graph/graphBuilder';
-import { db } from '@/db';
+import { db } from '@/services/db';
 
-jest.mock('@/db', () => ({
+jest.mock('@/services/db', () => ({
   db: {
     insert: jest.fn(),
     query: {

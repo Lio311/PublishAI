@@ -18,14 +18,14 @@ const mockInsertValues = jest.fn().mockResolvedValue([{ id: 1 }]);
 const mockInsert = jest.fn().mockReturnValue({ values: mockInsertValues });
 const mockExecute = jest.fn().mockResolvedValue([{ count: 1 }]);
 
-jest.mock("@/db", () => ({
+jest.mock("@/services/db", () => ({
   db: {
     insert: (...args: any[]) => mockInsert(...args),
     execute: (...args: any[]) => mockExecute(...args),
   },
 }));
 
-jest.mock("@/db/schema", () => ({
+jest.mock("@/services/db/schema", () => ({
   reviewComments: {
     name: "review_comments",
   },

@@ -1,6 +1,6 @@
 import { SubmissionStatusService, STATUS_METADATA } from '../src/services/submission';
 
-jest.mock('@/db', () => ({
+jest.mock('@/services/db', () => ({
   db: {
     insert: jest.fn().mockReturnValue({
       values: jest.fn().mockResolvedValue([]),

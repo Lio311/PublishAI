@@ -12,21 +12,21 @@ import {
 } from "@/services/submission";
 import { POST as submitRoute } from "@/app/api/submissions/[id]/submit/route";
 import { GET as getStatusRoute, PATCH as patchStatusRoute } from "@/app/api/submissions/[id]/status/route";
-import { auth } from "@/auth";
+import { auth } from "@/app/auth";
 
-// Mock @/auth
-jest.mock("@/auth", () => ({
+// Mock @/app/auth
+jest.mock("@/app/auth", () => ({
   auth: jest.fn().mockResolvedValue({
     user: { id: "test-user-123", email: "author@test.com", name: "Test Author" },
   }),
 }));
 
-// Mock @/lib/rate-limit
-jest.mock("@/lib/rate-limit", () => ({
+// Mock @/services/rate-limit
+jest.mock("@/services/rate-limit", () => ({
   checkRateLimit: jest.fn().mockResolvedValue({ success: true }),
 }));
 
-// Mock @/db
+// Mock @/services/db
 const mockSubmissionsMap = new Map<number, any>([
   [
     201,
@@ -41,7 +41,7 @@ const mockSubmissionsMap = new Map<number, any>([
   ],
 ]);
 
-jest.mock("@/db", () => {
+jest.mock("@/services/db", () => {
   return {
     db: {
       insert: jest.fn().mockReturnValue({

@@ -11,7 +11,7 @@ global.fetch = jest.fn();
 globalThis.fetch = global.fetch;
 if (typeof window !== 'undefined') window.fetch = global.fetch;
 
-jest.mock('@/db', () => ({
+jest.mock('@/services/db', () => ({
   db: {}
 }));
 

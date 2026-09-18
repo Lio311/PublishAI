@@ -1,9 +1,9 @@
 import { initializeDebate, addDebateMessage, checkConsensus } from '../src/services/debateService';
-import { db } from '@/db';
-import { debates, debateAgents, debateMessages } from '@/db/schema';
+import { db } from '@/services/db';
+import { debates, debateAgents, debateMessages } from '@/services/db/schema';
 import { eq } from 'drizzle-orm';
 
-jest.mock('@/db', () => ({
+jest.mock('@/services/db', () => ({
   db: {
     insert: jest.fn(),
     select: jest.fn(),

@@ -1,4 +1,4 @@
-import { users, documents, papers, submissions, figures } from '../src/db/schema';
+import { users, documents, papers, submissions, figures } from '../src/services/db/schema';
 import { getTableConfig } from 'drizzle-orm/pg-core';
 
 describe('Database Schema Constraints', () => {

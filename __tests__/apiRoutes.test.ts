@@ -1,7 +1,7 @@
 
 process.env.DATABASE_URL = "postgres://mock";
 
-jest.mock("@/db", () => {
+jest.mock("@/services/db", () => {
   const docStore = [
     { id: 1, title: "Quantum Computing Foundations", status: "pending", userId: "test-user-id", createdAt: new Date() },
     { id: 2, title: "Another doc", status: "draft", userId: "test-user-id", createdAt: new Date() }
@@ -42,7 +42,7 @@ jest.mock("@/db", () => {
   return { db: chainable };
 });
 
-jest.mock("@/auth", () => {
+jest.mock("@/app/auth", () => {
   return {
     auth: jest.fn().mockResolvedValue({ user: { id: "test-user-id", name: "Test User" } })
   };

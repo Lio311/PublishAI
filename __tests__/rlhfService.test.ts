@@ -1,8 +1,8 @@
 import { logFeedbackOutcome, exportDatasetForFineTuning, assignPromptStrategy, getJournalAnalytics } from '../src/services/rlhfService';
-import { db } from '@/db';
+import { db } from '@/services/db';
 import fs from 'fs/promises';
 
-jest.mock('@/db', () => ({
+jest.mock('@/services/db', () => ({
   db: {
     execute: jest.fn(),
     insert: jest.fn(),
