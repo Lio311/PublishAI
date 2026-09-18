@@ -7,9 +7,8 @@
 - **Status:** ✅ Complete
 
 ## Epic 3: The RPA Submission Engine (Playwright + HITL)
-- **RPA Automation Agent:** ✅ Complete - Playwright bot created in `src/services/rpa/`
-- **Inngest Workflow Agent:** 🔄 In Progress - Implementing `step.waitForEvent()` and Captcha UI
-- **Status:** In Progress
+- **Status:** ✅ Complete
 
 ## Epic 4: The Cascade E2E Pipeline
-- **Status:** Pending
+- **Cascade Workflow Agent:** 🔄 In Progress - Implementing rejection cascade
+- **Status:** In Progress

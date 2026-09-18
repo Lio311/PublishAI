@@ -215,3 +215,4 @@ export const processResubmission = inngest.createFunction(
     return { success: true, rebuttalGenerated: true };
   }
 );
+export { processPaperRejected } from "./functions/cascade";

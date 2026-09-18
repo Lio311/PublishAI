@@ -34,7 +34,7 @@ export default async function RootLayout({
   // Providing all messages to the client
   // side is the easiest way to get started
   const messages = await getMessages();
-  const session = await auth();
+  const session = null;
 
   // Determine direction
   const dir = locale === 'he' ? 'rtl' : 'ltr';

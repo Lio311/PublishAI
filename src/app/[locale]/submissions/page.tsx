@@ -9,7 +9,7 @@ export default async function SubmissionsPage({
 }) {
   const resolvedParams = await params;
   const locale = resolvedParams?.locale || "en";
-  const isAdmin = await checkIsAdmin();
+  const isAdmin = false;
 
   return (
     <DashboardLayout isAdmin={isAdmin}>
