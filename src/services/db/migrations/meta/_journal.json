@@ -22,6 +22,13 @@
       "when": 1789427150432,
       "tag": "0002_white_prodigy",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789822314970,
+      "tag": "0003_melted_exiles",
+      "breakpoints": true
     }
   ]
 }

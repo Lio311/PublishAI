@@ -11,7 +11,8 @@ import {
   uuid,
   real,
   index,
-  primaryKey
+  primaryKey,
+  vector
 } from "drizzle-orm/pg-core";
 
 export const statusEnum = pgEnum("status", [
@@ -623,3 +624,21 @@ export type NewReviewThread = typeof reviewThreads.$inferInsert;
 
 export type ReviewComment = typeof reviewComments.$inferSelect;
 export type NewReviewComment = typeof reviewComments.$inferInsert;
+
+// ═══════════════════════════════════════════════════════
+// UPGRADE 6: RAG & PGVECTOR
+// ═══════════════════════════════════════════════════════
+
+export const documentChunks = pgTable("document_chunks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  documentId: uuid("document_id").references(() => documents.id, { onDelete: "cascade" }).notNull(),
+  content: text("content").notNull(),
+  embedding: vector("embedding", { dimensions: 1536 }),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  documentIdIdx: index("document_chunks_document_id_idx").on(table.documentId),
+}));
+
+export type DocumentChunk = typeof documentChunks.$inferSelect;
+export type NewDocumentChunk = typeof documentChunks.$inferInsert;

@@ -1,0 +1,12 @@
+
+> publish-ai@0.1.0 dev
+> next dev
+
+▲ Next.js 16.3.5 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://10.0.0.17:3000
+- Environments: .env.local
+✓ Ready in 219ms
+✓ Running next.config.ts took 26ms
+
+ GET /en/login 200 in 501ms (next.js: 354ms, application-code: 147ms)
