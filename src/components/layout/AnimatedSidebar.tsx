@@ -49,7 +49,7 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <aside 
-      className="relative w-[280px] m-4 lg:m-6 flex flex-col justify-between rounded-[2rem] bg-white/70 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden z-20"
+      className="relative w-[280px] h-[calc(100vh-2rem)] lg:h-[calc(100vh-3rem)] m-4 lg:m-6 flex flex-col justify-between rounded-[2rem] bg-white/70 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden z-20"
     >
       {/* Subtle animated gradient background inside sidebar */}
       <div className="absolute inset-0 bg-gradient-to-b from-sky-50/30 to-transparent pointer-events-none" />
