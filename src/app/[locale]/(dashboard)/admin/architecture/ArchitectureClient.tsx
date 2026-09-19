@@ -300,6 +300,10 @@ id: 9, phase: 1,
       en: "Agent extracts explicit formatting rules, word limits, citation styles, and mandatory sections into structured JSON.",
       he: "סוכן AI מנתח את הדף ושולף את כל חוקי העיצוב (גבולות מילים, סגנון ציטוט, חלקי מאמר חובה) וממיר ל-JSON מובנה."
     },
+    prompt: {
+      en: "Extract the formatting guidelines from the provided journal webpage. Return a structured JSON containing word limits, mandatory sections, and citation style rules.",
+      he: "חלץ את הנחיות העיצוב מתוך דף כתב העת שסופק. החזר JSON מובנה המכיל את מגבלות המילים, חלקי החובה וכללי סגנון הציטוט."
+    },
     icon: Search, tools: ["Claude 3.5", "Neon Postgres", "Drizzle ORM"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
@@ -310,6 +314,10 @@ id: 9, phase: 1,
       en: "The manuscript is refactored to perfectly match the target journal's specific structure and citation requirements.",
       he: "המאמר משוכתב ומסודר מחדש בהתאמה מושלמת למבנה, לאורך ולסגנון הציטוטים הספציפי שדורש עיתון היעד."
     },
+    prompt: {
+      en: "Reformat the provided manuscript to adhere strictly to the target journal guidelines (JSON). Adjust headings, references, and spacing without altering the core scientific meaning.",
+      he: "עצב מחדש את כתב היד המצורף כך שיעמוד בקפדנות בהנחיות כתב העת (JSON). התאם כותרות, הפניות וריווח מבלי לשנות את המשמעות המדעית."
+    },
     icon: Scissors, tools: ["Claude 3.5", "Tiptap & Monaco"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
@@ -319,6 +327,10 @@ id: 9, phase: 1,
     description: { 
       en: "Automated checklist runs pre-submission logic to ensure no rule of the journal is violated.",
       he: "רשימת תיוג (Checklist) אוטומטית המאמתת לפני ההגשה שאף חוק של העיתון לא הופר (למשל חריגה במילים בתקציר)."
+    },
+    prompt: {
+      en: "Cross-reference the formatted manuscript against the journal\'s formal guidelines. Perform a rigorous step-by-step checklist validation and report any missing compliance items.",
+      he: "הצלב את כתב היד המעוצב אל מול ההנחיות הרשמיות של כתב העת. בצע אימות קפדני לפי רשימת תיוג ודווח על כל סעיף שאינו עומד בדרישות."
     },
     icon: ListChecks, tools: ["OpenAI o1"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
@@ -366,6 +378,10 @@ id: 9, phase: 1,
       en: "Execution Agent selectively edits only the relevant paragraphs in the manuscript to address the critiques.",
       he: "סוכן הביצוע ניגש ישירות לפסקאות הרלוונטיות במאמר ועורך אך ורק אותן כדי לספק את דרישות הסוקרים (מבלי להרוס את השאר)."
     },
+    prompt: {
+      en: "Implement the required changes in the manuscript according to the Rebuttal Strategy Document. Maintain the academic tone and ensure the edits directly address the reviewers\' concerns.",
+      he: "יישם את השינויים הנדרשים במאמר בהתאם למסמך אסטרטגיית התגובה. שמור על המשלב האקדמי וודא שהעריכה נותנת מענה ישיר לחששות הסוקרים."
+    },
     icon: Edit3, tools: ["Claude 3.5", "Tiptap & Monaco"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
@@ -375,6 +391,10 @@ id: 9, phase: 1,
     description: { 
       en: "Generates a formal point-by-point rebuttal letter demonstrating to the editors exactly how their comments were addressed.",
       he: "מפיק מכתב תגובה רשמי (Point-by-point Rebuttal) שמדגים לעורכי העיתון בדיוק כיצד המאמר תוקן בהתאם לכל אחת מהערותיהם."
+    },
+    prompt: {
+      en: "Draft the official \'Response to Reviewers\' letter. For each point, copy the original reviewer comment and provide our polite, detailed explanation of how the manuscript was amended.",
+      he: "נסח את מכתב ה\'תגובה לסוקרים\' הרשמי. עבור כל נקודה, העתק את הערת הסוקר המקורית וספק את ההסבר המנומס והמפורט שלנו כיצד תוקן המאמר."
     },
     icon: FileCheck, tools: ["Next.js API", "Claude 3.5", "Mammoth & Docx"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
