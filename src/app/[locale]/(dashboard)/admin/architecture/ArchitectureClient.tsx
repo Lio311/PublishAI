@@ -188,7 +188,7 @@ const ARCHITECTURE_STEPS = [
       en: "Extract 3 main search queries for academic literature based on this text. Output ONLY the 3 queries, separated by commas, with no additional text, numbering, or formatting.", 
       he: "חלץ 3 שורות חיפוש עיקריות לספרות אקדמית בהתבסס על הטקסט. פלוט *אך ורק* את 3 שורות החיפוש, מופרדות בפסיקים, ללא טקסט נוסף, מספור או עיצוב כלשהו." 
     },
-    icon: Database, tools: ["pgvector", "GraphRAG", "MCP", "LangChain & LangGraph"],
+    icon: Database, tools: ["Claude 3.7", "pgvector", "GraphRAG", "MCP", "LangChain & LangGraph"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
@@ -202,7 +202,7 @@ const ARCHITECTURE_STEPS = [
       en: "Generate a simulated peer-review report for this final manuscript provided.", 
       he: "צור דוח הדמיה של ביקורת עמיתים (Peer Review) עבור גרסת המאמר הסופית שהוזנה." 
     },
-    icon: BarChart2, tools: ["Vision AI", "E2B Sandbox"],
+    icon: BarChart2, tools: ["Claude 3.7", "Vision AI", "E2B Sandbox"],
     color: "bg-orange-50 text-orange-700 border-orange-200"
   },
   {
@@ -240,13 +240,17 @@ const ARCHITECTURE_STEPS = [
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
-    id: 9, phase: 1,
+id: 9, phase: 1,
     title: { en: "9. Execution Agent", he: "9. סוכן ביצוע והטמעה" },
     description: { 
       en: "Applies the line-by-line Diff changes to the manuscript. Populates the Tiptap/Monaco UI so the user can see exact modifications.",
       he: "מיישם את השינויים סעיף-אחר-סעיף על המסמך, ומזין את הממשק החזותי כך שהמשתמש יוכל לראות במדויק מה נמחק ומה התווסף."
     },
-    icon: Save, tools: ["Tiptap & Monaco", "Neon Postgres", "Drizzle ORM"],
+    prompt: { 
+      en: "Create a structured summary of the changes made between the original manuscript and the rewritten version.",
+      he: "צור סיכום מובנה של השינויים שבוצעו בין כתב היד המקורי לגרסה המשוכתבת."
+    },
+    icon: Save, tools: ["Claude 3 Opus", "Tiptap & Monaco", "Neon Postgres", "Drizzle ORM"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
@@ -274,7 +278,7 @@ const ARCHITECTURE_STEPS = [
       en: "You are an academic editor. Write a professional cover letter for the following manuscript being submitted to the journal. Ensure it follows this structure: 1. Address the Editor in Chief. 2. State the title of the manuscript and intent to submit. 3. Briefly highlight the main findings and significance. 4. Confirm it has not been published elsewhere. 5. Provide contact info.", 
       he: "אתה עורך אקדמי. כתוב מכתב מקדים (Cover Letter) מקצועי עבור המאמר המוגש לכתב העת. עליך לוודא שהוא עוקב אחר המבנה הבא: 1. פנייה לעורך הראשי. 2. ציון כותרת המאמר. 3. הדגשה של הממצאים העיקריים והחשיבות. 4. אישור שהמאמר לא פורסם בשום מקום אחר. 5. פרטי התקשרות." 
     },
-    icon: Download, tools: ["Next.js API", "Mammoth & Docx", "Nodemailer", "Stripe Billing"],
+    icon: Download, tools: ["Claude 3.7", "Next.js API", "Mammoth & Docx", "Nodemailer", "Stripe Billing"],
     color: "bg-cyan-50 text-cyan-700 border-cyan-200"
   },
   
@@ -581,44 +585,6 @@ export default function ArchitectureClient({ isAdmin }: { isAdmin: boolean }) {
                       )}
                     </div>
       
-              {/* Navigation Buttons */}
-              <div className="mt-auto pt-8 border-t border-slate-100 flex items-center justify-between">
-                {(() => {
-                  const currentIndex = currentPhaseSteps.findIndex(s => s.id === activeStep);
-                  const prevStep = currentIndex > 0 ? currentPhaseSteps[currentIndex - 1] : null;
-                  const nextStep = currentIndex < currentPhaseSteps.length - 1 ? currentPhaseSteps[currentIndex + 1] : null;
-                  
-                  return (
-                    <>
-                      {prevStep ? (
-                        <button
-                          onClick={() => {
-                            setActiveStep(prevStep.id);
-                            setSelectedTool(null);
-                          }}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors font-medium text-sm ${isHe ? 'ml-auto' : 'mr-auto'}`}
-                        >
-                          <ArrowRight className={`w-4 h-4 ${isHe ? '' : 'rotate-180'}`} />
-                          {isHe ? 'השלב הקודם' : 'Previous Step'}
-                        </button>
-                      ) : <div className={isHe ? 'ml-auto' : 'mr-auto'}></div>}
-                      
-                      {nextStep && (
-                        <button
-                          onClick={() => {
-                            setActiveStep(nextStep.id);
-                            setSelectedTool(null);
-                          }}
-                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-colors font-medium text-sm shadow-sm"
-                        >
-                          {isHe ? 'השלב הבא' : 'Next Step'}
-                          <ArrowRight className={`w-4 h-4 ${isHe ? 'rotate-180' : ''}`} />
-                        </button>
-                      )}
-                    </>
-                  );
-                })()}
-              </div>
 
             </motion.div>
                 )}
