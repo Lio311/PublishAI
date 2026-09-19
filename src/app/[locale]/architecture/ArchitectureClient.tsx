@@ -7,7 +7,7 @@ import {
   Upload, Search, FileText, BarChart2, Eye, MessageSquare, 
   CheckCircle, Edit3, Save, ShieldCheck, Download, 
   Cpu, Database, Layers, X, Info, ArrowRight, BookOpen, Scissors, ListChecks, RefreshCw, GitMerge, FileCheck
-, Terminal} from "lucide-react";
+, Terminal, Share2} from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 
 // Tools Dictionary
@@ -428,6 +428,19 @@ export default function ArchitectureClient({ isAdmin }: { isAdmin: boolean }) {
   const [activeStep, setActiveStep] = useState(1);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    try {
+      const url = `${window.location.origin}/${locale}/architecture`;
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy', err);
+    }
+  };
+  
   const locale = useLocale() as 'en' | 'he';
   const isHe = locale === 'he';
 
@@ -446,15 +459,28 @@ export default function ArchitectureClient({ isAdmin }: { isAdmin: boolean }) {
   return (
     <DashboardLayout isAdmin={isAdmin} showSidebar={isAdmin}>
       <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen">
-      <div className="mb-8 text-start">
-        <h1 className="text-3xl font-bold text-slate-800">
-          {isHe ? 'ארכיטקטורת מערכת' : 'System Architecture'}
-        </h1>
-        <p className="text-slate-500 mt-2">
-          {isHe 
-            ? 'סייר בצורה אינטראקטיבית בכל שלבי האלגוריתם והתשתית של PublishAI. לחץ על הכלים והסוכנים למידע נוסף.' 
-            : 'Interactive exploration of the PublishAI Algorithm & Infrastructure. Click on tools and agents for more info.'}
-        </p>
+      <div className="mb-8 text-start flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800">
+            {isHe ? 'ארכיטקטורת מערכת' : 'System Architecture'}
+          </h1>
+          <p className="text-slate-500 mt-2">
+            {isHe 
+              ? 'סייר בצורה אינטראקטיבית בכל שלבי האלגוריתם והתשתית של PublishAI. לחץ על הכלים והסוכנים למידע נוסף.' 
+              : 'Interactive exploration of the PublishAI Algorithm & Infrastructure. Click on tools and agents for more info.'}
+          </p>
+        </div>
+        
+        {/* Share Button */}
+        <button 
+          onClick={handleShare}
+          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 shadow-sm rounded-xl text-slate-600 hover:text-sky-600 hover:border-sky-200 hover:bg-sky-50 transition-all duration-300 shrink-0"
+        >
+          <Share2 className="w-4 h-4" />
+          <span className="font-medium text-sm">
+            {copied ? (isHe ? 'הקישור הועתק!' : 'Link Copied!') : (isHe ? 'שתף מפה' : 'Share Map')}
+          </span>
+        </button>
       </div>
 
       {/* Phase Tabs */}
