@@ -165,8 +165,8 @@ const ARCHITECTURE_STEPS = [
       he: "מראיין את המשתמש ומחלץ את דרישות המגזין הרצוי, ספירת המילים המותרת וסגנונות העיצוב הנדרשים."
     },
     prompt: { 
-      en: "You are an expert academic editor. Analyze the academic text provided and extract: 1. The main thesis / objective. 2. The primary field of study. 3. Any obvious missing sections (e.g., no Conclusion).", 
-      he: "אתה עורך אקדמי מומחה. עליך לנתח את הטקסט האקדמי ולחלץ מתוכו: 1. את התזה המרכזית / המטרה. 2. את תחום המחקר העיקרי. 3. כל חסר בולט של חלקים במאמר (כגון היעדר מסקנות)." 
+      en: "SYSTEM: You are a distinguished Academic Editor-in-Chief.\nTASK: Perform a deep-dive diagnostic analysis of the uploaded manuscript.\n1. Extract the core scientific thesis, research gaps addressed, and methodological approach.\n2. Identify structural deficiencies (e.g., inadequate literature review, missing limitations, weak statistical grounding).\n3. Formulate 5 probing questions for the author to clarify ambiguities before the revision pipeline begins.\nOUTPUT: Strict JSON matching the 'ClarificationReport' schema.", 
+      he: "מערכת: אתה עורך אקדמי ראשי בעל שם עולמי.\nמשימה: בצע ניתוח דיאגנוסטי מעמיק של כתב היד.\n1. חלץ את התזה המדעית המרכזית, פערי המחקר, והגישה המתודולוגית.\n2. זהה כשלים מבניים (למשל: סקירת ספרות חסרה, היעדר מגבלות מחקר, ביסוס סטטיסטי חלש).\n3. נסח 5 שאלות חקר מחודדות למחבר לצורך הבהרת עמימויות לפני תחילת השכתוב.\nפלט: JSON קפדני התואם לסכמת ClarificationReport." 
     },
     icon: Search, tools: ["Claude 3.5", "Vercel AI SDK"],
     color: "bg-green-50 text-green-700 border-green-200"
@@ -179,8 +179,8 @@ const ARCHITECTURE_STEPS = [
       he: "מגבש אסטרטגיית שכתוב ברמת-על, מזהה כשלי לוגיקה ומתכנן שיפורים מבניים במסמך."
     },
     prompt: { 
-      en: "You are an expert academic planner. Based on the clarification analysis and the manuscript, create a structural revision plan for this paper. Identify weaknesses, required citations, and sections to rewrite.", 
-      he: "אתה מתכנן אקדמי מומחה. בהתבסס על ניתוח הבירור והמאמר שהוזן, צור תוכנית שכתוב מבנית עבור מאמר זה. עליך לזהות חולשות, ציטוטים חסרים נדרשים ופסקאות שדורשות שכתוב." 
+      en: "SYSTEM: You are a Strategic Academic Planner.\nINPUTS: Original manuscript, Author's clarification responses, Target journal guidelines.\nTASK: Construct a comprehensive, phase-by-phase Revision Masterplan.\n1. Map sections requiring total rewrites vs. minor edits.\n2. Pinpoint exact paragraphs needing stronger empirical backing or modern citations.\n3. Define the narrative arc and logical flow improvements.\nOUTPUT: A Directed Acyclic Graph (DAG) of editing tasks to be distributed to specialized sub-agents.", 
+      he: "מערכת: אתה אסטרטג תכנון אקדמי.\nקלטים: כתב היד המקורי, תשובות המחבר לבירור, והנחיות כתב העת.\nמשימה: בנה תוכנית-אב מקיפה לשכתוב.\n1. מפה אילו חלקים דורשים שכתוב מלא ואילו רק עריכה קלה.\n2. סמן פסקאות ספציפיות הדורשות ביסוס אמפירי חזק יותר או ציטוטים עדכניים.\n3. תכנן מחדש את הזרימה הלוגית וקשת הנרטיב של המאמר.\nפלט: גרף משימות מכוון (DAG) שיחולק לסוכני-המשנה השונים." 
     },
     icon: FileText, tools: ["Claude 3.5"],
     color: "bg-green-50 text-green-700 border-green-200"
@@ -193,8 +193,8 @@ const ARCHITECTURE_STEPS = [
       he: "מתחבר למאגרי מידע חיצוניים (PubMed/ArXiv) בעזרת פרוטוקול MCP, ושולף ספרות מקצועית ואנלוגיות חוצי-תחומים באמצעות GraphRAG."
     },
     prompt: { 
-      en: "Extract 3 main search queries for academic literature based on this text. Output ONLY the 3 queries, separated by commas, with no additional text, numbering, or formatting.", 
-      he: "חלץ 3 שורות חיפוש עיקריות לספרות אקדמית בהתבסס על הטקסט. פלוט *אך ורק* את 3 שורות החיפוש, מופרדות בפסיקים, ללא טקסט נוסף, מספור או עיצוב כלשהו." 
+      en: "SYSTEM: You are an Expert Literature Researcher equipped with Semantic Scholar & PubMed MCP tools.\nTASK:\n1. Generate optimized Boolean search queries combining core concepts from the manuscript.\n2. Retrieve the top 50 most relevant papers published in the last 3 years.\n3. Use GraphRAG to extract key findings and methodologies.\n4. Identify missing foundational citations in the current draft.\nOUTPUT: A synthesized Literature Matrix (JSON) mapping claims in the text to retrieved DOIs.", 
+      he: "מערכת: אתה חוקר ספרות מומחה המצויד בכלי גישה ל-Semantic Scholar ול-PubMed.\nמשימה:\n1. נסח שאילתות חיפוש בוליאניות אופטימליות המשלבות את מושגי הליבה של המאמר.\n2. שלוף את 50 המאמרים הרלוונטיים ביותר מה-3 שנים האחרונות.\n3. השתמש ב-GraphRAG כדי לחלץ מתודולוגיות וממצאים.\n4. זהה ציטוטי חובה שחסרים בטיוטה הנוכחית.\nפלט: מטריצת ספרות מסונתזת הממפה טענות בטקסט ל-DOIs מתאימים." 
     },
     icon: Database, tools: ["Claude 3.7", "pgvector", "GraphRAG", "MCP", "LangChain & LangGraph"],
     color: "bg-green-50 text-green-700 border-green-200"
@@ -207,8 +207,8 @@ const ARCHITECTURE_STEPS = [
       he: "מחלץ נתונים מתוך הגרפים שבמאמר באמצעות Vision AI, ומזין אותם לסביבת E2B Python כדי להריץ בדיקות סטטיסטיות לאימות הטענות במאמר."
     },
     prompt: { 
-      en: "Generate a simulated peer-review report for this final manuscript provided.", 
-      he: "צור דוח הדמיה של ביקורת עמיתים (Peer Review) עבור גרסת המאמר הסופית שהוזנה." 
+      en: "SYSTEM: You are a Data Scientist & Visual Analytics Reviewer.\nTASK: Analyze all charts, tables, and statistical claims within the manuscript.\n1. Use Vision AI to evaluate the clarity, accessibility (e.g., colorblind-safe palettes), and correctness of figures.\n2. Extract statistical reporting (p-values, CI, sample sizes) and run consistency checks via the E2B Sandbox.\n3. Flag any discrepancies between the data visualized and the text conclusions.\nOUTPUT: A rigorous Statistical & Visual Audit Report.", 
+      he: "מערכת: אתה מדען נתונים ומבקר אנליזה חזותית.\nמשימה: נתח את כל התרשימים, הטבלאות והטענות הסטטיסטיות במאמר.\n1. השתמש ב-Vision AI כדי להעריך את הבהירות, הנגישות, והנכונות של האיורים.\n2. חלץ דיווחים סטטיסטיים וודא עקביות באמצעות הפעלת קוד ב-E2B Sandbox.\n3. התרע על כל פער בין הנתונים המוצגים לבין המסקנות בטקסט.\nפלט: דוח ביקורת סטטיסטית וחזותית קפדני." 
     },
     icon: BarChart2, tools: ["Claude 3.7", "Vision AI", "E2B Sandbox"],
     color: "bg-orange-50 text-orange-700 border-orange-200"
@@ -241,8 +241,8 @@ const ARCHITECTURE_STEPS = [
       he: "משכתב ועורך את הטקסט בהתבסס על החלטות סוכן העל. מוודא שהטון אקדמי ותקני, ומסיר ביטויים רובוטיים אופייניים ל-AI."
     },
     prompt: { 
-      en: "Rewrite the text to elevate the academic tone, address the following review feedback, and remove any generic AI-sounding phrases.", 
-      he: "שכתב את הטקסט כדי להעלות את המשלב האקדמי שלו, לטפל במשוב מהביקורת, ולהסיר כל ביטוי גנרי שנשמע כאילו נכתב על ידי AI." 
+      en: "SYSTEM: You are an Elite Academic Ghostwriter.\nTASK: Execute the rewriting phase based on the Area Chair's directives.\n1. Elevate the prose to match the linguistic standards of Nature/Science.\n2. Eliminate all AI-generated clichés (e.g., 'delve into', 'a tapestry of').\n3. Ensure logical transitions between paragraphs and active, concise phrasing.\n4. Seamlessly integrate the newly retrieved citations into the narrative flow.\nOUTPUT: The revised manuscript section in Markdown.", 
+      he: "מערכת: אתה עורך וכותב צללים אקדמי עילית.\nמשימה: בצע את שלב השכתוב בהתאם להנחיות סוכן-העל (Area Chair).\n1. שפר את משלב הכתיבה לרמה של כתבי העת המובילים (Nature/Science).\n2. השמד לחלוטין קלישאות AI (כגון 'חשוב לציין', 'מארג של').\n3. ודא מעברים לוגיים חלקים בין פסקאות, ושימוש בשפה פעילה ותמציתית.\n4. שלב בטבעיות את הציטוטים החדשים שנשלפו לתוך זרימת הטקסט.\nפלט: הטקסט המשוכתב בפורמט Markdown." 
     },
     icon: Edit3, tools: ["Claude 3.5"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
@@ -255,8 +255,8 @@ id: 9, phase: 1,
       he: "מיישם את השינויים סעיף-אחר-סעיף על המסמך, ומזין את הממשק החזותי כך שהמשתמש יוכל לראות במדויק מה נמחק ומה התווסף."
     },
     prompt: { 
-      en: "Create a structured summary of the changes made between the original manuscript and the rewritten version.",
-      he: "צור סיכום מובנה של השינויים שבוצעו בין כתב היד המקורי לגרסה המשוכתבת."
+      en: "SYSTEM: You are the Source Control & Execution Agent.\nTASK:\n1. Compare the original text and the revised text.\n2. Generate a precise Operational Diff (JSON patch).\n3. Inject the changes directly into the Collaborative Tiptap Editor Database.\n4. Compile a concise Changelog for the human author summarizing the exact semantic shifts.",
+      he: "מערכת: אתה סוכן ביצוע ובקרת גרסאות.\nמשימה:\n1. השווה בין הטקסט המקורי לטקסט המשוכתב.\n2. צור Diff תפעולי מדויק (בתצורת JSON patch).\n3. הזרק את השינויים ישירות למסד הנתונים של העורך השיתופי (Tiptap).\n4. הפק יומן שינויים (Changelog) תמציתי עבור המחבר המסכם את התמורות הסמנטיות."
     },
     icon: Save, tools: ["Claude 3 Opus", "Tiptap & Monaco", "Neon Postgres", "Drizzle ORM"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
@@ -269,8 +269,8 @@ id: 9, phase: 1,
       he: "בדיקת עקביות סופית. סורק פלגיאט, מוודא תקינות ציטוטים ומייצר את מפת הקשרים החזותית של הספרות המקצועית."
     },
     prompt: { 
-      en: "Check the academic text provided for spelling errors, inconsistency, and unreferenced figures/tables.", 
-      he: "בדוק את הטקסט האקדמי שהוזן וחפש שגיאות כתיב, חוסר עקביות ותרשימים/טבלאות שאינם מצוטטים בגוף הטקסט." 
+      en: "SYSTEM: You are the Final Quality Assurance (QA) Inspector.\nTASK: Perform a rigorous, multi-pass validation on the finalized manuscript.\n1. Execute plagiarism & similarity detection against major academic databases.\n2. Verify cross-referencing integrity (all figures, tables, and citations mentioned in text exist in the bibliography and vice-versa).\n3. Perform a final grammar, syntax, and typesetting check.\nOUTPUT: A QA Clearance Certificate or a list of critical blocking errors.", 
+      he: "מערכת: אתה פקח בקרת האיכות הסופית (QA).\nמשימה: בצע ולידציה רב-שלבית קפדנית על כתב היד המוגמר.\n1. הפעל זיהוי פלגיאט ודמיון אל מול מאגרי מידע אקדמיים מרכזיים.\n2. ודא שלמות של הפניות צולבות (כל התרשימים והציטוטים המוזכרים בטקסט אכן קיימים, והפוך).\n3. בצע בדיקת דקדוק, תחביר ועיצוב טיפוגרפי סופית.\nפלט: תעודת אישור QA או רשימה של שגיאות חוסמות קריטיות." 
     },
     icon: ShieldCheck, tools: ["react-force-graph-2d", "Claude 3.5"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
@@ -283,8 +283,8 @@ id: 9, phase: 1,
       he: "אורז את הגרסה הסופית לקובץ Word/PDF, מייצר מכתב פנייה למגזין (Cover Letter), ושולח הכל למשתמש."
     },
     prompt: { 
-      en: "You are an academic editor. Write a professional cover letter for the following manuscript being submitted to the journal. Ensure it follows this structure: 1. Address the Editor in Chief. 2. State the title of the manuscript and intent to submit. 3. Briefly highlight the main findings and significance. 4. Confirm it has not been published elsewhere. 5. Provide contact info.", 
-      he: "אתה עורך אקדמי. כתוב מכתב מקדים (Cover Letter) מקצועי עבור המאמר המוגש לכתב העת. עליך לוודא שהוא עוקב אחר המבנה הבא: 1. פנייה לעורך הראשי. 2. ציון כותרת המאמר. 3. הדגשה של הממצאים העיקריים והחשיבות. 4. אישור שהמאמר לא פורסם בשום מקום אחר. 5. פרטי התקשרות." 
+      en: "SYSTEM: You are the Publishing Executive.\nTASK: Prepare the submission package.\n1. Draft a highly persuasive Cover Letter addressing the specific Editor-in-Chief of the target journal, highlighting the novelty and broad impact of the research.\n2. Ensure all compliance declarations (conflict of interest, funding, data availability) are present.\n3. Format the final output cleanly.\nOUTPUT: Cover Letter text and metadata payload for export.", 
+      he: "מערכת: אתה מנהל ההוצאה לאור.\nמשימה: הכן את חבילת ההגשה.\n1. נסח מכתב מקדים (Cover Letter) משכנע הממוען ספציפית לעורך הראשי של כתב העת, תוך הדגשת החדשנות וההשפעה של המחקר.\n2. ודא כי כל הצהרות החובה (ניגוד עניינים, מימון, זמינות נתונים) קיימות.\n3. עצב את התוצר הסופי בצורה נקייה.\nפלט: טקסט המכתב ומטען (Payload) נתונים לייצוא." 
     },
     icon: Download, tools: ["Claude 3.7", "Next.js API", "Mammoth & Docx", "Nodemailer", "Stripe Billing"],
     color: "bg-cyan-50 text-cyan-700 border-cyan-200"
@@ -309,8 +309,8 @@ id: 9, phase: 1,
       he: "סוכן AI מנתח את הדף ושולף את כל חוקי העיצוב (מגבלת מילים, סגנון ציטוט, חלקי מאמר חובה) וממיר ל-JSON מובנה."
     },
     prompt: {
-      en: "Extract the formatting guidelines from the provided journal webpage. Return a structured JSON containing word limits, mandatory sections, and citation style rules.",
-      he: "חלץ את הנחיות העיצוב מתוך דף כתב העת שסופק. החזר JSON מובנה המכיל את מגבלות המילים, חלקי החובה וכללי סגנון הציטוט."
+      en: "SYSTEM: You are a strict Journal Requirements Parsing Engine.\nTASK: Deeply analyze the scraped HTML/text of the target journal's Author Guidelines.\n1. Extract explicit constraints: abstract word limit, main text word limit, reference formatting style (e.g., APA, IEEE), figure resolution rules, and mandatory section order.\n2. Identify implicit requirements (e.g., blind title page, specific declarations).\nOUTPUT: A rigid JournalRules JSON schema mapping every constraint.",
+      he: "מערכת: אתה מנוע פענוח קפדני לדרישות כתבי עת.\nמשימה: נתח לעומק את ה-HTML/טקסט שנשאב מעמוד הנחיות המחברים של העיתון.\n1. חלץ אילוצים מפורשים: מגבלת מילים בתקציר ובגוף הטקסט, סגנון ציטוט (APA, IEEE), דרישות רזולוציה לאיורים, וסדר פרקים חובה.\n2. זהה דרישות סמויות (למשל: עמוד כותרת נפרד לביקורת עיוורת, הצהרות ספציפיות).\nפלט: סכמת JSON קשיחה הממפה כל אילוץ."
     },
     icon: Search, tools: ["Claude 3.5", "Neon Postgres", "Drizzle ORM"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
@@ -323,8 +323,8 @@ id: 9, phase: 1,
       he: "המאמר משוכתב ומסודר מחדש בהתאמה מושלמת למבנה, לאורך ולסגנון הציטוטים הספציפי שדורש עיתון היעד."
     },
     prompt: {
-      en: "Reformat the provided manuscript to adhere strictly to the target journal guidelines (JSON). Adjust headings, references, and spacing without altering the core scientific meaning.",
-      he: "עצב מחדש את כתב היד המצורף כך שיעמוד בקפדנות בהנחיות כתב העת (JSON). התאם כותרות, הפניות וריווח מבלי לשנות את המשמעות המדעית."
+      en: "SYSTEM: You are a precision Formatting & Typesetting Agent.\nINPUTS: Final manuscript, JournalRules JSON.\nTASK: Structurally transform the manuscript without altering scientific claims.\n1. Restructure headers to match the journal's hierarchy.\n2. Automatically trim or expand the abstract to fit the exact word boundaries.\n3. Reformat all in-text citations and the bibliography to match the required standard perfectly.\nOUTPUT: The completely reformatted manuscript.",
+      he: "מערכת: אתה סוכן עיצוב וטיפוגרפיה מדויק.\nקלטים: כתב היד הסופי, קובץ JSON של הנחיות העיתון.\nמשימה: התמר את כתב היד מבחינה מבנית מבלי לשנות טענות מדעיות.\n1. סדר מחדש את הכותרות כך שיתאימו להיררכיה של העיתון.\n2. קצץ או הרחב אוטומטית את התקציר כך שיעמוד בדיוק במגבלת המילים.\n3. עצב מחדש את כל הציטוטים בגוף הטקסט והביבליוגרפיה לסגנון הנדרש.\nפלט: כתב היד המעוצב במלואו."
     },
     icon: Scissors, tools: ["Claude 3.5", "Tiptap & Monaco"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
@@ -337,8 +337,8 @@ id: 9, phase: 1,
       he: "רשימת תיוג (Checklist) אוטומטית המאמתת לפני ההגשה שאף חוק של העיתון לא הופר (למשל חריגה במילים בתקציר)."
     },
     prompt: {
-      en: "Cross-reference the formatted manuscript against the journal\'s formal guidelines. Perform a rigorous step-by-step checklist validation and report any missing compliance items.",
-      he: "הצלב את כתב היד המעוצב אל מול ההנחיות הרשמיות של כתב העת. בצע אימות קפדני לפי רשימת תיוג ודווח על כל סעיף שאינו עומד בדרישות."
+      en: "SYSTEM: You are the Pre-Flight Compliance Auditor (Powered by OpenAI o1).\nTASK: Perform zero-tolerance Boolean logic validation on the manuscript against the Journal Rules.\n1. Count abstract words. Does it exceed X? (Fail/Pass)\n2. Check section order. Does Methods come before Results? (Fail/Pass)\n3. Verify blinded manuscript constraints (e.g., no author names in the main PDF).\nOUTPUT: A Submission Readiness Report. If any check fails, trigger a rollback.",
+      he: "מערכת: אתה מבקר תאימות לפני-הגשה (מופעל ע\"י OpenAI o1).\nמשימה: בצע אימות לוגי בוליאני באפס-סובלנות לכתב היד מול חוקי העיתון.\n1. ספור מילים בתקציר. האם חורג מ-X? (עובר/נכשל)\n2. בדוק סדר פרקים. האם שיטות מופיעות לפני תוצאות? (עובר/נכשל)\n3. ודא אילוצי סקירה עיוורת (למשל, אין שמות מחברים ב-PDF המרכזי).\nפלט: דוח מוכנות להגשה. אם בדיקה נכשלת, הפעל חזרה לאחור (Rollback)."
     },
     icon: ListChecks, tools: ["OpenAI o1"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
@@ -352,8 +352,8 @@ id: 9, phase: 1,
       he: "סוכן אוטומציה (RPA) מבוסס Playwright מנווט אל מערכת ההגשה של כתב העת, ממלא את המטא-דאטה (Metadata), מעלה את המאמר, ועוצר ומחכה שהמשתמש יפתור CAPTCHA במידת הצורך."
     },
     prompt: {
-      en: "Navigate to the Editorial Manager portal. Fill out the author details, upload manuscript.pdf, extract the CAPTCHA image and wait for user resolution.",
-      he: "נווט למערכת ההגשה של כתב העת (לדוגמה: Editorial Manager). מלא את פרטי המחברים, העלה את קובץ המאמר, חלץ את תמונת ה-CAPTCHA והמתן לפתרון על ידי המשתמש האנושי."
+      en: "SYSTEM: You are the Autonomous Submission RPA Bot (Playwright Controller).\nTASK: Execute the end-to-end journal portal workflow.\n1. Authenticate to Editorial Manager / ScholarOne using user credentials.\n2. Map the extracted manuscript metadata (Title, Abstract, Authors, Funding) to the portal's HTML form fields.\n3. Upload the final PDF, source files, and Cover Letter to the correct categories.\n4. Pause execution securely upon detecting CAPTCHA, relay the challenge to the user UI, and await the resolved token.",
+      he: "מערכת: אתה בוט ההגשה האוטונומי (RPA) ששולט ב-Playwright.\nמשימה: בצע את זרימת העבודה במערכת ההגשה מקצה לקצה.\n1. בצע אימות ל-Editorial Manager / ScholarOne בעזרת אישורי המשתמש.\n2. מפה את נתוני המאמר (כותרת, תקציר, מחברים, מימון) לשדות הטופס במערכת.\n3. העלה את ה-PDF הסופי, קובצי המקור ומכתב הפנייה לקטגוריות הנכונות.\n4. השהה פעולה באופן מאובטח בזיהוי CAPTCHA, העבר את האתגר לממשק המשתמש והמתן לאסימון פתור."
     },
     icon: Globe, tools: ["Playwright", "Puppeteer", "Node.js"],
     color: "bg-teal-50 text-teal-700 border-teal-200"
@@ -387,8 +387,8 @@ id: 9, phase: 1,
       he: "סוכן-העל מנסח אסטרטגיית תגובה לכל הערה: מחליט אילו הערות דורשות שינוי ממשי במאמר ואילו דורשות רק נימוק-נגד משכנע."
     },
     prompt: { 
-      en: "You are a senior academic editor. The author has received reviewer comments. To enhance the creativity and robustness of the rebuttal, consider cross-domain analogies. Generate a \'Response to Reviewers\' strategy document proposing clear, actionable changes. Format as: 1. Reviewer\'s Point 2. Proposed Change 3. Draft Rebuttal Text.", 
-      he: "אתה עורך אקדמי בכיר. המחבר קיבל הערות מסוקרים. כדי לשפר את היצירתיות והחוסן של מכתב התגובה, היעזר באנלוגיות חוצות-תחומים. צור מסמך אסטרטגיה של \'תגובה לסוקרים\' ובו שינויים ברורים ויישומים. עצב זאת כ: 1. נקודת הביקורת 2. השינוי המוצע למאמר 3. טיוטת טקסט התגובה (מה להגיד לסוקר)." 
+      en: "SYSTEM: You are a Master Rebuttal Strategist leveraging Analogical Reasoning (o1).\nINPUTS: Original Manuscript, Editor Decision Letter, 3x Reviewer Comments.\nTASK: Construct an airtight defense and revision strategy.\n1. Deconstruct each reviewer comment into core grievances.\n2. Use Analogical Reasoning via GraphRAG to cross-reference successful rebuttals from similar past disputes.\n3. Propose strategic compromises vs. firm defenses.\nOUTPUT: A structured RebuttalActionPlan detailing exact manuscript edits required per comment.", 
+      he: "מערכת: אתה אסטרטג מכתבי תגובה ראשי המנצל חשיבה אנלוגית (OpenAI o1).\nקלטים: המאמר המקורי, מכתב החלטת העורך, והערות מ-3 סוקרים.\nמשימה: הרכב אסטרטגיית הגנה ושכתוב הרמטית.\n1. פרק כל הערת סוקר לתלונות הליבה שבה.\n2. השתמש ב-GraphRAG כדי להצליב תקדימים ממכתבי תגובה מוצלחים בעבר בעזרת חשיבה אנלוגית.\n3. הצע פשרות אסטרטגיות אל מול קווי הגנה תקיפים.\nפלט: RebuttalActionPlan מובנה המפרט בדיוק אילו שינויים יש לבצע במאמר לכל הערה." 
     },
     icon: RefreshCw, tools: ["OpenAI o1", "GraphRAG"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
@@ -401,8 +401,8 @@ id: 9, phase: 1,
       he: "סוכן הביצוע ניגש ישירות לפסקאות הרלוונטיות במאמר ועורך אך ורק אותן כדי לספק את דרישות הסוקרים (מבלי להרוס את השאר)."
     },
     prompt: {
-      en: "Implement the required changes in the manuscript according to the Rebuttal Strategy Document. Maintain the academic tone and ensure the edits directly address the reviewers\' concerns.",
-      he: "יישם את השינויים הנדרשים במאמר בהתאם למסמך אסטרטגיית התגובה. שמור על המשלב האקדמי וודא שהעריכה נותנת מענה ישיר לחששות הסוקרים."
+      en: "SYSTEM: You are the Rebuttal Execution Agent.\nTASK: Directly implement the RebuttalActionPlan into the manuscript text.\n1. Surgically inject clarifications, new citations, or soften claims exactly where specified.\n2. Maintain semantic consistency with the rest of the unmodified text.\n3. Flag any edits that inadvertently contradict prior findings.\nOUTPUT: A new manuscript revision version.",
+      he: "מערכת: אתה סוכן יישום מכתב התגובה.\nמשימה: יישם ישירות את ה-RebuttalActionPlan אל תוך טקסט המאמר.\n1. הזרק בצורה כירורגית הבהרות, ציטוטים חדשים או ריכוך טענות בדיוק במקומות שצוינו.\n2. שמור על עקביות סמנטית מול שאר חלקי הטקסט שלא שונו.\n3. התרע על שינויים שסותרים בטעות ממצאים קודמים במאמר.\nפלט: גרסת שכתוב חדשה (Revision) למאמר."
     },
     icon: Edit3, tools: ["Claude 3.5", "Tiptap & Monaco"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
@@ -415,8 +415,8 @@ id: 9, phase: 1,
       he: "מפיק מכתב תגובה רשמי (Point-by-point Rebuttal) שמדגים לעורכי העיתון בדיוק כיצד המאמר תוקן בהתאם לכל אחת מהערותיהם."
     },
     prompt: {
-      en: "Draft the official \'Response to Reviewers\' letter. For each point, copy the original reviewer comment and provide our polite, detailed explanation of how the manuscript was amended.",
-      he: "נסח את מכתב ה\'תגובה לסוקרים\' הרשמי. עבור כל נקודה, העתק את הערת הסוקר המקורית וספק את ההסבר המנומס והמפורט שלנו כיצד תוקן המאמר."
+      en: "SYSTEM: You are an Expert Academic Diplomat.\nTASK: Generate the final 'Response to Reviewers' letter.\n1. Adopt a deferential, extremely polite, and appreciative tone.\n2. Format clearly: [Reviewer Comment verbatim] followed by [Response].\n3. Explicitly state the exact Line/Page numbers where changes were made.\n4. Smooth over any firm defenses with academic grace.\nOUTPUT: The complete Response PDF/Word document.",
+      he: "מערכת: אתה דיפלומט אקדמי מומחה.\nמשימה: הפק את המכתב הרשמי והסופי של 'תגובה לסוקרים'.\n1. סגל טון מכבד, מנומס להפליא ומלא הערכה לסוקרים ולעורך.\n2. עצב בבירור: [הערת הסוקר מילה-במילה] ולאחריה [תגובתנו].\n3. ציין במפורש את מספרי השורות/העמודים המדויקים שבהם בוצעו השינויים במאמר.\n4. רכך התנגדויות אסטרטגיות בחן אקדמי.\nפלט: קובץ התגובה סופי ומוכן להגשה."
     },
     icon: FileCheck, tools: ["Next.js API", "Claude 3.5", "Mammoth & Docx"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
