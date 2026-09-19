@@ -51,11 +51,11 @@ def generate_compact_architecture():
         
         with pipe.subgraph(name='cluster_debate') as debate:
             debate.attr(label='6. Debate (Vercel AI SDK)', style='dashed', color='#1565c0')
-            debate.node('R_H', 'Harsh Rev', fillcolor='#e3f2fd')
-            debate.node('R_N', 'Novel Rev', fillcolor='#e3f2fd')
-            debate.node('R_O', 'Optimist Rev', fillcolor='#e3f2fd')
+            debate.node('R_H', 'Harsh Rev\n(Claude)', fillcolor='#e3f2fd')
+            debate.node('R_N', 'Analytical Rev\n(GPT-4o)', fillcolor='#e3f2fd')
+            debate.node('R_O', 'Optimist Rev\n(Gemini)', fillcolor='#e3f2fd')
             
-        pipe.node('S7', '7. Area Chair', fillcolor='#e8eaf6')
+        pipe.node('S7', '7. Area Chair\n(OpenAI o1)', fillcolor='#e8eaf6')
         pipe.node('S8', '8. Write', fillcolor='#f3e5f5')
         pipe.node('S9', '9. Execute\n(Tiptap/Monaco)', fillcolor='#f3e5f5')
         pipe.node('S10', '10. QA\n(Recharts)', fillcolor='#f3e5f5')
@@ -115,6 +115,7 @@ def generate_compact_architecture():
     with dot.subgraph(name='cluster_ai') as ai:
         ai.attr(label='AI Providers', style='filled', color='#f3e5f5')
         ai.node('Claude', 'Claude 3.5', shape='cloud', fillcolor='#e1bee7')
+        ai.node('GPT4', 'GPT-4o', shape='cloud', fillcolor='#e1bee7')
         ai.node('OAI', 'OpenAI o1', shape='cloud', fillcolor='#e1bee7')
         ai.node('Gem', 'Gemini 1.5', shape='cloud', fillcolor='#e1bee7')
         ai.node('E2B', 'E2B Sandbox', shape='box', fillcolor='#ffcdd2')
@@ -129,6 +130,7 @@ def generate_compact_architecture():
     dot.edge('S2', 'Claude', style='dashed')
     dot.edge('S7', 'OAI', style='dashed')
     dot.edge('R_O', 'Gem', style='dashed')
+    dot.edge('R_N', 'GPT4', style='dashed')
 
     # Render via QuickChart API POST
     dot_code = dot.source

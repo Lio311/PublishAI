@@ -27,9 +27,13 @@ const TOOLS_INFO: Record<string, { en: string, he: string }> = {
     en: "Anthropic's LLM known for exceptional academic writing, nuanced editing, and maintaining a human-like scientific tone.",
     he: "מודל השפה של Anthropic המצטיין בכתיבה אקדמית, עריכה עדינה ושמירה על טון מדעי ואנושי."
   },
+  "GPT-4o": {
+    en: "OpenAI's flagship fast multimodal model, serving as a dynamic and deeply analytical reviewer in the multi-agent debate.",
+    he: "מודל הדגל המהיר של OpenAI. משמש כסוקר אנליטי וביקורתי המסוגל לקלוט תמונה רחבה בדיון הסוקרים."
+  },
   "OpenAI o1": {
     en: "OpenAI's reasoning model used for deep logical evaluation, finding novel flaws, and synthesizing complex meta-decisions.",
-    he: "מודל ההסקה (Reasoning) של OpenAI, משמש להערכה לוגית עמוקה, איתור כשלי מחקר, וקבלת החלטות מורכבות כ-Area Chair."
+    he: "מודל ההסקה (Reasoning) של OpenAI, משמש להערכה לוגית עמוקה כסוכן-העל (Area Chair) שמקבל את ההחלטה הסופית."
   },
   "Gemini 1.5": {
     en: "Google's LLM with a massive context window, serving as the Optimist Reviewer to find hidden strengths and synergies in the paper.",
@@ -79,20 +83,53 @@ const TOOLS_INFO: Record<string, { en: string, he: string }> = {
     en: "Node.js module used to automatically dispatch the finalized manuscript and cover letter directly to the user's email.",
     he: "רכיב שרת האחראי על שליחת מיילים אוטומטית. שולח את המאמר הסופי ומכתב המקדים ישירות לתיבת המייל של המשתמש."
   },
-  "Puppeteer API": {
-    en: "Headless browser automation used for scraping target journal guidelines directly from their official websites.",
-    he: "ספריית אוטומציית דפדפן המשמשת לגירוד (Scraping) ושליפת הנחיות ההגשה הרשמיות של מגזין היעד מאתר האינטרנט שלו."
+  "Playwright": {
+    en: "End-to-end testing and browser automation library used to scrape journal submission websites.",
+    he: "ספריית אוטומציה לדפדפנים המשמשת לגירוד (Scraping) אוטומטי של אתרי ההגשה של העיתונים."
   },
   "PDF Parser": {
-    en: "Utility for reliably extracting structured text and reviewer comments from uploaded decision letters (R&R).",
-    he: "כלי לשליפה ופיענוח טקסט מובנה והערות סוקרים מתוך מכתבי הדחייה או התיקונים (R&R) שמעלה המשתמש."
+    en: "Utility for reliably extracting structured text and reviewer comments from uploaded decision letters (R&R) via pdf-parse.",
+    he: "כלי לשליפה ופיענוח טקסט מובנה והערות סוקרים מתוך קבצי PDF (באמצעות pdf-parse)."
+  },
+  "Drizzle ORM": {
+    en: "Lightweight and highly performant TypeScript ORM used to interact safely with Neon Postgres.",
+    he: "ORM (כלי גישה למסד הנתונים) קל ומהיר מבוסס TypeScript, המשמש לתקשורת בטוחה ויעילה מול מסד הנתונים Neon."
+  },
+  "Stripe Billing": {
+    en: "Payment processing infrastructure handling subscriptions and one-off payments for document generation.",
+    he: "תשתית סליקה ותשלומים המנהלת מנויים ותשלומים חד-פעמיים עבור הפקת המאמרים."
+  },
+  "Vercel AI SDK": {
+    en: "Framework connecting Next.js with multiple LLM providers with built-in streaming support.",
+    he: "ספרייה המקשרת את Next.js עם מגוון מודלי שפה ותומכת בהזרמת טקסט (Streaming) בזמן אמת."
+  },
+  "LangChain & LangGraph": {
+    en: "Framework for building stateful, multi-actor applications, managing memory and text chunking.",
+    he: "סביבת עבודה לבניית אפליקציות מרובות-סוכנים בעלות זיכרון, המשמשת לפיצול טקסט (Chunking) ולניהול תהליכי RAG."
+  },
+  "NextAuth.js": {
+    en: "Complete open-source authentication solution for Next.js, managing user sessions and OAuth logins.",
+    he: "מערכת הזדהות (Authentication) מקיפה המנהלת חיבור משתמשים, סשנים (Sessions) והתחברות מאובטחת."
+  },
+  "Upstash Redis": {
+    en: "Serverless Redis database used for aggressive rate-limiting, session caching, and fast temporary data access.",
+    he: "מסד נתונים Redis המשמש להגבלת קצב בקשות (Rate Limiting) למניעת עומס, ולשמירת נתונים זמנית במהירות גבוהה."
+  },
+  "Mammoth & Docx": {
+    en: "Libraries for parsing uploaded .docx files into HTML and generating new formatted Word documents from scratch.",
+    he: "ספריות לפענוח קבצי Word (.docx) שהועלו ולייצור קבצי Word חדשים ומעוצבים מאפס עבור הגרסה הסופית."
+  },
+  "Recharts": {
+    en: "Composable charting library built on React components used for the RLHF analytics and user dashboards.",
+    he: "ספריית בניית תרשימים המשמשת להצגת סטטיסטיקות במסכי הניהול ומדדי ביצוע של המערכת (Analytics)."
   }
 };
 
 const PHASES = [
   { id: 1, title: { en: "Phase 1: Core Revision", he: "שלב 1: ליבת השכתוב" } },
   { id: 2, title: { en: "Phase 2: Journal Connection", he: "שלב 2: התחברות לעיתון" } },
-  { id: 3, title: { en: "Phase 3: Peer Review Iteration", he: "שלב 3: פינג-פונג תיקונים" } }
+  { id: 3, title: { en: "Phase 3: Peer Review Iteration", he: "שלב 3: פינג-פונג תיקונים" } },
+  { id: 4, title: { en: "Global: Infra & UI", he: "תשתיות רוחביות" } }
 ];
 
 const ARCHITECTURE_STEPS = [
@@ -104,7 +141,7 @@ const ARCHITECTURE_STEPS = [
       en: "User uploads manuscript (PDF/Word). Next.js API Routes stream it to Vercel Blob and trigger the Inngest background engine.",
       he: "המשתמש מעלה את המאמר (PDF/Word). נתיבי ה-API מעבירים את הקובץ לאחסון מאובטח ומזנקים את תהליכי הרקע במנוע של Inngest."
     },
-    icon: Upload, tools: ["Next.js 16 UI", "Vercel Blob", "Inngest"],
+    icon: Upload, tools: ["Next.js 16 UI", "Vercel Blob", "Inngest", "Mammoth & Docx", "PDF Parser", "Upstash Redis", "LangChain & LangGraph"],
     color: "bg-cyan-50 text-cyan-700 border-cyan-200"
   },
   {
@@ -114,7 +151,7 @@ const ARCHITECTURE_STEPS = [
       en: "Interviews the user and extracts target journal constraints, word counts, and required formatting styles.",
       he: "מראיין את המשתמש ומחלץ את דרישות המגזין הרצוי, ספירת המילים המותרת וסגנונות העיצוב הנדרשים."
     },
-    icon: Search, tools: ["Claude 3.5"],
+    icon: Search, tools: ["Claude 3.5", "Vercel AI SDK"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
@@ -134,7 +171,7 @@ const ARCHITECTURE_STEPS = [
       en: "Connects to PubMed/ArXiv via Model Context Protocol (MCP) to retrieve external literature and cross-domain analogies using GraphRAG.",
       he: "מתחבר למאגרי מידע חיצוניים (PubMed/ArXiv) בעזרת פרוטוקול MCP, ושולף ספרות מקצועית ואנלוגיות חוצי-תחומים באמצעות GraphRAG."
     },
-    icon: Database, tools: ["pgvector", "GraphRAG", "MCP"],
+    icon: Database, tools: ["pgvector", "GraphRAG", "MCP", "LangChain & LangGraph"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
@@ -151,20 +188,20 @@ const ARCHITECTURE_STEPS = [
     id: 6, phase: 1,
     title: { en: "6. Scientific Review Debate", he: "6. עימות סוקרים מדעי (Debate)" },
     description: { 
-      en: "A parallel multi-agent debate (Vercel AI SDK). Harsh Reviewer (Claude), Novelty Reviewer (o1), and Optimist Reviewer (Gemini) debate the paper's merits.",
-      he: "דיון סוקרים מקביל המדמה ועידה מדעית. סוקר קשוח (Claude), סוקר חדשנות (o1), וסוקר אופטימי (Gemini) מבקרים את המאמר מזוויות שונות."
+      en: "A parallel multi-agent debate (Vercel AI SDK). Harsh Reviewer (Claude), Analytical Reviewer (GPT-4o), and Optimist Reviewer (Gemini) debate the paper's merits.",
+      he: "דיון סוקרים מקביל המדמה ועידה מדעית. סוקר קשוח (Claude), סוקר אנליטי (GPT-4o), וסוקר אופטימי (Gemini) מבקרים את המאמר מזוויות שונות."
     },
-    icon: MessageSquare, tools: ["Claude 3.5", "OpenAI o1", "Gemini 1.5"],
+    icon: MessageSquare, tools: ["Claude 3.5", "GPT-4o", "Gemini 1.5", "Vercel AI SDK"],
     color: "bg-blue-50 text-blue-700 border-blue-200"
   },
   {
     id: 7, phase: 1,
     title: { en: "7. Area Chair Meta-Agent", he: "7. סוכן-על (Area Chair)" },
     description: { 
-      en: "Synthesizes the parallel reviews into a final concrete rebuttal and action plan using deep logical reasoning.",
-      he: "מסכם את ביקורות הסוקרים לתוכנית פעולה אחידה (Action Plan) וקובע אילו תיקונים יתבצעו בפועל תוך שימוש בהסקה לוגית עמוקה."
+      en: "Synthesizes the parallel reviews into a final concrete rebuttal and action plan using deep logical reasoning (OpenAI o1).",
+      he: "מסכם את ביקורות מועצת הסוקרים לתוכנית פעולה אחידה (Action Plan) וקובע אילו תיקונים יתבצעו בפועל תוך שימוש בהסקה לוגית עמוקה של OpenAI o1."
     },
-    icon: Layers, tools: ["OpenAI o1", "RLHF Logs"],
+    icon: Layers, tools: ["OpenAI o1", "RLHF Logs", "Drizzle ORM"],
     color: "bg-indigo-50 text-indigo-700 border-indigo-200"
   },
   {
@@ -184,7 +221,7 @@ const ARCHITECTURE_STEPS = [
       en: "Applies the line-by-line Diff changes to the manuscript. Populates the Tiptap/Monaco UI so the user can see exact modifications.",
       he: "מיישם את השינויים סעיף-אחר-סעיף על המסמך, ומזין את הממשק החזותי כך שהמשתמש יוכל לראות במדויק מה נמחק ומה התווסף."
     },
-    icon: Save, tools: ["Tiptap & Monaco", "Neon Postgres"],
+    icon: Save, tools: ["Tiptap & Monaco", "Neon Postgres", "Drizzle ORM"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
@@ -204,7 +241,7 @@ const ARCHITECTURE_STEPS = [
       en: "Packages the final approved version into Word/PDF, generates a Cover Letter, and emails the user.",
       he: "אורז את הגרסה הסופית לקובץ Word/PDF, מייצר מכתב פנייה למגזין (Cover Letter), ושולח הכל למשתמש."
     },
-    icon: Download, tools: ["Next.js API", "Nodemailer"],
+    icon: Download, tools: ["Next.js API", "Mammoth & Docx", "Nodemailer", "Stripe Billing"],
     color: "bg-cyan-50 text-cyan-700 border-cyan-200"
   },
   
@@ -216,7 +253,7 @@ const ARCHITECTURE_STEPS = [
       en: "System maps the journal URL provided by the user and verifies access to scrape submission guidelines.",
       he: "המערכת ממפה את קישור העיתון שסיפק המשתמש, ומוודאת יכולת גישה לשאיבת הנחיות ההגשה הרשמיות."
     },
-    icon: BookOpen, tools: ["Puppeteer API", "Next.js API"],
+    icon: BookOpen, tools: ["Playwright", "Next.js API"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {
@@ -226,7 +263,7 @@ const ARCHITECTURE_STEPS = [
       en: "Agent extracts explicit formatting rules, word limits, citation styles, and mandatory sections into structured JSON.",
       he: "סוכן AI מנתח את הדף ושולף את כל חוקי העיצוב (גבולות מילים, סגנון ציטוט, חלקי מאמר חובה) וממיר ל-JSON מובנה."
     },
-    icon: Search, tools: ["Claude 3.5", "Neon Postgres"],
+    icon: Search, tools: ["Claude 3.5", "Neon Postgres", "Drizzle ORM"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {
@@ -258,7 +295,7 @@ const ARCHITECTURE_STEPS = [
       en: "User uploads the rejection/revision letter from the human peer reviewers at the journal.",
       he: "המשתמש מעלה את מכתב הביקורת והדחייה (Revise and Resubmit) שקיבל מהסוקרים האנושיים בעיתון היעד."
     },
-    icon: Upload, tools: ["PDF Parser", "Vercel Blob"],
+    icon: Upload, tools: ["PDF Parser", "Mammoth & Docx", "Vercel Blob"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
   {
@@ -268,7 +305,7 @@ const ARCHITECTURE_STEPS = [
       en: "Agent parses the unstructured letter into individual, actionable critiques categorized by severity.",
       he: "הסוכן מנתח את המכתב (שלרוב אינו מובנה), ומפרק אותו להערות בודדות ברות-פעולה, המחולקות לפי רמת קריטיות."
     },
-    icon: GitMerge, tools: ["Claude 3.5"],
+    icon: GitMerge, tools: ["Claude 3.5", "Vercel AI SDK"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
   {
@@ -298,8 +335,30 @@ const ARCHITECTURE_STEPS = [
       en: "Generates a formal point-by-point rebuttal letter demonstrating to the editors exactly how their comments were addressed.",
       he: "מפיק מכתב תגובה רשמי (Point-by-point Rebuttal) שמדגים לעורכי העיתון בדיוק כיצד המאמר תוקן בהתאם לכל אחת מהערותיהם."
     },
-    icon: FileCheck, tools: ["Next.js API", "Claude 3.5"],
+    icon: FileCheck, tools: ["Next.js API", "Claude 3.5", "Mammoth & Docx"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
+  },
+  
+  // GLOBAL INFRASTRUCTURE
+  {
+    id: 21, phase: 4,
+    title: { en: "Security & Authentication", he: "אבטחה והזדהות" },
+    description: { 
+      en: "Global security layers ensuring protected access to manuscripts and user accounts.",
+      he: "שכבות אבטחה גלובליות המבטיחות גישה מוגנת למאמרים ולחשבונות המשתמשים."
+    },
+    icon: ShieldCheck, tools: ["NextAuth.js", "Upstash Redis", "Neon Postgres"],
+    color: "bg-slate-100 text-slate-700 border-slate-200"
+  },
+  {
+    id: 22, phase: 4,
+    title: { en: "Data Analytics & UI", he: "ממשק משתמש וסטטיסטיקות" },
+    description: { 
+      en: "Admin and user dashboards featuring rich visualizations of agent performance and processing history.",
+      he: "מסכי ניהול ומשתמש הכוללים ייצוג חזותי עשיר של ביצועי הסוכנים והיסטוריית העיבוד."
+    },
+    icon: BarChart2, tools: ["Next.js 16 UI", "Recharts", "Neon Postgres", "Drizzle ORM"],
+    color: "bg-slate-100 text-slate-700 border-slate-200"
   }
 ];
 
