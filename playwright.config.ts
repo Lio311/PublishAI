@@ -35,7 +35,9 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
         timeout: 120 * 1000,
         env: {
-          NEXT_PUBLIC_E2E_TEST: 'true'
+          NEXT_PUBLIC_E2E_TEST: 'true',
+          AUTH_SECRET: 'dummy_secret_for_e2e_testing_only_123',
+          DATABASE_URL: 'postgres://dummy:dummy@dummy/dummy'
         }
       },
 });
