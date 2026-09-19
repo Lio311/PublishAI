@@ -6,7 +6,7 @@ import { useLocale } from "next-intl";
 import { 
   Upload, Search, FileText, BarChart2, Eye, MessageSquare, 
   CheckCircle, Edit3, Save, ShieldCheck, Download, 
-  Cpu, Database, Layers, X, Info, ArrowRight
+  Cpu, Database, Layers, X, Info, ArrowRight, BookOpen, Scissors, ListChecks, RefreshCw, GitMerge, FileCheck
 } from "lucide-react";
 
 // Tools Dictionary
@@ -78,140 +78,250 @@ const TOOLS_INFO: Record<string, { en: string, he: string }> = {
   "Nodemailer": {
     en: "Node.js module used to automatically dispatch the finalized manuscript and cover letter directly to the user's email.",
     he: "רכיב שרת האחראי על שליחת מיילים אוטומטית. שולח את המאמר הסופי ומכתב המקדים ישירות לתיבת המייל של המשתמש."
+  },
+  "Puppeteer API": {
+    en: "Headless browser automation used for scraping target journal guidelines directly from their official websites.",
+    he: "ספריית אוטומציית דפדפן המשמשת לגירוד (Scraping) ושליפת הנחיות ההגשה הרשמיות של מגזין היעד מאתר האינטרנט שלו."
+  },
+  "PDF Parser": {
+    en: "Utility for reliably extracting structured text and reviewer comments from uploaded decision letters (R&R).",
+    he: "כלי לשליפה ופיענוח טקסט מובנה והערות סוקרים מתוך מכתבי הדחייה או התיקונים (R&R) שמעלה המשתמש."
   }
 };
 
+const PHASES = [
+  { id: 1, title: { en: "Phase 1: Core Revision", he: "שלב 1: ליבת השכתוב" } },
+  { id: 2, title: { en: "Phase 2: Journal Connection", he: "שלב 2: התחברות לעיתון" } },
+  { id: 3, title: { en: "Phase 3: Peer Review Iteration", he: "שלב 3: פינג-פונג תיקונים" } }
+];
+
 const ARCHITECTURE_STEPS = [
+  // PHASE 1
   {
-    id: 1,
+    id: 1, phase: 1,
     title: { en: "1. Document Upload", he: "1. העלאת מסמך" },
     description: { 
       en: "User uploads manuscript (PDF/Word). Next.js API Routes stream it to Vercel Blob and trigger the Inngest background engine.",
       he: "המשתמש מעלה את המאמר (PDF/Word). נתיבי ה-API מעבירים את הקובץ לאחסון מאובטח ומזנקים את תהליכי הרקע במנוע של Inngest."
     },
-    icon: Upload,
-    tools: ["Next.js 16 UI", "Vercel Blob", "Inngest"],
+    icon: Upload, tools: ["Next.js 16 UI", "Vercel Blob", "Inngest"],
     color: "bg-cyan-50 text-cyan-700 border-cyan-200"
   },
   {
-    id: 2,
+    id: 2, phase: 1,
     title: { en: "2. Clarification Agent", he: "2. סוכן בירור והגדרות" },
     description: { 
       en: "Interviews the user and extracts target journal constraints, word counts, and required formatting styles.",
       he: "מראיין את המשתמש ומחלץ את דרישות המגזין הרצוי, ספירת המילים המותרת וסגנונות העיצוב הנדרשים."
     },
-    icon: Search,
-    tools: ["Claude 3.5"],
+    icon: Search, tools: ["Claude 3.5"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
-    id: 3,
+    id: 3, phase: 1,
     title: { en: "3. Planning Agent", he: "3. סוכן תכנון" },
     description: { 
       en: "Drafts a high-level revision strategy, identifying logical flaws and planning structural improvements.",
       he: "מגבש אסטרטגיית שכתוב ברמת-על, מזהה כשלי לוגיקה ומתכנן שיפורים מבניים במסמך."
     },
-    icon: FileText,
-    tools: ["Claude 3.5"],
+    icon: FileText, tools: ["Claude 3.5"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
-    id: 4,
+    id: 4, phase: 1,
     title: { en: "4. Knowledge Agent", he: "4. סוכן ידע וספרות" },
     description: { 
       en: "Connects to PubMed/ArXiv via Model Context Protocol (MCP) to retrieve external literature and cross-domain analogies using GraphRAG.",
       he: "מתחבר למאגרי מידע חיצוניים (PubMed/ArXiv) בעזרת פרוטוקול MCP, ושולף ספרות מקצועית ואנלוגיות חוצי-תחומים באמצעות GraphRAG."
     },
-    icon: Database,
-    tools: ["pgvector", "GraphRAG", "MCP"],
+    icon: Database, tools: ["pgvector", "GraphRAG", "MCP"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
-    id: 5,
+    id: 5, phase: 1,
     title: { en: "5. Visual & Data Verification", he: "5. אימות נתונים ותרשימים" },
     description: { 
       en: "Parses charts from the PDF using Vision AI. Pipes raw numerical data into an E2B Python Sandbox to run SciPy statistical verifications.",
       he: "מחלץ נתונים מתוך הגרפים שבמאמר באמצעות Vision AI, ומזין אותם לסביבת E2B Python כדי להריץ בדיקות סטטיסטיות לאימות הטענות במאמר."
     },
-    icon: BarChart2,
-    tools: ["Vision AI", "E2B Sandbox"],
+    icon: BarChart2, tools: ["Vision AI", "E2B Sandbox"],
     color: "bg-orange-50 text-orange-700 border-orange-200"
   },
   {
-    id: 6,
+    id: 6, phase: 1,
     title: { en: "6. Scientific Review Debate", he: "6. עימות סוקרים מדעי (Debate)" },
     description: { 
       en: "A parallel multi-agent debate (Vercel AI SDK). Harsh Reviewer (Claude), Novelty Reviewer (o1), and Optimist Reviewer (Gemini) debate the paper's merits.",
       he: "דיון סוקרים מקביל המדמה ועידה מדעית. סוקר קשוח (Claude), סוקר חדשנות (o1), וסוקר אופטימי (Gemini) מבקרים את המאמר מזוויות שונות."
     },
-    icon: MessageSquare,
-    tools: ["Claude 3.5", "OpenAI o1", "Gemini 1.5"],
+    icon: MessageSquare, tools: ["Claude 3.5", "OpenAI o1", "Gemini 1.5"],
     color: "bg-blue-50 text-blue-700 border-blue-200"
   },
   {
-    id: 7,
+    id: 7, phase: 1,
     title: { en: "7. Area Chair Meta-Agent", he: "7. סוכן-על (Area Chair)" },
     description: { 
       en: "Synthesizes the parallel reviews into a final concrete rebuttal and action plan using deep logical reasoning.",
       he: "מסכם את ביקורות הסוקרים לתוכנית פעולה אחידה (Action Plan) וקובע אילו תיקונים יתבצעו בפועל תוך שימוש בהסקה לוגית עמוקה."
     },
-    icon: Layers,
-    tools: ["OpenAI o1", "RLHF Logs"],
+    icon: Layers, tools: ["OpenAI o1", "RLHF Logs"],
     color: "bg-indigo-50 text-indigo-700 border-indigo-200"
   },
   {
-    id: 8,
+    id: 8, phase: 1,
     title: { en: "8. Academic Writing Agent", he: "8. סוכן כתיבה ועריכה" },
     description: { 
       en: "Rewrites and edits the text based on the Area Chair's decisions, ensuring a standard academic tone and removing 'AI-style' language.",
       he: "משכתב ועורך את הטקסט בהתבסס על החלטות סוכן העל. מוודא שהטון אקדמי ותקני, ומסיר ביטויים רובוטיים אופייניים ל-AI."
     },
-    icon: Edit3,
-    tools: ["Claude 3.5"],
+    icon: Edit3, tools: ["Claude 3.5"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
-    id: 9,
+    id: 9, phase: 1,
     title: { en: "9. Execution Agent", he: "9. סוכן ביצוע והטמעה" },
     description: { 
       en: "Applies the line-by-line Diff changes to the manuscript. Populates the Tiptap/Monaco UI so the user can see exact modifications.",
       he: "מיישם את השינויים סעיף-אחר-סעיף על המסמך, ומזין את הממשק החזותי כך שהמשתמש יוכל לראות במדויק מה נמחק ומה התווסף."
     },
-    icon: Save,
-    tools: ["Tiptap & Monaco", "Neon Postgres"],
+    icon: Save, tools: ["Tiptap & Monaco", "Neon Postgres"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
-    id: 10,
+    id: 10, phase: 1,
     title: { en: "10. QA Agent", he: "10. סוכן בקרת איכות (QA)" },
     description: { 
       en: "Final consistency checks. Scans for plagiarism, reference formatting, and generates the final citation visual map.",
       he: "בדיקת עקביות סופית. סורק פלגיאט, מוודא תקינות ציטוטים ומייצר את מפת הקשרים החזותית של הספרות המקצועית."
     },
-    icon: ShieldCheck,
-    tools: ["react-force-graph-2d", "Claude 3.5"],
+    icon: ShieldCheck, tools: ["react-force-graph-2d", "Claude 3.5"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
-    id: 11,
+    id: 11, phase: 1,
     title: { en: "11. Compilation & Export", he: "11. הפקה וייצוא סופי" },
     description: { 
       en: "Packages the final approved version into Word/PDF, generates a Cover Letter, and emails the user.",
       he: "אורז את הגרסה הסופית לקובץ Word/PDF, מייצר מכתב פנייה למגזין (Cover Letter), ושולח הכל למשתמש."
     },
-    icon: Download,
-    tools: ["Next.js API", "Nodemailer"],
+    icon: Download, tools: ["Next.js API", "Nodemailer"],
     color: "bg-cyan-50 text-cyan-700 border-cyan-200"
+  },
+  
+  // PHASE 2
+  {
+    id: 12, phase: 2,
+    title: { en: "12. Journal Target Selection", he: "12. בחירת עיתון יעד" },
+    description: { 
+      en: "System maps the journal URL provided by the user and verifies access to scrape submission guidelines.",
+      he: "המערכת ממפה את קישור העיתון שסיפק המשתמש, ומוודאת יכולת גישה לשאיבת הנחיות ההגשה הרשמיות."
+    },
+    icon: BookOpen, tools: ["Puppeteer API", "Next.js API"],
+    color: "bg-pink-50 text-pink-700 border-pink-200"
+  },
+  {
+    id: 13, phase: 2,
+    title: { en: "13. Guideline Extraction", he: "13. שליפת חוקים והנחיות" },
+    description: { 
+      en: "Agent extracts explicit formatting rules, word limits, citation styles, and mandatory sections into structured JSON.",
+      he: "סוכן AI מנתח את הדף ושולף את כל חוקי העיצוב (גבולות מילים, סגנון ציטוט, חלקי מאמר חובה) וממיר ל-JSON מובנה."
+    },
+    icon: Search, tools: ["Claude 3.5", "Neon Postgres"],
+    color: "bg-pink-50 text-pink-700 border-pink-200"
+  },
+  {
+    id: 14, phase: 2,
+    title: { en: "14. Manuscript Formatting", he: "14. התאמת פורמט" },
+    description: { 
+      en: "The manuscript is refactored to perfectly match the target journal's specific structure and citation requirements.",
+      he: "המאמר משוכתב ומסודר מחדש בהתאמה מושלמת למבנה, לאורך ולסגנון הציטוטים הספציפי שדורש עיתון היעד."
+    },
+    icon: Scissors, tools: ["Claude 3.5", "Tiptap & Monaco"],
+    color: "bg-pink-50 text-pink-700 border-pink-200"
+  },
+  {
+    id: 15, phase: 2,
+    title: { en: "15. Compliance Validation", he: "15. אימות עמידה בדרישות" },
+    description: { 
+      en: "Automated checklist runs pre-submission logic to ensure no rule of the journal is violated.",
+      he: "רשימת תיוג (Checklist) אוטומטית המאמתת לפני ההגשה שאף חוק של העיתון לא הופר (למשל חריגה במילים בתקציר)."
+    },
+    icon: ListChecks, tools: ["OpenAI o1"],
+    color: "bg-pink-50 text-pink-700 border-pink-200"
+  },
+
+  // PHASE 3
+  {
+    id: 16, phase: 3,
+    title: { en: "16. Feedback Ingestion", he: "16. קליטת ביקורת (R&R)" },
+    description: { 
+      en: "User uploads the rejection/revision letter from the human peer reviewers at the journal.",
+      he: "המשתמש מעלה את מכתב הביקורת והדחייה (Revise and Resubmit) שקיבל מהסוקרים האנושיים בעיתון היעד."
+    },
+    icon: Upload, tools: ["PDF Parser", "Vercel Blob"],
+    color: "bg-amber-50 text-amber-700 border-amber-200"
+  },
+  {
+    id: 17, phase: 3,
+    title: { en: "17. Comment Breakdown", he: "17. פירוק והבנת הערות" },
+    description: { 
+      en: "Agent parses the unstructured letter into individual, actionable critiques categorized by severity.",
+      he: "הסוכן מנתח את המכתב (שלרוב אינו מובנה), ומפרק אותו להערות בודדות ברות-פעולה, המחולקות לפי רמת קריטיות."
+    },
+    icon: GitMerge, tools: ["Claude 3.5"],
+    color: "bg-amber-50 text-amber-700 border-amber-200"
+  },
+  {
+    id: 18, phase: 3,
+    title: { en: "18. Rebuttal Strategy", he: "18. אסטרטגיית מענה" },
+    description: { 
+      en: "Area Chair formulates a strategy for addressing each comment, identifying which require text changes vs. which just need a solid counter-argument.",
+      he: "סוכן-העל מנסח אסטרטגיית תגובה לכל הערה: מחליט אילו הערות דורשות שינוי ממשי במאמר ואילו דורשות רק נימוק-נגד משכנע."
+    },
+    icon: RefreshCw, tools: ["OpenAI o1", "GraphRAG"],
+    color: "bg-amber-50 text-amber-700 border-amber-200"
+  },
+  {
+    id: 19, phase: 3,
+    title: { en: "19. Directed Revision", he: "19. שכתוב ממוקד" },
+    description: { 
+      en: "Execution Agent selectively edits only the relevant paragraphs in the manuscript to address the critiques.",
+      he: "סוכן הביצוע ניגש ישירות לפסקאות הרלוונטיות במאמר ועורך אך ורק אותן כדי לספק את דרישות הסוקרים (מבלי להרוס את השאר)."
+    },
+    icon: Edit3, tools: ["Claude 3.5", "Tiptap & Monaco"],
+    color: "bg-amber-50 text-amber-700 border-amber-200"
+  },
+  {
+    id: 20, phase: 3,
+    title: { en: "20. Rebuttal Letter Generation", he: "20. הפקת מכתב תגובה" },
+    description: { 
+      en: "Generates a formal point-by-point rebuttal letter demonstrating to the editors exactly how their comments were addressed.",
+      he: "מפיק מכתב תגובה רשמי (Point-by-point Rebuttal) שמדגים לעורכי העיתון בדיוק כיצד המאמר תוקן בהתאם לכל אחת מהערותיהם."
+    },
+    icon: FileCheck, tools: ["Next.js API", "Claude 3.5"],
+    color: "bg-amber-50 text-amber-700 border-amber-200"
   }
 ];
 
 export default function ArchitectureInteractivePage() {
+  const [activePhase, setActivePhase] = useState(1);
   const [activeStep, setActiveStep] = useState(1);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
+  
   const locale = useLocale() as 'en' | 'he';
   const isHe = locale === 'he';
 
-  const stepData = ARCHITECTURE_STEPS.find(s => s.id === activeStep) || ARCHITECTURE_STEPS[0];
+  // Filter steps by active phase
+  const currentPhaseSteps = ARCHITECTURE_STEPS.filter(s => s.phase === activePhase);
+  const stepData = ARCHITECTURE_STEPS.find(s => s.id === activeStep) || currentPhaseSteps[0];
+
+  // Auto-select first step when phase changes
+  const handlePhaseChange = (phaseId: number) => {
+    setActivePhase(phaseId);
+    const firstStepInPhase = ARCHITECTURE_STEPS.find(s => s.phase === phaseId);
+    if (firstStepInPhase) setActiveStep(firstStepInPhase.id);
+    setSelectedTool(null);
+  };
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen">
@@ -221,20 +331,34 @@ export default function ArchitectureInteractivePage() {
         </h1>
         <p className="text-slate-500 mt-2">
           {isHe 
-            ? 'סייר בצורה אינטראקטיבית ב-11 שלבי האלגוריתם והתשתית של PublishAI. לחץ על הכלים והסוכנים למידע נוסף.' 
-            : 'Interactive exploration of the PublishAI 11-Step Algorithm & Infrastructure. Click on tools and agents for more info.'}
+            ? 'סייר בצורה אינטראקטיבית בכל שלבי האלגוריתם והתשתית של PublishAI. לחץ על הכלים והסוכנים למידע נוסף.' 
+            : 'Interactive exploration of the PublishAI Algorithm & Infrastructure. Click on tools and agents for more info.'}
         </p>
+      </div>
+
+      {/* Phase Tabs */}
+      <div className="flex flex-wrap items-center gap-2 mb-8 bg-slate-100/50 p-2 rounded-2xl w-fit border border-slate-200/50">
+        {PHASES.map((phase) => (
+          <button
+            key={phase.id}
+            onClick={() => handlePhaseChange(phase.id)}
+            className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
+              activePhase === phase.id
+                ? "bg-white text-sky-700 shadow-sm border border-slate-200"
+                : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+            }`}
+          >
+            {phase.title[locale]}
+          </button>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         
         {/* Sidebar: Stepper */}
         <div className="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-slate-100 p-4 max-h-[85vh] overflow-y-auto">
-          <h2 className="font-semibold text-slate-700 mb-4 px-2 uppercase text-sm tracking-wider text-start">
-            {isHe ? '11 שלבי הצינור (Pipeline)' : 'The 11-Step Pipeline'}
-          </h2>
           <div className="space-y-2">
-            {ARCHITECTURE_STEPS.map((step) => {
+            {currentPhaseSteps.map((step) => {
               const isActive = step.id === activeStep;
               return (
                 <button
