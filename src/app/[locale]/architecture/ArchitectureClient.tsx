@@ -298,7 +298,7 @@ id: 9, phase: 1,
     title: { en: "13. Guideline Extraction", he: "13. שליפת חוקים והנחיות" },
     description: { 
       en: "Agent extracts explicit formatting rules, word limits, citation styles, and mandatory sections into structured JSON.",
-      he: "סוכן AI מנתח את הדף ושולף את כל חוקי העיצוב (גבולות מילים, סגנון ציטוט, חלקי מאמר חובה) וממיר ל-JSON מובנה."
+      he: "סוכן AI מנתח את הדף ושולף את כל חוקי העיצוב (מגבלת מילים, סגנון ציטוט, חלקי מאמר חובה) וממיר ל-JSON מובנה."
     },
     prompt: {
       en: "Extract the formatting guidelines from the provided journal webpage. Return a structured JSON containing word limits, mandatory sections, and citation style rules.",
