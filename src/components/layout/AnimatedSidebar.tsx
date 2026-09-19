@@ -44,7 +44,7 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
 
   if (isAdmin) {
     menuItems.push({ name: locale === 'he' ? 'ניהול מערכת' : 'Admin Dashboard', icon: Globe, href: `/${locale}/admin` });
-    menuItems.push({ name: locale === 'he' ? 'ארכיטקטורת מערכת' : 'System Architecture', icon: Share2, href: `/${locale}/admin/architecture` });
+    menuItems.push({ name: locale === 'he' ? 'ארכיטקטורת מערכת' : 'System Architecture', icon: Share2, href: `/${locale}/architecture` });
   }
 
   const activeItem = [...menuItems].sort((a, b) => b.href.length - a.href.length).find(
