@@ -7,7 +7,7 @@ import {
   Upload, Search, FileText, BarChart2, Eye, MessageSquare, 
   CheckCircle, Edit3, Save, ShieldCheck, Download, 
   Cpu, Database, Layers, X, Info, ArrowRight, BookOpen, Scissors, ListChecks, RefreshCw, GitMerge, FileCheck
-, Terminal, Share2} from "lucide-react";
+, Terminal, Share2, Globe} from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 
 // Tools Dictionary
@@ -87,6 +87,14 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
   "Nodemailer": {
     en: "Node.js module used to automatically dispatch the finalized manuscript and cover letter directly to the user's email.",
     he: "רכיב שרת האחראי על שליחת מיילים אוטומטית. שולח את המאמר הסופי ומכתב המקדים ישירות לתיבת המייל של המשתמש."
+  },
+  "Puppeteer": {
+    en: "A Node library which provides a high-level API to control Chrome or Chromium over the DevTools Protocol. Used here as an alternative automation driver.",
+    he: "ספריית Node לשליטה בדפדפן Chrome דרך פרוטוקול DevTools. משמשת כאן כמנוע אוטומציה חלופי."
+  },
+  "Node.js": {
+    en: "JavaScript runtime built on Chrome's V8 JavaScript engine. Executes the RPA bot scripts on the server.",
+    he: "סביבת ריצה ל-JavaScript המאפשרת הרצת סקריפטים של סוכני ה-RPA בשרת."
   },
   "Playwright": {
     en: "End-to-end testing and browser automation library used to scrape journal submission websites.",
@@ -336,10 +344,24 @@ id: 9, phase: 1,
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
 
+  {
+    id: 16, phase: 2,
+    title: { en: "16. Automated Submission (RPA)", he: "16. הגשה אוטומטית (RPA)" },
+    description: { 
+      en: "A Robotic Process Automation (RPA) bot powered by Playwright navigates the target journal's submission portal, fills out metadata, uploads the manuscript, and pauses for human CAPTCHA solving if required.",
+      he: "סוכן אוטומציה (RPA) מבוסס Playwright מנווט אל מערכת ההגשה של כתב העת, ממלא את המטא-דאטה (Metadata), מעלה את המאמר, ועוצר ומחכה שהמשתמש יפתור CAPTCHA במידת הצורך."
+    },
+    prompt: {
+      en: "Navigate to the Editorial Manager portal. Fill out the author details, upload manuscript.pdf, extract the CAPTCHA image and wait for user resolution.",
+      he: "נווט למערכת ההגשה של כתב העת (לדוגמה: Editorial Manager). מלא את פרטי המחברים, העלה את קובץ המאמר, חלץ את תמונת ה-CAPTCHA והמתן לפתרון על ידי המשתמש האנושי."
+    },
+    icon: Globe, tools: ["Playwright", "Puppeteer", "Node.js"],
+    color: "bg-teal-50 text-teal-700 border-teal-200"
+  },
   // PHASE 3
   {
-    id: 16, phase: 3,
-    title: { en: "16. Feedback Ingestion", he: "16. קליטת ביקורת (R&R)" },
+    id: 17, phase: 3,
+    title: { en: "17. Feedback Ingestion", he: "17. קליטת ביקורת (R&R)" },
     description: { 
       en: "User uploads the rejection/revision letter from the human peer reviewers at the journal.",
       he: "המשתמש מעלה את מכתב הביקורת והדחייה (Revise and Resubmit) שקיבל מהסוקרים האנושיים בעיתון היעד."
@@ -348,8 +370,8 @@ id: 9, phase: 1,
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
   {
-    id: 17, phase: 3,
-    title: { en: "17. Comment Breakdown", he: "17. פירוק והבנת הערות" },
+    id: 18, phase: 3,
+    title: { en: "18. Comment Breakdown", he: "18. פירוק והבנת הערות" },
     description: { 
       en: "Agent parses the unstructured letter into individual, actionable critiques categorized by severity.",
       he: "הסוכן מנתח את המכתב (שלרוב אינו מובנה), ומפרק אותו להערות בודדות ברות-פעולה, המחולקות לפי רמת קריטיות."
@@ -358,8 +380,8 @@ id: 9, phase: 1,
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
   {
-    id: 18, phase: 3,
-    title: { en: "18. Rebuttal Strategy", he: "18. אסטרטגיית מענה" },
+    id: 19, phase: 3,
+    title: { en: "19. Rebuttal Strategy", he: "19. אסטרטגיית מענה" },
     description: { 
       en: "Area Chair formulates a strategy for addressing each comment, identifying which require text changes vs. which just need a solid counter-argument.",
       he: "סוכן-העל מנסח אסטרטגיית תגובה לכל הערה: מחליט אילו הערות דורשות שינוי ממשי במאמר ואילו דורשות רק נימוק-נגד משכנע."
@@ -372,8 +394,8 @@ id: 9, phase: 1,
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
   {
-    id: 19, phase: 3,
-    title: { en: "19. Directed Revision", he: "19. שכתוב ממוקד" },
+    id: 20, phase: 3,
+    title: { en: "20. Directed Revision", he: "20. שכתוב ממוקד" },
     description: { 
       en: "Execution Agent selectively edits only the relevant paragraphs in the manuscript to address the critiques.",
       he: "סוכן הביצוע ניגש ישירות לפסקאות הרלוונטיות במאמר ועורך אך ורק אותן כדי לספק את דרישות הסוקרים (מבלי להרוס את השאר)."
@@ -386,8 +408,8 @@ id: 9, phase: 1,
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
   {
-    id: 20, phase: 3,
-    title: { en: "20. Rebuttal Letter Generation", he: "20. הפקת מכתב תגובה" },
+    id: 21, phase: 3,
+    title: { en: "21. Rebuttal Letter Generation", he: "21. הפקת מכתב תגובה" },
     description: { 
       en: "Generates a formal point-by-point rebuttal letter demonstrating to the editors exactly how their comments were addressed.",
       he: "מפיק מכתב תגובה רשמי (Point-by-point Rebuttal) שמדגים לעורכי העיתון בדיוק כיצד המאמר תוקן בהתאם לכל אחת מהערותיהם."
