@@ -506,12 +506,12 @@ export default function ArchitectureClient({ isAdmin }: { isAdmin: boolean }) {
       </div>
 
       {/* Phase Tabs */}
-      <div className="flex flex-wrap items-center gap-2 mb-8 bg-slate-100/50 p-2 rounded-2xl w-fit border border-slate-200/50">
+      <div className="flex flex-wrap w-full gap-2 mb-8 bg-slate-100/50 p-2 rounded-2xl border border-slate-200/50">
         {PHASES.map((phase) => (
           <button
             key={phase.id}
             onClick={() => handlePhaseChange(phase.id)}
-            className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
+            className={`flex-1 text-center px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
               activePhase === phase.id
                 ? "bg-white text-sky-700 shadow-sm border border-slate-200"
                 : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
