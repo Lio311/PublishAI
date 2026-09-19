@@ -7,7 +7,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { FileText, Home, Settings, LogOut, Globe, Book, Link as LinkIcon, ChevronRight, Send } from "lucide-react";
+import { FileText, Home, Settings, LogOut, Globe, Book, Link as LinkIcon, ChevronRight, Send, Share2 } from "lucide-react";
 
 export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
@@ -44,6 +44,7 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
 
   if (isAdmin) {
     menuItems.push({ name: locale === 'he' ? 'ניהול מערכת' : 'Admin Dashboard', icon: Globe, href: `/${locale}/admin` });
+    menuItems.push({ name: locale === 'he' ? 'ארכיטקטורת מערכת' : 'System Architecture', icon: Share2, href: `/${locale}/admin/architecture` });
   }
 
   return (
