@@ -36,10 +36,16 @@ export default function DashboardLayout({
       {/* Public Top Header (when no sidebar) */}
       {!showSidebar && (
         <header className="flex items-center justify-between px-4 md:px-8 py-3 md:py-4 bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm w-full">
-          <Link href={`/${locale}`} className="flex items-center">
+          {/* Left section (empty in LTR, holds button in RTL if we use flex-1, but since it's dir-aware, flex-row behaves correctly) */}
+          <div className="flex-1 flex justify-start">
+            {/* Can add language switcher or other elements here later if needed */}
+          </div>
+          
+          <Link href={`/${locale}`} className="flex-1 flex justify-center">
              <Image src="/logo.png" alt="PublishAI Logo" width={130} height={40} className="object-contain" priority />
           </Link>
-          <div className="flex items-center gap-3">
+          
+          <div className="flex-1 flex justify-end items-center gap-3">
             <Link href={`/${locale}/login`} className="text-sm font-bold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-4 md:px-6 py-2 md:py-2.5 rounded-full border border-sky-100 transition-colors shadow-sm">
               {locale === 'he' ? 'התחברות למערכת' : 'Login'}
             </Link>
