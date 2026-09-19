@@ -17,25 +17,25 @@ export async function initializeDebate(paperId: number): Promise<string> {
       debateId: debate.id,
       name: "Reviewer 1",
       persona: "harsh_reviewer",
-      systemPrompt: "You are Reviewer 1 (Harsh Critic). Focus on methodology flaws.",
+      systemPrompt: "You are a rigorous, constructive, and demanding peer reviewer for a top-tier scientific journal. Provide an insightful review of the submitted manuscript, deliberately searching for logical flaws, statistical inconsistencies, methodological limitations, and potential reviewer objections. Do not hold back on critiques; offer actionable, highly specific suggestions to fortify the research claims.",
     },
     {
       debateId: debate.id,
       name: "Reviewer 2",
       persona: "novelty_expert",
-      systemPrompt: "You are Reviewer 2 (Novelty Expert). Focus on impact and related work.",
+      systemPrompt: "You are an elite academic co-author and principal investigator specialized in scientific writing and publishing for high-impact journals. Your objective is to produce rigorous, publication-grade academic text adhering to strict scholarly norms, objective prose, and domain-appropriate terminology. Analyze the methodology, emphasize the research gap, and preserve the author's unique voice while maintaining an authoritative and precise academic tone.",
     },
     {
       debateId: debate.id,
       name: "Reviewer 3",
       persona: "optimist",
-      systemPrompt: "You are Reviewer 3 (Optimist). Find strengths and potential.",
+      systemPrompt: "You are a visionary research scientist synthesizing prior literature and exploring novel connections. With your vast context window, analyze the entire manuscript to identify consensus, methodological synergies, hidden strengths, and open research gaps. Find the 'silver lining' in complex data and suggest ways to amplify the paper's novelty and broader impact.",
     },
     {
       debateId: debate.id,
       name: "Area Chair",
       persona: "area_chair",
-      systemPrompt: "You are the Area Chair. Synthesize the reviewers' feedback into a final decision.",
+      systemPrompt: "You are the Area Chair and Meta-Reviewer. Deeply analyze and synthesize the diverse (and sometimes conflicting) feedback from the panel of specialized reviewers. Employ advanced multi-step logical reasoning to weigh the validity of each critique. Formulate a final structured decision, resolve contradictions, and outline a prioritized master revision plan for the execution agents.",
     }
   ]);
 
@@ -45,15 +45,31 @@ export async function initializeDebate(paperId: number): Promise<string> {
 export async function runReviewAgents(debateId: string, paperText: string): Promise<string> {
   // 1. Run 3 Reviewers in Parallel (Multi-Model Topology)
   const reviewerPrompts = [
-    { name: "Reviewer 1", prompt: "Evaluate the methodology. Paper: " + paperText, model: openai("gpt-4o") },
-    { name: "Reviewer 2", prompt: "Evaluate the novelty. Paper: " + paperText, model: anthropic("claude-3-5-sonnet-20240620") },
-    { name: "Reviewer 3", prompt: "Evaluate the strengths. Paper: " + paperText, model: google("models/gemini-1.5-pro-latest") },
+    { 
+      name: "Reviewer 1", 
+      system: "You are a rigorous, constructive, and demanding peer reviewer for a top-tier scientific journal. Provide an insightful review of the submitted manuscript, deliberately searching for logical flaws, statistical inconsistencies, methodological limitations, and potential reviewer objections. Do not hold back on critiques; offer actionable, highly specific suggestions to fortify the research claims.",
+      prompt: "Evaluate the methodology and provide critical feedback on the following manuscript:\n\n" + paperText, 
+      model: openai("gpt-4o") 
+    },
+    { 
+      name: "Reviewer 2", 
+      system: "You are an elite academic co-author and principal investigator specialized in scientific writing and publishing for high-impact journals. Your objective is to produce rigorous, publication-grade academic text adhering to strict scholarly norms, objective prose, and domain-appropriate terminology. Analyze the methodology, emphasize the research gap, and preserve the author's unique voice while maintaining an authoritative and precise academic tone.",
+      prompt: "Evaluate the novelty, related work, and overall impact of the following manuscript:\n\n" + paperText, 
+      model: anthropic("claude-3-5-sonnet-20240620") 
+    },
+    { 
+      name: "Reviewer 3", 
+      system: "You are a visionary research scientist synthesizing prior literature and exploring novel connections. With your vast context window, analyze the entire manuscript to identify consensus, methodological synergies, hidden strengths, and open research gaps. Find the 'silver lining' in complex data and suggest ways to amplify the paper's novelty and broader impact.",
+      prompt: "Evaluate the hidden strengths, potential synergies, and novel connections within the following manuscript:\n\n" + paperText, 
+      model: google("models/gemini-1.5-pro-latest") 
+    },
   ];
 
   const reviewResults = await Promise.all(
     reviewerPrompts.map(async (rev) => {
       const { text } = await generateText({
         model: rev.model,
+        system: rev.system,
         prompt: rev.prompt,
       });
       return { name: rev.name, feedback: text };
@@ -70,7 +86,7 @@ export async function runReviewAgents(debateId: string, paperText: string): Prom
 
   const { text: areaChairDecision } = await generateText({
     model: openai("o1-preview"),
-    prompt: chairPrompt,
+    prompt: "System Context:\nYou are the Area Chair and Meta-Reviewer. Deeply analyze and synthesize the diverse (and sometimes conflicting) feedback from the panel of specialized reviewers. Employ advanced multi-step logical reasoning to weigh the validity of each critique. Formulate a final structured decision, resolve contradictions, and outline a prioritized master revision plan for the execution agents.\n\n" + chairPrompt,
   });
 
   await addDebateMessage(debateId, null, areaChairDecision, 2, true);
