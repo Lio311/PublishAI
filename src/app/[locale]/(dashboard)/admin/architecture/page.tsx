@@ -8,6 +8,7 @@ import {
   CheckCircle, Edit3, Save, ShieldCheck, Download, 
   Cpu, Database, Layers, X, Info, ArrowRight, BookOpen, Scissors, ListChecks, RefreshCw, GitMerge, FileCheck
 } from "lucide-react";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 // Tools Dictionary
 const TOOLS_INFO: Record<string, { en: string, he: string }> = {
@@ -85,7 +86,7 @@ const TOOLS_INFO: Record<string, { en: string, he: string }> = {
   },
   "Playwright": {
     en: "End-to-end testing and browser automation library used to scrape journal submission websites.",
-    he: "ספריית אוטומציה לדפדפנים המשמשת לגירוד (Scraping) אוטומטי של אתרי ההגשה של העיתונים."
+    he: "הספריה שמחליפה את ה-API הרגיל בשלב של גירוד (Scraping) חוקי ההגשה מאתרי המגזינים."
   },
   "PDF Parser": {
     en: "Utility for reliably extracting structured text and reviewer comments from uploaded decision letters (R&R) via pdf-parse.",
@@ -93,35 +94,35 @@ const TOOLS_INFO: Record<string, { en: string, he: string }> = {
   },
   "Drizzle ORM": {
     en: "Lightweight and highly performant TypeScript ORM used to interact safely with Neon Postgres.",
-    he: "ORM (כלי גישה למסד הנתונים) קל ומהיר מבוסס TypeScript, המשמש לתקשורת בטוחה ויעילה מול מסד הנתונים Neon."
+    he: "כלי גישה למסד הנתונים ששומר את הביקורות והמשתמשים בצורה בטוחה."
   },
   "Stripe Billing": {
     en: "Payment processing infrastructure handling subscriptions and one-off payments for document generation.",
-    he: "תשתית סליקה ותשלומים המנהלת מנויים ותשלומים חד-פעמיים עבור הפקת המאמרים."
+    he: "מערכת הסליקה לחיוב על הפקת מאמרים / מנויים בסוף שלב 1."
   },
   "Vercel AI SDK": {
-    en: "Framework connecting Next.js with multiple LLM providers with built-in streaming support.",
-    he: "ספרייה המקשרת את Next.js עם מגוון מודלי שפה ותומכת בהזרמת טקסט (Streaming) בזמן אמת."
+    en: "AI SDK used to handle real-time streaming of text from the AI providers.",
+    he: "אחראי על ניהול הזרמת הטקסט בזמן אמת (Streaming) בשלבי הבירור ועימות הסוקרים."
   },
   "LangChain & LangGraph": {
-    en: "Framework for building stateful, multi-actor applications, managing memory and text chunking.",
-    he: "סביבת עבודה לבניית אפליקציות מרובות-סוכנים בעלות זיכרון, המשמשת לפיצול טקסט (Chunking) ולניהול תהליכי RAG."
+    en: "Infrastructure for AI agents that handles text chunking and memory chains.",
+    he: "תשתית סוכני ה-AI שדואגת לפיצול הטקסט ולבניית שרשרת זיכרון לסוכנים."
   },
   "NextAuth.js": {
-    en: "Complete open-source authentication solution for Next.js, managing user sessions and OAuth logins.",
-    he: "מערכת הזדהות (Authentication) מקיפה המנהלת חיבור משתמשים, סשנים (Sessions) והתחברות מאובטחת."
+    en: "Authentication solution that manages user logins and account security.",
+    he: "פתרון ההזדהות שמנהל את כניסת המשתמשים ואבטחת החשבונות."
   },
   "Upstash Redis": {
-    en: "Serverless Redis database used for aggressive rate-limiting, session caching, and fast temporary data access.",
-    he: "מסד נתונים Redis המשמש להגבלת קצב בקשות (Rate Limiting) למניעת עומס, ולשמירת נתונים זמנית במהירות גבוהה."
+    en: "System cache, also used to prevent server overload (Rate Limiting) during file uploads.",
+    he: "מערכת ה-Cache של המערכת, משמשת גם כדי למנוע עומס (Rate Limiting) על השרתים בזמן העלאת קבצים."
   },
   "Mammoth & Docx": {
-    en: "Libraries for parsing uploaded .docx files into HTML and generating new formatted Word documents from scratch.",
-    he: "ספריות לפענוח קבצי Word (.docx) שהועלו ולייצור קבצי Word חדשים ומעוצבים מאפס עבור הגרסה הסופית."
+    en: "Tools that parse word files initially and generate styled word files at the end.",
+    he: "הכלים שמפענחים את קבצי הוורד (.docx) בהתחלה ובסוף התהליך בונים קובץ וורד מעוצב מאפס."
   },
   "Recharts": {
-    en: "Composable charting library built on React components used for the RLHF analytics and user dashboards.",
-    he: "ספריית בניית תרשימים המשמשת להצגת סטטיסטיקות במסכי הניהול ומדדי ביצוע של המערכת (Analytics)."
+    en: "Charting library that generates the statistics and dashboards.",
+    he: "ספריית התרשימים שמייצרת את הסטטיסטיקות והדשבורדים בתשתיות המערכת."
   }
 };
 
@@ -383,7 +384,8 @@ export default function ArchitectureInteractivePage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen">
+    <DashboardLayout isAdmin={true}>
+      <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen">
       <div className="mb-8 text-start">
         <h1 className="text-3xl font-bold text-slate-800">
           {isHe ? 'ארכיטקטורת מערכת' : 'System Architecture'}
@@ -526,5 +528,6 @@ export default function ArchitectureInteractivePage() {
         </div>
       </div>
     </div>
+    </DashboardLayout>
   );
 }
