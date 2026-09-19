@@ -47,6 +47,10 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
     menuItems.push({ name: locale === 'he' ? 'ארכיטקטורת מערכת' : 'System Architecture', icon: Share2, href: `/${locale}/admin/architecture` });
   }
 
+  const activeItem = [...menuItems].sort((a, b) => b.href.length - a.href.length).find(
+    item => pathname === item.href || (item.href !== `/${locale}` && pathname.startsWith(item.href))
+  );
+
   return (
     <aside 
       className="relative w-[280px] h-[calc(100vh-2rem)] lg:h-[calc(100vh-3rem)] m-4 lg:m-6 flex flex-col justify-between rounded-[2rem] bg-white/70 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden z-20"
@@ -71,7 +75,7 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
           onMouseLeave={() => setHoveredIndex(null)}
         >
           {menuItems.map((item, index) => {
-            const isActive = pathname === item.href || (item.href !== `/${locale}` && pathname.startsWith(item.href));
+            const isActive = activeItem?.href === item.href;
             
             return (
               <motion.div
