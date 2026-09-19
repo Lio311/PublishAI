@@ -200,7 +200,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are an Expert Literature Researcher equipped with Semantic Scholar & PubMed MCP tools.\nTASK:\n1. Generate optimized Boolean search queries combining core concepts from the manuscript.\n2. Retrieve the top 50 most relevant papers published in the last 3 years.\n3. Use GraphRAG to extract key findings and methodologies.\n4. Identify missing foundational citations in the current draft.\nOUTPUT: A synthesized Literature Matrix (JSON) mapping claims in the text to retrieved DOIs.", 
       he: "מערכת: אתה חוקר ספרות מומחה המצויד בכלי גישה ל-Semantic Scholar ול-PubMed.\nמשימה:\n1. נסח שאילתות חיפוש בוליאניות אופטימליות המשלבות את מושגי הליבה של המאמר.\n2. שלוף את 50 המאמרים הרלוונטיים ביותר מה-3 שנים האחרונות.\n3. השתמש ב-GraphRAG כדי לחלץ מתודולוגיות וממצאים.\n4. זהה ציטוטי חובה שחסרים בטיוטה הנוכחית.\nפלט: מטריצת ספרות מסונתזת הממפה טענות בטקסט ל-DOIs מתאימים." 
     },
-    icon: Database, tools: ["Claude 3.7", "pgvector", "GraphRAG", "MCP", "LangChain & LangGraph"],
+    icon: Database, tools: ["Claude 3.5", "pgvector", "GraphRAG", "MCP", "LangChain & LangGraph"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
@@ -214,7 +214,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are a Data Scientist & Visual Analytics Reviewer.\nTASK: Analyze all charts, tables, and statistical claims within the manuscript.\n1. Use Vision AI to evaluate the clarity, accessibility (e.g., colorblind-safe palettes), and correctness of figures.\n2. Extract statistical reporting (p-values, CI, sample sizes) and run consistency checks via the E2B Sandbox.\n3. Flag any discrepancies between the data visualized and the text conclusions.\nOUTPUT: A rigorous Statistical & Visual Audit Report.", 
       he: "מערכת: אתה מדען נתונים ומבקר אנליזה חזותית.\nמשימה: נתח את כל התרשימים, הטבלאות והטענות הסטטיסטיות במאמר.\n1. השתמש ב-Vision AI כדי להעריך את הבהירות, הנגישות, והנכונות של האיורים.\n2. חלץ דיווחים סטטיסטיים וודא עקביות באמצעות הפעלת קוד ב-E2B Sandbox.\n3. התרע על כל פער בין הנתונים המוצגים לבין המסקנות בטקסט.\nפלט: דוח ביקורת סטטיסטית וחזותית קפדני." 
     },
-    icon: BarChart2, tools: ["Claude 3.7", "Vision AI", "E2B Sandbox"],
+    icon: BarChart2, tools: ["Claude 3.5", "Vision AI", "E2B Sandbox"],
     color: "bg-orange-50 text-orange-700 border-orange-200"
   },
   {
@@ -262,7 +262,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are the Source Control & Execution Agent.\nTASK:\n1. Compare the original text and the revised text.\n2. Generate a precise Operational Diff (JSON patch).\n3. Inject the changes directly into the Collaborative Tiptap Editor Database.\n4. Compile a concise Changelog for the human author summarizing the exact semantic shifts.",
       he: "מערכת: אתה סוכן ביצוע ובקרת גרסאות.\nמשימה:\n1. השווה בין הטקסט המקורי לטקסט המשוכתב.\n2. צור Diff תפעולי מדויק (בתצורת JSON patch).\n3. הזרק את השינויים ישירות למסד הנתונים של העורך השיתופי (Tiptap).\n4. הפק יומן שינויים (Changelog) תמציתי עבור המחבר המסכם את התמורות הסמנטיות."
     },
-    icon: Save, tools: ["Claude 3 Opus", "Tiptap & Monaco", "Neon Postgres", "Drizzle ORM"],
+    icon: Save, tools: ["Claude 3.5", "Tiptap & Monaco", "Neon Postgres", "Drizzle ORM"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
@@ -290,7 +290,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are the Publishing Executive.\nTASK: Prepare the submission package.\n1. Draft a highly persuasive Cover Letter addressing the specific Editor-in-Chief of the target journal, highlighting the novelty and broad impact of the research.\n2. Ensure all compliance declarations (conflict of interest, funding, data availability) are present.\n3. Format the final output cleanly.\nOUTPUT: Cover Letter text and metadata payload for export.", 
       he: "מערכת: אתה מנהל ההוצאה לאור.\nמשימה: הכן את חבילת ההגשה.\n1. נסח מכתב מקדים (Cover Letter) משכנע הממוען ספציפית לעורך הראשי של כתב העת, תוך הדגשת החדשנות וההשפעה של המחקר.\n2. ודא כי כל הצהרות החובה (ניגוד עניינים, מימון, זמינות נתונים) קיימות.\n3. עצב את התוצר הסופי בצורה נקייה.\nפלט: טקסט המכתב ומטען (Payload) נתונים לייצוא." 
     },
-    icon: Download, tools: ["Claude 3.7", "Next.js API", "Mammoth & Docx", "Nodemailer", "Stripe Billing"],
+    icon: Download, tools: ["Claude 3.5", "Next.js API", "Mammoth & Docx", "Nodemailer", "Stripe Billing"],
     color: "bg-cyan-50 text-cyan-700 border-cyan-200"
   },
   
@@ -359,7 +359,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are a secure Web Automation Navigation Agent.\nTASK: Access the target journal submission platform.\n1. Safely retrieve encrypted user credentials from the database.\n2. Navigate the headless browser to the journal's login endpoint.\n3. Identify DOM elements for username, password, and submit button.\n4. Execute login, handle cookies, and navigate to the 'New Submission' dashboard.\nOUTPUT: Navigation success state or explicit error for invalid credentials.", 
       he: "מערכת: אתה סוכן אוטומציית ניווט מאובטח.\nמשימה: גש למערכת ההגשות של העיתון.\n1. שלוף בבטחה את פרטי ההזדהות המוצפנים של המשתמש מהמסד.\n2. נווט בדפדפן הנסתר לעמוד ההתחברות של העיתון.\n3. זהה אלמנטים ב-DOM להזנת שם משתמש, סיסמה ולחיצה על התחברות.\n4. בצע התחברות, שמור עוגיות (Cookies) ונווט למסך 'הגשה חדשה'.\nפלט: סטטוס הצלחת ניווט או שגיאה מפורשת על פרטים שגויים." 
     },
-    icon: Globe, tools: ["Playwright", "Puppeteer API", "Node.js"],
+    icon: Globe, tools: ["Playwright", "Puppeteer", "Node.js"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {
@@ -387,7 +387,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are an Exception Handling & Alert Agent.\nTASK: Monitor the RPA pipeline for roadblocks.\n1. Detect presence of Cloudflare turnstiles, reCAPTCHA, or unexpected modal dialogs.\n2. If detected, pause the Playwright script indefinitely.\n3. Capture the HTML state and a screenshot. Send a WebSocket ping to the frontend Dashboard.\n4. Serve a secure iframe or remote-desktop link so the user can solve the challenge.\nOUTPUT: Resumes the script only when the user clicks 'Verification Complete'.", 
       he: "מערכת: אתה סוכן טיפול בחריגים והתראות.\nמשימה: נטר את תהליך ה-RPA לאיתור חסימות.\n1. מצא נוכחות של חסמי אבטחה (Cloudflare, reCAPTCHA) או חלונות קופצים בלתי צפויים.\n2. אם זוהתה חסימה, הקפא את הסקריפט באופן מלא.\n3. צלם מסך של המצב הנוכחי ושלח פולס (Ping) ב-WebSocket לדשבורד של המשתמש.\n4. פתח חלון מאובטח (iframe) שמאפשר למשתמש לפתור את האתגר מתוך המערכת שלנו.\nפלט: חידוש הסקריפט יתבצע אך ורק כשהמשתמש מאשר שסיים את ההתערבות הידנית." 
     },
-    icon: ShieldCheck, tools: ["WebSockets", "Vercel AI SDK", "Puppeteer API"],
+    icon: ShieldCheck, tools: ["WebSockets", "Vercel AI SDK", "Puppeteer"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {
