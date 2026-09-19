@@ -11,7 +11,7 @@ import {
 import DashboardLayout from "@/components/layout/DashboardLayout";
 
 // Tools Dictionary
-const TOOLS_INFO: Record<string, { en: string, he: string }> = {
+const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string, he: string } }> = {
   "Next.js 16 UI": {
     en: "Modern React framework providing Server Components, API Routes, and optimized rendering for a fast, responsive user interface.",
     he: "פריימוורק React מתקדם המספק רינדור צד-שרת, נתיבי API וביצועים מהירים במיוחד עבור ממשק המשתמש."
@@ -26,19 +26,35 @@ const TOOLS_INFO: Record<string, { en: string, he: string }> = {
   },
   "Claude 3.5": {
     en: "Anthropic's LLM known for exceptional academic writing, nuanced editing, and maintaining a human-like scientific tone.",
-    he: "מודל השפה של Anthropic המצטיין בכתיבה אקדמית, עריכה עדינה ושמירה על טון מדעי ואנושי."
+    he: "מודל השפה של Anthropic המצטיין בכתיבה אקדמית, עריכה עדינה ושמירה על טון מדעי ואנושי.",
+    prompt: {
+      en: "You are Reviewer 1 (Harsh Critic). Focus on methodology flaws.",
+      he: "אתה סוקר מס' 1 (מבקר קשוח). התמקד בפגמים מתודולוגיים."
+    }
   },
   "GPT-4o": {
     en: "OpenAI's flagship fast multimodal model, serving as a dynamic and deeply analytical reviewer in the multi-agent debate.",
-    he: "מודל הדגל המהיר של OpenAI. משמש כסוקר אנליטי וביקורתי המסוגל לקלוט תמונה רחבה בדיון הסוקרים."
+    he: "מודל הדגל המהיר של OpenAI. משמש כסוקר אנליטי וביקורתי המסוגל לקלוט תמונה רחבה בדיון הסוקרים.",
+    prompt: {
+      en: "You are Reviewer 2 (Analytical Expert). Focus on impact and related work.",
+      he: "אתה סוקר מס' 2 (מומחה אנליטי). התמקד בהשפעה ובעבודות קשורות."
+    }
   },
   "OpenAI o1": {
     en: "OpenAI's reasoning model used for deep logical evaluation, finding novel flaws, and synthesizing complex meta-decisions.",
-    he: "מודל ההסקה (Reasoning) של OpenAI, משמש להערכה לוגית עמוקה כסוכן-העל (Area Chair) שמקבל את ההחלטה הסופית."
+    he: "מודל ההסקה (Reasoning) של OpenAI, משמש להערכה לוגית עמוקה כסוכן-העל (Area Chair) שמקבל את ההחלטה הסופית.",
+    prompt: {
+      en: "You are the Area Chair. Synthesize the reviewers' feedback into a final structured decision.",
+      he: "אתה יו\"ר המושב (Area Chair). עליך למזג את משוב הסוקרים לכדי החלטה סופית ומובנית."
+    }
   },
   "Gemini 1.5": {
     en: "Google's LLM with a massive context window, serving as the Optimist Reviewer to find hidden strengths and synergies in the paper.",
-    he: "מודל השפה של Google בעל חלון ההקשר העצום. משמש כסוקר האופטימי לאיתור חוזקות ורעיונות חיוביים נסתרים במאמר."
+    he: "מודל השפה של Google בעל חלון ההקשר העצום. משמש כסוקר האופטימי לאיתור חוזקות ורעיונות חיוביים נסתרים במאמר.",
+    prompt: {
+      en: "You are Reviewer 3 (Optimist). Find strengths and potential.",
+      he: "אתה סוקר מס' 3 (אופטימיסט). מצא חוזקות ופוטנציאל מחקרי."
+    }
   },
   "pgvector": {
     en: "PostgreSQL extension for vector similarity search, enabling RAG (Retrieval-Augmented Generation) across the scientific literature database.",
@@ -518,6 +534,16 @@ export default function ArchitectureInteractivePage() {
                       <p className="text-slate-600 leading-relaxed text-start pe-6">
                         {TOOLS_INFO[selectedTool][locale]}
                       </p>
+                      {TOOLS_INFO[selectedTool].prompt && (
+                        <div className="mt-4 pt-4 border-t border-slate-200">
+                          <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 text-start">
+                            {isHe ? 'פרומפט המערכת (System Prompt)' : 'System Prompt'}
+                          </h5>
+                          <div className={`bg-slate-800 text-slate-300 font-mono text-sm p-4 rounded-lg text-start leading-relaxed ${isHe ? 'font-sans' : ''}`} dir={isHe ? "rtl" : "ltr"}>
+                            {TOOLS_INFO[selectedTool].prompt[locale]}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 )}
