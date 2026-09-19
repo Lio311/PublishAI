@@ -6,7 +6,7 @@ import { useLocale } from "next-intl";
 import { 
   Upload, Search, FileText, BarChart2, Eye, MessageSquare, 
   CheckCircle, Edit3, Save, ShieldCheck, Download, 
-  Cpu, Database, Layers, X, Info, ArrowRight, BookOpen, Scissors, ListChecks, RefreshCw, GitMerge, FileCheck
+  Cpu, Database, Layers, X, Info, ArrowRight, BookOpen, Scissors, ListChecks, RefreshCw, GitMerge, FileCheck, Code
 , Terminal, Share2, Globe} from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 
