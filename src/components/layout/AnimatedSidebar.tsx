@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
+import { Link, usePathname, useRouter } from "@/app/i18n/routing";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { FileText, Home, Settings, LogOut, Globe, Book, Link as LinkIcon, ChevronRight, Send, Share2 } from "lucide-react";
@@ -25,26 +24,22 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
 
   const toggleLanguage = () => {
     const nextLocale = locale === 'he' ? 'en' : 'he';
-    const newPath = pathname.replace(`/${locale}`, `/${nextLocale}`);
-    if (pathname === '/' || pathname === `/${locale}`) {
-      router.push(`/${nextLocale}`);
-    } else {
-      router.push(newPath);
-    }
+    // next-intl router automatically handles injecting the new locale
+    router.replace(pathname, { locale: nextLocale });
   };
 
   const menuItems = [
-    { name: t("home"), icon: Home, href: `/${locale}` },
-    { name: t("myPapers"), icon: FileText, href: `/${locale}/papers` },
-    { name: locale === 'he' ? 'חיבור לעיתונים' : 'Journal Connections', icon: LinkIcon, href: `/${locale}/connections` },
-    { name: locale === 'he' ? 'חוקי עיתונים' : 'Journal Rules', icon: Book, href: `/${locale}/journals` },
-    { name: locale === 'he' ? 'מעקב הגשות וביקורת' : 'Submissions & Reviews', icon: Send, href: `/${locale}/submissions` },
-    { name: t("settings"), icon: Settings, href: `/${locale}/settings` },
+    { name: t("home"), icon: Home, href: `/` },
+    { name: t("myPapers"), icon: FileText, href: `/papers` },
+    { name: locale === 'he' ? 'חיבור לעיתונים' : 'Journal Connections', icon: LinkIcon, href: `/connections` },
+    { name: locale === 'he' ? 'חוקי עיתונים' : 'Journal Rules', icon: Book, href: `/journals` },
+    { name: locale === 'he' ? 'מעקב הגשות וביקורת' : 'Submissions & Reviews', icon: Send, href: `/submissions` },
+    { name: t("settings"), icon: Settings, href: `/settings` },
   ];
 
   if (isAdmin) {
-    menuItems.push({ name: locale === 'he' ? 'ניהול מערכת' : 'Admin Dashboard', icon: Globe, href: `/${locale}/admin` });
-    menuItems.push({ name: locale === 'he' ? 'ארכיטקטורת מערכת' : 'System Architecture', icon: Share2, href: `/${locale}/architecture` });
+    menuItems.push({ name: locale === 'he' ? 'ניהול מערכת' : 'Admin Dashboard', icon: Globe, href: `/admin` });
+    menuItems.push({ name: locale === 'he' ? 'ארכיטקטורת מערכת' : 'System Architecture', icon: Share2, href: `/architecture` });
   }
 
   const activeItem = [...menuItems].sort((a, b) => b.href.length - a.href.length).find(

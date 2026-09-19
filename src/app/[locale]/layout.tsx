@@ -43,7 +43,7 @@ export default async function RootLayout({
     <html lang={locale} dir={dir} translate="no">
       <body className={`${openSans.className} bg-transparent min-h-screen text-slate-900`}>
         <DynamicBackground />
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <SessionProvider session={session}>
             <GlobalPasswordProtection>
               {children}
