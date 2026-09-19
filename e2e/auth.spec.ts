@@ -2,9 +2,9 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Authentication Flows', () => {
   test.beforeEach(async ({ context }) => {
-    // Pre-populate localStorage with valid site PIN authorization
+    // Pre-populate sessionStorage with valid site PIN authorization
     await context.addInitScript(() => {
-      window.localStorage.setItem('publishai_global_auth_time_v2', Date.now().toString());
+      window.sessionStorage.setItem('publishai_global_auth', 'true');
     });
   });
 
