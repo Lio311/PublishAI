@@ -7,8 +7,10 @@ import { embedMany } from "ai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 
 export const ingestDocument = inngest.createFunction(
-  { id: "ingest-document" },
-  { event: "document.uploaded" },
+  { 
+    id: "ingest-document",
+    triggers: [{ event: "document.uploaded" }] 
+  },
   async ({ event, step }) => {
     const { documentId } = event.data;
 
@@ -28,12 +30,12 @@ export const ingestDocument = inngest.createFunction(
         chunkSize: 1000,
         chunkOverlap: 200,
       });
-      return await splitter.createDocuments([doc.content]);
+      return await splitter.createDocuments([doc.content!]);
     });
 
     // 3. Generate embeddings
     const embeddings = await step.run("generate-embeddings", async () => {
-      const chunkTexts = chunks.map(c => c.pageContent);
+      const chunkTexts = chunks.map((c: any) => c.pageContent);
       const { embeddings } = await embedMany({
         model: openai.embedding("text-embedding-3-small"),
         values: chunkTexts,
@@ -43,7 +45,7 @@ export const ingestDocument = inngest.createFunction(
 
     // 4. Store vectors in DB
     await step.run("store-vectors", async () => {
-      const values = chunks.map((chunk, i) => ({
+      const values = chunks.map((chunk: any, i: number) => ({
         documentId: doc.id,
         content: chunk.pageContent,
         embedding: embeddings[i],
