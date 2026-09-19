@@ -31,20 +31,34 @@ export default function DashboardLayout({
   }, [pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50/50 text-slate-900 font-sans" dir={locale === 'he' ? 'rtl' : 'ltr'}>
+    <div className={`min-h-screen flex ${showSidebar ? "flex-col md:flex-row" : "flex-col"} bg-slate-50/50 text-slate-900 font-sans`} dir={locale === 'he' ? 'rtl' : 'ltr'}>
       
-      {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-white/70 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-        <Image src="/logo.png" alt="PublishAI Logo" width={120} height={40} className="object-contain" priority />
-        {showSidebar && (
+      {/* Public Top Header (when no sidebar) */}
+      {!showSidebar && (
+        <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm w-full">
+          <Link href={`/${locale}`} className="flex items-center">
+             <Image src="/logo.png" alt="PublishAI Logo" width={140} height={45} className="object-contain" priority />
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href={`/${locale}/login`} className="text-sm font-bold text-slate-700 hover:text-sky-600 bg-slate-100 hover:bg-slate-200 px-5 py-2.5 rounded-xl transition-colors">
+              {locale === 'he' ? 'התחברות למערכת' : 'Login'}
+            </Link>
+          </div>
+        </header>
+      )}
+
+      {/* Mobile Header (only when there IS a sidebar) */}
+      {showSidebar && (
+        <div className="md:hidden flex items-center justify-between p-4 bg-white/70 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-sm w-full">
+          <Image src="/logo.png" alt="PublishAI Logo" width={120} height={40} className="object-contain" priority />
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2 bg-slate-100 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors"
           >
             {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Sidebar Overlay for Mobile */}
       {showSidebar && isMobileMenuOpen && (
@@ -68,11 +82,7 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto relative bg-slate-50/30 flex flex-col">
-        {!showSidebar && (
-          <div className="hidden md:flex p-6">
-            <Image src="/logo.png" alt="PublishAI Logo" width={140} height={45} className="object-contain" priority />
-          </div>
-        )}
+
         {/* Subtle page background glows (Mesh Gradient effect) */}
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-400/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-sky-400/5 rounded-full blur-[100px] pointer-events-none" />
