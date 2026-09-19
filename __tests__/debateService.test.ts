@@ -60,7 +60,7 @@ describe('debateService', () => {
 
     it('returns true if consensus proposal exists', async () => {
       const mockSelectWhere = jest.fn().mockResolvedValue([
-        { id: 'msg-1', isConsensusProposal: true }
+        { id: 'msg-1', isConsensusProposal: true, content: 'Agreed consensus' }
       ]);
       (db.select as jest.Mock).mockReturnValue({
         from: jest.fn().mockReturnValue({
