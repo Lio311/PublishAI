@@ -7,7 +7,7 @@ import {
   Upload, Search, FileText, BarChart2, Eye, MessageSquare, 
   CheckCircle, Edit3, Save, ShieldCheck, Download, 
   Cpu, Database, Layers, X, Info, ArrowRight, BookOpen, Scissors, ListChecks, RefreshCw, GitMerge, FileCheck
-} from "lucide-react";
+, Terminal} from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 
 // Tools Dictionary
@@ -25,28 +25,16 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     he: "מנוע ניהול תהליכי רקע מבוסס אירועים. מנהל את זרימת העבודה הארוכה והמורכבת של הסוכנים ללא חשש מפסקי זמן (Timeouts)."
   },
   "Claude 3.5": {
-    en: "Anthropic's LLM known for exceptional academic writing, nuanced editing, and maintaining a human-like scientific tone.",
-    he: "מודל השפה של Anthropic המצטיין בכתיבה אקדמית, עריכה עדינה ושמירה על טון מדעי ואנושי.",
-    prompt: {
-      en: "You are a rigorous, constructive, and demanding peer reviewer for a top-tier scientific journal. Provide an insightful review of the submitted manuscript, deliberately searching for logical flaws, statistical inconsistencies, methodological limitations, and potential reviewer objections. Do not hold back on critiques; offer actionable, highly specific suggestions to fortify the research claims.",
-      he: "אתה סוקר עמיתים קפדני, ביקורתי ותובעני מטעם כתב עת מדעי מהשורה הראשונה. ספק סקירה מעמיקה, תוך חיפוש מכוון של כשלים לוגיים, חוסר עקביות סטטיסטית ומגבלות מתודולוגיות. אל תחסוך בביקורת; מטרתך היא לבחון את המאמר במבחן מאמץ לפני ההגשה ולהציע פתרונות מדויקים לחזק את הטענות."
-    }
+    en: "Anthropic's language model, excelling in academic writing, nuanced editing, and maintaining a scientific yet human tone.",
+    he: "מודל השפה של Anthropic המצטיין בכתיבה אקדמית, עריכה עדינה ושמירה על טון מדעי ואנושי."
   },
   "GPT-4o": {
     en: "OpenAI's flagship fast multimodal model, serving as a dynamic and deeply analytical reviewer in the multi-agent debate.",
-    he: "מודל הדגל המהיר של OpenAI. משמש כסוקר אנליטי וביקורתי המסוגל לקלוט תמונה רחבה בדיון הסוקרים.",
-    prompt: {
-      en: "You are an elite academic co-author and principal investigator specialized in scientific writing and publishing for high-impact journals. Your objective is to produce rigorous, publication-grade academic text adhering to strict scholarly norms, objective prose, and domain-appropriate terminology. Analyze the methodology, emphasize the research gap, and preserve the author's unique voice while maintaining an authoritative and precise academic tone.",
-      he: "אתה חוקר ראשי ושותף אקדמי בכיר, המתמחה בכתיבה מדעית ופרסום בכתבי עת מובילים. מטרתך להפיק טקסט אקדמי קפדני, תוך הקפדה על נורמות מחמירות, שפה אובייקטיבית ומינוח מקצועי. נתח את המתודולוגיה, הדגש את הפער המחקרי, ושמור על קולו הייחודי של המחבר בטון סמכותי ומדויק."
-    }
+    he: "מודל מהיר של OpenAI המשמש כסוקר דינמי ומעמיק בפאנל הדיבייט (עימות הסוקרים) המרובה-סוכנים."
   },
   "OpenAI o1": {
-    en: "OpenAI's reasoning model used for deep logical evaluation, finding novel flaws, and synthesizing complex meta-decisions.",
-    he: "מודל ההסקה (Reasoning) של OpenAI, משמש להערכה לוגית עמוקה כסוכן-העל (Area Chair) שמקבל את ההחלטה הסופית.",
-    prompt: {
-      en: "You are the Area Chair and Meta-Reviewer. Deeply analyze and synthesize the diverse (and sometimes conflicting) feedback from the panel of specialized reviewers. Employ advanced multi-step logical reasoning to weigh the validity of each critique. Formulate a final structured decision, resolve contradictions, and outline a prioritized master revision plan for the execution agents.",
-      he: "אתה יו\"ר המושב (Area Chair) ומבקר-העל. עליך לנתח ולמזג את המשוב המגוון (ולעיתים הסותר) מפאנל הסוקרים. השתמש בהסקה לוגית מתקדמת מרובת שלבים כדי לשקול את התוקף של כל ביקורת. נסח החלטה סופית מובנית, פתור סתירות פנימיות, והתווה תוכנית עבודה ראשית מתועדפת שסוכני הביצוע יפעלו לפיה כדי להביא את המאמר לשלמות."
-    }
+    en: "OpenAI's advanced reasoning model, taking the role of 'Area Chair' to synthesize complex debate and make final editorial calls.",
+    he: "מודל ההסקה הלוגית של OpenAI, מתפקד כ'סוקר-על' המסנתז את הדיבייט ומקבל את החלטות העריכה הסופיות."
   },
   "Gemini 1.5": {
     en: "Google's LLM with a massive context window, serving as the Optimist Reviewer to find hidden strengths and synergies in the paper.",
@@ -168,6 +156,10 @@ const ARCHITECTURE_STEPS = [
       en: "Interviews the user and extracts target journal constraints, word counts, and required formatting styles.",
       he: "מראיין את המשתמש ומחלץ את דרישות המגזין הרצוי, ספירת המילים המותרת וסגנונות העיצוב הנדרשים."
     },
+    prompt: { 
+      en: "You are an expert academic editor. Analyze the academic text provided and extract: 1. The main thesis / objective. 2. The primary field of study. 3. Any obvious missing sections (e.g., no Conclusion).", 
+      he: "אתה עורך אקדמי מומחה. עליך לנתח את הטקסט האקדמי ולחלץ מתוכו: 1. את התזה המרכזית / המטרה. 2. את תחום המחקר העיקרי. 3. כל חסר בולט של חלקים במאמר (כגון היעדר מסקנות)." 
+    },
     icon: Search, tools: ["Claude 3.5", "Vercel AI SDK"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
@@ -177,6 +169,10 @@ const ARCHITECTURE_STEPS = [
     description: { 
       en: "Drafts a high-level revision strategy, identifying logical flaws and planning structural improvements.",
       he: "מגבש אסטרטגיית שכתוב ברמת-על, מזהה כשלי לוגיקה ומתכנן שיפורים מבניים במסמך."
+    },
+    prompt: { 
+      en: "You are an expert academic planner. Based on the clarification analysis and the manuscript, create a structural revision plan for this paper. Identify weaknesses, required citations, and sections to rewrite.", 
+      he: "אתה מתכנן אקדמי מומחה. בהתבסס על ניתוח הבירור והמאמר שהוזן, צור תוכנית שכתוב מבנית עבור מאמר זה. עליך לזהות חולשות, ציטוטים חסרים נדרשים ופסקאות שדורשות שכתוב." 
     },
     icon: FileText, tools: ["Claude 3.5"],
     color: "bg-green-50 text-green-700 border-green-200"
@@ -188,6 +184,10 @@ const ARCHITECTURE_STEPS = [
       en: "Connects to PubMed/ArXiv via Model Context Protocol (MCP) to retrieve external literature and cross-domain analogies using GraphRAG.",
       he: "מתחבר למאגרי מידע חיצוניים (PubMed/ArXiv) בעזרת פרוטוקול MCP, ושולף ספרות מקצועית ואנלוגיות חוצי-תחומים באמצעות GraphRAG."
     },
+    prompt: { 
+      en: "Extract 3 main search queries for academic literature based on this text. Output ONLY the 3 queries, separated by commas, with no additional text, numbering, or formatting.", 
+      he: "חלץ 3 שורות חיפוש עיקריות לספרות אקדמית בהתבסס על הטקסט. פלוט *אך ורק* את 3 שורות החיפוש, מופרדות בפסיקים, ללא טקסט נוסף, מספור או עיצוב כלשהו." 
+    },
     icon: Database, tools: ["pgvector", "GraphRAG", "MCP", "LangChain & LangGraph"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
@@ -197,6 +197,10 @@ const ARCHITECTURE_STEPS = [
     description: { 
       en: "Parses charts from the PDF using Vision AI. Pipes raw numerical data into an E2B Python Sandbox to run SciPy statistical verifications.",
       he: "מחלץ נתונים מתוך הגרפים שבמאמר באמצעות Vision AI, ומזין אותם לסביבת E2B Python כדי להריץ בדיקות סטטיסטיות לאימות הטענות במאמר."
+    },
+    prompt: { 
+      en: "Generate a simulated peer-review report for this final manuscript provided.", 
+      he: "צור דוח הדמיה של ביקורת עמיתים (Peer Review) עבור גרסת המאמר הסופית שהוזנה." 
     },
     icon: BarChart2, tools: ["Vision AI", "E2B Sandbox"],
     color: "bg-orange-50 text-orange-700 border-orange-200"
@@ -228,6 +232,10 @@ const ARCHITECTURE_STEPS = [
       en: "Rewrites and edits the text based on the Area Chair's decisions, ensuring a standard academic tone and removing 'AI-style' language.",
       he: "משכתב ועורך את הטקסט בהתבסס על החלטות סוכן העל. מוודא שהטון אקדמי ותקני, ומסיר ביטויים רובוטיים אופייניים ל-AI."
     },
+    prompt: { 
+      en: "Rewrite the text to elevate the academic tone, address the following review feedback, and remove any generic AI-sounding phrases.", 
+      he: "שכתב את הטקסט כדי להעלות את המשלב האקדמי שלו, לטפל במשוב מהביקורת, ולהסיר כל ביטוי גנרי שנשמע כאילו נכתב על ידי AI." 
+    },
     icon: Edit3, tools: ["Claude 3.5"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
@@ -248,6 +256,10 @@ const ARCHITECTURE_STEPS = [
       en: "Final consistency checks. Scans for plagiarism, reference formatting, and generates the final citation visual map.",
       he: "בדיקת עקביות סופית. סורק פלגיאט, מוודא תקינות ציטוטים ומייצר את מפת הקשרים החזותית של הספרות המקצועית."
     },
+    prompt: { 
+      en: "Check the academic text provided for spelling errors, inconsistency, and unreferenced figures/tables.", 
+      he: "בדוק את הטקסט האקדמי שהוזן וחפש שגיאות כתיב, חוסר עקביות ותרשימים/טבלאות שאינם מצוטטים בגוף הטקסט." 
+    },
     icon: ShieldCheck, tools: ["react-force-graph-2d", "Claude 3.5"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
@@ -257,6 +269,10 @@ const ARCHITECTURE_STEPS = [
     description: { 
       en: "Packages the final approved version into Word/PDF, generates a Cover Letter, and emails the user.",
       he: "אורז את הגרסה הסופית לקובץ Word/PDF, מייצר מכתב פנייה למגזין (Cover Letter), ושולח הכל למשתמש."
+    },
+    prompt: { 
+      en: "You are an academic editor. Write a professional cover letter for the following manuscript being submitted to the journal. Ensure it follows this structure: 1. Address the Editor in Chief. 2. State the title of the manuscript and intent to submit. 3. Briefly highlight the main findings and significance. 4. Confirm it has not been published elsewhere. 5. Provide contact info.", 
+      he: "אתה עורך אקדמי. כתוב מכתב מקדים (Cover Letter) מקצועי עבור המאמר המוגש לכתב העת. עליך לוודא שהוא עוקב אחר המבנה הבא: 1. פנייה לעורך הראשי. 2. ציון כותרת המאמר. 3. הדגשה של הממצאים העיקריים והחשיבות. 4. אישור שהמאמר לא פורסם בשום מקום אחר. 5. פרטי התקשרות." 
     },
     icon: Download, tools: ["Next.js API", "Mammoth & Docx", "Nodemailer", "Stripe Billing"],
     color: "bg-cyan-50 text-cyan-700 border-cyan-200"
@@ -331,6 +347,10 @@ const ARCHITECTURE_STEPS = [
     description: { 
       en: "Area Chair formulates a strategy for addressing each comment, identifying which require text changes vs. which just need a solid counter-argument.",
       he: "סוכן-העל מנסח אסטרטגיית תגובה לכל הערה: מחליט אילו הערות דורשות שינוי ממשי במאמר ואילו דורשות רק נימוק-נגד משכנע."
+    },
+    prompt: { 
+      en: "You are a senior academic editor. The author has received reviewer comments. To enhance the creativity and robustness of the rebuttal, consider cross-domain analogies. Generate a \'Response to Reviewers\' strategy document proposing clear, actionable changes. Format as: 1. Reviewer\'s Point 2. Proposed Change 3. Draft Rebuttal Text.", 
+      he: "אתה עורך אקדמי בכיר. המחבר קיבל הערות מסוקרים. כדי לשפר את היצירתיות והחוסן של מכתב התגובה, היעזר באנלוגיות חוצות-תחומים. צור מסמך אסטרטגיה של \'תגובה לסוקרים\' ובו שינויים ברורים ויישומים. עצב זאת כ: 1. נקודת הביקורת 2. השינוי המוצע למאמר 3. טיוטת טקסט התגובה (מה להגיד לסוקר)." 
     },
     icon: RefreshCw, tools: ["OpenAI o1", "GraphRAG"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
@@ -478,7 +498,22 @@ export default function ArchitectureClient({ isAdmin }: { isAdmin: boolean }) {
                 </div>
                 <div>
                   <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-3">{stepData.title[locale]}</h2>
-                  <p className="text-slate-600 leading-relaxed text-lg">{stepData.description[locale]}</p>
+                                    <p className="text-slate-600 leading-relaxed text-lg">{stepData.description[locale]}</p>
+                  
+                  {/* Step Agent System Prompt */}
+                  {stepData.prompt && (
+                    <div className="mt-6 p-4 md:p-5 bg-slate-800 rounded-xl border border-slate-700 shadow-inner">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Terminal className="w-4 h-4 text-emerald-400" />
+                        <h4 className="text-xs font-bold text-slate-300 uppercase tracking-widest">
+                          {isHe ? 'פרומפט מערכת (System Prompt)' : 'Agent System Prompt'}
+                        </h4>
+                      </div>
+                      <div className={`text-slate-300 font-mono text-sm leading-relaxed ${isHe ? 'font-sans' : ''} whitespace-pre-wrap`} dir={isHe ? "rtl" : "ltr"}>
+                        {stepData.prompt[locale]}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
