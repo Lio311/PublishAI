@@ -432,9 +432,9 @@ export default function ArchitectureInteractivePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         
-        {/* Sidebar: Stepper */}
-        <div className="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-slate-100 p-4 max-h-[85vh] overflow-y-auto">
-          <div className="space-y-2">
+                {/* Sidebar: Stepper */}
+        <div className="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-slate-100 p-2 lg:p-4 lg:max-h-[85vh] lg:overflow-y-auto">
+          <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-hide snap-x">
             {currentPhaseSteps.map((step) => {
               const isActive = step.id === activeStep;
               return (
@@ -444,17 +444,17 @@ export default function ArchitectureInteractivePage() {
                     setActiveStep(step.id);
                     setSelectedTool(null);
                   }}
-                  className={`w-full text-start flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${
+                  className={`snap-center shrink-0 lg:w-full text-start flex items-center gap-3 lg:gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${
                     isActive 
-                      ? "bg-slate-800 text-white shadow-md transform scale-[1.02]" 
-                      : "hover:bg-slate-50 text-slate-600 hover:text-slate-900"
+                      ? "bg-slate-800 text-white shadow-md lg:transform lg:scale-[1.02]" 
+                      : "hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-100 lg:border-transparent"
                   }`}
                 >
-                  <div className={`p-2 rounded-lg shrink-0 ${isActive ? "bg-white/20" : step.color.split(' ')[0]}`}>
-                    <step.icon className={`w-5 h-5 ${isActive ? "text-white" : step.color.split(' ')[1]}`} />
+                  <div className={`p-1.5 lg:p-2 rounded-lg shrink-0 ${isActive ? "bg-white/20" : step.color.split(' ')[0]}`}>
+                    <step.icon className={`w-4 h-4 lg:w-5 lg:h-5 ${isActive ? "text-white" : step.color.split(' ')[1]}`} />
                   </div>
-                  <span className="font-medium text-sm leading-tight flex-1">{step.title[locale]}</span>
-                  {isActive && <ArrowRight className={`w-4 h-4 shrink-0 opacity-70 ${isHe ? 'rotate-180' : ''}`} />}
+                  <span className="font-medium text-xs lg:text-sm leading-tight flex-1 whitespace-nowrap lg:whitespace-normal">{step.title[locale]}</span>
+                  {isActive && <ArrowRight className={`hidden lg:block w-4 h-4 shrink-0 opacity-70 ${isHe ? 'rotate-180' : ''}`} />}
                 </button>
               );
             })}
@@ -545,9 +545,89 @@ export default function ArchitectureInteractivePage() {
                         </div>
                       )}
                     </div>
-                  </motion.div>
+      
+              {/* Navigation Buttons */}
+              <div className="mt-auto pt-8 border-t border-slate-100 flex items-center justify-between">
+                {(() => {
+                  const currentIndex = currentPhaseSteps.findIndex(s => s.id === activeStep);
+                  const prevStep = currentIndex > 0 ? currentPhaseSteps[currentIndex - 1] : null;
+                  const nextStep = currentIndex < currentPhaseSteps.length - 1 ? currentPhaseSteps[currentIndex + 1] : null;
+                  
+                  return (
+                    <>
+                      {prevStep ? (
+                        <button
+                          onClick={() => {
+                            setActiveStep(prevStep.id);
+                            setSelectedTool(null);
+                          }}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors font-medium text-sm ${isHe ? 'ml-auto' : 'mr-auto'}`}
+                        >
+                          <ArrowRight className={`w-4 h-4 ${isHe ? '' : 'rotate-180'}`} />
+                          {isHe ? 'השלב הקודם' : 'Previous Step'}
+                        </button>
+                      ) : <div className={isHe ? 'ml-auto' : 'mr-auto'}></div>}
+                      
+                      {nextStep && (
+                        <button
+                          onClick={() => {
+                            setActiveStep(nextStep.id);
+                            setSelectedTool(null);
+                          }}
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-colors font-medium text-sm shadow-sm"
+                        >
+                          {isHe ? 'השלב הבא' : 'Next Step'}
+                          <ArrowRight className={`w-4 h-4 ${isHe ? 'rotate-180' : ''}`} />
+                        </button>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+
+            </motion.div>
                 )}
               </AnimatePresence>
+
+
+              {/* Navigation Buttons */}
+              <div className="mt-auto pt-8 border-t border-slate-100 flex items-center justify-between">
+                {(() => {
+                  const currentIndex = currentPhaseSteps.findIndex(s => s.id === activeStep);
+                  const prevStep = currentIndex > 0 ? currentPhaseSteps[currentIndex - 1] : null;
+                  const nextStep = currentIndex < currentPhaseSteps.length - 1 ? currentPhaseSteps[currentIndex + 1] : null;
+                  
+                  return (
+                    <>
+                      {prevStep ? (
+                        <button
+                          onClick={() => {
+                            setActiveStep(prevStep.id);
+                            setSelectedTool(null);
+                          }}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors font-medium text-sm ${isHe ? 'ml-auto' : 'mr-auto'}`}
+                        >
+                          <ArrowRight className={`w-4 h-4 ${isHe ? '' : 'rotate-180'}`} />
+                          {isHe ? 'השלב הקודם' : 'Previous Step'}
+                        </button>
+                      ) : <div className={isHe ? 'ml-auto' : 'mr-auto'}></div>}
+                      
+                      {nextStep && (
+                        <button
+                          onClick={() => {
+                            setActiveStep(nextStep.id);
+                            setSelectedTool(null);
+                          }}
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-colors font-medium text-sm shadow-sm"
+                        >
+                          {isHe ? 'השלב הבא' : 'Next Step'}
+                          <ArrowRight className={`w-4 h-4 ${isHe ? 'rotate-180' : ''}`} />
+                        </button>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
 
             </motion.div>
           </AnimatePresence>
