@@ -14,10 +14,12 @@ import AnimatedSidebar from "./AnimatedSidebar";
 
 export default function DashboardLayout({ 
   children,
-  isAdmin = false 
+  isAdmin = false,
+  showSidebar = true
 }: { 
   children: React.ReactNode;
   isAdmin?: boolean;
+  showSidebar?: boolean;
 }) {
   const locale = useLocale();
   const pathname = usePathname();
@@ -34,16 +36,18 @@ export default function DashboardLayout({
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 bg-white/70 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <Image src="/logo.png" alt="PublishAI Logo" width={120} height={40} className="object-contain" priority />
-        <button 
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 bg-slate-100 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors"
-        >
-          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        {showSidebar && (
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 bg-slate-100 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors"
+          >
+            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        )}
       </div>
 
       {/* Sidebar Overlay for Mobile */}
-      {isMobileMenuOpen && (
+      {showSidebar && isMobileMenuOpen && (
         <div 
           className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
@@ -51,17 +55,24 @@ export default function DashboardLayout({
       )}
 
       {/* Sidebar Container */}
-      <div className={`
-        fixed md:relative top-0 md:flex z-50 h-screen md:h-auto py-0 md:py-0
-        transition-transform duration-300 ease-in-out
-        ${isMobileMenuOpen ? 'translate-x-0' : (locale === 'he' ? 'translate-x-full md:translate-x-0' : '-translate-x-full md:translate-x-0')}
-        ${locale === 'he' ? 'right-0' : 'left-0'}
-      `}>
-        <AnimatedSidebar isAdmin={isAdmin} />
-      </div>
+      {showSidebar && (
+        <div className={`
+          fixed md:relative top-0 md:flex z-50 h-screen md:h-auto py-0 md:py-0
+          transition-transform duration-300 ease-in-out
+          ${isMobileMenuOpen ? 'translate-x-0' : (locale === 'he' ? 'translate-x-full md:translate-x-0' : '-translate-x-full md:translate-x-0')}
+          ${locale === 'he' ? 'right-0' : 'left-0'}
+        `}>
+          <AnimatedSidebar isAdmin={isAdmin} />
+        </div>
+      )}
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto relative bg-slate-50/30">
+      <main className="flex-1 overflow-auto relative bg-slate-50/30 flex flex-col">
+        {!showSidebar && (
+          <div className="hidden md:flex p-6">
+            <Image src="/logo.png" alt="PublishAI Logo" width={140} height={45} className="object-contain" priority />
+          </div>
+        )}
         {/* Subtle page background glows (Mesh Gradient effect) */}
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-400/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-sky-400/5 rounded-full blur-[100px] pointer-events-none" />
