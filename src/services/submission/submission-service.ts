@@ -5,6 +5,8 @@ import { eq } from "drizzle-orm";
 import { decrypt } from "@/services/security/encryption";
 import { WordPressAdapter } from "./adapters/wordpress-adapter";
 import { OJSAdapter } from "./adapters/ojs-adapter";
+import { EmailAdapter } from "./adapters/email-adapter";
+import { EditorialManagerAdapter } from "./adapters/editorial-manager-adapter";
 import { SubmissionPayload, SubmissionResult } from "./connection-types";
 
 export class SubmissionService {
@@ -55,6 +57,13 @@ export class SubmissionService {
         result = await adapter.submit(payload);
       } else if (conn.platform === "ojs") {
         const adapter = new OJSAdapter(conn.siteUrl, username);
+        result = await adapter.submit(payload);
+      } else if (conn.platform === "email") {
+        // For email: siteUrl = editor email, username = author name, password = author email
+        const adapter = new EmailAdapter(conn.siteUrl, username, password);
+        result = await adapter.submit(payload);
+      } else if (conn.platform === "editorial_manager") {
+        const adapter = new EditorialManagerAdapter(conn.siteUrl, username);
         result = await adapter.submit(payload);
       } else {
         throw new Error(`Unsupported platform: ${conn.platform}`);

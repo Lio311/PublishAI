@@ -243,8 +243,10 @@ export const userSettings = pgTable("user_settings", {
 // ═══════════════════════════════════════════════════════
 
 export const journalPlatformEnum = pgEnum("journal_platform", [
-  "wordpress",   // REST API — /wp-json/wp/v2/
-  "ojs",         // REST API — /api/v1/
+  "wordpress",           // REST API — /wp-json/wp/v2/
+  "ojs",                 // REST API — /api/v1/
+  "email",               // Direct email submission via SMTP
+  "editorial_manager",   // Aries Systems Editorial Manager
 ]);
 
 export const connectionStatusEnum = pgEnum("connection_status", [

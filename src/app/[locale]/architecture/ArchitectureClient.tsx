@@ -352,28 +352,28 @@ id: 9, phase: 1,
     id: 16, phase: 2,
     title: { en: "16. RPA Login & Navigation", he: "16. ניווט והתחברות אוטומטית (RPA)" },
     description: { 
-      en: "A Robotic Process Automation (RPA) bot powered by Playwright navigates the target journal's portal, executing automated logins using the user's stored OAuth or app-password credentials.",
-      he: "בוט אוטומציה (RPA) המופעל על ידי Playwright מנווט אל מערכת ההגשות של העיתון ומתחבר עצמאית בעזרת פרטי ההזדהות (OAuth או סיסמאות יישום) שהוגדרו."
+      en: "A real RPA bot powered by Playwright navigates the target journal's portal, executing automated logins using encrypted credentials. When DOM selectors fail, a Vision AI fallback layer analyzes screenshots and identifies page elements visually.",
+      he: "בוט אוטומציה (RPA) אמיתי המופעל על ידי Playwright מנווט אל מערכת ההגשות ומתחבר עצמאית בעזרת פרטי הזדהות מוצפנים. כאשר סלקטורי DOM נכשלים, שכבת Vision AI מנתחת צילומי מסך ומזהה אלמנטים באופן חזותי."
     },
     prompt: { 
       en: "SYSTEM: You are a secure Web Automation Navigation Agent.\nTASK: Access the target journal submission platform.\n1. Safely retrieve encrypted user credentials from the database.\n2. Navigate the headless browser to the journal's login endpoint.\n3. Identify DOM elements for username, password, and submit button.\n4. Execute login, handle cookies, and navigate to the 'New Submission' dashboard.\nOUTPUT: Navigation success state or explicit error for invalid credentials.", 
       he: "מערכת: אתה סוכן אוטומציית ניווט מאובטח.\nמשימה: גש למערכת ההגשות של העיתון.\n1. שלוף בבטחה את פרטי ההזדהות המוצפנים של המשתמש מהמסד.\n2. נווט בדפדפן הנסתר לעמוד ההתחברות של העיתון.\n3. זהה אלמנטים ב-DOM להזנת שם משתמש, סיסמה ולחיצה על התחברות.\n4. בצע התחברות, שמור עוגיות (Cookies) ונווט למסך 'הגשה חדשה'.\nפלט: סטטוס הצלחת ניווט או שגיאה מפורשת על פרטים שגויים." 
     },
-    icon: Globe, tools: ["Playwright", "Puppeteer", "Node.js"],
+    icon: Globe, tools: ["Playwright", "Node.js", "Vision AI"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {
     id: 17, phase: 2,
     title: { en: "17. Form Filling & Metadata", he: "17. מילוי טפסים ופרטי מחברים" },
     description: { 
-      en: "Agent reads the journal's dynamic HTML forms, maps the paper's metadata (Abstract, Authors, Institutions, Conflicts of Interest), and automatically injects them into the respective fields.",
-      he: "הסוכן סורק את טופסי ה-HTML הדינמיים בעיתון, ממפה את פרטי המאמר (תקציר, שמות מחברים, מוסדות, ניגודי עניינים) ומזריק אותם אוטומטית לשדות המתאימים."
+      en: "Agent reads the journal's dynamic HTML forms and maps the paper's metadata into the respective fields. For journals that accept email submissions, a dedicated Email adapter sends the manuscript package directly to the editor via SMTP.",
+      he: "הסוכן סורק את טופסי ה-HTML הדינמיים ומזריק פרטי מאמר אוטומטית לשדות המתאימים. עבור כתבי עת שמקבלים הגשה במייל, אדפטר Email ייעודי שולח את חבילת המאמר ישירות לתיבת המייל של העורך."
     },
     prompt: { 
       en: "SYSTEM: You are a DOM-parsing and Data-Entry Agent.\nTASK: Fill out the journal's complex multi-page submission form.\n1. Scan the current page for input fields, textareas, and select dropdowns.\n2. Cross-reference the required fields with the manuscript's JSON metadata.\n3. Map and type out all fields automatically (e.g., matching 'Corresponding Author' to the user's profile).\n4. Upload the required files (Manuscript, Cover Letter, Figures) into the correct dropzones.\nOUTPUT: State verification that all mandatory fields are satisfied.", 
       he: "מערכת: אתה סוכן ניתוח DOM והזנת נתונים.\nמשימה: מלא את טופס ההגשה מרובה-הדפים של העיתון.\n1. סרוק את העמוד הנוכחי לאיתור שדות טקסט, תפריטי בחירה ואזורי גרירה.\n2. הצלב את השדות הנדרשים עם המטא-דאטה של המאמר (JSON).\n3. הזן את כל הנתונים הרלוונטיים (לדוגמה, חיבור 'המחבר המייצג' לפרופיל המשתמש).\n4. העלה את הקבצים הנדרשים (קובץ המאמר, מכתב מלווה, איורים) לאזורים הנכונים.\nפלט: אישור סטטוס שכל השדות החובה מולאו כהלכה." 
     },
-    icon: Edit3, tools: ["Playwright", "Claude 3.5", "Vision AI"],
+    icon: Edit3, tools: ["Playwright", "Claude 3.5", "Vision AI", "Nodemailer"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {

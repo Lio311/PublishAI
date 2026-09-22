@@ -2,6 +2,8 @@
 import { ConnectionTestResult } from "./connection-types";
 import { WordPressAdapter } from "./adapters/wordpress-adapter";
 import { OJSAdapter } from "./adapters/ojs-adapter";
+import { EmailAdapter } from "./adapters/email-adapter";
+import { EditorialManagerAdapter } from "./adapters/editorial-manager-adapter";
 
 export class ConnectionTester {
   /**
@@ -35,6 +37,18 @@ export class ConnectionTester {
     if (platform === "ojs") {
       // For OJS, we use 'username' field to store the API token
       const adapter = new OJSAdapter(siteUrl, username);
+      return adapter.testConnection();
+    }
+
+    if (platform === "email") {
+      // For email: siteUrl = editor email, username = author name, password = author email
+      const adapter = new EmailAdapter(siteUrl, username, password || '');
+      return adapter.testConnection();
+    }
+
+    if (platform === "editorial_manager") {
+      // For EM: siteUrl = portal URL, username = API token
+      const adapter = new EditorialManagerAdapter(siteUrl, username);
       return adapter.testConnection();
     }
 
