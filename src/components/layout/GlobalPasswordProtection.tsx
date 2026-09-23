@@ -221,7 +221,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                     className="flex w-full items-center justify-center gap-3 px-6 py-4 rounded-xl font-medium text-slate-700 bg-white border-2 border-slate-200 hover:bg-slate-50 transition-all shadow-sm active:scale-[0.98]"
                                 >
                                     <Image src="https://authjs.dev/img/providers/google.svg" alt="Google" width={24} height={24} />
-                                    התחברות עם Google
+                                    התחברות
                                 </button>
                             </div>
                         </div>
