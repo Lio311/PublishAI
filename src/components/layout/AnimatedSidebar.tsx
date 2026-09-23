@@ -53,17 +53,18 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
     >
       {/* Subtle animated gradient background inside sidebar */}
       <div className="absolute inset-0 bg-gradient-to-b from-sky-50/30 to-transparent pointer-events-none" />
+
+      {onClose && (
+        <button 
+          onClick={onClose}
+          className="md:hidden absolute top-4 end-4 p-2 bg-slate-100 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors z-50"
+        >
+          <X size={20} />
+        </button>
+      )}
       
-      <div className="p-4 md:p-6 pt-6 md:pt-6 relative z-10 flex-1 flex flex-col min-h-0">
+      <div className="p-4 md:p-6 pt-8 md:pt-6 relative z-10 flex-1 flex flex-col min-h-0">
         <div className="flex items-center justify-center mb-6 lg:mb-10 pt-2 shrink-0 relative">
-          {onClose && (
-            <button 
-              onClick={onClose}
-              className="md:hidden absolute end-0 p-2 bg-slate-100 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors z-10"
-            >
-              <X size={20} />
-            </button>
-          )}
           <Image 
             src="/logo.png" 
             alt="PublishAI Logo" 
