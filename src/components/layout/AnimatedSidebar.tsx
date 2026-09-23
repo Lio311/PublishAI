@@ -54,8 +54,8 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
       {/* Subtle animated gradient background inside sidebar */}
       <div className="absolute inset-0 bg-gradient-to-b from-sky-50/30 to-transparent pointer-events-none" />
       
-      <div className="p-6 relative z-10 flex-1 flex flex-col">
-        <div className="flex items-center justify-center mb-10 pt-2">
+      <div className="p-6 relative z-10 flex-1 flex flex-col min-h-0">
+        <div className="flex items-center justify-center mb-6 lg:mb-10 pt-2 shrink-0">
           <Image 
             src="/logo.png" 
             alt="PublishAI Logo" 
@@ -67,7 +67,7 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
         </div>
         
         <motion.nav 
-          className="space-y-2 flex-1 overflow-y-auto scrollbar-hide"
+          className="space-y-1 lg:space-y-2 flex-1 overflow-y-auto scrollbar-hide min-h-0"
           onMouseLeave={() => setHoveredIndex(null)}
         >
           {menuItems.map((item, index) => {
@@ -126,7 +126,7 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
       </div>
 
       {/* Bottom Section */}
-      <div className="p-6 relative z-10">
+      <div className="p-4 lg:p-6 relative z-10 shrink-0">
         <div className="p-1.5 bg-slate-100/50 rounded-2xl border border-slate-200/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] backdrop-blur-md">
           <button 
             onClick={toggleLanguage}
