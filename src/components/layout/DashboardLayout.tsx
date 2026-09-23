@@ -55,14 +55,14 @@ export default function DashboardLayout({
 
       {/* Mobile Header (only when there IS a sidebar) */}
       {showSidebar && (
-        <div className="md:hidden flex items-center justify-between p-4 bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-[60] shadow-sm w-full">
-          <Image src="/logo.png" alt="PublishAI Logo" width={120} height={40} className="object-contain" priority />
+        <div className="md:hidden relative flex items-center justify-center p-4 bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-[60] shadow-sm w-full h-[72px]">
           <button 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 bg-slate-100 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors"
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="absolute start-4 p-2 bg-slate-100 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors"
           >
-            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            <Menu size={20} />
           </button>
+          <Image src="/logo.png" alt="PublishAI Logo" width={120} height={40} className="object-contain" priority />
         </div>
       )}
 
