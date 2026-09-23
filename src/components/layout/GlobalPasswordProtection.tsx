@@ -6,7 +6,7 @@ import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
 export default function GlobalPasswordProtection({ children }: { children: React.ReactNode }) {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(false);
     const [token, setToken] = useState('');
     const [isAuthLoading, setIsAuthLoading] = useState(false);
     const [authError, setAuthError] = useState<string | false>(false);
