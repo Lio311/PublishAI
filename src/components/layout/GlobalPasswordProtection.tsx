@@ -59,14 +59,6 @@ export default function GlobalPasswordProtection({ children }: { children: React
         }
     }, []);
 
-    // Automatically sign in to NextAuth when the PIN is verified
-    useEffect(() => {
-        if (isAuthenticated && status === 'unauthenticated') {
-            // Silently authenticate with the default admin user to enable NextAuth protected features
-            signIn('credentials', { username: 'admin', password: 'password', redirect: false });
-        }
-    }, [isAuthenticated, status]);
-
     const verifyPin = async (currentPin: string) => {
         if (isAuthLoading) return;
         setIsAuthLoading(true);
@@ -187,10 +179,54 @@ export default function GlobalPasswordProtection({ children }: { children: React
         );
     }
 
-    if (status === 'loading' || status === 'unauthenticated') {
+    if (status === 'loading') {
         return (
             <div className="fixed inset-0 z-[100] min-h-screen w-full bg-white/80 flex items-center justify-center">
                 <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    if (status === 'unauthenticated') {
+        return (
+            <div 
+                className="fixed inset-0 z-[100] min-h-screen w-full bg-transparent flex items-center justify-center overflow-hidden" 
+                dir="ltr"
+            >
+                
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    className="z-10 w-full max-w-md p-8"
+                >
+                    <div className="backdrop-blur-2xl bg-white border border-slate-200 rounded-3xl p-10 shadow-xl overflow-hidden relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 to-transparent opacity-50"></div>
+                        
+                        <div className="relative z-10 flex flex-col items-center">
+                            <motion.div 
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                                className="w-56 h-auto flex items-center justify-center mb-6"
+                            >
+                                <Image src="/logo.png" alt="PublishAI Logo" width={224} height={224} className="w-full h-auto object-contain" priority />
+                            </motion.div>
+                            
+                            <p className="text-slate-600 font-medium text-sm mb-8 tracking-widest text-center w-full block uppercase">התחברות לחשבון</p>
+
+                            <div className="w-full flex flex-col items-center gap-4">
+                                <button
+                                    onClick={() => signIn('google', { callbackUrl: '/' })}
+                                    className="flex w-full items-center justify-center gap-3 px-6 py-4 rounded-xl font-medium text-slate-700 bg-white border-2 border-slate-200 hover:bg-slate-50 transition-all shadow-sm active:scale-[0.98]"
+                                >
+                                    <Image src="https://authjs.dev/img/providers/google.svg" alt="Google" width={24} height={24} />
+                                    התחברות עם Google
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
             </div>
         );
     }

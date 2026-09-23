@@ -2,6 +2,7 @@
 
 import { useLocale } from 'next-intl';
 import { signIn } from "next-auth/react";
+import Image from 'next/image';
 
 export default function LoginPage() {
   const locale = useLocale();
@@ -20,10 +21,11 @@ export default function LoginPage() {
         
         <div className="mt-8">
           <button
-            onClick={() => signIn("credentials", { username: "admin", password: "password", callbackUrl: `/${locale}` })}
-            className="flex w-full justify-center items-center gap-3 rounded-md border border-gray-300 bg-gray-900 px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-800"
+            onClick={() => signIn("google", { callbackUrl: `/${locale}` })}
+            className="flex w-full justify-center items-center gap-3 rounded-md border border-gray-300 bg-white px-3 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
           >
-            {locale === 'he' ? 'התחבר עם משתמש הדגמה' : 'Continue with Demo User'}
+            <Image src="https://authjs.dev/img/providers/google.svg" alt="Google" width={20} height={20} />
+            {locale === 'he' ? 'התחברות עם Google' : 'Continue with Google'}
           </button>
         </div>
       </div>

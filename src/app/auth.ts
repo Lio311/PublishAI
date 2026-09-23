@@ -1,6 +1,7 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import GitHub from "next-auth/providers/github"
+import Google from "next-auth/providers/google"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import { db } from "@/services/db"
 import { accounts, sessions, users, verificationTokens } from "@/services/db/schema"
@@ -14,6 +15,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     verificationTokensTable: verificationTokens,
   }),
   providers: [
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID || "mock-github-client-id",
       clientSecret: process.env.AUTH_GITHUB_SECRET || "mock-github-client-secret",
