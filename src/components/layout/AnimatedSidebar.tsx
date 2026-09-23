@@ -49,13 +49,13 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <aside 
-      className="relative w-[280px] h-[calc(100vh-2rem)] lg:h-[calc(100vh-3rem)] m-4 lg:m-6 flex flex-col justify-between rounded-[2rem] bg-white/70 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden z-20"
+      className="relative w-[280px] h-full md:h-[calc(100vh-2rem)] lg:h-[calc(100vh-3rem)] md:m-4 lg:m-6 flex flex-col justify-between md:rounded-[2rem] bg-white/95 md:bg-white/70 backdrop-blur-2xl md:border md:border-white/50 shadow-[2px_0_32px_rgba(0,0,0,0.05)] overflow-hidden z-20"
     >
       {/* Subtle animated gradient background inside sidebar */}
       <div className="absolute inset-0 bg-gradient-to-b from-sky-50/30 to-transparent pointer-events-none" />
       
-      <div className="p-6 relative z-10 flex-1 flex flex-col min-h-0">
-        <div className="flex items-center justify-center mb-6 lg:mb-10 pt-2 shrink-0">
+      <div className="p-4 md:p-6 pt-24 md:pt-6 relative z-10 flex-1 flex flex-col min-h-0">
+        <div className="hidden md:flex items-center justify-center mb-6 lg:mb-10 pt-2 shrink-0">
           <Image 
             src="/logo.png" 
             alt="PublishAI Logo" 
