@@ -8,6 +8,7 @@ import { useSession, signIn } from 'next-auth/react';
 
 export default function GlobalPasswordProtection({ children }: { children: React.ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [isChecking, setIsChecking] = useState<boolean>(true);
     const [pin, setPin] = useState('');
     const [pinError, setPinError] = useState(false);
     const [isAuthLoading, setIsAuthLoading] = useState(false);
@@ -57,6 +58,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
             setIsAuthenticated(false);
             localStorage.removeItem('publishai_global_auth_time_v2');
         }
+        setIsChecking(false);
     }, []);
 
     const verifyPin = async (currentPin: string) => {
@@ -95,6 +97,13 @@ export default function GlobalPasswordProtection({ children }: { children: React
         setPin(prev => prev.slice(0, -1));
     };
 
+    if (isChecking) {
+        return (
+            <div className="fixed inset-0 z-[100] min-h-screen w-full bg-white/80 flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     if (!isAuthenticated) {
         return (
