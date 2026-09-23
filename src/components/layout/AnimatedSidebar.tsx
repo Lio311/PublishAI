@@ -6,9 +6,9 @@ import { Link, usePathname, useRouter } from "@/app/i18n/routing";
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { FileText, Home, Settings, LogOut, Globe, Book, Link as LinkIcon, ChevronRight, Send, Share2, Brain } from "lucide-react";
+import { FileText, Home, Settings, LogOut, Globe, Book, Link as LinkIcon, ChevronRight, Send, Share2, Brain, X } from "lucide-react";
 
-export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
+export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean, onClose?: () => void }) {
   const pathname = usePathname();
   const t = useTranslations("Sidebar");
   const locale = useLocale();
@@ -54,8 +54,8 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
       {/* Subtle animated gradient background inside sidebar */}
       <div className="absolute inset-0 bg-gradient-to-b from-sky-50/30 to-transparent pointer-events-none" />
       
-      <div className="p-4 md:p-6 pt-24 md:pt-6 relative z-10 flex-1 flex flex-col min-h-0">
-        <div className="hidden md:flex items-center justify-center mb-6 lg:mb-10 pt-2 shrink-0">
+      <div className="p-4 md:p-6 pt-6 md:pt-6 relative z-10 flex-1 flex flex-col min-h-0">
+        <div className="flex items-center justify-between mb-6 lg:mb-10 pt-2 shrink-0">
           <Image 
             src="/logo.png" 
             alt="PublishAI Logo" 
@@ -64,6 +64,14 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
             className="object-contain"
             priority
           />
+          {onClose && (
+            <button 
+              onClick={onClose}
+              className="md:hidden p-2 bg-slate-100 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors"
+            >
+              <X size={20} />
+            </button>
+          )}
         </div>
         
         <motion.nav 

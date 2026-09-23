@@ -69,7 +69,7 @@ export default function DashboardLayout({
       {/* Sidebar Overlay for Mobile */}
       {showSidebar && isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[65] md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -77,12 +77,12 @@ export default function DashboardLayout({
       {/* Sidebar Container */}
       {showSidebar && (
         <div className={`
-          fixed inset-y-0 h-full md:sticky md:top-0 md:flex z-50 md:h-screen py-0 md:py-0
+          fixed inset-y-0 h-full md:sticky md:top-0 md:flex z-[70] md:z-50 md:h-screen py-0 md:py-0
           transition-transform duration-300 ease-in-out
           ${isMobileMenuOpen ? 'translate-x-0' : (locale === 'he' ? 'translate-x-full md:translate-x-0' : '-translate-x-full md:translate-x-0')}
           ${locale === 'he' ? 'right-0' : 'left-0'}
         `}>
-          <AnimatedSidebar isAdmin={isAdmin} />
+          <AnimatedSidebar isAdmin={isAdmin} onClose={() => setIsMobileMenuOpen(false)} />
         </div>
       )}
 
