@@ -108,9 +108,6 @@ export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
           >
             <MessageSquare className="w-4 h-4 text-amber-600" />
             <span>{isHe ? "מענה לביקורת עמיתים" : "Reviewer Rebuttal & Responses"}</span>
-            <span className="px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-800 font-bold">
-              4
-            </span>
           </button>
         </div>
 
