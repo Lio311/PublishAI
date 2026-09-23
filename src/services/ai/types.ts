@@ -81,6 +81,8 @@ export interface RefineWritingOptions {
   provider?: AIProvider;
   model?: AIModel;
   apiKey?: string;
+  userId?: string;
+  journalId?: number;
 }
 
 export interface GenerateAbstractOptions {

@@ -106,10 +106,103 @@ export const journals = pgTable("journals", {
   name: text("name").notNull(),
   field: text("field"),
   instructionsUrl: text("instructions_url"),
-  rules: jsonb("rules"), // Storing limits, styles, etc.
-  citationStyle: text("citation_style"),
+  rules: jsonb("rules"), // Legacy: general notes
+  citationStyle: text("citation_style"), // Backward compat: short name e.g. "Nature"
+  wordLimit: integer("word_limit"),      // Backward compat: default article type
+  abstractLimit: integer("abstract_limit"), // Backward compat: default article type
+  // ── New enriched fields ──
+  requiredSections: jsonb("required_sections"), // Ordered array of mandatory sections
+  dataSource: text("data_source").default("ai-generated"), // "official-website" | "ai-generated"
+  lastVerifiedAt: timestamp("last_verified_at"),
+});
+
+// ═══════════════════════════════════════════════════════
+// JOURNAL ENRICHMENT: CITATION RULES (1:1 per journal)
+// ═══════════════════════════════════════════════════════
+
+export const journalCitationRules = pgTable("journal_citation_rules", {
+  id: serial("id").primaryKey(),
+  journalId: integer("journal_id")
+    .references(() => journals.id, { onDelete: "cascade" })
+    .notNull()
+    .unique(),
+  styleName: text("style_name").notNull(),          // e.g. "Vancouver", "Harvard/Author-Date", "IEEE"
+  inTextFormat: text("in_text_format").notNull(),    // "superscript" | "brackets" | "parentheses" | "italic-parentheses"
+  referenceListOrder: text("reference_list_order").notNull(), // "order-of-appearance" | "alphabetical"
+  etAlThreshold: integer("et_al_threshold"),         // Number of authors before using et al.
+  etAlDisplayCount: integer("et_al_display_count"),  // How many authors to show before et al.
+  volumeFormat: text("volume_format"),               // "bold" | "plain"
+  yearFormat: text("year_format"),                   // "parentheses-end" | "inline" | "after-journal"
+  journalTitleFormat: text("journal_title_format"),  // "italic-abbreviated" | "italic-full" | "plain"
+  authorFormat: text("author_format"),               // "surname-initials" | "initials-surname"
+  lastAuthorSeparator: text("last_author_separator"), // "&" | "and" | ","
+  articleTitleFormat: text("article_title_format"),   // "plain" | "quotes" | "italic"
+  personalCommsInRefList: boolean("personal_comms_in_ref_list").default(false),
+  exampleReference: text("example_reference"),        // A complete formatted example
+  notes: text("notes"),                               // Additional formatting notes
+});
+
+// ═══════════════════════════════════════════════════════
+// JOURNAL ENRICHMENT: ARTICLE TYPES (1:N per journal)
+// ═══════════════════════════════════════════════════════
+
+export const journalArticleTypes = pgTable("journal_article_types", {
+  id: serial("id").primaryKey(),
+  journalId: integer("journal_id")
+    .references(() => journals.id, { onDelete: "cascade" })
+    .notNull(),
+  typeName: text("type_name").notNull(),              // e.g. "Research Article", "Review", "Brief Communication"
+  isPrimary: boolean("is_primary").default(false),    // Is this the main/default article type?
   wordLimit: integer("word_limit"),
-  abstractLimit: integer("abstract_limit"),
+  wordLimitNotes: text("word_limit_notes"),           // e.g. "excludes abstract, methods, references"
+  displayItemsLimit: integer("display_items_limit"),  // Max figures + tables combined
+  referencesLimit: integer("references_limit"),
+  methodsWordLimit: integer("methods_word_limit"),
+  abstractWordLimit: integer("abstract_word_limit"),
+  supplementaryNotes: text("supplementary_notes"),
+}, (table) => ({
+  journalIdIdx: index("journal_article_types_journal_id_idx").on(table.journalId),
+}));
+
+// ═══════════════════════════════════════════════════════
+// JOURNAL ENRICHMENT: ABSTRACT RULES (1:1 per journal)
+// ═══════════════════════════════════════════════════════
+
+export const journalAbstractRules = pgTable("journal_abstract_rules", {
+  id: serial("id").primaryKey(),
+  journalId: integer("journal_id")
+    .references(() => journals.id, { onDelete: "cascade" })
+    .notNull()
+    .unique(),
+  abstractType: text("abstract_type").notNull(),       // "structured" | "unstructured"
+  defaultWordLimit: integer("default_word_limit"),
+  label: text("label").default("Abstract"),            // e.g. "Summary Paragraph" for Nature
+  allowCitations: boolean("allow_citations").default(false),
+  structuredHeadings: jsonb("structured_headings"),     // e.g. ["Background","Methods","Results","Conclusions"]
+  additionalRequirements: jsonb("additional_requirements"), // e.g. { "oneSentenceSummary": { "required": true, "maxChars": 150 } }
+  notes: text("notes"),
+});
+
+// ═══════════════════════════════════════════════════════
+// JOURNAL ENRICHMENT: COVER LETTER RULES (1:1 per journal)
+// ═══════════════════════════════════════════════════════
+
+export const journalCoverLetterRules = pgTable("journal_cover_letter_rules", {
+  id: serial("id").primaryKey(),
+  journalId: integer("journal_id")
+    .references(() => journals.id, { onDelete: "cascade" })
+    .notNull()
+    .unique(),
+  required: boolean("required").notNull().default(true),
+  maxPages: integer("max_pages").default(1),
+  shownToReviewers: boolean("shown_to_reviewers").default(false),
+  requiredContent: jsonb("required_content"),           // Array of required elements
+  // e.g. ["significance-and-fit","originality-statement","co-author-approval",
+  //        "related-work-disclosure","reviewer-suggestions"]
+  uniqueRequirements: text("unique_requirements"),      // Free-text for journal-specific rules
+  toneGuidance: text("tone_guidance"),                  // e.g. "clinical-impact" | "broad-scientific" | "translational"
+  templatePrompt: text("template_prompt"),              // AI prompt template for this journal's CL
+  notes: text("notes"),
 });
 
 export const papers = pgTable("papers", {
@@ -615,6 +708,18 @@ export type NewReference = typeof references.$inferInsert;
 export type Journal = typeof journals.$inferSelect;
 export type NewJournal = typeof journals.$inferInsert;
 
+export type JournalCitationRule = typeof journalCitationRules.$inferSelect;
+export type NewJournalCitationRule = typeof journalCitationRules.$inferInsert;
+
+export type JournalArticleType = typeof journalArticleTypes.$inferSelect;
+export type NewJournalArticleType = typeof journalArticleTypes.$inferInsert;
+
+export type JournalAbstractRule = typeof journalAbstractRules.$inferSelect;
+export type NewJournalAbstractRule = typeof journalAbstractRules.$inferInsert;
+
+export type JournalCoverLetterRule = typeof journalCoverLetterRules.$inferSelect;
+export type NewJournalCoverLetterRule = typeof journalCoverLetterRules.$inferInsert;
+
 export type Submission = typeof submissions.$inferSelect;
 export type NewSubmission = typeof submissions.$inferInsert;
 
@@ -644,3 +749,21 @@ export const documentChunks = pgTable("document_chunks", {
 
 export type DocumentChunk = typeof documentChunks.$inferSelect;
 export type NewDocumentChunk = typeof documentChunks.$inferInsert;
+
+// ═══════════════════════════════════════════════════════
+// UPGRADE: AI SYSTEM FEEDBACK (RLHF & TELEMETRY)
+// ═══════════════════════════════════════════════════════
+
+export const aiSystemFeedback = pgTable("ai_system_feedback", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  journalId: integer("journal_id").references(() => journals.id, { onDelete: "cascade" }),
+  sourceType: text("source_type").notNull(), // 'user_rewrite', 'reviewer_feedback'
+  sourceId: text("source_id"), // original comment id or submission id
+  ruleText: text("rule_text"), // Actionable rule for future prompts
+  category: text("category"), // e.g., 'tone', 'accuracy', 'hallucination', 'formatting'
+  productInsight: text("product_insight"), // Internal telemetry note
+  isActionable: boolean("is_actionable").default(false), // whether to inject ruleText into prompts
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});

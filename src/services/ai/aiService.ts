@@ -2,6 +2,7 @@ import { generateText, generateObject, streamText } from "ai";
 export { generateText, generateObject, streamText } from "ai";
 import { createOpenAI, openai } from "@ai-sdk/openai";
 import Anthropic from "@anthropic-ai/sdk";
+import { getApplicableRules, extractUserRewriteFeedback } from "@/services/learningService";
 import {
   AIProvider,
   AIModel,

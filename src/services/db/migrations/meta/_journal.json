@@ -29,6 +29,13 @@
       "when": 1789822314970,
       "tag": "0003_melted_exiles",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790147776413,
+      "tag": "0004_clean_talos",
+      "breakpoints": true
     }
   ]
 }
