@@ -133,7 +133,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                         {!isAuthLoading && (
                                             <motion.div
                                                 drag={disabled ? false : "x"}
-                                                dragConstraints={{ left: 0, right: containerWidth > 0 ? containerWidth - 56 : 0 }}
+                                                dragConstraints={{ left: 0, right: Math.max(1, containerWidth - 56) }}
                                                 dragElastic={0.05}
                                                 onDragEnd={handleDragEnd}
                                                 style={{ x }}
