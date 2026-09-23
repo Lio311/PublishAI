@@ -8,9 +8,11 @@ import { redirect } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
 
-export default async function AILearningPage({ params }: { params: { locale: string } }) {
+export default async function AILearningPage({ params }: { params: Promise<{ locale: string }> | { locale: string } }) {
+  const resolvedParams = await params;
+  const locale = resolvedParams.locale;
+  
   const isAdmin = await checkIsAdmin();
-  const locale = params.locale;
   if (!isAdmin) {
     redirect(`/${locale}`);
   }
@@ -29,7 +31,7 @@ export default async function AILearningPage({ params }: { params: { locale: str
   .orderBy(desc(aiSystemFeedback.createdAt));
 
   return (
-    <DashboardLayout>
+    <DashboardLayout isAdmin={isAdmin}>
       <div className="max-w-6xl mx-auto py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
