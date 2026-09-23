@@ -18,6 +18,13 @@ export const metadata: Metadata = {
   description: "End-to-end AI agent system for academic paper revision and submission.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default async function RootLayout({
   children,
   params

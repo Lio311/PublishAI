@@ -31,7 +31,7 @@ export default function DashboardLayout({
   }, [pathname]);
 
   return (
-    <div className={`min-h-screen flex ${showSidebar ? "flex-col md:flex-row" : "flex-col"} bg-slate-50/50 text-slate-900 font-sans`} dir={locale === 'he' ? 'rtl' : 'ltr'}>
+    <div className={`min-h-screen flex ${showSidebar ? "flex-col md:flex-row" : "flex-col"} bg-slate-50/50 text-slate-900 font-sans overflow-x-hidden w-full`} dir={locale === 'he' ? 'rtl' : 'ltr'}>
       
       {/* Public Top Header (when no sidebar) */}
       {!showSidebar && (
@@ -55,7 +55,7 @@ export default function DashboardLayout({
 
       {/* Mobile Header (only when there IS a sidebar) */}
       {showSidebar && (
-        <div className="md:hidden flex items-center justify-between p-4 bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-sm w-full">
+        <div className="md:hidden flex items-center justify-between p-4 bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-[60] shadow-sm w-full">
           <Image src="/logo.png" alt="PublishAI Logo" width={120} height={40} className="object-contain" priority />
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

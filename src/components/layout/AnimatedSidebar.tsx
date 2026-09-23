@@ -67,7 +67,7 @@ export default function AnimatedSidebar({ isAdmin }: { isAdmin: boolean }) {
         </div>
         
         <motion.nav 
-          className="space-y-2 flex-1"
+          className="space-y-2 flex-1 overflow-y-auto scrollbar-hide"
           onMouseLeave={() => setHoveredIndex(null)}
         >
           {menuItems.map((item, index) => {

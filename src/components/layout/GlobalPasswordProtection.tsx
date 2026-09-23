@@ -124,34 +124,34 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                     {authError && <p className="text-red-500 text-sm mt-2 text-center">{authError}</p>}
                                 </div>
 
-                                <div dir="ltr" ref={containerRef} className="relative w-full h-14 bg-slate-50 rounded-full overflow-hidden flex items-center justify-center border border-slate-200 mt-4">
-                                    <motion.div style={{ background }} className="absolute inset-0 z-0" />
-                                    <span className="text-slate-400 font-medium z-0 select-none text-sm tracking-wider uppercase">
-                                        {isAuthLoading ? 'Unlocking...' : 'Slide to unlock'}
-                                    </span>
-                                    
-                                    {!isAuthLoading && (
-                                        <motion.div
-                                            drag={disabled ? false : "x"}
-                                            dragConstraints={{ left: 0, right: containerWidth > 0 ? containerWidth - 56 : 0 }}
-                                            dragElastic={0.05}
-                                            onDragEnd={handleDragEnd}
-                                            style={{ x }}
-                                            className={`absolute left-1 w-12 h-12 bg-white rounded-full z-10 flex items-center justify-center shadow-md border border-slate-100 ${disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'}`}
-                                        >
-                                            <ChevronRight className="w-5 h-5 text-slate-800" />
-                                        </motion.div>
-                                    )}
-                                    {isAuthLoading && (
-                                        <div className="absolute right-1 w-12 h-12 bg-white rounded-full z-10 flex items-center justify-center shadow-md border border-slate-100">
+                                    <div dir="ltr" ref={containerRef} className="relative w-full h-14 bg-slate-50 rounded-full overflow-hidden flex items-center justify-center border border-slate-200 mt-4 touch-none">
+                                        <motion.div style={{ background }} className="absolute inset-0 z-0" />
+                                        <span className="text-slate-400 font-medium z-0 select-none text-sm tracking-wider uppercase pointer-events-none">
+                                            {isAuthLoading ? 'Unlocking...' : 'Slide to unlock'}
+                                        </span>
+                                        
+                                        {!isAuthLoading && (
                                             <motion.div
-                                                animate={{ rotate: 360 }}
-                                                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                                                className="w-5 h-5 border-2 border-slate-200 border-t-slate-800 rounded-full"
-                                            />
-                                        </div>
-                                    )}
-                                </div>
+                                                drag={disabled ? false : "x"}
+                                                dragConstraints={{ left: 0, right: containerWidth > 0 ? containerWidth - 56 : 0 }}
+                                                dragElastic={0.05}
+                                                onDragEnd={handleDragEnd}
+                                                style={{ x }}
+                                                className={`absolute left-1 w-12 h-12 bg-white rounded-full z-10 flex items-center justify-center shadow-md border border-slate-100 touch-none ${disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'}`}
+                                            >
+                                                <ChevronRight className="w-5 h-5 text-slate-800 pointer-events-none" />
+                                            </motion.div>
+                                        )}
+                                        {isAuthLoading && (
+                                            <div className="absolute right-1 w-12 h-12 bg-white rounded-full z-10 flex items-center justify-center shadow-md border border-slate-100">
+                                                <motion.div
+                                                    animate={{ rotate: 360 }}
+                                                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                                                    className="w-5 h-5 border-2 border-slate-200 border-t-slate-800 rounded-full"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                             </form>
                         </div>
                     </div>

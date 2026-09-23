@@ -34,3 +34,5 @@ body {
     scrollbar-width: none;
   }
 }
+
+body { overflow-x: hidden; }
