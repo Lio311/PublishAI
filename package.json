@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "seed": "tsx src/services/db/seed.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.57",

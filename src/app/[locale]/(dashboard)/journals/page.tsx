@@ -1,14 +1,90 @@
 import { db } from "@/services/db";
-import { journals } from "@/services/db/schema";
-import { Book, ExternalLink } from "lucide-react";
+import { journals, journalCitationRules, journalArticleTypes, journalAbstractRules, journalCoverLetterRules } from "@/services/db/schema";
+import { eq } from "drizzle-orm";
+import { Book, ExternalLink, FileText, Quote, List, Mail, CheckCircle, XCircle, Shield, Sparkles } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { checkIsAdmin } from "@/services/auth-utils";
 import AddJournalButton from "@/components/journals/AddJournalButton";
 
+type JournalWithRelations = {
+  journal: typeof journals.$inferSelect;
+  citationRules: (typeof journalCitationRules.$inferSelect) | null;
+  articleTypes: (typeof journalArticleTypes.$inferSelect)[];
+  abstractRules: (typeof journalAbstractRules.$inferSelect) | null;
+  coverLetterRules: (typeof journalCoverLetterRules.$inferSelect) | null;
+};
+
+async function getJournalsWithRelations(): Promise<JournalWithRelations[]> {
+  const allJournals = await db.select().from(journals);
+  
+  const enriched: JournalWithRelations[] = await Promise.all(
+    allJournals.map(async (journal) => {
+      const [citationRule] = await db.select().from(journalCitationRules).where(eq(journalCitationRules.journalId, journal.id));
+      const articleTypesList = await db.select().from(journalArticleTypes).where(eq(journalArticleTypes.journalId, journal.id));
+      const [abstractRule] = await db.select().from(journalAbstractRules).where(eq(journalAbstractRules.journalId, journal.id));
+      const [coverLetterRule] = await db.select().from(journalCoverLetterRules).where(eq(journalCoverLetterRules.journalId, journal.id));
+      
+      return {
+        journal,
+        citationRules: citationRule || null,
+        articleTypes: articleTypesList,
+        abstractRules: abstractRule || null,
+        coverLetterRules: coverLetterRule || null,
+      };
+    })
+  );
+  
+  return enriched;
+}
+
+function DataSourceBadge({ source, isHe }: { source: string | null; isHe: boolean }) {
+  if (source === "official-website") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+        <Shield className="w-3 h-3" />
+        {isHe ? 'מאומת' : 'Verified'}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+      <Sparkles className="w-3 h-3" />
+      {isHe ? 'AI' : 'AI-generated'}
+    </span>
+  );
+}
+
+function CoverLetterStatus({ rules, isHe }: { rules: JournalWithRelations['coverLetterRules']; isHe: boolean }) {
+  if (!rules) {
+    return <span className="text-slate-400">{isHe ? 'לא ידוע' : 'Unknown'}</span>;
+  }
+  if (rules.required) {
+    return (
+      <span className="inline-flex items-center gap-1 text-red-600 font-medium">
+        <CheckCircle className="w-3.5 h-3.5" />
+        {isHe ? 'חובה' : 'Required'}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 text-slate-500">
+      <XCircle className="w-3.5 h-3.5" />
+      {isHe ? 'אופציונלי' : 'Optional'}
+    </span>
+  );
+}
+
+const IN_TEXT_FORMAT_LABELS: Record<string, { en: string; he: string }> = {
+  "superscript": { en: "Superscript¹", he: "superscript¹" },
+  "brackets": { en: "Brackets [1]", he: "סוגריים [1]" },
+  "parentheses": { en: "Parentheses (1)", he: "סוגריים (1)" },
+  "italic-parentheses": { en: "Italic (1)", he: "סוגריים נטויים (1)" },
+};
+
 export default async function JournalsPage({ params }: { params: Promise<{ locale: string }> | { locale: string } }) {
   const resolvedParams = await params;
   const locale = resolvedParams.locale;
-  const allJournals = await db.select().from(journals);
+  const allJournals = await getJournalsWithRelations();
   const isAdmin = await checkIsAdmin();
 
   const isHe = locale === 'he';
@@ -24,33 +100,124 @@ export default async function JournalsPage({ params }: { params: Promise<{ local
         <AddJournalButton />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {allJournals.map(journal => (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {allJournals.map(({ journal, citationRules, articleTypes, abstractRules, coverLetterRules }) => (
           <div key={journal.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-            <div className="p-6 flex-1">
-              <div className="w-12 h-12 bg-sky-50 rounded-lg flex items-center justify-center mb-4 text-sky-500">
-                <Book className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-1">{journal.name}</h3>
-              <p className="text-sm text-slate-500 mb-4">{journal.field}</p>
-              
-              <div className="space-y-2 text-sm text-slate-700">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">{isHe ? 'מגבלת מילים:' : 'Word Limit:'}</span>
-                  <span className="font-medium">{journal.wordLimit || (isHe ? 'ללא' : 'None')}</span>
+            {/* Header */}
+            <div className="p-6 pb-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-sky-50 rounded-lg flex items-center justify-center text-sky-500">
+                    <Book className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900">{journal.name}</h3>
+                    <p className="text-sm text-slate-500">{journal.field}</p>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">{isHe ? 'מגבלת תקציר:' : 'Abstract Limit:'}</span>
-                  <span className="font-medium">{journal.abstractLimit || (isHe ? 'ללא' : 'None')}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">{isHe ? 'סגנון ציטוט:' : 'Citation Style:'}</span>
-                  <span className="font-medium">{journal.citationStyle || (isHe ? 'ברירת מחדל' : 'Default')}</span>
-                </div>
+                <DataSourceBadge source={journal.dataSource} isHe={isHe} />
               </div>
             </div>
+
+            {/* Main Data Grid */}
+            <div className="px-6 pb-4 space-y-4">
+              {/* Citation & Abstract Row */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Citation Style */}
+                <div className="bg-slate-50 rounded-lg p-3">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Quote className="w-4 h-4 text-slate-400" />
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      {isHe ? 'ציטוט' : 'Citation'}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-slate-800">
+                    {citationRules?.styleName || journal.citationStyle || (isHe ? 'ברירת מחדל' : 'Default')}
+                  </p>
+                  {citationRules && (
+                    <p className="text-xs text-slate-500 mt-1">
+                      {IN_TEXT_FORMAT_LABELS[citationRules.inTextFormat]?.[isHe ? 'he' : 'en'] || citationRules.inTextFormat}
+                      {citationRules.etAlThreshold && ` · et al. >${citationRules.etAlThreshold}`}
+                    </p>
+                  )}
+                </div>
+
+                {/* Abstract */}
+                <div className="bg-slate-50 rounded-lg p-3">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <FileText className="w-4 h-4 text-slate-400" />
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      {isHe ? 'תקציר' : 'Abstract'}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-slate-800">
+                    {abstractRules?.defaultWordLimit || journal.abstractLimit || '—'} {isHe ? 'מילים' : 'words'}
+                  </p>
+                  {abstractRules && (
+                    <p className="text-xs text-slate-500 mt-1">
+                      {abstractRules.abstractType === 'structured' 
+                        ? (isHe ? 'מובנה' : 'Structured')
+                        : (isHe ? 'לא מובנה' : 'Unstructured')}
+                      {abstractRules.label !== 'Abstract' && ` · "${abstractRules.label}"`}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Article Types */}
+              {articleTypes.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <List className="w-4 h-4 text-slate-400" />
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      {isHe ? 'סוגי מאמרים' : 'Article Types'}
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {articleTypes.slice(0, 4).map((at) => (
+                      <div key={at.id} className="flex items-center justify-between text-sm">
+                        <span className={`${at.isPrimary ? 'font-medium text-slate-800' : 'text-slate-600'}`}>
+                          {at.isPrimary && '★ '}{at.typeName}
+                        </span>
+                        <span className="text-xs text-slate-500 tabular-nums">
+                          {at.wordLimit ? `${at.wordLimit.toLocaleString()} ${isHe ? 'מ' : 'w'}` : (isHe ? 'ללא מגבלה' : 'No limit')}
+                          {at.displayItemsLimit && ` · ${at.displayItemsLimit} ${isHe ? 'איורים' : 'figs'}`}
+                          {at.referencesLimit && ` · ${at.referencesLimit} ${isHe ? 'מקורות' : 'refs'}`}
+                        </span>
+                      </div>
+                    ))}
+                    {articleTypes.length > 4 && (
+                      <p className="text-xs text-slate-400">+{articleTypes.length - 4} {isHe ? 'נוספים' : 'more'}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Cover Letter */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Mail className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    {isHe ? 'מכתב נלווה' : 'Cover Letter'}
+                  </span>
+                </div>
+                <CoverLetterStatus rules={coverLetterRules} isHe={isHe} />
+              </div>
+
+              {/* Fallback: basic data if no enrichment */}
+              {articleTypes.length === 0 && (
+                <div className="space-y-2 text-sm text-slate-700">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">{isHe ? 'מגבלת מילים:' : 'Word Limit:'}</span>
+                    <span className="font-medium">{journal.wordLimit || (isHe ? 'ללא' : 'None')}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
             {journal.instructionsUrl && (
-              <div className="px-6 py-3 bg-slate-50 border-t border-slate-100">
+              <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 mt-auto">
                 <a 
                   href={journal.instructionsUrl} 
                   target="_blank" 
