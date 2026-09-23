@@ -16,8 +16,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   }),
   providers: [
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      clientId: process.env.AUTH_GOOGLE_ID || "missing-google-id",
+      clientSecret: process.env.AUTH_GOOGLE_SECRET || "missing-google-secret",
     }),
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID || "mock-github-client-id",
@@ -38,6 +38,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
     })
   ],
+  debug: true,
   session: {
     strategy: "jwt",
   },
