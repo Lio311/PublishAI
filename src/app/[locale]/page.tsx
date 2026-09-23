@@ -31,7 +31,7 @@ export default async function Home({
 
   if (!userId) {
     // Not authenticated. Let GlobalPasswordProtection handle the UI.
-    return null;
+    redirect(`/${locale}/login`);
   }
 
   const t = await getTranslations("Dashboard");
