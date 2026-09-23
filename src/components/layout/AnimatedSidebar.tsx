@@ -59,7 +59,7 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
           {onClose && (
             <button 
               onClick={onClose}
-              className="md:hidden absolute start-0 p-2 bg-slate-100 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors z-10"
+              className="md:hidden absolute end-0 p-2 bg-slate-100 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors z-10"
             >
               <X size={20} />
             </button>
