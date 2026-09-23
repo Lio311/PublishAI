@@ -16,7 +16,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
     const x = useMotionValue(0);
     const background = useTransform(
         x,
-        [0, containerWidth > 0 ? containerWidth - 56 : 0],
+        [0, Math.max(1, containerWidth - 56)],
         ['rgba(0, 0, 0, 0.02)', 'rgba(0, 0, 0, 0.1)']
     );
 
@@ -84,7 +84,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
                 <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-slate-200 rounded-full mix-blend-multiply filter blur-[120px] opacity-40"></div>
                 
                 <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 1, y: 0 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                     className="z-10 w-full max-w-md p-8"
