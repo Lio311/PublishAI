@@ -4,12 +4,17 @@ import { eq, desc } from "drizzle-orm";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Brain, User, Book, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { checkIsAdmin } from "@/services/auth-utils";
+import { redirect } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
 
 export default async function AILearningPage({ params }: { params: { locale: string } }) {
   const isAdmin = await checkIsAdmin();
   const locale = params.locale;
+  if (!isAdmin) {
+    redirect(`/${locale}`);
+  }
+  
   const isHe = locale === "he";
 
   // Fetch all learning rules (Ideally with joins for user email and journal name)
