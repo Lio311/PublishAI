@@ -116,10 +116,6 @@ export default function GlobalPasswordProtection({ children }: { children: React
 
     useEffect(() => {
         setMounted(true);
-        if (process.env.NEXT_PUBLIC_E2E_TEST === 'true') {
-            setIsAuthenticated(true);
-            return;
-        }
 
         const auth = sessionStorage.getItem('publishai_global_auth');
         if (auth === 'true') {

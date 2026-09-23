@@ -29,26 +29,23 @@ export default async function Home({
     redirect("/api/auth/clear-session");
   }
 
-  if (!userId) {
-    // Not authenticated. Let GlobalPasswordProtection handle the UI.
-    redirect(`/${locale}/login`);
-  }
-
   const t = await getTranslations("Dashboard");
 
-  // Fetch real data from the database
-  const allPapers = await db
-    .select({
-      id: papers.id,
-      title: papers.title,
-      status: papers.status,
-      createdAt: papers.createdAt,
-      journalName: journals.name
-    })
-    .from(papers)
-    .leftJoin(journals, eq(papers.targetJournalId, journals.id))
-    .where(eq(papers.userId, userId))
-    .orderBy(desc(papers.createdAt));
+  // Fetch real data from the database (only if authenticated)
+  const allPapers = userId
+    ? await db
+        .select({
+          id: papers.id,
+          title: papers.title,
+          status: papers.status,
+          createdAt: papers.createdAt,
+          journalName: journals.name
+        })
+        .from(papers)
+        .leftJoin(journals, eq(papers.targetJournalId, journals.id))
+        .where(eq(papers.userId, userId))
+        .orderBy(desc(papers.createdAt))
+    : [];
 
   // Calculate real stats
   const inProgressCount = allPapers.filter(
