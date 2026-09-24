@@ -140,6 +140,18 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     en: "Real-time bi-directional communication protocol used to stream live screenshots and receive instant user interventions during RPA roadblocks.",
     he: "פרוטוקול תקשורת דו-כיווני בזמן אמת המשמש להזרמת צילומי מסך חיים וקבלת התערבות מיידית מהמשתמש בעת חסימות בתהליך ה-RPA."
   },
+  "Editorial Manager RPA": {
+    en: "Vision AI and Playwright-based browser automation adapter for Editorial Manager.",
+    he: "אדפטר מבוסס Vision AI ו-Playwright לאוטומציית דפדפן מלאה במערכת Editorial Manager."
+  },
+  "ScholarOne RPA": {
+    en: "Playwright-based automation adapter targeting Clarivate's ScholarOne portal.",
+    he: "אדפטר מבוסס Playwright המכוון לאוטומציה בפורטל ScholarOne של Clarivate."
+  },
+  "eJournalPress RPA": {
+    en: "Playwright-based automation adapter targeting the eJournalPress platform.",
+    he: "אדפטר מבוסס Playwright המכוון לאוטומציה בפלטפורמת eJournalPress."
+  },
 };
 
 const PHASES = [
@@ -359,7 +371,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are a secure Web Automation Navigation Agent.\nTASK: Access the target journal submission platform.\n1. Safely retrieve encrypted user credentials from the database.\n2. Navigate the headless browser to the journal's login endpoint.\n3. Identify DOM elements for username, password, and submit button.\n4. Execute login, handle cookies, and navigate to the 'New Submission' dashboard.\nOUTPUT: Navigation success state or explicit error for invalid credentials.", 
       he: "מערכת: אתה סוכן אוטומציית ניווט מאובטח.\nמשימה: גש למערכת ההגשות של העיתון.\n1. שלוף בבטחה את פרטי ההזדהות המוצפנים של המשתמש מהמסד.\n2. נווט בדפדפן הנסתר לעמוד ההתחברות של העיתון.\n3. זהה אלמנטים ב-DOM להזנת שם משתמש, סיסמה ולחיצה על התחברות.\n4. בצע התחברות, שמור עוגיות (Cookies) ונווט למסך 'הגשה חדשה'.\nפלט: סטטוס הצלחת ניווט או שגיאה מפורשת על פרטים שגויים." 
     },
-    icon: Globe, tools: ["Playwright", "Node.js", "Vision AI"],
+    icon: Globe, tools: ["Playwright", "Node.js", "Vision AI", "Editorial Manager RPA", "ScholarOne RPA", "eJournalPress RPA"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {

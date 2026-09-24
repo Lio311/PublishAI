@@ -1,17 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from guardrails import Guard
-from guardrails.hub import PIIFilter
 from validators import SafeCodeExecution
 
 app = FastAPI()
 
 safe_code_guard = Guard().use(SafeCodeExecution, on_fail="exception")
-pii_guard = Guard().use(
-    PIIFilter, 
-    piis=["EMAIL_ADDRESS", "PHONE_NUMBER", "CREDIT_CARD", "US_SSN"],
-    on_fail="exception"
-)
 
 class ValidationRequest(BaseModel):
     content: str
@@ -25,9 +19,7 @@ class ValidationResponse(BaseModel):
 @app.post("/validate", response_model=ValidationResponse)
 async def validate_content(req: ValidationRequest):
     try:
-        if req.action == "pii_check":
-            result = pii_guard.validate(req.content)
-        elif req.action == "code_execution":
+        if req.action == "code_execution":
             result = safe_code_guard.validate(req.content)
         else:
             raise HTTPException(status_code=400, detail="Invalid action")
