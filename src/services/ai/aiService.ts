@@ -97,13 +97,13 @@ export async function callLLM(options: GenerateTextOptions): Promise<AIResponse>
 
   const trace = langfuse.trace({
     name: "callLLM",
-    input: { prompt: options.prompt, system: options.systemPrompt },
+    input: options.prompt,
   });
 
   const generation = trace.generation({
     name: "openai-generation",
     model: modelName,
-    prompt: { prompt: options.prompt, system: options.systemPrompt },
+    input: options.prompt,
   });
 
   const result = await generateText({

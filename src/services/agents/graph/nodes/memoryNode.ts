@@ -9,12 +9,12 @@ export const retrieveMemoryNode = async (state: PublishAIState): Promise<Partial
   }
 
   try {
-    const searchResults = await memoryClient.search(lastMessage.content, {
-      user_id: state.userId,
-      limit: 5,
-    });
+    const searchResponse = await memoryClient.search(lastMessage.content, {
+      userId: state.userId,
+      topK: 5,
+    } as any);
 
-    const memoryContext = searchResults
+    const memoryContext = searchResponse.results
       .map((result: any) => `- ${result.memory}`)
       .join("\n");
 
@@ -38,7 +38,7 @@ export const updateMemoryNode = async (state: PublishAIState): Promise<Partial<P
       { role: "user", content: userMessage.content as string },
       { role: "assistant", content: aiMessage.content as string }
     ], {
-      user_id: state.userId
+      userId: state.userId
     });
   } catch (e) {
     console.warn("Mem0 update failed", e);
