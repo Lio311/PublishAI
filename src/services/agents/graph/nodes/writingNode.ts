@@ -8,7 +8,12 @@ export const writingNode = async (state: PublishAIState): Promise<Partial<Publis
   const reviewResult = state.previousStageOutputs.get("scientific_review");
   const review = reviewResult?.output || "";
   
-  const prompt = `Rewrite the text to elevate the academic tone, address the following review feedback, and remove any generic AI-sounding phrases.\n\nReview:\n${review}\n\nManuscript provided between <manuscript> tags:\n<manuscript>\n${state.documentContent}\n</manuscript>`;
+  let memoryStr = "";
+  if (state.memoryContext) {
+    memoryStr = `\n\nAdditional context about the user's preferences:\n${state.memoryContext}`;
+  }
+
+  const prompt = `Rewrite the text to elevate the academic tone, address the following review feedback, and remove any generic AI-sounding phrases.\n\nReview:\n${review}${memoryStr}\n\nManuscript provided between <manuscript> tags:\n<manuscript>\n${state.documentContent}\n</manuscript>`;
   
   const { text, tokensUsed } = await askClaude(prompt, model);
   

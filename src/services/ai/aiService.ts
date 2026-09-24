@@ -2,6 +2,7 @@ import { generateText, generateObject, streamText } from "ai";
 export { generateText, generateObject, streamText } from "ai";
 import { createOpenAI, openai } from "@ai-sdk/openai";
 import Anthropic from "@anthropic-ai/sdk";
+import { langfuse } from "@/lib/langfuse";
 import { getApplicableRules, extractUserRewriteFeedback } from "@/services/learningService";
 import {
   AIProvider,
@@ -94,12 +95,34 @@ export async function callLLM(options: GenerateTextOptions): Promise<AIResponse>
   const modelName = (options.model as string) || DEFAULT_OPENAI_MODEL;
   const modelInstance = getOpenAIModelInstance(modelName, options.apiKey);
 
+  const trace = langfuse.trace({
+    name: "callLLM",
+    input: { prompt: options.prompt, system: options.systemPrompt },
+  });
+
+  const generation = trace.generation({
+    name: "openai-generation",
+    model: modelName,
+    prompt: { prompt: options.prompt, system: options.systemPrompt },
+  });
+
   const result = await generateText({
     model: modelInstance,
     prompt: options.prompt,
     system: options.systemPrompt,
     temperature: options.temperature,
   });
+
+  generation.end({
+    output: result.text,
+    usage: {
+      promptTokens: ((result.usage as any))?.promptTokens,
+      completionTokens: ((result.usage as any))?.completionTokens,
+      totalTokens: ((result.usage as any))?.totalTokens,
+    },
+  });
+
+  await langfuse.flushAsync();
 
   return {
     text: result.text,

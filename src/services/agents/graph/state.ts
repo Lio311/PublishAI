@@ -31,6 +31,14 @@ export const PublishAIStateAnnotation = Annotation.Root({
     reducer: (x, y) => y ?? x,
     default: () => "",
   }),
+  userId: Annotation<string>({
+    reducer: (x, y) => y ?? x,
+    default: () => "default_user",
+  }),
+  memoryContext: Annotation<string>({
+    reducer: (x, y) => y ?? x,
+    default: () => "",
+  }),
 });
 
 export type PublishAIState = typeof PublishAIStateAnnotation.State;
