@@ -108,7 +108,7 @@ function FlowArrow({ isHe, reverse = false, label }: { isHe: boolean; reverse?: 
   const pointsLeft = (isHe && !reverse) || (!isHe && reverse);
   
   return (
-    <div className="hidden lg:flex flex-1 items-center justify-center min-w-[30px] relative z-0">
+    <div className="hidden lg:flex flex-1 items-center justify-center min-w-[15px] relative z-0 shrink">
       <div className="w-full h-[3px] bg-slate-400 relative">
         {pointsLeft ? (
           <div className="absolute left-0 top-1/2 -translate-y-1/2 border-r-[10px] border-r-slate-400 border-y-[6px] border-y-transparent -translate-x-[1px]"></div>
@@ -168,7 +168,7 @@ function NodeCard({ titleEn, titleHe, descEn, descHe, icon: Icon, type, isHe, is
   }
 
   return (
-    <div className={`w-[175px] min-h-[110px] flex flex-col rounded-xl border-[3px] ${s.border} ${s.bg} p-2.5 shadow-md transition-all hover:shadow-lg hover:-translate-y-1 group shrink-0 relative z-10 bg-opacity-95`}>
+    <div className={`w-full max-w-[175px] min-w-[130px] shrink flex-1 min-h-[110px] flex flex-col rounded-xl border-[3px] ${s.border} ${s.bg} p-2 shadow-md transition-all hover:shadow-lg hover:-translate-y-1 group relative z-10 bg-opacity-95`}>
       <div className={`w-10 h-10 rounded-lg ${s.iconBg} flex items-center justify-center mb-2 shadow-sm shrink-0`}>
         <Icon className={`w-5 h-5 ${s.iconColor}`} />
       </div>
