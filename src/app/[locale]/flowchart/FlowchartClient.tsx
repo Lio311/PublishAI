@@ -90,6 +90,10 @@ const techColors: Record<string, string> = {
   'Sharp': 'bg-pink-100 text-pink-800 border-pink-300',
   'Pandas': 'bg-blue-100 text-blue-800 border-blue-300',
   'Scipy': 'bg-indigo-100 text-indigo-800 border-indigo-300',
+  'Langfuse': 'bg-orange-100 text-orange-800 border-orange-300',
+  'Tiptap': 'bg-zinc-100 text-zinc-800 border-zinc-300',
+  'Drizzle ORM': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+  'MCP': 'bg-purple-100 text-purple-800 border-purple-300',
 };
 
 // ═══════════════════════════════════════════
@@ -351,7 +355,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="infra" icon={FileText} isHe={isHe} titleEn="Metadata" titleHe="מטא-דאטה" descEn="Extract Authors, Keywords, Abstract" descHe="חילוץ מחברים, מילות מפתח, תקציר" techs={['Claude 3.7', 'Zod']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} label={{ en: 'JSON', he: 'JSON' }} />
-                <NodeCard type="db" icon={Database} isHe={isHe} titleEn="Database" titleHe="מסד נתונים" descEn="Save initial record. Return ID." descHe="שמירת רשומה. החזרת מזהה." techs={['Neon Postgres']} />
+                <NodeCard type="db" icon={Database} isHe={isHe} titleEn="Database" titleHe="מסד נתונים" descEn="Save initial record. Return ID." descHe="שמירת רשומה. החזרת מזהה." techs={['Drizzle ORM', 'Neon Postgres']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Queue" titleHe="תור משימות" descEn="Fire event: 'paper/uploaded'" descHe="הפעלת אירוע 'מאמר הועלה'" techs={['Inngest']} />
@@ -381,7 +385,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="agent" icon={FileText} isHe={isHe} titleEn="Planning" titleHe="סוכן תכנון" descEn="GraphRAG -> Journal Trends -> DAG Plan" descHe="מושך טרנדים מ-GraphRAG ובונה תוכנית" techs={['GraphRAG', 'pgvector']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={Search} isHe={isHe} titleEn="Knowledge" titleHe="סוכן ידע" descEn="arXiv / PubMed searches for literature." descHe="שאיבת ספרות מ-PubMed ו-arXiv." techs={['PubMed API', 'arXiv API']} />
+                <NodeCard type="agent" icon={Search} isHe={isHe} titleEn="Knowledge" titleHe="סוכן ידע" descEn="arXiv / PubMed searches for literature." descHe="שאיבת ספרות מ-PubMed ו-arXiv." techs={['MCP', 'PubMed API', 'arXiv API']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="agent" icon={MessageSquare} isHe={isHe} titleEn="SciReview" titleHe="עימות סוקרים" descEn="Harsh (Claude) + Analyst (GPT-4o) + Optimist" descHe="ביקורת רב-מודלית (Claude, GPT-4o, Gemini)" techs={['GPT-4o-mini', 'Gemini 1.5 Pro']} />
@@ -443,7 +447,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             </div>
             <div className="p-6 md:p-10 flex flex-col items-center w-full relative z-10">
               
-              <NodeCard type="user" icon={User} isHe={isHe} titleEn="Approve" titleHe="אישור והגשה" descEn="User reviews final paper and clicks 'Approve & Submit'" descHe="המשתמש סוקר את המאמר ולוחץ 'אשר והגש'" techs={['Next.js 16', 'NextAuth.js']} />
+              <NodeCard type="user" icon={User} isHe={isHe} titleEn="Approve" titleHe="אישור והגשה" descEn="User reviews final paper and clicks 'Approve & Submit'" descHe="המשתמש סוקר את המאמר ולוחץ 'אשר והגש'" techs={['Next.js 16', 'Tiptap', 'NextAuth.js']} />
               
               <VerticalFlowArrow isHe={isHe} length="h-8" />
               
@@ -621,7 +625,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             </div>
             <div className="p-6 md:p-10 flex flex-col items-center w-full relative z-10">
               <div className="flex flex-col lg:flex-row justify-between items-center w-full relative">
-                <NodeCard type="infra" icon={Globe} isHe={isHe} titleEn="CMS Publish" titleHe="פרסום באתר" descEn="Auto-publish to Lab's WordPress" descHe="פרסום אוטומטי באתר המעבדה" techs={['WordPress API']} />
+                <NodeCard type="infra" icon={Globe} isHe={isHe} titleEn="CMS Publish" titleHe="פרסום באתר" descEn="Auto-publish to Lab's WordPress" descHe="פרסום אוטומטי באתר המעבדה" techs={['MCP', 'WordPress API']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="agent" icon={Activity} isHe={isHe} titleEn="Performance Tracking" titleHe="מעקב ביצועים" descEn="Track citations and journal metrics" descHe="מעקב אחר ציטוטים ומדדי כתב עת" techs={['pgvector']} />
@@ -630,7 +634,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="user" icon={User} isHe={isHe} titleEn="Human Feedback" titleHe="משוב אנושי" descEn="Rate agent decisions via RLHF Dashboard" descHe="דירוג החלטות הסוכנים בממשק RLHF" techs={['RLHF']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="db" icon={Brain} isHe={isHe} titleEn="Telemetry & Learning" titleHe="טלמטריה ולמידה" descEn="Process outcomes & export RLHF dataset" descHe="למידה מתוצאות וייצוא נתוני RLHF למודל" techs={['Inngest', 'RLHF', 'Neon Postgres']} />
+                <NodeCard type="db" icon={Brain} isHe={isHe} titleEn="Telemetry & Learning" titleHe="טלמטריה ולמידה" descEn="Process outcomes & export RLHF dataset" descHe="למידה מתוצאות וייצוא נתוני RLHF למודל" techs={['Inngest', 'Langfuse', 'RLHF', 'Neon Postgres']} />
               </div>
             </div>
           </div>
