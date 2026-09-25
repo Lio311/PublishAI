@@ -470,9 +470,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
               <div className="w-full p-4 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-t-xl relative">
                 <h2 className="text-xl font-bold">{isHe ? 'שלב 4B: נתיב RPA אוטונומי' : 'Phase 4B: Autonomous RPA Bot'}</h2>
                 <p className="text-sm opacity-90">{isHe ? 'מופעל כגיבוי או כשאין API זמין' : 'Fallback when no API / no credentials'}</p>
-                {/* Arrow coming from missing creds */}
-                <div className="hidden lg:block absolute -left-[14px] top-1/2 w-4 border-b-[3px] border-slate-400"></div>
-                <div className="hidden lg:block absolute -left-[12px] top-[calc(50%-4px)] border-l-[8px] border-l-slate-400 border-y-[5px] border-y-transparent z-20"></div>
+
               </div>
               <div className="p-6 md:p-8 flex flex-col items-center">
                 <NodeCard type="rpa" icon={Bot} isHe={isHe} titleEn="GenericNavigator" titleHe="נווט גנרי" descEn="Launch headless Chromium & load portal" descHe="הפעלת דפדפן ללא ראש וטעינת הפורטל" techs={['Playwright']} />
