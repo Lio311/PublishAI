@@ -3,23 +3,26 @@
 import React, { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
-export default function JournalPerformanceChart() {
+export default function JournalPerformanceChart({ journalId = 1 }: { journalId?: number }) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // In a real app, this would fetch an aggregated API of all journals, or loop them
-  // Here we'll simulate fetching for some known journals or a dedicated endpoint.
   useEffect(() => {
-    // Mocking an aggregated fetch for the chart
-    setData([
-      { name: 'Nature', accepted: 40, rejected: 24, revision: 20 },
-      { name: 'Science', accepted: 30, rejected: 13, revision: 22 },
-      { name: 'Cell', accepted: 20, rejected: 50, revision: 10 }
-    ]);
-    setLoading(false);
-  }, []);
+    fetch(`/api/rlhf/analytics/journal/${journalId}`)
+      .then(res => res.json())
+      .then(json => {
+        setData(json.timeline || []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch journal analytics timeline:", err);
+        setLoading(false);
+      });
+  }, [journalId]);
 
   if (loading) return <p>Loading chart...</p>;
+
+  if (data.length === 0) return <p>No data available for this journal.</p>;
 
   return (
     <div className="h-80 w-full">
@@ -34,7 +37,7 @@ export default function JournalPerformanceChart() {
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis dataKey="date" />
           <YAxis />
           <Tooltip />
           <Legend />

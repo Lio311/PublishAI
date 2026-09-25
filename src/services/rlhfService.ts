@@ -81,12 +81,41 @@ export async function getJournalAnalytics(journalId: number): Promise<any> {
 
   const total = stats.reduce((acc, curr) => acc + Number(curr.count), 0);
   
+  const timelineData = await db.select({
+    date: sql<string>`DATE(${rlhfFeedbackLogs.createdAt})`,
+    outcome: rlhfFeedbackLogs.outcome,
+    count: sql<number>`count(*)`
+  })
+  .from(rlhfFeedbackLogs)
+  .where(eq(rlhfFeedbackLogs.journalId, journalId))
+  .groupBy(sql`DATE(${rlhfFeedbackLogs.createdAt})`, rlhfFeedbackLogs.outcome)
+  .orderBy(sql`DATE(${rlhfFeedbackLogs.createdAt})`);
+
+  const timelineMap = new Map<string, any>();
+  for (const row of timelineData) {
+    if (!timelineMap.has(row.date)) {
+      timelineMap.set(row.date, { date: row.date, accepted: 0, rejected: 0, revision: 0, total: 0 });
+    }
+    const entry = timelineMap.get(row.date);
+    if (row.outcome === 'accepted') entry.accepted = Number(row.count);
+    if (row.outcome === 'rejected') entry.rejected = Number(row.count);
+    if (row.outcome === 'revision_required') entry.revision = Number(row.count);
+    entry.total += Number(row.count);
+    timelineMap.set(row.date, entry);
+  }
+
+  const timelineArray = Array.from(timelineMap.values()).map(entry => ({
+    ...entry,
+    successRate: entry.total > 0 ? ((entry.accepted / entry.total) * 100).toFixed(1) : 0
+  }));
+
   return {
     totalSubmissions: total,
     outcomes: stats.map(s => ({
       status: s.outcome,
       count: Number(s.count),
       percentage: total > 0 ? (Number(s.count) / total) * 100 : 0
-    }))
+    })),
+    timeline: timelineArray
   };
 }
