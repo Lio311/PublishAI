@@ -318,7 +318,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="queue" icon={Layers} isHe={isHe} titleEn="Vector & Graph Ingestion" titleHe="הטמעת ידע ורשת" descEn="Chunk to vectors & extract GraphRAG entities" descHe="קידוד וקטורי וחילוץ ישויות רשת ידע" techs={['Inngest', 'LangChain', 'Vercel AI SDK']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={BarChart2} isHe={isHe} titleEn="Sandbox & Vision" titleHe="ארגז חול וראייה" descEn="Python execution & Vision AI" descHe="הרצת פייתון וניתוח איורים" techs={['E2B Sandbox', 'Vision AI']} />
+                <NodeCard type="agent" icon={BarChart2} isHe={isHe} titleEn="Data & Vision Validation" titleHe="אימות נתונים וראייה" descEn="Validate graphs vs Excel using Python" descHe="אימות סטטיסטי בין גרפים לאקסל" techs={['E2B Sandbox', 'Vision AI']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="user" icon={Search} isHe={isHe} titleEn="GraphRAG Analytics" titleHe="ניתוח Knowledge Graph" descEn="Network graph & entity analytics" descHe="תצוגת רשת וניתוח ישויות מתקדם" techs={['GraphRAG', 'pgvector']} />
