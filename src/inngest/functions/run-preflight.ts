@@ -13,13 +13,21 @@ export const runPreflightCheck = inngest.createFunction(
       
       try {
         // Install dependencies if provided
+        // Sanitize dependencies
         if (dependencies && dependencies.length > 0) {
-          await sandbox.commands.run(`pip install ${dependencies.join(' ')}`);
+          const safeDeps = dependencies.filter((d: string) => /^[a-zA-Z0-9_.-]+$/.test(d));
+          if (safeDeps.length > 0) {
+            await sandbox.commands.run(`pip install ${safeDeps.join(" ")}`);
+          }
         }
         
         // Download and write datasets if provided
         if (datasets && datasets.length > 0) {
           for (const dataset of datasets) {
+            const parsedUrl = new URL(dataset.url);
+            if (parsedUrl.protocol !== "https:" || parsedUrl.hostname === "localhost" || parsedUrl.hostname.startsWith("127.") || parsedUrl.hostname.startsWith("169.254.") || parsedUrl.hostname.startsWith("10.") || parsedUrl.hostname.startsWith("192.168.")) {
+              throw new Error("Invalid URL");
+            }
             const response = await fetch(dataset.url);
             const arrayBuffer = await response.arrayBuffer();
             await sandbox.files.write(dataset.filename, arrayBuffer);

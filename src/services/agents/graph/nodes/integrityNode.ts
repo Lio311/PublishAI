@@ -35,9 +35,10 @@ export async function integrityNode(state: any) {
 }
 
 // Helper to simulate a score based on text length/content for demonstration
-function generateSimulatedScore(text: string, type: 'plagiarism' | 'ai'): number {
+function generateSimulatedScore(text: any, type: 'plagiarism' | 'ai'): number {
   // Return a deterministic mock score between 0 and 1
-  const hash = text.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const textStr = typeof text === 'string' ? text : JSON.stringify(text || "");
+  const hash = textStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const base = (hash % 100) / 100;
   
   if (type === 'plagiarism') {

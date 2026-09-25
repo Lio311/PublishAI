@@ -4,10 +4,10 @@ import { Pool } from "pg";
 import { PublishAIStateAnnotation, PublishAIState } from "./state";
 import { clarificationNode } from "./nodes/clarificationNode";
 import { planningNode } from "./nodes/planningNode";
-import { literatureNode } from "./nodes/literatureNode";
-import { executionNode } from "./nodes/executionNode";
+import { knowledgeNode } from "./nodes/knowledgeNode";
+import { dataValidationNode } from "./nodes/dataValidationNode";
 import { scientificReviewNode } from "./nodes/scientificReviewNode";
-import { draftNode } from "./nodes/draftNode";
+import { writingNode } from "./nodes/writingNode";
 import { editsNode } from "./nodes/editsNode";
 import { integrityNode } from "./nodes/integrityNode";
 import { qaNode } from "./nodes/qaNode";
@@ -41,10 +41,10 @@ const routeFromStart = (state: PublishAIState) => {
 const builder = new StateGraph(PublishAIStateAnnotation)
   .addNode("clarificationNode", clarificationNode)
   .addNode("planningNode", planningNode)
-  .addNode("literatureNode", literatureNode)
-  .addNode("executionNode", executionNode)
+  .addNode("knowledgeNode", knowledgeNode)
+  .addNode("dataValidationNode", dataValidationNode)
   .addNode("scientificReviewNode", scientificReviewNode)
-  .addNode("draftNode", draftNode)
+  .addNode("writingNode", writingNode)
   .addNode("editsNode", editsNode)
   .addNode("integrityNode", integrityNode)
   .addNode("qaNode", qaNode)
@@ -57,15 +57,15 @@ const builder = new StateGraph(PublishAIStateAnnotation)
   .addNode("cascadeNode", cascadeNode)
 
   .addConditionalEdges(START, routeFromStart)
-  .addEdge("cascadeNode", "executionNode")
-  .addEdge("rebuttalNode", "executionNode")
+  .addEdge("cascadeNode", "dataValidationNode")
+  .addEdge("rebuttalNode", "dataValidationNode")
   .addEdge("clarificationNode", "planningNode")
-  .addEdge("planningNode", "literatureNode")
-  .addEdge("literatureNode", "executionNode")
-  .addEdge("executionNode", "scientificReviewNode")
+  .addEdge("planningNode", "knowledgeNode")
+  .addEdge("knowledgeNode", "dataValidationNode")
+  .addEdge("dataValidationNode", "scientificReviewNode")
   .addEdge("scientificReviewNode", "retrieveMemoryNode")
-  .addEdge("retrieveMemoryNode", "draftNode")
-  .addEdge("draftNode", "guardrailsNode")
+  .addEdge("retrieveMemoryNode", "writingNode")
+  .addEdge("writingNode", "guardrailsNode")
   .addEdge("guardrailsNode", "editsNode")
   .addEdge("editsNode", "integrityNode")
   .addConditionalEdges("integrityNode", routeAfterIntegrity)

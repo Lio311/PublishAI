@@ -9,8 +9,16 @@ export const retrieveMemoryNode = async (state: PublishAIState): Promise<Partial
   }
 
   try {
-    const searchResponse = await mem0.search(lastMessage.content, {
-      user_id: state.userId,
+    // Sanitize user_id
+    const validUserId = state.userId.replace(/[^a-zA-Z0-9_-]/g, "") || "default_user";
+    
+    // Sanitize input to prevent prompt injection
+    let safeInput = String(lastMessage.content).replace(/<[^>]*>?/gm, "");
+    // Remove system prompt attempts
+    safeInput = safeInput.replace(/system prompt/ig, "").replace(/ignore previous instructions/ig, "");
+
+    const searchResponse = await mem0.search(safeInput, {
+      user_id: validUserId,
     } as any);
 
     const results = (searchResponse as any).results || searchResponse;
@@ -34,10 +42,13 @@ export const updateMemoryNode = async (state: PublishAIState): Promise<Partial<P
   const aiMessage = state.messages[messagesCount - 1];
 
   try {
+    // Sanitize user_id
+    const validUserId = state.userId.replace(/[^a-zA-Z0-9_-]/g, "") || "default_user";
+
     await mem0.add(
-      [{ role: "user", content: userMessage.content as string },
+      [{ role: "user", content: String(userMessage.content).replace(/<[^>]*>?/gm, "").replace(/system prompt/ig, "").replace(/ignore previous instructions/ig, "") },
        { role: "assistant", content: aiMessage.content as string }],
-      { user_id: state.userId } as any
+      { user_id: validUserId } as any
     );
   } catch (e) {
     console.warn("Mem0 update failed", e);

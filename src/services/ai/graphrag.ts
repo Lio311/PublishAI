@@ -91,10 +91,7 @@ export async function queryJournalTrends(journalId: number, topic: string) {
       inArray(rel.sourceEntityId, entityIds),
       inArray(rel.targetEntityId, entityIds)
     ),
-    with: {
-      source: true, // Assuming relation exists, or we just do simple join if not
-      target: true,
-    },
+
     limit: 10,
   });
   
