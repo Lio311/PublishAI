@@ -624,6 +624,24 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             </div>
           </div>
 
+          {/* ══════════════════════════════════
+               SCHEDULED TASKS (CRON)
+             ══════════════════════════════════ */}
+          <VerticalFlowArrow isHe={isHe} length="h-16" label={{ en: "Scheduled Background Jobs", he: "עבודות רקע מתוזמנות" }} />
+
+          <div className="w-full rounded-2xl overflow-visible shadow-lg border border-slate-300 bg-slate-50/40 mb-2">
+            <div className="w-full p-4 bg-gradient-to-r from-slate-600 to-slate-800 text-white rounded-t-xl">
+              <h2 className="text-xl font-bold">{isHe ? 'משימות רקע תקופתיות (Cron)' : 'Scheduled Background Tasks (Cron)'}</h2>
+            </div>
+            <div className="p-6 md:p-10 flex flex-col items-center w-full relative z-10">
+              <div className="flex flex-col lg:flex-row justify-center items-center w-full relative gap-8 lg:gap-16">
+                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Weekly RLHF Dataset" titleHe="איסוף נתוני RLHF" descEn="cron: '0 0 * * 0' (Sundays)" descHe="איסוף נתוני אימון שבועיים (ראשון בחצות)" techs={['Inngest', 'Neon Postgres']} />
+                
+                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Weekly Digest Email" titleHe="סיכום שבועי במייל" descEn="cron: '0 9 * * 1' (Mondays)" descHe="שליחת עדכונים שבועית (שני בבוקר)" techs={['Inngest', 'SMTP']} />
+              </div>
+            </div>
+          </div>
+
           <div className="mt-10 h-10 w-full" />
         </div>
       </div>

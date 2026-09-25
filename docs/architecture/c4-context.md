@@ -83,6 +83,8 @@ flowchart TD
     end
 
     User -->|"HTTPS / WSS"| WebFrontend
+    CronScheduler["Cron Scheduler<br>[Time Trigger]<br>Triggers weekly RLHF dataset generation and digest emails"]
+    CronScheduler -->|"Triggers scheduled jobs"| InngestEngine
     WebFrontend -->|"Server Actions & REST"| APILayer
     APILayer -->|"Triggers background workflows via events"| InngestEngine
     APILayer -->|"Uses Drizzle queries"| Drizzle
