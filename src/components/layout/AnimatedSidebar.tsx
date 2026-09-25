@@ -67,8 +67,8 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
         </button>
       )}
       
-      <div className="p-4 md:p-6 pt-8 md:pt-6 relative z-10 flex-1 flex flex-col min-h-0">
-        <div className="flex items-center justify-center mb-6 lg:mb-10 pt-2 shrink-0 relative">
+      <div className="p-4 md:p-6 pt-6 md:pt-4 relative z-10 flex-1 flex flex-col min-h-0">
+        <div className="flex items-center justify-center mb-4 lg:mb-6 pt-2 shrink-0 relative">
           <Image 
             src="/logo.png" 
             alt="PublishAI Logo" 
@@ -80,7 +80,7 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
         </div>
         
         <motion.nav 
-          className="space-y-1 lg:space-y-2 flex-1 overflow-y-auto scrollbar-hide min-h-0"
+          className="space-y-0.5 lg:space-y-1 flex-1 overflow-y-auto scrollbar-hide min-h-0"
           onMouseLeave={() => setHoveredIndex(null)}
         >
           {menuItems.map((item, index) => {
@@ -94,7 +94,7 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
               >
                 <Link
                   href={item.href}
-                  className={`relative flex items-center justify-between px-4 py-3.5 rounded-2xl font-medium transition-colors duration-300 z-10 ${
+                  className={`relative flex items-center justify-between px-4 py-2.5 rounded-2xl font-medium transition-colors duration-300 z-10 ${
                     isActive ? "text-sky-800" : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
@@ -139,11 +139,11 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
       </div>
 
       {/* Bottom Section */}
-      <div className="p-4 lg:p-6 relative z-10 shrink-0">
+      <div className="p-4 lg:px-6 lg:py-4 relative z-10 shrink-0">
         <div className="p-1.5 bg-slate-100/50 rounded-2xl border border-slate-200/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] backdrop-blur-md">
           <button 
             onClick={toggleLanguage}
-            className="flex w-full items-center justify-between px-4 py-3 rounded-xl font-medium text-slate-600 hover:bg-white hover:shadow-sm transition-all duration-300 group"
+            className="flex w-full items-center justify-between px-4 py-2 rounded-xl font-medium text-slate-600 hover:bg-white hover:shadow-sm transition-all duration-300 group"
           >
             <div className="flex items-center gap-3">
               <div className="p-1.5 rounded-lg bg-slate-200/50 group-hover:bg-sky-100 group-hover:text-sky-500 transition-colors">
@@ -158,7 +158,7 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
           {session ? (
             <button 
               onClick={() => signOut()} 
-              className="flex w-full items-center justify-between px-4 py-3 rounded-xl font-medium text-slate-600 hover:bg-white hover:text-red-600 hover:shadow-sm transition-all duration-300 group"
+              className="flex w-full items-center justify-between px-4 py-2 rounded-xl font-medium text-slate-600 hover:bg-white hover:text-red-600 hover:shadow-sm transition-all duration-300 group"
             >
               <div className="flex items-center gap-3">
                 <div className="p-1.5 rounded-lg bg-slate-200/50 group-hover:bg-red-50 group-hover:text-red-500 transition-colors">
@@ -170,7 +170,7 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
           ) : (
             <button 
               onClick={() => signIn()} 
-              className="flex w-full items-center justify-between px-4 py-3 rounded-xl font-medium text-slate-600 hover:bg-white hover:text-sky-600 hover:shadow-sm transition-all duration-300 group"
+              className="flex w-full items-center justify-between px-4 py-2 rounded-xl font-medium text-slate-600 hover:bg-white hover:text-sky-600 hover:shadow-sm transition-all duration-300 group"
             >
               <div className="flex items-center gap-3">
                 <div className="p-1.5 rounded-lg bg-slate-200/50 group-hover:bg-sky-100 group-hover:text-sky-500 transition-colors">
