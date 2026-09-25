@@ -88,6 +88,8 @@ const techColors: Record<string, string> = {
   'OpenAI': 'bg-emerald-100 text-emerald-800 border-emerald-300',
   'ExcelJS': 'bg-green-100 text-green-800 border-green-300',
   'Sharp': 'bg-pink-100 text-pink-800 border-pink-300',
+  'Pandas': 'bg-blue-100 text-blue-800 border-blue-300',
+  'Scipy': 'bg-indigo-100 text-indigo-800 border-indigo-300',
 };
 
 // ═══════════════════════════════════════════
@@ -318,7 +320,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="queue" icon={Layers} isHe={isHe} titleEn="Vector & Graph Ingestion" titleHe="הטמעת ידע ורשת" descEn="Chunk to vectors & extract GraphRAG entities" descHe="קידוד וקטורי וחילוץ ישויות רשת ידע" techs={['Inngest', 'LangChain', 'Vercel AI SDK']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={BarChart2} isHe={isHe} titleEn="Data & Vision Validation" titleHe="אימות נתונים וראייה" descEn="Validate graphs vs Excel using Python" descHe="אימות סטטיסטי בין גרפים לאקסל" techs={['E2B Sandbox', 'Vision AI']} />
+                <NodeCard type="agent" icon={BarChart2} isHe={isHe} titleEn="Data & Vision Validation" titleHe="אימות נתונים וראייה" descEn="Validate graphs vs Excel using Python" descHe="אימות סטטיסטי בין גרפים לאקסל" techs={['E2B Sandbox', 'Pandas', 'Scipy']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="user" icon={Search} isHe={isHe} titleEn="GraphRAG Analytics" titleHe="ניתוח Knowledge Graph" descEn="Network graph & entity analytics" descHe="תצוגת רשת וניתוח ישויות מתקדם" techs={['GraphRAG', 'pgvector']} />
