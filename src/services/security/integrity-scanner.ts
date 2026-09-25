@@ -1,8 +1,6 @@
-/**
- * Integrity Scanner
- * A heuristic-based service for detecting plagiarism and AI-generated content.
- * In a real production system, this would call APIs like Turnitin or Copyleaks.
- */
+import { generateObject } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { z } from 'zod';
 
 export interface IntegrityReport {
   plagiarismScore: number; // 0-100 (higher means more copied)
@@ -14,90 +12,49 @@ export interface IntegrityReport {
 
 export class IntegrityScanner {
   /**
-   * Scan text for plagiarism and AI footprint using basic heuristics.
+   * Scan text for plagiarism and AI footprint using a robust LLM-based check.
    */
   static async scanManuscript(text: string): Promise<IntegrityReport> {
-    console.log("[Integrity Scanner] Analyzing manuscript for plagiarism and AI patterns...");
+    console.log("[Integrity Scanner] Analyzing manuscript for plagiarism and AI patterns using LLM...");
     
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const { object } = await generateObject({
+        model: openai('gpt-4o'),
+        schema: z.object({
+          plagiarismScore: z.number().min(0).max(100).describe("Estimated percentage of plagiarized content (0-100)."),
+          aiGeneratedScore: z.number().min(0).max(100).describe("Estimated probability that the text is AI-generated (0-100)."),
+          flaggedSentences: z.array(z.string()).describe("List of specific sentences flagged as potentially plagiarized or AI-generated."),
+          notes: z.string().describe("Detailed notes on the analysis, explaining the scores and findings.")
+        }),
+        prompt: `You are an expert academic integrity auditor. Your task is to analyze the following manuscript text for potential plagiarism and AI-generated content footprints. 
+        
+Examine the text for:
+1. Plagiarism: Look for overly generic phrases, sudden shifts in tone, or sections that appear copied without proper citation.
+2. AI-generated footprint: Look for common LLM artifacts (e.g., "Furthermore", "In conclusion", "It is important to note", "delve", "tapestry"), highly uniform sentence lengths, and lack of human nuance.
 
-    const words = text.toLowerCase().match(/\b\w+\b/g) || [];
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-    
-    // 1. Plagiarism Heuristic
-    let plagiarismScore = 0;
-    const flaggedSentences: string[] = [];
-    
-    // Check for repeated 3-word phrases
-    const phrases = new Map<string, number>();
-    for (let i = 0; i < words.length - 2; i++) {
-      const phrase = `${words[i]} ${words[i+1]} ${words[i+2]}`;
-      phrases.set(phrase, (phrases.get(phrase) || 0) + 1);
-    }
-    
-    let repeatedPhrasesCount = 0;
-    for (const count of phrases.values()) {
-      if (count > 2) repeatedPhrasesCount++; // more than 2 times
-    }
-    
-    plagiarismScore += Math.min(repeatedPhrasesCount * 5, 50); // up to 50%
-    
-    // Check uniqueness (unique words / total words)
-    const uniqueWords = new Set(words).size;
-    if (words.length > 0) {
-      const uniquenessRatio = uniqueWords / words.length;
-      if (uniquenessRatio < 0.3) {
-        plagiarismScore += 30; // Very repetitive vocabulary
-      } else if (uniquenessRatio < 0.4) {
-        plagiarismScore += 15;
-      }
-    }
+Provide an estimated plagiarism score and an AI-generated score (both 0-100). List any specific sentences that seem suspicious. Finally, provide detailed notes justifying your scores.
 
-    if (text.toLowerCase().includes("lorem ipsum")) {
-      plagiarismScore += 40;
-      flaggedSentences.push("Contains placeholder text (Lorem ipsum).");
-    }
+Manuscript Text:
+"""
+${text.substring(0, 100000)}
+"""`
+      });
 
-    // 2. AI Detection Heuristic
-    let aiGeneratedScore = 0;
-    const aiKeywords = ["furthermore", "moreover", "it is worth noting", "in conclusion", "delve", "testament", "tapestry", "multifaceted"];
-    
-    let aiKeywordCount = 0;
-    const lowerText = text.toLowerCase();
-    for (const keyword of aiKeywords) {
-      const regex = new RegExp(`\b${keyword}\b`, "g");
-      const matches = lowerText.match(regex);
-      if (matches) {
-        aiKeywordCount += matches.length;
-      }
-    }
-    
-    aiGeneratedScore += Math.min(aiKeywordCount * 10, 60); // up to 60%
-    
-    // Check for uniform sentence length (AI tends to have less variance)
-    if (sentences.length > 3) {
-      const lengths = sentences.map(s => s.trim().split(' ').length);
-      const avgLength = lengths.reduce((a, b) => a + b, 0) / lengths.length;
-      const variance = lengths.reduce((a, b) => a + Math.pow(b - avgLength, 2), 0) / lengths.length;
-      
-      if (variance < 10) {
-        // Very uniform sentence lengths
-        aiGeneratedScore += 20;
-      }
-    }
+      // Thresholds: Plagiarism > 20% or AI > 40% is considered a failure
+      const passed = object.plagiarismScore <= 20 && object.aiGeneratedScore <= 40;
 
-    // Thresholds: Plagiarism > 20% or AI > 40% is considered a failure
-    const passed = plagiarismScore < 20 && aiGeneratedScore < 40;
-
-    return {
-      plagiarismScore: Math.min(plagiarismScore, 100),
-      aiGeneratedScore: Math.min(aiGeneratedScore, 100),
-      flaggedSentences,
-      passed,
-      notes: passed 
-        ? "Manuscript passed integrity checks." 
-        : "Warning: High similarity or AI footprint detected. Manual review recommended.",
-    };
+      return {
+        plagiarismScore: object.plagiarismScore,
+        aiGeneratedScore: object.aiGeneratedScore,
+        flaggedSentences: object.flaggedSentences,
+        passed,
+        notes: passed 
+          ? "Manuscript passed integrity checks.\n\nAuditor Notes:\n" + object.notes 
+          : "Warning: High similarity or AI footprint detected. Manual review recommended.\n\nAuditor Notes:\n" + object.notes,
+      };
+    } catch (error) {
+      console.error("[Integrity Scanner] Error during LLM scan:", error);
+      throw new Error("Failed to perform integrity scan due to an error with the LLM provider.");
+    }
   }
 }
