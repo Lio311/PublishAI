@@ -3,6 +3,7 @@ export { generateText, generateObject, streamText } from "ai";
 import { createOpenAI, openai } from "@ai-sdk/openai";
 import Anthropic from "@anthropic-ai/sdk";
 import { langfuse } from "@/lib/langfuse";
+import { memoryClient } from "@/lib/mem0";
 import { getApplicableRules, extractUserRewriteFeedback } from "@/services/learningService";
 import {
   AIProvider,
@@ -57,6 +58,26 @@ export function getOpenAIModelInstance(modelName: string = DEFAULT_OPENAI_MODEL,
 export async function callLLM(options: GenerateTextOptions): Promise<AIResponse> {
   const provider = resolveProvider(options.provider, options.model);
 
+  let finalSystemPrompt = options.systemPrompt;
+  if (options.useMemory && options.userId) {
+    try {
+      const searchResponse = await memoryClient.search(options.prompt, {
+        userId: options.userId,
+        topK: 3,
+      } as any);
+      
+      const memoryStr = searchResponse.results
+        .map((r: any) => `- ${r.memory}`)
+        .join("\n");
+        
+      if (memoryStr) {
+        finalSystemPrompt = `${finalSystemPrompt || ""}\n\n[USER PREFERENCES & CONTEXT]:\n${memoryStr}`;
+      }
+    } catch (e) {
+      console.warn("Mem0 injection failed in callLLM:", e);
+    }
+  }
+
   if (provider === "anthropic") {
     const client = getAnthropicClient(options.apiKey);
     const model = (options.model as string) || DEFAULT_ANTHROPIC_MODEL;
@@ -66,7 +87,7 @@ export async function callLLM(options: GenerateTextOptions): Promise<AIResponse>
       model,
       max_tokens: maxTokens,
       temperature: options.temperature,
-      system: options.systemPrompt,
+      system: finalSystemPrompt,
       messages: [{ role: "user", content: options.prompt }],
     });
 
@@ -109,7 +130,7 @@ export async function callLLM(options: GenerateTextOptions): Promise<AIResponse>
   const result = await generateText({
     model: modelInstance,
     prompt: options.prompt,
-    system: options.systemPrompt,
+    system: finalSystemPrompt,
     temperature: options.temperature,
   });
 

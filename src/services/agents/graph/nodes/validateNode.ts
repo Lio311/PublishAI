@@ -9,7 +9,7 @@ export const validateCodeNode = async (state: PublishAIState): Promise<Partial<P
     const response = await fetch("http://localhost:8000/validate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: state.documentContent, action: "code_execution" }),
+      body: JSON.stringify({ content: state.documentContent, action: "academic_text" }),
     });
 
     const result = await response.json();

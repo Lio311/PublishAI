@@ -37,6 +37,8 @@ export interface GenerateTextOptions {
   temperature?: number;
   maxTokens?: number;
   responseFormat?: 'text' | 'json';
+  userId?: string;
+  useMemory?: boolean;
 }
 
 export interface ChatOptions {
