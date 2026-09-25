@@ -222,7 +222,7 @@ const ARCHITECTURE_STEPS = [
       en: "User uploads manuscript (PDF/Word). Next.js API Routes stream it to Vercel Blob and trigger the Inngest background engine.",
       he: "המשתמש מעלה את המאמר (PDF/Word). נתיבי ה-API מעבירים את הקובץ לאחסון מאובטח ומזנקים את תהליכי הרקע במנוע של Inngest."
     },
-    icon: Upload, tools: ["Next.js 16 UI", "Vercel Blob", "Inngest", "Mammoth "Next.js 16 UI", "Vercel Blob", "Inngest", "Mammoth & Docx", "PDF Parser", "Upstash Redis", "LangChain & LangGraph" Docx", "PDF Parser", "Upstash Redis", "LangChain "Next.js 16 UI", "Vercel Blob", "Inngest", "Mammoth & Docx", "PDF Parser", "Upstash Redis", "LangChain & LangGraph" LangGraph", "next-intl", "Tailwind CSS", "Framer Motion", "Sonner"],
+    icon: Upload, tools: ["Next.js 16 UI", "Vercel Blob", "Inngest", "Mammoth & Docx", "PDF Parser", "Upstash Redis", "LangChain & LangGraph", "next-intl", "Tailwind CSS", "Framer Motion", "Sonner"],
     color: "bg-cyan-50 text-cyan-700 border-cyan-200"
   },
   {
@@ -264,7 +264,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are an Expert Literature Researcher equipped with Semantic Scholar & PubMed MCP tools.\nTASK:\n1. Generate optimized Boolean search queries combining core concepts from the manuscript.\n2. Retrieve the top 50 most relevant papers published in the last 3 years.\n3. Use GraphRAG to extract key findings and methodologies.\n4. Identify missing foundational citations in the current draft.\nOUTPUT: A synthesized Literature Matrix (JSON) mapping claims in the text to retrieved DOIs.", 
       he: "מערכת: אתה חוקר ספרות מומחה המצויד בכלי גישה ל-Semantic Scholar ול-PubMed.\nמשימה:\n1. נסח שאילתות חיפוש בוליאניות אופטימליות המשלבות את מושגי הליבה של המאמר.\n2. שלוף את 50 המאמרים הרלוונטיים ביותר מה-3 שנים האחרונות.\n3. השתמש ב-GraphRAG כדי לחלץ מתודולוגיות וממצאים.\n4. זהה ציטוטי חובה שחסרים בטיוטה הנוכחית.\nפלט: מטריצת ספרות מסונתזת הממפה טענות בטקסט ל-DOIs מתאימים." 
     },
-    icon: Database, tools: ["Claude 3.7", "pgvector", "GraphRAG", "MCP", "LangChain "Claude 3.7", "pgvector", "GraphRAG", "MCP", "LangChain & LangGraph" LangGraph", "Hugging Face Spaces"],
+    icon: Database, tools: ["Claude 3.7", "pgvector", "GraphRAG", "MCP", "LangChain & LangGraph", "Hugging Face Spaces"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
