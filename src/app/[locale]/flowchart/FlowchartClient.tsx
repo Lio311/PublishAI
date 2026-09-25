@@ -179,14 +179,14 @@ function NodeCard({ titleEn, titleHe, descEn, descHe, icon: Icon, type, isHe, is
   }
 
   return (
-    <div className={`w-full max-w-[175px] min-w-[130px] shrink flex-1 min-h-[110px] flex flex-col rounded-xl border-[3px] ${s.border} ${s.bg} p-2 shadow-md transition-all hover:shadow-lg hover:-translate-y-1 group relative z-10 bg-opacity-95`}>
+    <div className={`w-full max-w-[175px] min-w-[130px] shrink flex-1 min-h-[110px] flex flex-col items-center text-center rounded-xl border-[3px] ${s.border} ${s.bg} p-2 shadow-md transition-all hover:shadow-lg hover:-translate-y-1 group relative z-10 bg-opacity-95`}>
       <div className={`w-10 h-10 rounded-lg ${s.iconBg} flex items-center justify-center mb-2 shadow-sm shrink-0`}>
         <Icon className={`w-5 h-5 ${s.iconColor}`} />
       </div>
       <h3 className={`text-[12.5px] font-bold mb-1 leading-snug ${s.text}`}>{isHe ? titleHe : titleEn}</h3>
       <p className={`text-[10.5px] opacity-80 leading-snug ${s.text} mb-2 flex-grow`}>{isHe ? descHe : descEn}</p>
       {techs && techs.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-auto pt-1.5 border-t border-black/10">
+        <div className="flex flex-wrap justify-center gap-1 mt-auto pt-1.5 border-t border-black/10 w-full">
           {techs.map(t => <TechBadge key={t} name={t} />)}
         </div>
       )}
