@@ -6,7 +6,7 @@ import { Link, usePathname, useRouter } from "@/app/i18n/routing";
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { FileText, Home, Settings, LogOut, Globe, Book, Link as LinkIcon, ChevronRight, Send, Share2, Brain, X, Workflow } from "lucide-react";
+import { FileText, Home, Settings, LogOut, Globe, Book, Link as LinkIcon, ChevronRight, Send, Share2, Brain, X, Workflow, BarChart3 } from "lucide-react";
 
 export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean, onClose?: () => void }) {
   const pathname = usePathname();
@@ -34,6 +34,7 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
     { name: locale === 'he' ? 'חיבור לעיתונים' : 'Journal Connections', icon: LinkIcon, href: `/connections` },
     { name: locale === 'he' ? 'חוקי עיתונים' : 'Journal Rules', icon: Book, href: `/journals` },
     { name: locale === 'he' ? 'מעקב הגשות וביקורת' : 'Submissions & Reviews', icon: Send, href: `/submissions` },
+    { name: locale === 'he' ? 'ניתוח נתונים' : 'Analytics', icon: BarChart3, href: `/analytics` },
     { name: t("settings"), icon: Settings, href: `/settings` },
   ];
 
