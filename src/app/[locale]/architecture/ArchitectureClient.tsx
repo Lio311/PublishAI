@@ -52,6 +52,22 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     en: "Advanced retrieval technique using knowledge graphs to map conceptual relationships, finding cross-domain analogies for novel ideas.",
     he: "טכנולוגיית אחזור מתקדמת המשתמשת בגרף ידע למיפוי קשרים מושגיים. מסייעת במציאת אנלוגיות ורעיונות חוצי-תחומים."
   },
+  "LangGraph": {
+    en: "A library for building stateful, multi-actor applications with LLMs. Orchestrates the Multi-Agent team and enables Human-in-the-Loop workflows.",
+    he: "ספרייה לבניית אפליקציות מרובות-סוכנים מבוססות מצב (State). מנהלת את נחיל הסוכנים ומאפשרת התערבות אנושית (Human-in-the-Loop) באמצע התהליך."
+  },
+  "Mem0": {
+    en: "A long-term memory layer for AI agents. Remembers user preferences, writing styles, and feedback across all sessions.",
+    he: "שכבת זיכרון לטווח ארוך עבור סוכני AI. זוכרת את ההעדפות של המשתמש, סגנון הכתיבה וההערות הקודמות שלו לאורך זמן."
+  },
+  "Langfuse": {
+    en: "An open-source LLMOps platform for tracing, evals, and prompt management. Monitors token usage, latency, and agent reasoning.",
+    he: "פלטפורמת LLMOps למעקב (Tracing) ואנליזה. מנטרת את כמות הטוקנים, זמני התגובה, ומאפשרת לנתח את הליך ההסקה של הסוכנים בזמן אמת."
+  },
+  "Guardrails AI": {
+    en: "An open-source framework ensuring AI safety. Validates outputs to prevent hallucinations, generic AI apologies, and malicious code generation.",
+    he: "מסגרת לאבטחת AI. בודקת ומוודאת את התוצרים כדי למנוע הזיות (Hallucinations), תשובות 'רובוטיות', או יצירת קוד זדוני."
+  },
   "MCP": {
     en: "Model Context Protocol. Standardizes how AI agents securely access external tools like PubMed and ArXiv databases.",
     he: "פרוטוקול גישה למודלים. מספק תקן מאובטח שדרכו סוכני ה-AI מתקשרים עם כלים חיצונים כמו מאגרי PubMed ו-ArXiv."
@@ -253,14 +269,14 @@ const ARCHITECTURE_STEPS = [
     id: 8, phase: 1,
     title: { en: "8. Academic Writing Agent", he: "8. סוכן כתיבה ועריכה" },
     description: { 
-      en: "Rewrites and edits the text based on the Area Chair's decisions, ensuring a standard academic tone and removing 'AI-style' language.",
-      he: "משכתב ועורך את הטקסט בהתבסס על החלטות סוכן העל. מוודא שהטון אקדמי ותקני, ומסיר ביטויים רובוטיים אופייניים ל-AI."
+      en: "Rewrites the text in an iterative LangGraph loop. Fetches user preferences via Mem0, validates output with Guardrails AI, and halts for Human-in-the-Loop review. All monitored by Langfuse.",
+      he: "משכתב את הטקסט בלולאה איטרטיבית של LangGraph. שואב העדפות אישיות דרך Mem0, מוודא את בטיחות התוצר עם Guardrails AI, ועוצר לביקורת אנושית (Human-in-the-Loop). מפוקח בזמן אמת ע\"י Langfuse."
     },
     prompt: { 
       en: "SYSTEM: You are an Elite Academic Ghostwriter.\nTASK: Execute the rewriting phase based on the Area Chair's directives.\n1. Elevate the prose to match the linguistic standards of Nature/Science.\n2. Eliminate all AI-generated clichés (e.g., 'delve into', 'a tapestry of').\n3. Ensure logical transitions between paragraphs and active, concise phrasing.\n4. Seamlessly integrate the newly retrieved citations into the narrative flow.\nOUTPUT: The revised manuscript section in Markdown.", 
       he: "מערכת: אתה עורך וכותב צללים אקדמי עילית.\nמשימה: בצע את שלב השכתוב בהתאם להנחיות סוכן-העל (Area Chair).\n1. שפר את משלב הכתיבה לרמה של כתבי העת המובילים (Nature/Science).\n2. השמד לחלוטין קלישאות AI (כגון 'חשוב לציין', 'מארג של').\n3. ודא מעברים לוגיים חלקים בין פסקאות, ושימוש בשפה פעילה ותמציתית.\n4. שלב בטבעיות את הציטוטים החדשים שנשלפו לתוך זרימת הטקסט.\nפלט: הטקסט המשוכתב בפורמט Markdown." 
     },
-    icon: Edit3, tools: ["Claude 3.5"],
+    icon: Edit3, tools: ["Claude 3.5", "LangGraph", "Mem0", "Guardrails AI", "Langfuse"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {

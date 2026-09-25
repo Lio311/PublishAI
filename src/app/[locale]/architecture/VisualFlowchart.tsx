@@ -32,7 +32,7 @@ export default function VisualFlowchart({ locale }: VisualFlowchartProps) {
             <Arrow isHe={isHe} />
             <Node title={isHe ? "יו\"ר (Area Chair)" : "Area Chair"} color="bg-indigo-100 text-indigo-800" />
             <Arrow isHe={isHe} />
-            <Node title={isHe ? "כתיבה וביצוע" : "Writing & Execution"} color="bg-purple-100 text-purple-800" />
+            <Node title={isHe ? "כתיבה (LangGraph Loop)" : "Writing (LangGraph Loop)"} color="bg-purple-100 text-purple-800" />
             <Arrow isHe={isHe} />
             <Node title={isHe ? "QA והפקה" : "QA & Export"} color="bg-cyan-100 text-cyan-800" />
           </div>
