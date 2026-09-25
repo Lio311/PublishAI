@@ -51,15 +51,18 @@ export function AgentRunner({ paperId = "123", onResult, onStatusChange, onLog }
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let done = false;
+      let buffer = "";
 
       while (!done) {
         const { value, done: readerDone } = await reader.read();
         done = readerDone;
         if (value) {
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n").filter(line => line.trim());
+          buffer += decoder.decode(value, { stream: !done });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
           
           for (const line of lines) {
+            if (!line.trim()) continue;
             try {
               const event = JSON.parse(line);
               const logMsg = `[${event.event}] ${event.name}`;

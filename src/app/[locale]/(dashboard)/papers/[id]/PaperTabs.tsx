@@ -12,6 +12,21 @@ import FigureGallery from "@/components/vision/FigureGallery";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { Sparkles, Database, Network, Users, Eye, Edit3 } from "lucide-react";
 import RichDocumentEditor from "@/components/RichDocumentEditor";
+import { PreflightCheckPanel } from "@/components/sandbox/PreflightCheckPanel";
+import DataScienceSandboxUI from "@/components/stage1/DataScienceSandboxUI";
+import EntityHighlighter from "@/components/graph/EntityHighlighter";
+import { MultiAgentDebatePanel } from "@/components/debate/MultiAgentDebatePanel";
+import { SubmissionTracker } from "@/components/rpa/SubmissionTracker";
+import RejectStateHandler from "@/components/cascade/RejectStateHandler";
+import { RevisionRequestForm } from "@/components/pingpong/RevisionRequestForm";
+import { RevisionDiffViewer } from "@/components/pingpong/RevisionDiffViewer";
+import AITiptapEditor from "@/components/Editor/AITiptapEditor";
+import CitationSearch from "@/components/literature/CitationSearch";
+import { ExportAgentToggle } from "@/components/export/ExportAgentToggle";
+import UploadClarificationModal from "@/components/stage1/UploadClarificationModal";
+import { CaptchaSolver } from "@/components/submission/CaptchaSolver";
+import { TwoFactorDialog } from "@/components/submission/TwoFactorDialog";
+
 
 interface PaperTabsProps {
   paperId: number;
@@ -94,21 +109,37 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
 
       {/* Tab Panels */}
       <div className="relative">
-        {activeTab === "Editor" && (
+                {activeTab === "Editor" && (
           <ErrorBoundary name="Editor">
-            <RichDocumentEditor documentId={String(paperId)} />
+            <div className="space-y-8">
+              <RichDocumentEditor documentId={String(paperId)} />
+              <AITiptapEditor initialContent="" />
+              <CitationSearch />
+              <RevisionRequestForm onSubmit={() => {}} isLoading={false} />
+              <RevisionDiffViewer originalContent="" newContent="" />
+              <ExportAgentToggle paperId={String(paperId)} hasVerifiedCode={true} />
+            </div>
           </ErrorBoundary>
         )}
 
-        {activeTab === "Processing" && (
+                {activeTab === "Processing" && (
           <ErrorBoundary name="Pipeline Processing">
-            <PaperProcessingUI paperId={paperId} initialStatus={initialStatus} />
+            <div className="space-y-8">
+              <PaperProcessingUI paperId={paperId} initialStatus={initialStatus} />
+              <SubmissionTracker jobId={String(paperId)} />
+              <RejectStateHandler paperId={paperId} rejectionReason="None" />
+              <UploadClarificationModal isOpen={false} onClose={() => {}} onComplete={() => {}} />
+              <CaptchaSolver submissionId={String(paperId)} />
+              <TwoFactorDialog isOpen={false} onClose={() => {}} onSubmit={async () => {}} />
+            </div>
           </ErrorBoundary>
         )}
 
-        {activeTab === "Data Sandbox" && (
+                {activeTab === "Data Sandbox" && (
           <ErrorBoundary name="Data Sandbox">
             <div className="space-y-8">
+              <PreflightCheckPanel paperId={paperId} codeSnippet="" dependencies={[]} />
+              <DataScienceSandboxUI />
               <DataUploadSection paperId={paperId} />
               <AnalysisStatus paperId={paperId} />
               <GeneratedChartsViewer paperId={paperId} />
@@ -116,18 +147,20 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
           </ErrorBoundary>
         )}
 
-        {activeTab === "Knowledge Graph" && (
+                {activeTab === "Knowledge Graph" && (
           <ErrorBoundary name="Knowledge Graph">
             <div className="space-y-8">
+              <EntityHighlighter text="" />
               <KnowledgeGraphViewer paperId={paperId} />
               <LogicConsistencyReport paperId={paperId} />
             </div>
           </ErrorBoundary>
         )}
 
-        {activeTab === "AI Debate" && (
+                {activeTab === "AI Debate" && (
           <ErrorBoundary name="AI Debate Room">
             <div className="space-y-8">
+              <MultiAgentDebatePanel userFindings="No initial findings" />
               <DebateRoom paperId={paperId} />
             </div>
           </ErrorBoundary>

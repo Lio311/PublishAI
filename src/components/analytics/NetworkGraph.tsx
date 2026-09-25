@@ -38,18 +38,10 @@ export default function NetworkGraph() {
   const locale = useLocale();
   const isHe = locale === 'he';
   
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  const containerRef = useRef<HTMLDivElement>(null);
-  const requestRef = useRef<number>(0);
-  
-  // Simulation params
-  const width = 800;
-  const height = 500;
-  
+  const nodesRef = useRef<Node[]>([]);
+  const edgesRef = useRef<Edge[]>([]);
+  const [, forceRender] = useState({});
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -58,7 +50,7 @@ export default function NetworkGraph() {
         const data = await res.json();
         
         // Initialize nodes with random positions
-        const initializedNodes = data.nodes.map((n: any) => ({
+        const initializedNodes = data.nodesRef.current.map((n: any) => ({
           ...n,
           x: width / 2 + (Math.random() - 0.5) * 100,
           y: height / 2 + (Math.random() - 0.5) * 100,
@@ -67,14 +59,14 @@ export default function NetworkGraph() {
         }));
         
         // Link edges to node objects
-        const initializedEdges = data.edges.map((e: any) => ({
+        const initializedEdges = data.edgesRef.current.map((e: any) => ({
           ...e,
           sourceNode: initializedNodes.find((n: Node) => n.id === e.source),
           targetNode: initializedNodes.find((n: Node) => n.id === e.target)
         })).filter((e: Edge) => e.sourceNode && e.targetNode);
 
-        setNodes(initializedNodes);
-        setEdges(initializedEdges);
+        nodesRef.current = initializedNodes;
+        edgesRef.current = initializedEdges;
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -88,11 +80,11 @@ export default function NetworkGraph() {
 
   // Force Directed Simulation Loop
   useEffect(() => {
-    if (nodes.length === 0 || loading) return;
+    if (nodesRef.current.length === 0 || loading) return;
 
     const tick = () => {
-      // Create new arrays so React detects state changes
-      const currentNodes = [...nodes];
+      const currentNodes = nodesRef.current;
+      const currentEdges = edgesRef.current;
       
       const alpha = 0.1; // cooling factor
       
@@ -120,7 +112,7 @@ export default function NetworkGraph() {
       }
       
       // 2. Attraction (links/springs)
-      for (const edge of edges) {
+      for (const edge of currentEdges) {
         if (!edge.sourceNode || !edge.targetNode) continue;
         const dx = edge.targetNode.x - edge.sourceNode.x;
         const dy = edge.targetNode.y - edge.sourceNode.y;
@@ -156,7 +148,7 @@ export default function NetworkGraph() {
         node.y = Math.max(20, Math.min(height - 20, node.y));
       }
       
-      setNodes(currentNodes);
+      forceRender({});
       
       // Keep simulating if there's enough energy
       let totalEnergy = currentNodes.reduce((sum, n) => sum + Math.abs(n.vx) + Math.abs(n.vy), 0);
@@ -170,7 +162,7 @@ export default function NetworkGraph() {
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [nodes.length, edges.length]); // Intentionally don't depend on raw positions to avoid infinite re-renders triggering effect restart
+  }, [loading]);
 
   if (loading) {
     return (
@@ -188,7 +180,7 @@ export default function NetworkGraph() {
     );
   }
 
-  if (nodes.length === 0) {
+  if (nodesRef.current.length === 0) {
     return (
       <div className="w-full h-[500px] flex items-center justify-center bg-gray-50 border border-gray-200 rounded-xl text-gray-500">
         {isHe ? 'אין נתונים עדיין ב-GraphRAG.' : 'No data in GraphRAG yet.'}
@@ -201,7 +193,7 @@ export default function NetworkGraph() {
       <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid slice">
         {/* Draw Edges */}
         <g stroke="#e2e8f0" strokeOpacity={0.6}>
-          {edges.map((edge, i) => (
+          {edgesRef.current.map((edge, i) => (
             <line 
               key={i}
               x1={edge.sourceNode?.x}
@@ -216,7 +208,7 @@ export default function NetworkGraph() {
         
         {/* Draw Nodes */}
         <g>
-          {nodes.map(node => (
+          {nodesRef.current.map(node => (
             <g key={node.id} transform={`translate(${node.x},${node.y})`}>
               <circle 
                 r={12} 

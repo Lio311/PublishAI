@@ -9,7 +9,7 @@ import { usePathname } from 'next/navigation';
 
 export default function GlobalPasswordProtection({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const isPublicRoute = pathname?.includes('/architecture') || pathname?.includes('/flowchart');
+    const isPublicRoute = pathname?.includes('/architecture') || pathname?.includes('/flowchart') || pathname?.includes('/login') || pathname?.includes('/register');
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [isChecking, setIsChecking] = useState<boolean>(true);
     const [pin, setPin] = useState('');
