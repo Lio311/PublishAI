@@ -25,11 +25,6 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       return NextResponse.json({ error: "Submission not found" }, { status: 404 });
     }
 
-    // Update its status to 'rejected'
-    await db.update(submissions)
-      .set({ status: 'rejected' })
-      .where(eq(submissions.id, submissionId));
-
     // Find the associated paper
     const paper = await db.query.papers.findFirst({
       where: eq(papers.id, submission.paperId)
@@ -45,53 +40,55 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       return NextResponse.json({ error: "Cascade queue is empty" }, { status: 400 });
     }
 
-    // Pop the first journal ID (nextJournalId)
-    const nextJournalId = queue[0];
+    const nextJournalIdStr = queue[0];
+    const nextJournalId = parseInt(nextJournalIdStr, 10);
     const newQueue = queue.slice(1);
 
-    // Update the paper's currentJournalId and save the new cascadeQueue
-    await db.update(papers)
-      .set({ 
-        currentJournalId: nextJournalId, 
-        cascadeQueue: newQueue 
-      })
-      .where(eq(papers.id, paper.id));
+    const newSubmission = await db.transaction(async (tx) => {
+      // Update its status to 'rejected'
+      await tx.update(submissions)
+        .set({ status: 'rejected' })
+        .where(eq(submissions.id, submissionId));
 
-    // We need to create a new submission record for the nextJournalId with status 'draft'.
-    // Since submission requires a connectionId, we look for an existing connection or create a dummy one.
-    // Try to treat nextJournalId as a number if it is one, for the journalId lookup.
-    const numericJournalId = parseInt(nextJournalId, 10);
-    let connection;
-    
-    if (!isNaN(numericJournalId)) {
-      connection = await db.query.journalConnections.findFirst({
-        where: (jc, { eq, and }) => and(
-          eq(jc.userId, userId),
-          eq(jc.journalId, numericJournalId)
-        )
-      });
-    }
+      // Update the paper's currentJournalId and save the new cascadeQueue
+      await tx.update(papers)
+        .set({ 
+          currentJournalId: isNaN(nextJournalId) ? null : nextJournalId, 
+          cascadeQueue: newQueue 
+        })
+        .where(eq(papers.id, paper.id));
 
-    if (!connection) {
-      // Fallback: create a dummy connection
-      const [newConn] = await db.insert(journalConnections).values({
+      let connection;
+      if (!isNaN(nextJournalId)) {
+        connection = await tx.query.journalConnections.findFirst({
+          where: (jc, { eq, and }) => and(
+            eq(jc.userId, userId),
+            eq(jc.journalId, nextJournalId)
+          )
+        });
+      }
+
+      if (!connection) {
+        const [newConn] = await tx.insert(journalConnections).values({
+          userId: userId,
+          journalId: isNaN(nextJournalId) ? null : nextJournalId,
+          platform: 'email',
+          siteUrl: 'http://example.com',
+          encryptedUsername: 'dummy',
+          encryptedPassword: 'dummy'
+        }).returning();
+        connection = newConn;
+      }
+
+      const [insertedSub] = await tx.insert(submissions).values({
+        paperId: paper.id,
+        connectionId: connection.id,
         userId: userId,
-        journalId: isNaN(numericJournalId) ? null : numericJournalId,
-        platform: 'email',
-        siteUrl: 'http://example.com',
-        encryptedUsername: 'dummy',
-        encryptedPassword: 'dummy'
+        status: "draft",
       }).returning();
-      connection = newConn;
-    }
-
-    // Create a new submission record
-    const [newSubmission] = await db.insert(submissions).values({
-      paperId: paper.id,
-      connectionId: connection.id,
-      userId: session.user.id,
-      status: "draft",
-    }).returning();
+      
+      return insertedSub;
+    });
 
     // Trigger the AI pipeline
     const previousJournalId = (submission.connection as any)?.journalId;
@@ -104,7 +101,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
         body: JSON.stringify({
           action: 'cascade',
           paperId: paper.id,
-          targetJournalId: nextJournalId,
+          targetJournalId: nextJournalIdStr,
           previousJournalId: previousJournalId
         })
       }).catch(err => console.error("Agent run failed inline", err));

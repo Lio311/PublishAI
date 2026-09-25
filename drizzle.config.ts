@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
 export default defineConfig({
-  schema: "./src/services/db/schema.ts",
+  schema: ["./src/services/db/schema.ts", "./src/services/db/schema/embeddings.ts"],
   out: "./src/services/db/migrations",
   dialect: "postgresql",
   dbCredentials: {
