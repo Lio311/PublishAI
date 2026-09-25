@@ -231,6 +231,7 @@ export const paperVersions = pgTable("paper_versions", {
   changesSummary: text("changes_summary"),
   reviewerComments: text("reviewer_comments"),
   rebuttalStrategy: text("rebuttal_strategy"),
+  rebuttalLetter: text("rebuttal_letter"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   paperIdIdx: index("paper_versions_paper_id_idx").on(table.paperId),

@@ -15,7 +15,7 @@ import { verificationNode } from "./nodes/verificationNode";
 import { coverLetterNode } from "./nodes/coverLetterNode";
 import { retrieveMemoryNode, updateMemoryNode } from "./nodes/memoryNode";
 import { guardrailsNode } from "./nodes/guardrailsNode";
-
+import { rebuttalNode } from "./nodes/rebuttalNode";
 
 const routeAfterIntegrity = (state: PublishAIState) => {
   // If integrity fails, route to END or error state.
@@ -25,6 +25,13 @@ const routeAfterIntegrity = (state: PublishAIState) => {
     return END;
   }
   return "qaNode";
+};
+
+const routeFromStart = (state: PublishAIState) => {
+  if (state.reviewerComments) {
+    return "rebuttalNode";
+  }
+  return "clarificationNode";
 };
 
 const builder = new StateGraph(PublishAIStateAnnotation)
@@ -42,8 +49,10 @@ const builder = new StateGraph(PublishAIStateAnnotation)
   .addNode("retrieveMemoryNode", retrieveMemoryNode)
   .addNode("updateMemoryNode", updateMemoryNode)
   .addNode("guardrailsNode", guardrailsNode)
+  .addNode("rebuttalNode", rebuttalNode)
 
-  .addEdge(START, "clarificationNode")
+  .addConditionalEdges(START, routeFromStart)
+  .addEdge("rebuttalNode", "executionNode")
   .addEdge("clarificationNode", "planningNode")
   .addEdge("planningNode", "literatureNode")
   .addEdge("literatureNode", "executionNode")

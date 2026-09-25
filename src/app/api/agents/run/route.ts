@@ -3,7 +3,7 @@ import { publishAiGraph } from "@/services/agents/graph/workflow";
 
 export async function POST(req: NextRequest) {
   try {
-    const { paperId, action, feedback } = await req.json();
+    const { paperId, action, feedback, reviewerComments } = await req.json();
 
     if (!paperId || !action) {
       return NextResponse.json(
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
           if (action === "start") {
             // Start a new run with the initial state
             const streamEvents = await publishAiGraph.streamEvents(
-              { paperId }, // initial state
+              { paperId, reviewerComments: reviewerComments || "" }, // initial state
               { ...config, version: "v2" }
             );
 

@@ -31,6 +31,14 @@ export const PublishAIStateAnnotation = Annotation.Root({
     reducer: (x, y) => y ?? x,
     default: () => "",
   }),
+  rebuttalStrategy: Annotation<string>({
+    reducer: (x, y) => y ?? x,
+    default: () => "",
+  }),
+  rebuttalLetter: Annotation<string>({
+    reducer: (x, y) => y ?? x,
+    default: () => "",
+  }),
   userId: Annotation<string>({
     reducer: (x, y) => y ?? x,
     default: () => "default_user",
@@ -61,6 +69,7 @@ export const PublishAIStateAnnotation = Annotation.Root({
     reducer: (x, y) => x + (y ? "\n" + y : ""),
     default: () => "",
   }),
+  rebuttal: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
 });
 
 export type PublishAIState = typeof PublishAIStateAnnotation.State;
