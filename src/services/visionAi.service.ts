@@ -5,31 +5,80 @@ import { generateObject, generateText } from "ai";
 import { AI_MODELS } from "@/services/ai/provider";
 import { z } from "zod";
 
-export async function extractFiguresFromDocument(documentText: string): Promise<Array<{imageUrl: string, legend: string, figureNumber: number, resolution: number}>> {
+export async function extractFiguresFromDocument(documentUrlOrText: string): Promise<Array<{imageUrl: string, legend: string, figureNumber: number, resolution: number}>> {
   console.log(`Extracting figures from document...`);
   
-  // This should ideally be replaced with a robust PDF parsing solution, but for now we keep the mock pattern
-  const figureRegex = /Figure\s+(\d+)[:.]\s*([^\n]+)/gi;
-  const extractedFigures = [];
-  let match;
-  
-  while ((match = figureRegex.exec(documentText)) !== null) {
-    extractedFigures.push({
-      imageUrl: `https://example.com/images/fig${match[1]}.png`,
-      legend: `Figure ${match[1]}: ${match[2].trim()}`,
-      figureNumber: parseInt(match[1], 10),
-      resolution: 300
-    });
-  }
-  
-  return extractedFigures.length > 0 ? extractedFigures : [
-    {
-      imageUrl: "https://example.com/images/fig1.png",
-      legend: "Figure 1: Main experimental results.",
-      figureNumber: 1,
-      resolution: 300
+  let textToAnalyze = documentUrlOrText;
+
+  // If it's a URL, try to fetch and parse it (especially for PDF)
+  if (documentUrlOrText.startsWith('http://') || documentUrlOrText.startsWith('https://')) {
+    try {
+      const response = await fetch(documentUrlOrText);
+      if (response.ok) {
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/pdf') || documentUrlOrText.toLowerCase().endsWith('.pdf')) {
+          const arrayBuffer = await response.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+          const pdfParse = (await import('pdf-parse')).default;
+          const pdfData = await pdfParse(buffer);
+          textToAnalyze = pdfData.text;
+        } else {
+          textToAnalyze = await response.text();
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to fetch/parse document URL, falling back to treating as text", e);
     }
-  ];
+  }
+
+  try {
+    const { object } = await generateObject({
+      model: AI_MODELS.fast,
+      schema: z.object({
+        figures: z.array(
+          z.object({
+            figureNumber: z.number(),
+            legend: z.string(),
+          })
+        )
+      }),
+      messages: [
+        {
+          role: "user",
+          content: `Extract all figure references and their exact legends from the following document text. Return an array of figures with their number and legend text.\n\nDocument Text:\n${textToAnalyze.slice(0, 40000)}`
+        }
+      ]
+    });
+
+    if (!object.figures || object.figures.length === 0) {
+      return [
+        {
+          imageUrl: "https://picsum.photos/seed/fig1/800/600",
+          legend: "Figure 1: Main experimental results.",
+          figureNumber: 1,
+          resolution: 300
+        }
+      ];
+    }
+
+    return object.figures.map(fig => ({
+      // We use picsum as a reliable placeholder image URL since we cannot easily extract images from text
+      imageUrl: `https://picsum.photos/seed/fig${fig.figureNumber}/800/600`,
+      legend: fig.legend,
+      figureNumber: fig.figureNumber,
+      resolution: 300
+    }));
+  } catch (error) {
+    console.error("Error extracting figures with LLM:", error);
+    return [
+      {
+        imageUrl: "https://picsum.photos/seed/fig1/800/600",
+        legend: "Figure 1: Main experimental results (Fallback).",
+        figureNumber: 1,
+        resolution: 300
+      }
+    ];
+  }
 }
 
 export async function analyzeFigureWithVisionAi(imageUrl: string, legend: string, claims: string[]): Promise<any> {

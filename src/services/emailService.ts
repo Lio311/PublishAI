@@ -49,8 +49,18 @@ export async function processIncomingReviewEmail(emailData: IncomingEmailData) {
   if (emailData.attachments && emailData.attachments.length > 0) {
     for (const attachment of emailData.attachments) {
       if (attachment.contentType === 'application/pdf' || attachment.filename?.endsWith('.pdf')) {
-        // Dummy PDF extraction for architecture demo to avoid pdf-parse build crash
-        comments.push("Mock extracted PDF text: Reviewer requests major revisions on Section 3.");
+        try {
+          const pdfParse = (await import('pdf-parse')).default;
+          // Ensure we have a Buffer for pdf-parse
+          const buffer = Buffer.isBuffer(attachment.content) 
+            ? attachment.content 
+            : Buffer.from(attachment.content, 'base64');
+          const pdfData = await pdfParse(buffer);
+          comments.push(`Extracted text from ${attachment.filename || 'PDF'}: ${pdfData.text}`);
+        } catch (err: any) {
+          console.error('Error parsing PDF:', err);
+          comments.push(`Failed to extract text from ${attachment.filename || 'PDF'}: ${err.message}`);
+        }
       }
     }
   }
