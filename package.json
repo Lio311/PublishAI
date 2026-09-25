@@ -19,6 +19,7 @@
     "@auth/drizzle-adapter": "^1.11.3",
     "@e2b/code-interpreter": "^2.8.0",
     "@huggingface/hub": "^2.17.3",
+    "@langchain/anthropic": "^1.5.11",
     "@langchain/core": "^1.2.11",
     "@langchain/langgraph": "^1.4.15",
     "@langchain/openai": "^1.5.13",

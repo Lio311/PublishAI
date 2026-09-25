@@ -1,30 +1,40 @@
-import { PublishAIState } from "../state";
-import { SystemMessage } from "@langchain/core/messages";
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatAnthropic } from "@langchain/anthropic";
+import { HumanMessage } from "@langchain/core/messages";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
+import { PublishAIState } from "../state";
 
-export const planningNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
-  const llm = new ChatOpenAI({
-    modelName: "gpt-4o-mini",
-    temperature: 0.2,
+export const planningNode = async (state: PublishAIState) => {
+  const model = new ChatAnthropic({
+    modelName: "claude-3-opus-20240229",
+    temperature: 0,
   });
 
-  const prompt = `You are a Planning Agent for an academic writing tool.
-User Memory Context:
-${state.memoryContext}
+  const clarificationOutput = state.previousStageOutputs.get("clarification")?.output || state.clarification || "No clarification available.";
 
-Based on the latest user request, create a detailed plan.`;
+  const prompt = `You are an expert academic planner.
+Based on the following clarification analysis:
+${clarificationOutput}
 
-  const messages = [
-    new SystemMessage(prompt),
-    ...state.messages,
-  ];
+And the manuscript provided between <manuscript> tags:
+<manuscript>
+${state.documentContent}
+</manuscript>
 
-  const response = await llm.invoke(messages, {
+Create a structural revision plan for this paper. Identify weaknesses, required citations, and sections to rewrite.
+`;
+
+  const response = await model.invoke([
+    new HumanMessage(prompt)
+  ], {
     callbacks: [langfuseLangchainHandler],
   });
 
+  const output = response.content as string;
+  const tokensUsed = (response.response_metadata as any)?.usage?.total_tokens ?? 0;
+
   return {
-    messages: [response],
+    plan: output,
+    previousStageOutputs: new Map([["planning", { output, status: "awaiting_approval", tokensUsed }]]),
+    currentStage: "planning"
   };
 };
