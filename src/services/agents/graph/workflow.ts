@@ -16,6 +16,7 @@ import { coverLetterNode } from "./nodes/coverLetterNode";
 import { retrieveMemoryNode, updateMemoryNode } from "./nodes/memoryNode";
 import { guardrailsNode } from "./nodes/guardrailsNode";
 import { rebuttalNode } from "./nodes/rebuttalNode";
+import { cascadeNode } from "./nodes/cascadeNode";
 
 const routeAfterIntegrity = (state: PublishAIState) => {
   // If integrity fails, route to END or error state.
@@ -28,6 +29,9 @@ const routeAfterIntegrity = (state: PublishAIState) => {
 };
 
 const routeFromStart = (state: PublishAIState) => {
+  if (state.action === 'cascade' || state.targetJournalId) {
+    return "cascadeNode";
+  }
   if (state.reviewerComments) {
     return "rebuttalNode";
   }
@@ -50,8 +54,10 @@ const builder = new StateGraph(PublishAIStateAnnotation)
   .addNode("updateMemoryNode", updateMemoryNode)
   .addNode("guardrailsNode", guardrailsNode)
   .addNode("rebuttalNode", rebuttalNode)
+  .addNode("cascadeNode", cascadeNode)
 
   .addConditionalEdges(START, routeFromStart)
+  .addEdge("cascadeNode", "executionNode")
   .addEdge("rebuttalNode", "executionNode")
   .addEdge("clarificationNode", "planningNode")
   .addEdge("planningNode", "literatureNode")

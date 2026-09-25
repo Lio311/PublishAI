@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { SecurityBriefing } from "./SecurityBriefing";
 import { ConnectionForm } from "./ConnectionForm";
-import { Loader2, ExternalLink, RefreshCw, Send, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, ExternalLink, RefreshCw, Send, CheckCircle2, AlertCircle, ArrowDownRight } from "lucide-react";
 
 interface SubmissionPanelProps {
   paperId: number;
@@ -18,8 +18,24 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
   const [connections, setConnections] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null);
+  const [cascadingId, setCascadingId] = useState<number | null>(null);
   
   const [submissions, setSubmissions] = useState<any[]>([]);
+
+  const handleCascade = async (submissionId: number) => {
+    try {
+      setCascadingId(submissionId);
+      const res = await fetch('/api/submissions/' + submissionId + '/cascade', { method: 'POST' });
+      if (res.ok) {
+        fetchSubmissions();
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setCascadingId(null);
+    }
+  };
 
   useEffect(() => {
     fetchConnections();
@@ -172,7 +188,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
               <div key={sub.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                 <div className="flex items-center gap-3">
                   {sub.status === 'submitted' && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
-                  {sub.status === 'failed' && <AlertCircle className="w-5 h-5 text-rose-500" />}
+                  {(sub.status === 'failed' || sub.status === 'rejected') && <AlertCircle className="w-5 h-5 text-rose-500" />}
                   {['preparing', 'submitting'].includes(sub.status) && <Loader2 className="w-5 h-5 text-sky-500 animate-spin" />}
                   
                   <div>
@@ -183,16 +199,32 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
                   </div>
                 </div>
                 
-                {sub.status === 'submitted' && sub.remotePostUrl && (
-                  <a 
-                    href={sub.remotePostUrl} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="flex items-center gap-1 text-sm font-medium text-sky-500 hover:text-sky-600"
-                  >
-                    {t("panel.viewPost")} <ExternalLink className="w-4 h-4" />
-                  </a>
-                )}
+                <div className="flex items-center gap-4">
+                  {sub.status === 'rejected' && (
+                    <button
+                      onClick={() => handleCascade(sub.id)}
+                      disabled={cascadingId === sub.id}
+                      className="flex items-center gap-2 px-4 py-2 bg-rose-100 text-rose-700 font-medium rounded-lg hover:bg-rose-200 transition-colors disabled:opacity-50"
+                    >
+                      {cascadingId === sub.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <ArrowDownRight className="w-4 h-4" />
+                      )}
+                      Cascade to Next Journal
+                    </button>
+                  )}
+                  {sub.status === 'submitted' && sub.remotePostUrl && (
+                    <a 
+                      href={sub.remotePostUrl} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="flex items-center gap-1 text-sm font-medium text-sky-500 hover:text-sky-600"
+                    >
+                      {t("panel.viewPost")} <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
               </div>
             ))}
           </div>

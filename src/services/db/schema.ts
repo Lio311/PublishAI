@@ -211,6 +211,8 @@ export const papers = pgTable("papers", {
   title: text("title").notNull(),
   status: statusEnum("status").default("pending"),
   targetJournalId: integer("target_journal_id").references(() => journals.id),
+  currentJournalId: uuid("current_journal_id"),
+  cascadeQueue: jsonb("cascade_queue").$type<string[]>(),
   originalFileUrl: text("original_file_url"),
   originalFormat: text("original_format"),
   rejections: jsonb("rejections"),
@@ -358,6 +360,7 @@ export const submissionStatusEnum = pgEnum("submission_status", [
   "submitted",
   "failed",
   "draft",
+  "rejected",
 ]);
 
 export const captchaStrategyEnum = pgEnum("captcha_strategy", ["auto", "manual"]);

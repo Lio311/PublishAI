@@ -11,6 +11,18 @@ export const PublishAIStateAnnotation = Annotation.Root({
     reducer: (x, y) => y ?? x,
     default: () => "",
   }),
+  targetJournalId: Annotation<string>({
+    reducer: (x, y) => y ?? x,
+    default: () => "",
+  }),
+  previousJournalId: Annotation<string>({
+    reducer: (x, y) => y ?? x,
+    default: () => "",
+  }),
+  action: Annotation<string>({
+    reducer: (x, y) => y ?? x,
+    default: () => "",
+  }),
   currentStage: Annotation<Stage>({
     reducer: (x, y) => y ?? x,
     default: () => "clarification" as Stage,

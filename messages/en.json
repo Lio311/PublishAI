@@ -17,7 +17,7 @@
       "dragTitle": "Drag your paper here",
       "processing": "Processing and extracting text...",
       "success": "File uploaded successfully!",
-      "description": "Supports all file types (images, excel, etc.). These files will be uploaded and analyzed if possible.",
+      "description": "Supported formats: PDF, Word (.docx), Excel (.xlsx), Images (.png, .jpg), PowerPoint (.pptx) and more. Files will be analyzed automatically.",
       "button": "Or select file",
       "uploading": "Uploading..."
     },
