@@ -774,3 +774,25 @@ export const aiSystemFeedback = pgTable("ai_system_feedback", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
+
+// ═══════════════════════════════════════════════════════
+// RPA AUTOMATED SUBMISSION
+// ═══════════════════════════════════════════════════════
+
+export const rpaJobStatusEnum = pgEnum("rpa_job_status", [
+  "pending", "running", "paused", "completed", "error"
+]);
+
+export const rpaJobs = pgTable("rpa_jobs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  submissionId: integer("submission_id").references(() => submissions.id, { onDelete: "cascade" }).notNull(),
+  status: rpaJobStatusEnum("status").default("pending").notNull(),
+  currentStep: text("current_step"),
+  stateData: jsonb("state_data"),
+  errorLog: text("error_log"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type RpaJob = typeof rpaJobs.$inferSelect;
+export type NewRpaJob = typeof rpaJobs.$inferInsert;

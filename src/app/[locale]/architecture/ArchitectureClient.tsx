@@ -168,6 +168,42 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     en: "Playwright-based automation adapter targeting the eJournalPress platform.",
     he: "אדפטר מבוסס Playwright המכוון לאוטומציה בפלטפורמת eJournalPress."
   },
+  "Claude 3.5 Haiku": {
+    en: "Anthropic's fastest model, used for quick text manipulations, figure legend improvement, and low-latency background tasks.",
+    he: "המודל המהיר ביותר של Anthropic, משמש למניפולציות טקסט קצרות, שיפור כיתובי איורים, ומשימות רקע שדורשות זמן תגובה מיידי."
+  },
+  "GPT-4o-mini": {
+    en: "Cost-efficient OpenAI model used for fast telemetry, extracting user feedback, and learning rules for the RLHF system.",
+    he: "מודל חסכוני ומהיר של OpenAI המשמש לטלמטריה, חילוץ משוב מהמשתמש, וגזירת חוקים למערכת הלמידה (RLHF)."
+  },
+  "Hugging Face Spaces": {
+    en: "Cloud platform used to deploy reproducible research agents as isolated MCP servers.",
+    he: "פלטפורמת ענן המשמשת לפריסת סוכני מחקר עצמאיים (כשרתי MCP) המאפשרים שחזור מדויק של תוצאות."
+  },
+  "next-intl": {
+    en: "Internationalization (i18n) library used to support both English and Hebrew interfaces seamlessly.",
+    he: "ספריית תרגום ושפות (i18n) המאפשרת תמיכה חלקה בממשק משתמש באנגלית ובעברית."
+  },
+  "Tailwind CSS": {
+    en: "Utility-first CSS framework for rapidly building custom, responsive user interfaces.",
+    he: "פריימוורק עיצוב (CSS) מבוסס-מחלקות לבנייה מהירה של ממשקי משתמש מודרניים ורספונסיביים."
+  },
+  "Framer Motion": {
+    en: "Production-ready animation library for React, powering the smooth transitions in the system flowchart and UI.",
+    he: "ספריית אנימציות מתקדמת ל-React, האחראית על מעברים חלקים בממשק המשתמש ותרשים הזרימה."
+  },
+  "Sonner": {
+    en: "An opinionated toast component for React used for real-time success/error notifications.",
+    he: "ספריית התראות (Toasts) אלגנטית המציגה הודעות הצלחה ושגיאה למשתמש בזמן אמת."
+  },
+  "Zod": {
+    en: "TypeScript-first schema declaration and validation library, ensuring AI outputs exactly match expected JSON structures.",
+    he: "ספריית ולידציה המבטיחה שהתשובות שחוזרות ממודלי ה-AI (בפורמט JSON) תואמות בדיוק למבנה הנתונים המצופה."
+  },
+  "Jest": {
+    en: "Delightful JavaScript Testing Framework with a focus on simplicity, used for unit testing core agent logic.",
+    he: "סביבת בדיקות (טסטים) ל-JavaScript המשמשת לווידוא הלוגיקה והאמינות של סוכני ה-AI והמערכת."
+  }
 };
 
 const PHASES = [
@@ -186,7 +222,7 @@ const ARCHITECTURE_STEPS = [
       en: "User uploads manuscript (PDF/Word). Next.js API Routes stream it to Vercel Blob and trigger the Inngest background engine.",
       he: "המשתמש מעלה את המאמר (PDF/Word). נתיבי ה-API מעבירים את הקובץ לאחסון מאובטח ומזנקים את תהליכי הרקע במנוע של Inngest."
     },
-    icon: Upload, tools: ["Next.js 16 UI", "Vercel Blob", "Inngest", "Mammoth & Docx", "PDF Parser", "Upstash Redis", "LangChain & LangGraph"],
+    icon: Upload, tools: ["Next.js 16 UI", "Vercel Blob", "Inngest", "Mammoth "Next.js 16 UI", "Vercel Blob", "Inngest", "Mammoth & Docx", "PDF Parser", "Upstash Redis", "LangChain & LangGraph" Docx", "PDF Parser", "Upstash Redis", "LangChain "Next.js 16 UI", "Vercel Blob", "Inngest", "Mammoth & Docx", "PDF Parser", "Upstash Redis", "LangChain & LangGraph" LangGraph", "next-intl", "Tailwind CSS", "Framer Motion", "Sonner"],
     color: "bg-cyan-50 text-cyan-700 border-cyan-200"
   },
   {
@@ -200,7 +236,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are a distinguished Academic Editor-in-Chief.\nTASK: Perform a deep-dive diagnostic analysis of the uploaded manuscript.\n1. Extract the core scientific thesis, research gaps addressed, and methodological approach.\n2. Identify structural deficiencies (e.g., inadequate literature review, missing limitations, weak statistical grounding).\n3. Formulate 5 probing questions for the author to clarify ambiguities before the revision pipeline begins.\nOUTPUT: Strict JSON matching the 'ClarificationReport' schema.", 
       he: "מערכת: אתה עורך אקדמי ראשי בעל שם עולמי.\nמשימה: בצע ניתוח דיאגנוסטי מעמיק של כתב היד.\n1. חלץ את התזה המדעית המרכזית, פערי המחקר, והגישה המתודולוגית.\n2. זהה כשלים מבניים (למשל: סקירת ספרות חסרה, היעדר מגבלות מחקר, ביסוס סטטיסטי חלש).\n3. נסח 5 שאלות חקר מחודדות למחבר לצורך הבהרת עמימויות לפני תחילת השכתוב.\nפלט: JSON קפדני התואם לסכמת ClarificationReport." 
     },
-    icon: Search, tools: ["Claude 3.7", "Vercel AI SDK"],
+    icon: Search, tools: ["Claude 3.7", "Vercel AI SDK", "GPT-4o-mini", "Zod"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
@@ -228,7 +264,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are an Expert Literature Researcher equipped with Semantic Scholar & PubMed MCP tools.\nTASK:\n1. Generate optimized Boolean search queries combining core concepts from the manuscript.\n2. Retrieve the top 50 most relevant papers published in the last 3 years.\n3. Use GraphRAG to extract key findings and methodologies.\n4. Identify missing foundational citations in the current draft.\nOUTPUT: A synthesized Literature Matrix (JSON) mapping claims in the text to retrieved DOIs.", 
       he: "מערכת: אתה חוקר ספרות מומחה המצויד בכלי גישה ל-Semantic Scholar ול-PubMed.\nמשימה:\n1. נסח שאילתות חיפוש בוליאניות אופטימליות המשלבות את מושגי הליבה של המאמר.\n2. שלוף את 50 המאמרים הרלוונטיים ביותר מה-3 שנים האחרונות.\n3. השתמש ב-GraphRAG כדי לחלץ מתודולוגיות וממצאים.\n4. זהה ציטוטי חובה שחסרים בטיוטה הנוכחית.\nפלט: מטריצת ספרות מסונתזת הממפה טענות בטקסט ל-DOIs מתאימים." 
     },
-    icon: Database, tools: ["Claude 3.7", "pgvector", "GraphRAG", "MCP", "LangChain & LangGraph"],
+    icon: Database, tools: ["Claude 3.7", "pgvector", "GraphRAG", "MCP", "LangChain "Claude 3.7", "pgvector", "GraphRAG", "MCP", "LangChain & LangGraph" LangGraph", "Hugging Face Spaces"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
@@ -242,7 +278,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are a Data Scientist & Visual Analytics Reviewer.\nTASK: Analyze all charts, tables, and statistical claims within the manuscript.\n1. Use Vision AI to evaluate the clarity, accessibility (e.g., colorblind-safe palettes), and correctness of figures.\n2. Extract statistical reporting (p-values, CI, sample sizes) and run consistency checks via the E2B Sandbox.\n3. Flag any discrepancies between the data visualized and the text conclusions.\nOUTPUT: A rigorous Statistical & Visual Audit Report.", 
       he: "מערכת: אתה מדען נתונים ומבקר אנליזה חזותית.\nמשימה: נתח את כל התרשימים, הטבלאות והטענות הסטטיסטיות במאמר.\n1. השתמש ב-Vision AI כדי להעריך את הבהירות, הנגישות, והנכונות של האיורים.\n2. חלץ דיווחים סטטיסטיים וודא עקביות באמצעות הפעלת קוד ב-E2B Sandbox.\n3. התרע על כל פער בין הנתונים המוצגים לבין המסקנות בטקסט.\nפלט: דוח ביקורת סטטיסטית וחזותית קפדני." 
     },
-    icon: BarChart2, tools: ["Claude 3.7", "Vision AI", "E2B Sandbox"],
+    icon: BarChart2, tools: ["Claude 3.7", "Claude 3.5 Haiku", "Vision AI", "E2B Sandbox"],
     color: "bg-orange-50 text-orange-700 border-orange-200"
   },
   {
@@ -304,7 +340,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are the Final Quality Assurance (QA) Inspector.\nTASK: Perform a rigorous, multi-pass validation on the finalized manuscript.\n1. Execute plagiarism & similarity detection against major academic databases.\n2. Verify cross-referencing integrity (all figures, tables, and citations mentioned in text exist in the bibliography and vice-versa).\n3. Perform a final grammar, syntax, and typesetting check.\nOUTPUT: A QA Clearance Certificate or a list of critical blocking errors.", 
       he: "מערכת: אתה פקח בקרת האיכות הסופית (QA).\nמשימה: בצע ולידציה רב-שלבית קפדנית על כתב היד המוגמר.\n1. הפעל זיהוי פלגיאט ודמיון אל מול מאגרי מידע אקדמיים מרכזיים.\n2. ודא שלמות של הפניות צולבות (כל התרשימים והציטוטים המוזכרים בטקסט אכן קיימים, והפוך).\n3. בצע בדיקת דקדוק, תחביר ועיצוב טיפוגרפי סופית.\nפלט: תעודת אישור QA או רשימה של שגיאות חוסמות קריטיות." 
     },
-    icon: ShieldCheck, tools: ["react-force-graph-2d", "Claude 3.7"],
+    icon: ShieldCheck, tools: ["react-force-graph-2d", "Claude 3.7", "Jest"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
@@ -318,7 +354,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are the Publishing Executive.\nTASK: Prepare the submission package.\n1. Draft a highly persuasive Cover Letter addressing the specific Editor-in-Chief of the target journal, highlighting the novelty and broad impact of the research.\n2. Ensure all compliance declarations (conflict of interest, funding, data availability) are present.\n3. Format the final output cleanly.\nOUTPUT: Cover Letter text and metadata payload for export.", 
       he: "מערכת: אתה מנהל ההוצאה לאור.\nמשימה: הכן את חבילת ההגשה.\n1. נסח מכתב מקדים (Cover Letter) משכנע הממוען ספציפית לעורך הראשי של כתב העת, תוך הדגשת החדשנות וההשפעה של המחקר.\n2. ודא כי כל הצהרות החובה (ניגוד עניינים, מימון, זמינות נתונים) קיימות.\n3. עצב את התוצר הסופי בצורה נקייה.\nפלט: טקסט המכתב ומטען (Payload) נתונים לייצוא." 
     },
-    icon: Download, tools: ["Claude 3.5", "Next.js API", "Mammoth & Docx", "Nodemailer", "Stripe Billing"],
+    icon: Download, tools: ["Claude 3.7", "Next.js API", "Mammoth & Docx", "Nodemailer", "Stripe Billing"],
     color: "bg-cyan-50 text-cyan-700 border-cyan-200"
   },
   
@@ -344,7 +380,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are a strict Journal Requirements Parsing Engine.\nTASK: Deeply analyze the scraped HTML/text of the target journal's Author Guidelines.\n1. Extract explicit constraints: abstract word limit, main text word limit, reference formatting style (e.g., APA, IEEE), figure resolution rules, and mandatory section order.\n2. Identify implicit requirements (e.g., blind title page, specific declarations).\nOUTPUT: A rigid JournalRules JSON schema mapping every constraint.",
       he: "מערכת: אתה מנוע פענוח קפדני לדרישות כתבי עת.\nמשימה: נתח לעומק את ה-HTML/טקסט שנשאב מעמוד הנחיות המחברים של העיתון.\n1. חלץ אילוצים מפורשים: מגבלת מילים בתקציר ובגוף הטקסט, סגנון ציטוט (APA, IEEE), דרישות רזולוציה לאיורים, וסדר פרקים חובה.\n2. זהה דרישות סמויות (למשל: עמוד כותרת נפרד לביקורת עיוורת, הצהרות ספציפיות).\nפלט: סכמת JSON קשיחה הממפה כל אילוץ."
     },
-    icon: Search, tools: ["Claude 3.5", "Neon Postgres", "Drizzle ORM"],
+    icon: Search, tools: ["Claude 3.7", "Neon Postgres", "Drizzle ORM"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {
@@ -358,7 +394,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are a precision Formatting & Typesetting Agent.\nINPUTS: Final manuscript, JournalRules JSON.\nTASK: Structurally transform the manuscript without altering scientific claims.\n1. Restructure headers to match the journal's hierarchy.\n2. Automatically trim or expand the abstract to fit the exact word boundaries.\n3. Reformat all in-text citations and the bibliography to match the required standard perfectly.\nOUTPUT: The completely reformatted manuscript.",
       he: "מערכת: אתה סוכן עיצוב וטיפוגרפיה מדויק.\nקלטים: כתב היד הסופי, קובץ JSON של הנחיות העיתון.\nמשימה: התמר את כתב היד מבחינה מבנית מבלי לשנות טענות מדעיות.\n1. סדר מחדש את הכותרות כך שיתאימו להיררכיה של העיתון.\n2. קצץ או הרחב אוטומטית את התקציר כך שיעמוד בדיוק במגבלת המילים.\n3. עצב מחדש את כל הציטוטים בגוף הטקסט והביבליוגרפיה לסגנון הנדרש.\nפלט: כתב היד המעוצב במלואו."
     },
-    icon: Scissors, tools: ["Claude 3.5", "Tiptap & Monaco"],
+    icon: Scissors, tools: ["Claude 3.7", "Tiptap & Monaco"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {
@@ -401,7 +437,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are a DOM-parsing and Data-Entry Agent.\nTASK: Fill out the journal's complex multi-page submission form.\n1. Scan the current page for input fields, textareas, and select dropdowns.\n2. Cross-reference the required fields with the manuscript's JSON metadata.\n3. Map and type out all fields automatically (e.g., matching 'Corresponding Author' to the user's profile).\n4. Upload the required files (Manuscript, Cover Letter, Figures) into the correct dropzones.\nOUTPUT: State verification that all mandatory fields are satisfied.", 
       he: "מערכת: אתה סוכן ניתוח DOM והזנת נתונים.\nמשימה: מלא את טופס ההגשה מרובה-הדפים של העיתון.\n1. סרוק את העמוד הנוכחי לאיתור שדות טקסט, תפריטי בחירה ואזורי גרירה.\n2. הצלב את השדות הנדרשים עם המטא-דאטה של המאמר (JSON).\n3. הזן את כל הנתונים הרלוונטיים (לדוגמה, חיבור 'המחבר המייצג' לפרופיל המשתמש).\n4. העלה את הקבצים הנדרשים (קובץ המאמר, מכתב מלווה, איורים) לאזורים הנכונים.\nפלט: אישור סטטוס שכל השדות החובה מולאו כהלכה." 
     },
-    icon: Edit3, tools: ["Playwright", "Claude 3.5", "Vision AI", "Nodemailer"],
+    icon: Edit3, tools: ["Playwright", "Claude 3.7", "Vision AI", "Nodemailer"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {
@@ -459,7 +495,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are a Peer Review Analyst.\nTASK: Deconstruct the peer review text into an array of isolated, distinct comments.\n1. Identify when a new point is being raised by a reviewer.\n2. Extract the exact text of the comment.\n3. Classify it as Major Revision (methodological flaws, requires new data) or Minor Revision (typos, clarifications, formatting).\nOUTPUT: A JSON array of 'ReviewComment' objects.", 
       he: "מערכת: אתה מנתח ביקורות עמיתים.\nמשימה: פרק את מכתב הביקורת למערך של הערות בודדות ונפרדות.\n1. זהה מתי הסוקר עובר לנקודה או להערה חדשה.\n2. חלץ את הטקסט המדויק של ההערה.\n3. סווג אותה כ'תיקון מהותי' (כשלים מתודולוגיים, צורך בנתונים חדשים) או 'תיקון משני' (שגיאות כתיב, הבהרות, עיצוב).\nפלט: מערך JSON של אובייקטים מסוג 'ReviewComment'." 
     },
-    icon: GitMerge, tools: ["Claude 3.5", "Vercel AI SDK"],
+    icon: GitMerge, tools: ["Claude 3.7", "Vercel AI SDK", "GPT-4o-mini", "Zod"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
   {
@@ -487,7 +523,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are the Targeted Execution Agent.\nTASK: Modify the manuscript exactly according to the Rebuttal Strategy.\n1. Locate the specific paragraphs identified by the Area Chair.\n2. Execute the required rewriting, preserving the surrounding context perfectly.\n3. Output a diff (Track Changes) showing only the newly modified areas so the human author can review them easily.\nOUTPUT: Updated manuscript with localized diffs.", 
       he: "מערכת: אתה סוכן ביצוע ממוקד-מטרה.\nמשימה: שנה את כתב היד בדיוק לפי אסטרטגיית המענה.\n1. אתר את הפסקאות הספציפיות שסומנו על ידי סוכן-העל.\n2. בצע את השכתוב הנדרש, תוך שמירה מושלמת על ההקשר הסובב.\n3. הפק מסמך עם סימוני שינויים (Track Changes) שיציג אך ורק את החלקים שעודכנו כדי שהמחבר יוכל לבחון אותם.\nפלט: כתב היד המעודכן עם סימוני Diff." 
     },
-    icon: Code, tools: ["Claude 3.5"],
+    icon: Code, tools: ["Claude 3.7"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
   {
@@ -501,7 +537,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are an Academic Letter Generator.\nTASK: Compile the final 'Response to Reviewers' letter.\n1. Use a highly formal, respectful, and appreciative academic tone.\n2. Format the letter as: [Reviewer Comment] followed by [Author Response] and [Action Taken in Manuscript].\n3. Include page/line numbers showing where the changes were made.\nOUTPUT: A perfectly formatted PDF/Docx rebuttal letter ready for submission.", 
       he: "מערכת: אתה מפיק מסמכים אקדמיים.\nמשימה: חבר את המכתב הסופי 'מענה לסוקרים'.\n1. השתמש בטון אקדמי רשמי, מכבד ומלא הוקרה.\n2. ערוך את המכתב במבנה של: [הערת הסוקר] מלווה ב-[תגובת המחברים] ו-[פעולה שבוצעה במאמר].\n3. ציין מספרי עמודים/שורות המראים היכן בוצעו השינויים בפועל.\nפלט: מכתב תגובה מעוצב בפורמט PDF/Docx מוכן להגשה." 
     },
-    icon: FileCheck, tools: ["Next.js API", "Claude 3.5", "Mammoth & Docx"],
+    icon: FileCheck, tools: ["Next.js API", "Claude 3.7", "Mammoth & Docx"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
   
