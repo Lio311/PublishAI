@@ -1,6 +1,5 @@
-/**
- * Mock service for E2B Data Science Sandbox
- */
+import { Sandbox } from '@e2b/code-interpreter';
+
 export interface SandboxExecutionResult {
   conclusions: string;
   plots: string[]; // Base64 encoded plots
@@ -19,11 +18,6 @@ export class SandboxService {
     pythonScript: string,
     csvData: string
   ): Promise<SandboxExecutionResult> {
-    console.log('Mocking execution of Python script in Sandbox environment...');
-    
-    // Simulate some execution time
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
     if (!pythonScript || !csvData) {
       return {
         success: false,
@@ -33,14 +27,55 @@ export class SandboxService {
       };
     }
 
-    // Mock response
-    return {
-      success: true,
-      conclusions: 'The data indicates a positive correlation between X and Y, with a p-value < 0.05. The variance is consistent across the dataset.',
-      plots: [
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=' // Mock base64 image (1x1 pixel)
-      ]
-    };
+    try {
+      const sandbox = await Sandbox.create();
+      
+      // Write the CSV data to a file inside the sandbox
+      // We use data.csv as a standard filename for the generated scripts
+      await sandbox.files.write('data.csv', csvData);
+
+      // Run the Python script
+      const execution = await sandbox.runCode(pythonScript);
+      
+      // execution.results contains visual outputs like charts, display calls
+      const plots = execution.results
+        .filter(r => !!r.png)
+        .map(r => r.png as string);
+
+      // execution.logs contains stdout/stderr
+      const logs = [
+        ...execution.logs.stdout,
+        ...execution.logs.stderr
+      ].join('\n');
+      
+      const conclusions = logs || 'No output generated.';
+
+      // Clean up the sandbox
+      await sandbox.kill();
+
+      if (execution.error) {
+        return {
+          success: false,
+          conclusions: conclusions,
+          plots,
+          error: `${execution.error.name}: ${execution.error.value}\n${execution.error.traceback}`
+        };
+      }
+
+      return {
+        success: true,
+        conclusions: conclusions,
+        plots
+      };
+    } catch (error) {
+      console.error('Error executing in sandbox:', error);
+      return {
+        success: false,
+        conclusions: '',
+        plots: [],
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
   }
 }
 
