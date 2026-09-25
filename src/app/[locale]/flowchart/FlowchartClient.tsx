@@ -380,7 +380,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
               </div>
 
               {/* Row 2 - RTL mapped logically via flex-row-reverse on desktop */}
-              <div className={`mt-0 lg:mt-12 flex flex-col lg:flex-row items-center w-full relative justify-between z-10 lg:flex-row-reverse`}>
+              <div className={`mt-0 lg:mt-12 flex flex-col items-center w-full relative justify-between z-10 lg:flex-row-reverse`}>
                 <NodeCard type="agent" icon={Layers} isHe={isHe} titleEn="Area Chair (o1)" titleHe="סוכן-על (o1)" descEn="Synthesizes debate into concrete action plan" descHe="מסנתז דיבייט לתוכנית פעולה עמוקה" techs={['o1-preview']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} reverse={true} label={{en: 'Plan', he: 'תוכנית'}} />
