@@ -1,20 +1,20 @@
 import re
 
-with open("src/app/[locale]/flowchart/FlowchartClient.tsx", "r") as f:
+with open('src/app/[locale]/flowchart/FlowchartClient.tsx', 'r', encoding='utf-8') as f:
     content = f.read()
 
-# Add Layers to lucide-react import
-content = re.sub(r'Box, HelpCircle, Workflow, BarChart2,', 'Box, HelpCircle, Workflow, BarChart2, Layers,', content)
+# 1. Fix TurnArrow height
+content = content.replace(
+    "h-full border-slate-400",
+    "h-[calc(100%+3rem)] border-slate-400"
+)
 
-# Remove everything after the first `        </div>\n      </div>\n    </DashboardLayout>\n  );\n}`
-first_end = content.find("    </DashboardLayout>\n  );\n}")
-content_before_end = content[:first_end]
+# 2. Fix Row 2 flex direction
+content = content.replace(
+    "${isHe ? 'lg:flex-row' : 'lg:flex-row-reverse'}",
+    "lg:flex-row-reverse"
+)
 
-# Extract the appended stuff
-appended_stuff = content[first_end + len("    </DashboardLayout>\n  );\n}"):]
+with open('src/app/[locale]/flowchart/FlowchartClient.tsx', 'w', encoding='utf-8') as f:
+    f.write(content)
 
-# Insert the appended stuff BEFORE the closing tags
-new_content = content_before_end + appended_stuff + "\n    </DashboardLayout>\n  );\n}\n"
-
-with open("src/app/[locale]/flowchart/FlowchartClient.tsx", "w") as f:
-    f.write(new_content)

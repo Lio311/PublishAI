@@ -16,6 +16,23 @@ export default function VisualFlowchart({ locale }: VisualFlowchartProps) {
       
       <div className="flex flex-col items-center gap-6 min-w-[800px]">
         
+        
+        {/* Phase 0 */}
+        <div className="w-full bg-white border border-indigo-200 rounded-xl p-6 shadow-sm">
+          <h4 className="font-bold text-indigo-800 mb-4 border-b border-indigo-100 pb-2">
+            {isHe ? "שלב 0: מחקר, נתונים וניתוח חזותי" : "Phase 0: Data Science & Vision"}
+          </h4>
+          <div className="flex items-center justify-center gap-6">
+            <Node title={isHe ? "העלאת נתונים" : "Data Upload"} color="bg-indigo-100 text-indigo-800" />
+            <Arrow isHe={isHe} />
+            <Node title={isHe ? "ארגז חול (פייתון)" : "Data Science Sandbox"} color="bg-indigo-100 text-indigo-800" />
+            <Arrow isHe={isHe} />
+            <Node title={isHe ? "ניתוח איורים (Vision)" : "Vision Analysis"} color="bg-indigo-100 text-indigo-800" />
+          </div>
+        </div>
+
+        <ArrowDown className="text-slate-400 w-6 h-6" />
+
         {/* Phase 1 */}
         <div className="w-full bg-white border border-cyan-200 rounded-xl p-6 shadow-sm">
           <h4 className="font-bold text-cyan-800 mb-4 border-b border-cyan-100 pb-2">
@@ -82,6 +99,24 @@ export default function VisualFlowchart({ locale }: VisualFlowchartProps) {
             <Node title={isHe ? "שכתוב ממוקד" : "Directed Revision"} color="bg-amber-100 text-amber-800" />
             <Arrow isHe={isHe} />
             <Node title={isHe ? "מכתב תגובה רשמי" : "Formal Rebuttal Letter"} color="bg-amber-100 text-amber-800" />
+          </div>
+        </div>
+
+        <ArrowDown className="text-slate-400 w-6 h-6" />
+
+        {/* Phase 4 */}
+        <div className="w-full bg-white border border-emerald-200 rounded-xl p-6 shadow-sm">
+          <h4 className="font-bold text-emerald-800 mb-4 border-b border-emerald-100 pb-2">
+            {isHe ? "שלב 4: הפצה ולמידת חיזוק (RLHF)" : "Phase 4: Dissemination & RLHF"}
+          </h4>
+          <div className="flex items-center justify-center gap-6">
+            <Node title={isHe ? "פרסום באתר (CMS)" : "CMS Publish"} color="bg-emerald-100 text-emerald-800" />
+            <Arrow isHe={isHe} />
+            <Node title={isHe ? "מעקב ביצועים" : "Performance Tracking"} color="bg-emerald-100 text-emerald-800" />
+            <Arrow isHe={isHe} />
+            <Node title={isHe ? "משוב אנושי (RLHF)" : "Human Feedback"} color="bg-emerald-100 text-emerald-800" />
+            <Arrow isHe={isHe} />
+            <Node title={isHe ? "עדכון מודלים" : "Model Fine-Tuning"} color="bg-emerald-100 text-emerald-800" />
           </div>
         </div>
 

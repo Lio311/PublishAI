@@ -9,7 +9,10 @@ export const knowledgeNode = async (state: PublishAIState): Promise<Partial<Publ
     temperature: 0.1,
   });
 
-  const prompt = `You are a Knowledge Agent. Retrieve necessary academic context and facts to support the writing plan.`;
+  const prompt = `You are a Knowledge Agent. Retrieve necessary academic context and facts to support the writing plan.
+User Memory Context:
+${state.memoryContext}
+`;
 
   const messages = [
     new SystemMessage(prompt),

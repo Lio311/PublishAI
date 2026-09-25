@@ -144,7 +144,7 @@ function TurnArrow({ isHe, direction }: { isHe: boolean, direction: 'right-to-le
   const isRightSide = (isHe && direction === 'left-to-right') || (!isHe && direction === 'right-to-left');
   
   return (
-    <div className={`hidden lg:block absolute top-1/2 w-8 h-full border-slate-400 z-0 ${isRightSide ? 'right-0 border-r-[3px] border-y-[3px] rounded-r-xl translate-x-[90%]' : 'left-0 border-l-[3px] border-y-[3px] rounded-l-xl -translate-x-[90%]'}`}>
+    <div className={`hidden lg:block absolute top-1/2 w-8 h-[calc(100%+3rem)] border-slate-400 z-0 ${isRightSide ? 'right-0 border-r-[3px] border-y-[3px] rounded-r-xl translate-x-[90%]' : 'left-0 border-l-[3px] border-y-[3px] rounded-l-xl -translate-x-[90%]'}`}>
       <div className={`absolute bottom-[-1px] ${isRightSide ? 'left-[-4px]' : 'right-[-4px]'} border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent ${isRightSide ? 'border-r-[10px] border-r-slate-400' : 'border-l-[10px] border-l-slate-400'}`}></div>
     </div>
   );
@@ -380,7 +380,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
               </div>
 
               {/* Row 2 - RTL mapped logically via flex-row-reverse on desktop */}
-              <div className={`mt-0 lg:mt-12 flex flex-col lg:flex-row items-center w-full relative justify-between z-10 ${isHe ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
+              <div className={`mt-0 lg:mt-12 flex flex-col lg:flex-row items-center w-full relative justify-between z-10 lg:flex-row-reverse`}>
                 <NodeCard type="agent" icon={Layers} isHe={isHe} titleEn="Area Chair (o1)" titleHe="סוכן-על (o1)" descEn="Synthesizes debate into concrete action plan" descHe="מסנתז דיבייט לתוכנית פעולה עמוקה" techs={['o1-preview']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} reverse={true} label={{en: 'Plan', he: 'תוכנית'}} />
