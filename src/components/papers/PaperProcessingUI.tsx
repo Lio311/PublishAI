@@ -148,7 +148,7 @@ const FLOW_STEPS: FlowStep[] = [
 
 
 export default function PaperProcessingUI({ paperId, initialStatus }: { paperId: number, initialStatus: string }) {
-  const t = useTranslations("Dashboard.SystemFlow");
+  const t = useTranslations("SystemFlow");
   const [currentStepIndex, setCurrentStepIndex] = useState(1); // Skip upload step
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set([0]));
   const [isFinished, setIsFinished] = useState(false);
@@ -159,29 +159,39 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
   const [captchaInput, setCaptchaInput] = useState("");
   const [submittingCaptcha, setSubmittingCaptcha] = useState(false);
 
-  // Auto-advance for visual simulation
   useEffect(() => {
     if (isFinished || requiresCaptcha) return;
-    
+
     // Scroll current step into view
     const currentEl = stepRefs.current[currentStepIndex];
     if (currentEl) {
       currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-    
-    const timer = setTimeout(() => {
-      setCompletedSteps((prev: Set<number>) => new Set([...prev, currentStepIndex]));
-      
-      const nextIndex = currentStepIndex + 1;
-      if (nextIndex < FLOW_STEPS.length) {
-        setCurrentStepIndex(nextIndex);
-      } else {
-        setIsFinished(true);
-      }
-    }, 4500); // 4.5 seconds per agent for simulation
 
-    return () => clearTimeout(timer);
-  }, [currentStepIndex, isFinished, requiresCaptcha]);
+    const checkStatus = async () => {
+      try {
+        const res = await fetch(`/api/submissions/${paperId}/status`);
+        if (res.ok) {
+          const data = await res.json();
+          // Assuming data.status relates to our FLOW_STEPS
+          if (data.status === 'completed' || data.status === 'approved') {
+             setIsFinished(true);
+             setCompletedSteps(new Set(FLOW_STEPS.map((_, i) => i)));
+          }
+          // We can also parse event progress here if needed
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    
+    // Poll every 3 seconds
+    const interval = setInterval(checkStatus, 3000);
+    checkStatus();
+
+    return () => clearInterval(interval);
+  }, [currentStepIndex, isFinished, requiresCaptcha, paperId]);
+
 
   const handleCaptchaSubmit = async () => {
     try {

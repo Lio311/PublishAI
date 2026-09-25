@@ -120,12 +120,25 @@ export default function RichDocumentEditor({
     setSaveStatus("unsaved");
   };
 
-  const handleManualSave = () => {
+  const handleManualSave = async () => {
     setSaveStatus("saving");
-    setTimeout(() => {
-      onSave?.(content, title);
-      setSaveStatus("saved");
-    }, 600);
+    try {
+      const res = await fetch(`/api/documents/${documentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, title })
+      });
+      if (res.ok) {
+        onSave?.(content, title);
+        setSaveStatus("saved");
+      } else {
+        setSaveStatus("unsaved");
+        toast.error("Failed to save document");
+      }
+    } catch (e) {
+      setSaveStatus("unsaved");
+      toast.error("Error saving document");
+    }
   };
 
   const handleAiAction = async (actionType: string) => {
@@ -266,14 +279,14 @@ export default function RichDocumentEditor({
       {/* Editor Formatting Toolbar */}
       <div className="px-4 py-2 border-b border-slate-200 bg-white flex items-center gap-1 overflow-x-auto shrink-0 text-slate-700 text-xs">
         <button
-          onClick={() => insertFormatting("**", "**")}
+          onClick={() => editor?.chain().focus().toggleBold().run()}
           className="p-1.5 hover:bg-slate-100 rounded text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
           title="Bold"
         >
           <Bold className="w-4 h-4" />
         </button>
         <button
-          onClick={() => insertFormatting("*", "*")}
+          onClick={() => editor?.chain().focus().toggleItalic().run()}
           className="p-1.5 hover:bg-slate-100 rounded text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
           title="Italic"
         >
@@ -281,21 +294,21 @@ export default function RichDocumentEditor({
         </button>
         <div className="w-px h-4 bg-slate-200 mx-1" />
         <button
-          onClick={() => insertFormatting("# ")}
+          onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
           className="p-1.5 hover:bg-slate-100 rounded text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
           title="Heading 1"
         >
           <Heading1 className="w-4 h-4" />
         </button>
         <button
-          onClick={() => insertFormatting("## ")}
+          onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
           className="p-1.5 hover:bg-slate-100 rounded text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
           title="Heading 2"
         >
           <Heading2 className="w-4 h-4" />
         </button>
         <button
-          onClick={() => insertFormatting("### ")}
+          onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
           className="p-1.5 hover:bg-slate-100 rounded text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
           title="Heading 3"
         >
@@ -303,28 +316,28 @@ export default function RichDocumentEditor({
         </button>
         <div className="w-px h-4 bg-slate-200 mx-1" />
         <button
-          onClick={() => insertFormatting("- ")}
+          onClick={() => editor?.chain().focus().toggleBulletList().run()}
           className="p-1.5 hover:bg-slate-100 rounded text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
           title="Bullet List"
         >
           <List className="w-4 h-4" />
         </button>
         <button
-          onClick={() => insertFormatting("1. ")}
+          onClick={() => editor?.chain().focus().toggleOrderedList().run()}
           className="p-1.5 hover:bg-slate-100 rounded text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
           title="Numbered List"
         >
           <ListOrdered className="w-4 h-4" />
         </button>
         <button
-          onClick={() => insertFormatting("> ")}
+          onClick={() => editor?.chain().focus().toggleBlockquote().run()}
           className="p-1.5 hover:bg-slate-100 rounded text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
           title="Blockquote"
         >
           <Quote className="w-4 h-4" />
         </button>
         <button
-          onClick={() => insertFormatting("```\n", "\n```")}
+          onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
           className="p-1.5 hover:bg-slate-100 rounded text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
           title="Code Block"
         >
@@ -332,19 +345,19 @@ export default function RichDocumentEditor({
         </button>
         <div className="w-px h-4 bg-slate-200 mx-1" />
         <button
-          onClick={() => insertFormatting("[@citation_key]")}
+          onClick={() => editor?.chain().focus().insertContent("[@citation_key]").run()}
           className="px-2 py-1 bg-sky-50 text-sky-700 hover:bg-sky-100 rounded text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
         >
           <BookOpen className="w-3.5 h-3.5" /> + Citation
         </button>
         <button
-          onClick={() => insertFormatting("![Figure 1: Caption](figure1.png)")}
+          onClick={() => editor?.chain().focus().insertContent("![Figure 1: Caption](figure1.png)").run()}
           className="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-xs font-medium transition-colors cursor-pointer"
         >
           + Figure
         </button>
         <button
-          onClick={() => insertFormatting("$$ E = mc^2 $$")}
+          onClick={() => editor?.chain().focus().insertContent("$$ E = mc^2 $$").run()}
           className="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-xs font-medium transition-colors cursor-pointer"
         >
           + LaTeX
