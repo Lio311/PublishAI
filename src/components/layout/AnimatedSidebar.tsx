@@ -6,7 +6,7 @@ import { Link, usePathname, useRouter } from "@/app/i18n/routing";
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { FileText, Home, Settings, LogOut, Globe, Book, Link as LinkIcon, ChevronRight, Send, Share2, Brain, X } from "lucide-react";
+import { FileText, Home, Settings, LogOut, Globe, Book, Link as LinkIcon, ChevronRight, Send, Share2, Brain, X, Workflow } from "lucide-react";
 
 export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean, onClose?: () => void }) {
   const pathname = usePathname();
@@ -40,6 +40,7 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
   if (isAdmin) {
     menuItems.push({ name: locale === 'he' ? 'ניהול מערכת' : 'Admin Dashboard', icon: Globe, href: `/admin` });
     menuItems.push({ name: locale === 'he' ? 'ארכיטקטורת מערכת' : 'System Architecture', icon: Share2, href: `/architecture` });
+    menuItems.push({ name: locale === 'he' ? 'תרשים זרימה' : 'System Flowchart', icon: Workflow, href: `/flowchart` });
     menuItems.push({ name: locale === 'he' ? 'למידת מערכת' : 'AI Learning', icon: Brain, href: `/learning` });
   }
 
