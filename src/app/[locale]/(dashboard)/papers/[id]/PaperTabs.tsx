@@ -127,7 +127,7 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
             <div className="space-y-8">
               <PaperProcessingUI paperId={paperId} initialStatus={initialStatus} />
               <SubmissionTracker jobId={String(paperId)} />
-              <RejectStateHandler paperId={paperId} rejectionReason="None" />
+              <RejectStateHandler paperTitle="Sample Paper" originalJournal="Nature" recommendations={[]} />
               <UploadClarificationModal isOpen={false} onClose={() => {}} onComplete={() => {}} />
               <CaptchaSolver submissionId={String(paperId)} />
               <TwoFactorDialog isOpen={false} onClose={() => {}} onSubmit={async () => {}} />
@@ -138,7 +138,7 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
                 {activeTab === "Data Sandbox" && (
           <ErrorBoundary name="Data Sandbox">
             <div className="space-y-8">
-              <PreflightCheckPanel paperId={paperId} codeSnippet="" dependencies={[]} />
+              <PreflightCheckPanel paperId={String(paperId)} codeSnippet="" dependencies={[]} />
               <DataScienceSandboxUI />
               <DataUploadSection paperId={paperId} />
               <AnalysisStatus paperId={paperId} />

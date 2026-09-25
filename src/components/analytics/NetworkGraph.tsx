@@ -41,6 +41,13 @@ export default function NetworkGraph() {
   const nodesRef = useRef<Node[]>([]);
   const edgesRef = useRef<Edge[]>([]);
   const [, forceRender] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const requestRef = useRef<number | undefined>(undefined);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const width = 800;
+  const height = 500;
 
   useEffect(() => {
     async function fetchData() {
