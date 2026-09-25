@@ -9,7 +9,6 @@ import {
   Cpu, Database, Layers, X, Info, ArrowRight, BookOpen, Scissors, ListChecks, RefreshCw, GitMerge, FileCheck, Code
 , Terminal, Share2, Globe} from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import VisualFlowchart from "./VisualFlowchart";
 
 // Tools Dictionary
 const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string, he: string } }> = {
@@ -625,8 +624,6 @@ export default function ArchitectureClient({ isAdmin }: { isAdmin: boolean }) {
           </span>
         </button>
       </div>
-
-      <VisualFlowchart locale={locale} />
 
       {/* Phase Tabs */}
       <div className="flex flex-wrap w-full gap-2 mb-8 bg-slate-100/50 p-2 rounded-2xl border border-slate-200/50">
