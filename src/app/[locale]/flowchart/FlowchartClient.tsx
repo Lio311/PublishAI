@@ -140,12 +140,12 @@ function VerticalFlowArrow({ isHe, label, length = 'h-12' }: { isHe: boolean; la
 }
 
 // U-Turn Arrow for connecting rows in a snake layout (Desktop only)
-function TurnArrow({ isHe, direction }: { isHe: boolean, direction: 'right-to-left' | 'left-to-right' }) {
-  const isRightSide = (isHe && direction === 'left-to-right') || (!isHe && direction === 'right-to-left');
-  
+function SideDropArrow({ isRightSide }: { isRightSide: boolean }) {
   return (
-    <div className={`hidden lg:block absolute top-1/2 w-8 h-[calc(100%+3rem)] border-slate-400 z-20 pointer-events-none ${isRightSide ? 'right-0 border-r-[3px] border-y-[3px] rounded-r-xl translate-x-full' : 'left-0 border-l-[3px] border-y-[3px] rounded-l-xl -translate-x-full'}`}>
-      <div className={`absolute bottom-[-1px] ${isRightSide ? 'left-[-4px]' : 'right-[-4px]'} border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent ${isRightSide ? 'border-r-[10px] border-r-slate-400' : 'border-l-[10px] border-l-slate-400'}`}></div>
+    <div className={`hidden lg:flex absolute top-[100%] h-12 w-[175px] justify-center z-0 ${isRightSide ? 'right-0' : 'left-0'}`}>
+      <div className="h-[120%] w-[3px] bg-slate-400 relative">
+        <div className="absolute bottom-[-1px] left-1/2 -translate-x-1/2 border-t-[10px] border-t-slate-400 border-x-[6px] border-x-transparent"></div>
+      </div>
     </div>
   );
 }
@@ -375,7 +375,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="agent" icon={MessageSquare} isHe={isHe} titleEn="9. SciReview" titleHe="9. עימות סוקרים" descEn="Harsh (Claude) + Analyst (GPT-4o) + Optimist" descHe="ביקורת רב-מודלית (Claude, GPT-4o, Gemini)" techs={['GPT-4o-mini', 'Gemini 1.5 Pro']} />
                 
-                <TurnArrow isHe={isHe} direction="right-to-left" />
+                <SideDropArrow isRightSide={!isHe} />
                 <VerticalFlowArrow isHe={isHe} length="h-16 lg:hidden" />
               </div>
 
@@ -395,7 +395,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <FlowArrow isHe={isHe} reverse={true} />
                 <NodeCard type="agent" icon={Code} isHe={isHe} titleEn="11. Execution" titleHe="11. סוכן ביצוע" descEn="Applies line-by-line diff. Generates JSON patch." descHe="מחיל שינויים סעיף-אחר-סעיף ומייצר Diff." techs={['Claude 3.7 Sonnet']} />
                 
-                <TurnArrow isHe={isHe} direction="left-to-right" />
+                <SideDropArrow isRightSide={isHe} />
                 <VerticalFlowArrow isHe={isHe} length="h-16 lg:hidden" />
               </div>
 
