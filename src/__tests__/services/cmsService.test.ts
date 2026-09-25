@@ -11,27 +11,57 @@ describe('cmsService - verifyAndPublishUpdate', () => {
     title: 'New Title',
   };
 
+  const OLD_ENV = process.env;
+
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = { ...OLD_ENV, WP_API_URL: 'https://example.com/wp-json' };
+    global.fetch = jest.fn();
+  });
+
+  afterAll(() => {
+    process.env = OLD_ENV;
+  });
+
   it('should publish update successfully when remote is NOT newer', async () => {
-    // Current dummy implementation of getRemotePostMetadata returns Date.now()
-    // By setting lastKnownRemoteUpdatedAt to a future date, we simulate the remote NOT being newer
+    const remoteUpdatedAt = new Date('2023-01-01T12:00:00Z');
+    const newRemoteUpdatedAt = new Date('2023-01-01T12:05:00Z');
+
+    // First fetch for GET metadata, Second for POST update
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ modified_gmt: '2023-01-01T12:00:00' })
+    }).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ modified_gmt: '2023-01-01T12:05:00' })
+    });
+
     const mockLocalPost: LocalPost = {
       id: 'local-1',
       remoteId: 'remote-1',
-      lastKnownRemoteUpdatedAt: new Date(Date.now() + 10000), 
+      lastKnownRemoteUpdatedAt: new Date('2023-01-01T12:00:00Z'), // same as remote, so not newer
     };
 
     const result = await verifyAndPublishUpdate(mockLocalPost, mockPayload);
     expect(result).toHaveProperty('newUpdatedAt');
+    expect(result.newUpdatedAt.toISOString()).toBe(newRemoteUpdatedAt.toISOString());
+    expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 
   it('should throw CollisionError when remote timestamp is newer', async () => {
-    // By setting lastKnownRemoteUpdatedAt to a past date, we simulate the remote being newer
+    // Remote is newer than local known timestamp
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ modified_gmt: '2023-01-02T12:00:00' }) // Updated later
+    });
+
     const mockLocalPost: LocalPost = {
       id: 'local-1',
       remoteId: 'remote-1',
-      lastKnownRemoteUpdatedAt: new Date('2000-01-01T00:00:00Z'),
+      lastKnownRemoteUpdatedAt: new Date('2023-01-01T12:00:00Z'),
     };
 
     await expect(verifyAndPublishUpdate(mockLocalPost, mockPayload)).rejects.toThrow(CollisionError);
+    expect(global.fetch).toHaveBeenCalledTimes(1); // Should not call the POST endpoint
   });
 });

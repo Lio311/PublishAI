@@ -33,33 +33,125 @@ export interface LocalPost {
 }
 
 /**
- * Simulates fetching the current state of the post from WordPress.
+ * Retrieves the WordPress configuration from environment variables.
+ */
+function getWpConfig() {
+  const wpUrl = process.env.WP_API_URL;
+  const wpUser = process.env.WP_USERNAME;
+  const wpAppPassword = process.env.WP_APP_PASSWORD;
+
+  if (!wpUrl) {
+    throw new Error('WP_API_URL is not defined in environment variables');
+  }
+
+  return { wpUrl, wpUser, wpAppPassword };
+}
+
+/**
+ * Generates authorization headers for WordPress REST API.
+ */
+function getAuthHeaders(wpUser?: string, wpAppPassword?: string): HeadersInit {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  if (wpUser && wpAppPassword) {
+    const encoded = Buffer.from(`${wpUser}:${wpAppPassword}`).toString('base64');
+    headers['Authorization'] = `Basic ${encoded}`;
+  }
+
+  return headers;
+}
+
+/**
+ * Fetches the current state of the post from WordPress.
  */
 export async function getRemotePostMetadata(remoteId: string): Promise<{ updatedAt: Date }> {
-  // TODO: Replace with actual WordPress REST API GET request
-  // e.g., fetch(`https://example.com/wp-json/wp/v2/posts/${remoteId}`)
-  
-  // Returning a dummy timestamp for scaffolding purposes
+  const { wpUrl, wpUser, wpAppPassword } = getWpConfig();
+
+  const response = await fetch(`${wpUrl}/wp/v2/posts/${remoteId}`, {
+    method: 'GET',
+    headers: getAuthHeaders(wpUser, wpAppPassword),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to fetch post metadata from WordPress: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  if (!data.modified_gmt) {
+    // Fallback to 'modified' if 'modified_gmt' is not available
+    if (data.modified) {
+      return { updatedAt: new Date(data.modified) };
+    }
+    throw new Error('Unexpected response format from WordPress: missing "modified_gmt" field.');
+  }
+
   return {
-    updatedAt: new Date(), 
+    updatedAt: new Date(data.modified_gmt + 'Z'),
   };
 }
 
 /**
- * Simulates updating a post in WordPress.
+ * Updates a post in WordPress.
  */
 export async function updateWordPressPost(remoteId: string, payload: PostUpdatePayload): Promise<{ newUpdatedAt: Date }> {
-  // TODO: Replace with actual WordPress REST API POST/PUT request
-  // Need to map our `PostUpdatePayload` to WordPress specific fields:
-  // - content -> content
-  // - metadata.seoTitle -> yoast_head or similar meta field depending on SEO plugin
-  // - metadata.tags -> tags
-  // - metadata.featuredImage -> featured_media
+  const { wpUrl, wpUser, wpAppPassword } = getWpConfig();
+
+  // Map our `PostUpdatePayload` to WordPress specific fields
+  const wpPayload: Record<string, any> = {
+    content: payload.content,
+  };
+
+  if (payload.title) {
+    wpPayload.title = payload.title;
+  }
+
+  if (payload.metadata) {
+    if (payload.metadata.seoTitle) {
+      // Assuming Yoast SEO or standard meta structure
+      wpPayload.meta = {
+        ...(wpPayload.meta || {}),
+        _yoast_wpseo_title: payload.metadata.seoTitle,
+      };
+    }
+    if (payload.metadata.tags) {
+      // Need tag IDs for WP REST API, but pass as is in case the endpoint can parse strings or they are IDs
+      wpPayload.tags = payload.metadata.tags; 
+    }
+    if (payload.metadata.featuredImage) {
+      // featured_media expects an integer ID
+      const mediaId = parseInt(payload.metadata.featuredImage, 10);
+      if (!isNaN(mediaId)) {
+        wpPayload.featured_media = mediaId;
+      }
+    }
+  }
+
+  const response = await fetch(`${wpUrl}/wp/v2/posts/${remoteId}`, {
+    method: 'POST',
+    headers: getAuthHeaders(wpUser, wpAppPassword),
+    body: JSON.stringify(wpPayload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to update post in WordPress: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+
+  const data = await response.json();
   
-  console.log(`[CMS] Updating WordPress post ${remoteId}`, payload);
-  
+  if (!data.modified_gmt) {
+    if (data.modified) {
+      return { newUpdatedAt: new Date(data.modified) };
+    }
+    throw new Error('Unexpected response format from WordPress: missing "modified_gmt" field.');
+  }
+
   return {
-    newUpdatedAt: new Date(), // Simulate new update timestamp returned from WP
+    newUpdatedAt: new Date(data.modified_gmt + 'Z'),
   };
 }
 
