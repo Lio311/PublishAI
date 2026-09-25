@@ -553,10 +553,10 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             </div>
             <div className="p-6 md:p-10 flex flex-col items-center w-full relative z-10">
               <div className="flex flex-col lg:flex-row justify-between items-center w-full relative">
-                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Queue" titleHe="תור" descEn="Event: 'comments-received'" descHe="אירוע: 'התקבלו הערות סוקרים'" techs={['Inngest']} />
+                <NodeCard type="user" icon={User} isHe={isHe} titleEn="Rebuttal UI" titleHe="ממשק משתמש" descEn="User pastes Reviewer Comments" descHe="המשתמש מדביק את הערות הסוקרים" techs={['Next.js 16', 'RebuttalPanel']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={Brain} isHe={isHe} titleEn="Rebuttal Agent" titleHe="סוכן מענה" descEn="Read critique → Generate rebuttalStrategy" descHe="ניתוח הביקורת → יצירת אסטרטגיית מענה" techs={['OpenAI o1', 'Mem0']} />
+                <NodeCard type="agent" icon={Brain} isHe={isHe} titleEn="Rebuttal Agent" titleHe="סוכן מענה" descEn="Read critique → Generate strategy & letter" descHe="ניתוח הביקורת → יצירת אסטרטגיה ומכתב" techs={['GPT-4o', 'LangGraph']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="user" icon={User} isHe={isHe} titleEn="User Approve" titleHe="אישור משתמש" descEn="Approve Rebuttal Strategy in UI" descHe="אישור אסטרטגיית המענה בממשק" techs={['Next.js 16', 'NextAuth.js']} />
