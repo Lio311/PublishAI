@@ -9,7 +9,7 @@ import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 export const ingestDocument = inngest.createFunction(
   { 
     id: "ingest-document",
-    triggers: [{ event: "document.uploaded" }] 
+    triggers: [{ event: "document/uploaded" }] 
   },
   async ({ event, step }) => {
     const { documentId } = event.data;

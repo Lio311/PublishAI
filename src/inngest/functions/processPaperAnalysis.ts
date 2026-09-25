@@ -6,7 +6,7 @@ import { dataFiles, sandboxRuns, generatedCharts, papers } from "../../services/
 import { eq } from "drizzle-orm";
 
 export const processPaperAnalysis = inngest.createFunction(
-  { id: "process-paper-analysis", event: "paper.uploaded" } as any,
+  { id: "process-paper-analysis", event: "paper/uploaded" } as any,
   async ({ event, step }: { event: any, step: any }) => {
     const paperId = event.data.paperId;
 
