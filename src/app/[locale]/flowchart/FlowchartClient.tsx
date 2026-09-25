@@ -82,6 +82,12 @@ const techColors: Record<string, string> = {
   'Tiptap': 'bg-violet-50 text-violet-700 border-violet-200',
   'Python': 'bg-blue-100 text-blue-800 border-blue-300',
   'WordPress API': 'bg-sky-100 text-sky-800 border-sky-300',
+  'Semantic Scholar': 'bg-blue-100 text-blue-800 border-blue-300',
+  'Mendeley CSL': 'bg-red-100 text-red-800 border-red-300',
+  'LangChain': 'bg-sky-100 text-sky-800 border-sky-300',
+  'OpenAI': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+  'ExcelJS': 'bg-green-100 text-green-800 border-green-300',
+  'Sharp': 'bg-pink-100 text-pink-800 border-pink-300',
 };
 
 // ═══════════════════════════════════════════
@@ -302,17 +308,20 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
              ══════════════════════════════════ */}
           <div className="w-full rounded-2xl overflow-visible shadow-lg border border-indigo-200 bg-indigo-50/40 mb-2 relative">
             <div className="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-t-xl">
-              <h2 className="text-xl font-bold">{isHe ? 'שלב 0: מחקר, נתונים וניתוח חזותי' : 'Phase 0: Data Science Sandbox & Vision Analysis'}</h2>
+              <h2 className="text-xl font-bold">{isHe ? 'שלב 0: ידע ארגוני, ארגז חול וניתוח חזותי' : 'Phase 0: GraphRAG, Sandbox & Vision'}</h2>
             </div>
             <div className="p-6 md:p-10 flex flex-col items-center w-full relative">
               <div className="flex flex-col lg:flex-row justify-between items-center w-full">
-                <NodeCard type="user" icon={Database} isHe={isHe} titleEn="Data Upload" titleHe="העלאת נתונים" descEn="Upload raw datasets (CSV, Excel) & Figures" descHe="העלאת קובצי נתונים (CSV) ואיורים" techs={['Next.js 16', 'Tailwind CSS']} />
+                <NodeCard type="user" icon={Database} isHe={isHe} titleEn="Data Upload" titleHe="העלאת נתונים" descEn="Upload raw datasets & Figures" descHe="העלאת קובצי נתונים ואיורים" techs={['Next.js 16', 'ExcelJS', 'Sharp']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={BarChart2} isHe={isHe} titleEn="Data Science Sandbox" titleHe="ארגז חול לנתונים" descEn="Python execution for generating plots & analysis" descHe="הרצת פייתון ליצירת גרפים וניתוח נתונים" techs={['E2B Sandbox', 'Python']} />
+                <NodeCard type="queue" icon={Layers} isHe={isHe} titleEn="Vector & Graph Ingestion" titleHe="הטמעת ידע ורשת" descEn="Chunk to vectors & extract GraphRAG entities" descHe="קידוד וקטורי וחילוץ ישויות רשת ידע" techs={['Inngest', 'LangChain', 'Vercel AI SDK']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={Eye} isHe={isHe} titleEn="Vision Analysis" titleHe="ניתוח חזותי" descEn="Analyze figures, generate legends (FigureGallery)" descHe="ניתוח איורים ויצירת מקרא (FigureGallery)" techs={['Vision AI', 'Claude 3.7']} />
+                <NodeCard type="agent" icon={BarChart2} isHe={isHe} titleEn="Sandbox & Vision" titleHe="ארגז חול וראייה" descEn="Python execution & Vision AI" descHe="הרצת פייתון וניתוח איורים" techs={['E2B Sandbox', 'Vision AI']} />
+                <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
+                <FlowArrow isHe={isHe} />
+                <NodeCard type="user" icon={Search} isHe={isHe} titleEn="GraphRAG Analytics" titleHe="ניתוח Knowledge Graph" descEn="Network graph & entity analytics" descHe="תצוגת רשת וניתוח ישויות מתקדם" techs={['GraphRAG', 'pgvector']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="success" icon={CheckCircle2} isHe={isHe} titleEn="Ready for Draft" titleHe="מוכן לטיוטה" descEn="Assets ready for paper generation" descHe="התוצרים מוכנים ליצירת המאמר" techs={['Neon Postgres']} />
@@ -334,10 +343,10 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="user" icon={User} isHe={isHe} titleEn="User UI" titleHe="ממשק משתמש" descEn="Upload Draft Manuscript & Target Journal" descHe="העלאת טיוטת מאמר וכתב עת יעד" techs={['Next.js 16', 'Tailwind CSS', 'Vercel Blob']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} label={{ en: 'File', he: 'קובץ' }} />
-                <NodeCard type="infra" icon={Code} isHe={isHe} titleEn="Parser" titleHe="מנתח מסמכים" descEn="Extract raw text from PDF/DOCX" descHe="חילוץ טקסט גולמי מהמסמך" techs={['Vercel AI SDK', 'Mammoth', 'PDF Parser']} />
+                <NodeCard type="infra" icon={Code} isHe={isHe} titleEn="Parse & Tokenize" titleHe="ניתוח ואסימון" descEn="Extract text & protect Mendeley citations" descHe="חילוץ טקסט והגנה על ציטוטי Mendeley" techs={['Vercel AI SDK', 'Mammoth', 'Mendeley CSL']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} label={{ en: 'Raw text', he: 'טקסט' }} />
-                <NodeCard type="infra" icon={FileText} isHe={isHe} titleEn="Metadata" titleHe="מטא-דאטה" descEn="Extract Authors, Keywords, Abstract" descHe="חילוץ מחברים, מילות מפתח, תקציר" techs={['Claude 3.5 Haiku', 'Zod']} />
+                <NodeCard type="infra" icon={FileText} isHe={isHe} titleEn="Metadata" titleHe="מטא-דאטה" descEn="Extract Authors, Keywords, Abstract" descHe="חילוץ מחברים, מילות מפתח, תקציר" techs={['Claude 3.7', 'Zod']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} label={{ en: 'JSON', he: 'JSON' }} />
                 <NodeCard type="db" icon={Database} isHe={isHe} titleEn="Database" titleHe="מסד נתונים" descEn="Save initial record. Return ID." descHe="שמירת רשומה. החזרת מזהה." techs={['Neon Postgres']} />
@@ -413,7 +422,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="agent" icon={FileText} isHe={isHe} titleEn="Cover Letter" titleHe="מכתב מקדים" descEn="Generate persuasive letter to Editor-in-Chief" descHe="יצירת מכתב מקדים משכנע לעורך" techs={['Claude 3.7']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={Download} isHe={isHe} titleEn="Compile" titleHe="סוכן הידור" descEn="Compile final manuscript + metadata payload" descHe="הידור מאמר סופי + מטען נתונים להגשה" techs={['DOCX']} />
+                <NodeCard type="agent" icon={Download} isHe={isHe} titleEn="Compile & Reinject" titleHe="הידור ושחזור" descEn="Compile manuscript & restore Mendeley CSL" descHe="הידור ושחזור ציטוטי Mendeley במסמך" techs={['DOCX', 'Mendeley CSL']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="infra" icon={FileText} isHe={isHe} titleEn="Export PDF/DOCX" titleHe="ייצוא קבצים" descEn="Generate formatted PDF & Word documents" descHe="יצירת קבצי PDF ו-Word מעוצבים" techs={['PDF Parser', 'DOCX']} />
@@ -616,10 +625,10 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="agent" icon={Activity} isHe={isHe} titleEn="Performance Tracking" titleHe="מעקב ביצועים" descEn="Track citations and journal metrics" descHe="מעקב אחר ציטוטים ומדדי כתב עת" techs={['pgvector']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="user" icon={User} isHe={isHe} titleEn="Human Feedback" titleHe="משוב אנושי" descEn="Rate agent decisions via Analytics Dashboard" descHe="דירוג החלטות הסוכנים בדאשבורד" techs={['RLHF']} />
+                <NodeCard type="user" icon={User} isHe={isHe} titleEn="Human Feedback" titleHe="משוב אנושי" descEn="Rate agent decisions via RLHF Dashboard" descHe="דירוג החלטות הסוכנים בממשק RLHF" techs={['RLHF']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="db" icon={Database} isHe={isHe} titleEn="Model Fine-Tuning" titleHe="עדכון מודלים" descEn="Export dataset to improve future revisions" descHe="ייצוא הדאטה-סט לשיפור עתידי של המודלים" techs={['RLHF', 'Neon Postgres']} />
+                <NodeCard type="db" icon={Brain} isHe={isHe} titleEn="Telemetry & Learning" titleHe="טלמטריה ולמידה" descEn="Process outcomes & export RLHF dataset" descHe="למידה מתוצאות וייצוא נתוני RLHF למודל" techs={['Inngest', 'RLHF', 'Neon Postgres']} />
               </div>
             </div>
           </div>
@@ -635,9 +644,11 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             </div>
             <div className="p-6 md:p-10 flex flex-col items-center w-full relative z-10">
               <div className="flex flex-col lg:flex-row justify-center items-center w-full relative gap-8 lg:gap-16">
-                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Weekly RLHF Dataset" titleHe="איסוף נתוני RLHF" descEn="cron: '0 0 * * 0' (Sundays)" descHe="איסוף נתוני אימון שבועיים (ראשון בחצות)" techs={['Inngest', 'Neon Postgres']} />
+                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Citation Sync" titleHe="סנכרון ציטוטים" descEn="cron: '0 0 * * *' (Midnight)" descHe="עדכון ציטוטים מ-Semantic Scholar (חצות)" techs={['Inngest', 'Semantic Scholar']} />
                 
-                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Weekly Digest Email" titleHe="סיכום שבועי במייל" descEn="cron: '0 9 * * 1' (Mondays)" descHe="שליחת עדכונים שבועית (שני בבוקר)" techs={['Inngest', 'SMTP']} />
+                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="RLHF Dataset" titleHe="איסוף נתוני RLHF" descEn="cron: '0 0 * * 0' (Sundays)" descHe="איסוף נתוני אימון שבועיים (ראשון בחצות)" techs={['Inngest', 'Neon Postgres']} />
+                
+                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Digest Email" titleHe="סיכום שבועי" descEn="cron: '0 9 * * 1' (Mondays)" descHe="שליחת עדכונים שבועית (שני בבוקר)" techs={['Inngest', 'Nodemailer']} />
               </div>
             </div>
           </div>

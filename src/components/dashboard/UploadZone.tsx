@@ -16,8 +16,27 @@ export default function UploadZone() {
   const handleUpload = async (files: FileList | File[]) => {
     setIsUploading(true);
     try {
+      const fileArray = Array.from(files);
+      const manuscriptFiles = fileArray.filter(f => !f.name.endsWith('.csv') && !f.name.endsWith('.xlsx'));
+      const datasetFiles = fileArray.filter(f => f.name.endsWith('.csv') || f.name.endsWith('.xlsx'));
+
+      if (datasetFiles.length > 0) {
+        const analyzeData = new FormData();
+        analyzeData.append("dataset", datasetFiles[0]);
+        try {
+          const analyzeRes = await fetch("/api/data/analyze", { method: "POST", body: analyzeData });
+          if (analyzeRes.ok) {
+            const result = await analyzeRes.json();
+            sessionStorage.setItem("pendingDataSchema", JSON.stringify(result.columns));
+          }
+        } catch (e) {
+          console.error("Failed to analyze dataset:", e);
+        }
+      }
+
       const formData = new FormData();
-      Array.from(files).forEach((file) => {
+      const filesToUpload = manuscriptFiles.length > 0 ? manuscriptFiles : fileArray;
+      filesToUpload.forEach((file) => {
         formData.append("file", file);
       });
 

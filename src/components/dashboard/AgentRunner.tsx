@@ -24,10 +24,26 @@ export function AgentRunner({ paperId = "123", onResult, onStatusChange, onLog }
     }
     
     try {
+      let dataSchema = undefined;
+      if (action === "start") {
+        const storedSchema = sessionStorage.getItem("pendingDataSchema");
+        if (storedSchema) {
+          try {
+            dataSchema = JSON.parse(storedSchema);
+          } catch (e) {}
+          sessionStorage.removeItem("pendingDataSchema");
+        }
+      }
+
       const res = await fetch("/api/agents/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, paperId, feedback: action === "resume" ? feedback : undefined }),
+        body: JSON.stringify({ 
+          action, 
+          paperId, 
+          feedback: action === "resume" ? feedback : undefined,
+          dataSchema 
+        }),
       });
 
       if (!res.body) throw new Error("No response body");

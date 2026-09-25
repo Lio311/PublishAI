@@ -82,6 +82,11 @@ export const PublishAIStateAnnotation = Annotation.Root({
     default: () => "",
   }),
   rebuttal: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
+  dataSchema: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
+  dataWarnings: Annotation<any[]>({
+    reducer: (x, y) => (y ? [...x, ...y] : x),
+    default: () => [],
+  }),
 });
 
 export type PublishAIState = typeof PublishAIStateAnnotation.State;

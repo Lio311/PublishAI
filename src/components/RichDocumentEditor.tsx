@@ -78,6 +78,7 @@ export default function RichDocumentEditor({
   const [activeSection, setActiveSection] = useState("abstract");
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const [rightTab, setRightTab] = useState<"copilot" | "citations" | "compliance">("copilot");
+  const [dataWarnings, setDataWarnings] = useState<any[]>([]);
   const [aiPrompt, setAiPrompt] = useState("");
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [pipelineStatus, setPipelineStatus] = useState<"IDLE" | "RUNNING" | "PAUSED" | "COMPLETED" | "ERROR">("IDLE");
@@ -437,6 +438,19 @@ export default function RichDocumentEditor({
           )}
 
           <div className="p-6 md:p-8 max-w-3xl mx-auto w-full flex-1 flex flex-col">
+            {dataWarnings.length > 0 && (
+              <div className="mb-6 space-y-2">
+                {dataWarnings.map((warning, idx) => (
+                  <div key={idx} className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Data Validation Warning {warning.textAnchor ? `- ${warning.textAnchor}` : ''}</p>
+                      <p>{warning.warning || warning.message || (typeof warning === 'string' ? warning : JSON.stringify(warning))}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             {editor && (
               <BubbleMenu
                 editor={editor}
@@ -519,6 +533,9 @@ export default function RichDocumentEditor({
                   onStatusChange={setPipelineStatus}
                   onLog={setPipelineLog}
                   onResult={(res) => {
+                    if (res && res.dataWarnings && Array.isArray(res.dataWarnings)) {
+                      setDataWarnings(res.dataWarnings);
+                    }
                     const text = typeof res === 'string' ? res : JSON.stringify(res, null, 2);
                     const formattedText = `\n\n### AI Pipeline Result\n${text}\n`;
                     setContent(prev => prev + formattedText);
@@ -563,6 +580,21 @@ export default function RichDocumentEditor({
                     Formatted for {journal} author guidelines.
                   </p>
                 </div>
+
+                {dataWarnings.length > 0 && (
+                  <div className="bg-rose-50 border border-rose-200 rounded-xl p-3">
+                    <div className="flex items-center gap-1.5 font-semibold text-rose-800">
+                      <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                      Dataset Warnings
+                    </div>
+                    <ul className="list-disc pl-4 mt-2 space-y-1 text-[11px] text-rose-700">
+                      {dataWarnings.map((w, i) => (
+                        <li key={i}>{typeof w === 'string' ? w : JSON.stringify(w)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[11px] py-1 border-b border-slate-200">
