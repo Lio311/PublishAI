@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
@@ -170,7 +171,7 @@ export default function RichDocumentEditor({
       }
     } catch (error) {
       console.error(error);
-      alert("Failed to get AI response.");
+      toast.error("Failed to get AI response.");
     } finally {
       setIsAiGenerating(false);
     }

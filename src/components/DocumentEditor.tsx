@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { toast } from "sonner";
 import {
   Bold,
   Italic,
@@ -135,7 +136,7 @@ export default function DocumentEditor({
       }
     } catch (error) {
       console.error(error);
-      alert("Failed to get AI response.");
+      toast.error("Failed to get AI response.");
     } finally {
       setIsAiGenerating(false);
     }

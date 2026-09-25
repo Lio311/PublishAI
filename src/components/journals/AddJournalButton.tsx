@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, X, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
+import { toast } from "sonner";
 
 export default function AddJournalButton() {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,11 +35,11 @@ export default function AddJournalButton() {
         // Refresh the page data
         router.refresh();
       } else {
-        alert(isHe ? "נכשל להוסיף עיתון" : "Failed to add journal");
+        toast.error(isHe ? "נכשל להוסיף עיתון" : "Failed to add journal");
       }
     } catch (error) {
       console.error(error);
-      alert(isHe ? "אירעה שגיאה" : "An error occurred");
+      toast.error(isHe ? "אירעה שגיאה" : "An error occurred");
     } finally {
       setIsLoading(false);
     }

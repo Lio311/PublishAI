@@ -10,6 +10,7 @@ import { SessionProvider } from 'next-auth/react';
 import { auth } from "@/app/auth";
 import { Toaster } from 'sonner';
 import DynamicBackground from '@/components/layout/DynamicBackground';
+import AlertOverride from '@/components/layout/AlertOverride';
 
 const openSans = Open_Sans({ subsets: ["latin", "hebrew"] });
 
@@ -68,6 +69,7 @@ export default async function RootLayout({
             },
           }}
         />
+        <AlertOverride />
       </body>
     </html>
   );

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { SubmissionPanel } from "../submission/SubmissionPanel";
 import { useEffect, useState, useRef, useCallback } from "react";
+import { toast } from "sonner";
 
 import { 
   Upload, MessageSquareText, ClipboardList, BookOpen, Microscope, 
@@ -196,7 +197,7 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
         setRequiresCaptcha(false);
         setCaptchaInput("");
       } else {
-        alert("Failed to submit captcha");
+        toast.error("Failed to submit captcha");
       }
     } catch (err) {
       console.error(err);
@@ -306,9 +307,9 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
                   method: "POST",
                 });
                 if (res.ok) {
-                  alert("RPA Autonomous Submission initiated successfully!");
+                  toast.success("RPA Autonomous Submission initiated successfully!");
                 } else {
-                  alert("Failed to initiate submission.");
+                  toast.error("Failed to initiate submission.");
                 }
               } catch (err) {
                 console.error("Submission failed:", err);
