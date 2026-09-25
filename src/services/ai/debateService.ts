@@ -30,8 +30,8 @@ export class MultiAgentDebateService {
       // Query pgvector for the most relevant chunks for this specific paper
       const result = await db.execute(sql`
         SELECT content 
-        FROM document_embeddings 
-        WHERE paper_id = ${paper.id} 
+        FROM document_chunks 
+        WHERE document_id = ${paper.id} 
         ORDER BY embedding <=> ${JSON.stringify(embedding)}::vector 
         LIMIT 5
       `);

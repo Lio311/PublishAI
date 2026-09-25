@@ -39,6 +39,14 @@ export const PublishAIStateAnnotation = Annotation.Root({
     reducer: (x, y) => y ?? x,
     default: () => "",
   }),
+  humanFeedback: Annotation<string | null>({
+    reducer: (x, y) => y !== undefined ? y : x,
+    default: () => null,
+  }),
+  validationErrors: Annotation<string[]>({
+    reducer: (x, y) => y ?? x,
+    default: () => [],
+  }),
 });
 
 export type PublishAIState = typeof PublishAIStateAnnotation.State;

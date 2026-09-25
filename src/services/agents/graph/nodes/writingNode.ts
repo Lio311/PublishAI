@@ -13,7 +13,15 @@ export const writingNode = async (state: PublishAIState): Promise<Partial<Publis
     memoryStr = `\n\nAdditional context about the user's preferences:\n${state.memoryContext}`;
   }
 
-  const prompt = `Rewrite the text to elevate the academic tone, address the following review feedback, and remove any generic AI-sounding phrases.\n\nReview:\n${review}${memoryStr}\n\nManuscript provided between <manuscript> tags:\n<manuscript>\n${state.documentContent}\n</manuscript>`;
+  let prompt = `Rewrite the text to elevate the academic tone, address the following review feedback, and remove any generic AI-sounding phrases.\n\nReview:\n${review}${memoryStr}\n\nManuscript provided between <manuscript> tags:\n<manuscript>\n${state.documentContent}\n</manuscript>`;
+  
+  if (state.validationErrors && state.validationErrors.length > 0) {
+    prompt += `\n\nCRITICAL FIX REQUIRED. The previous output failed security/academic validation with these errors:\n${state.validationErrors.join('\n')}\nFix these errors immediately.`;
+  }
+  
+  if (state.humanFeedback) {
+    prompt += `\n\nUSER FEEDBACK:\nThe user reviewed your previous draft and provided the following feedback. Address it completely:\n${state.humanFeedback}`;
+  }
   
   const { text, tokensUsed } = await askClaude(prompt, model);
   

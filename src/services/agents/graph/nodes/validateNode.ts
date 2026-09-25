@@ -1,10 +1,6 @@
 import { PublishAIState } from "../state";
 
-export const validateCodeNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
-  // We assume the generated code is stored in the state, but we don't have a `code` field.
-  // For the sake of this implementation, we will validate `documentContent`.
-  // If it's actual code, it will be validated correctly.
-  
+export const validateNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   try {
     const response = await fetch("http://localhost:8000/validate", {
       method: "POST",
@@ -16,14 +12,13 @@ export const validateCodeNode = async (state: PublishAIState): Promise<Partial<P
     
     if (!result.is_valid) {
       return { 
-        // We hijack reviewerComments to pass back the validation error
-        reviewerComments: result.errors.join("\n") 
+        validationErrors: result.errors 
       };
     }
     
-    return { reviewerComments: "" }; // Valid
-  } catch (e) {
+    return { validationErrors: [] }; 
+  } catch (e: any) {
     console.warn("Validation service unreachable", e);
-    return {};
+    return { validationErrors: [`Validation service failed: ${e.message}`] };
   }
 };
