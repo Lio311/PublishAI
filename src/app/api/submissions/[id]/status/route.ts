@@ -109,6 +109,18 @@ export async function PATCH(
       );
     }
 
+    // Verify submission ownership
+    const existingSubmission = await db.query.submissions.findFirst({
+      where: eq(submissions.id, submissionId),
+    });
+    
+    if (!existingSubmission || existingSubmission.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: "Forbidden: Not authorized to modify this submission" },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
     const { status, notes, stage, metadata, force } = body;
 

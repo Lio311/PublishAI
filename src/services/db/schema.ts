@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import type { AdapterAccountType } from "next-auth/adapters";
 import { 
   pgTable, 
@@ -211,7 +212,7 @@ export const papers = pgTable("papers", {
   title: text("title").notNull(),
   status: statusEnum("status").default("pending"),
   targetJournalId: integer("target_journal_id").references(() => journals.id),
-  currentJournalId: uuid("current_journal_id"),
+  currentJournalId: integer("current_journal_id").references(() => journals.id),
   cascadeQueue: jsonb("cascade_queue").$type<string[]>(),
   originalFileUrl: text("original_file_url"),
   originalFormat: text("original_format"),
@@ -857,3 +858,52 @@ export const agentEvaluations = pgTable("agent_evaluations", {
 
 export type AgentEvaluation = typeof agentEvaluations.$inferSelect;
 export type NewAgentEvaluation = typeof agentEvaluations.$inferInsert;
+
+
+// ═══════════════════════════════════════════════════════
+// RELATIONS
+// ═══════════════════════════════════════════════════════
+
+export const usersRelations = relations(users, ({ many }) => ({
+  papers: many(papers),
+  documents: many(documents),
+}));
+
+export const papersRelations = relations(papers, ({ one, many }) => ({
+  user: one(users, {
+    fields: [papers.userId],
+    references: [users.id],
+  }),
+  targetJournal: one(journals, {
+    fields: [papers.targetJournalId],
+    references: [journals.id],
+  }),
+  documents: many(documents),
+}));
+
+export const documentsRelations = relations(documents, ({ one, many }) => ({
+  user: one(users, {
+    fields: [documents.userId],
+    references: [users.id],
+  }),
+  paper: one(papers, {
+    fields: [documents.paperId],
+    references: [papers.id],
+  }),
+  citations: many(citations),
+}));
+
+export const citationsRelations = relations(citations, ({ one }) => ({
+  document: one(documents, {
+    fields: [citations.documentId],
+    references: [documents.id],
+  }),
+  paper: one(papers, {
+    fields: [citations.paperId],
+    references: [papers.id],
+  }),
+}));
+
+export const journalsRelations = relations(journals, ({ many }) => ({
+  papers: many(papers),
+}));

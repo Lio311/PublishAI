@@ -30,11 +30,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        // Placeholder credentials logic
-        if (credentials?.username === "admin" && credentials?.password === "password") {
-          return { id: "1", name: "Admin User", email: "admin@example.com" }
-        }
-        return null
+        // TODO: Implement actual credential verification logic. Hardcoded secrets have been removed.
+        throw new Error("Credential login is currently disabled for security reasons.");
       }
     })
   ],
