@@ -5,8 +5,11 @@ import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { Delete } from 'lucide-react';
 import Image from 'next/image';
 import { useSession, signIn } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 
 export default function GlobalPasswordProtection({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const isPublicRoute = pathname?.includes('/architecture') || pathname?.includes('/flowchart');
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [isChecking, setIsChecking] = useState<boolean>(true);
     const [pin, setPin] = useState('');
@@ -196,7 +199,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
         );
     }
 
-    if (status === 'unauthenticated') {
+    if (status === 'unauthenticated' && !isPublicRoute) {
         return (
             <div 
                 className="fixed inset-0 z-[100] min-h-screen w-full bg-transparent flex items-center justify-center overflow-hidden" 
