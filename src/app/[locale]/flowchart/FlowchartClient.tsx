@@ -229,9 +229,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                     </p>
                   </div>
                 </div>
-                <Link href="/architecture" className="text-sm text-blue-600 hover:text-blue-800 underline underline-offset-2 mt-1 inline-block">
-                  {isHe ? '← חזרה לעמוד ארכיטקטורה' : '← Back to Architecture Page'}
-                </Link>
+                
               </div>
 
               {/* Legend */}
