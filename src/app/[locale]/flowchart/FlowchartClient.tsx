@@ -90,10 +90,7 @@ const techColors: Record<string, string> = {
   'Sharp': 'bg-pink-100 text-pink-800 border-pink-300',
   'Pandas': 'bg-blue-100 text-blue-800 border-blue-300',
   'Scipy': 'bg-indigo-100 text-indigo-800 border-indigo-300',
-  'Langfuse': 'bg-orange-100 text-orange-800 border-orange-300',
-  'Tiptap': 'bg-zinc-100 text-zinc-800 border-zinc-300',
-  'Drizzle ORM': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-  'MCP': 'bg-purple-100 text-purple-800 border-purple-300',
+
 };
 
 // ═══════════════════════════════════════════
