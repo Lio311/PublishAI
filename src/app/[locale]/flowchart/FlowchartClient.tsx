@@ -367,10 +367,10 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="agent" icon={Search} isHe={isHe} titleEn="6. Clarification" titleHe="6. סוכן הבהרה" descEn="Extracts editorial goals & constraints" descHe="מחלץ יעדי עריכה ואילוצי כתב עת" techs={['Claude 3.7']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={FileText} isHe={isHe} titleEn="7. Planning" titleHe="7. סוכן תכנון" descEn="Builds step-by-step revision DAG" descHe="בונה גרף משימות מכוון (DAG)" techs={['Claude 3.7']} />
+                <NodeCard type="agent" icon={FileText} isHe={isHe} titleEn="7. Planning" titleHe="7. סוכן תכנון" descEn="GraphRAG -> Journal Trends -> DAG Plan" descHe="מושך טרנדים מ-GraphRAG ובונה תוכנית" techs={['GraphRAG', 'pgvector']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={Search} isHe={isHe} titleEn="8. Knowledge" titleHe="8. סוכן ידע" descEn="MCP → PubMed. GraphRAG for citations." descHe="GraphRAG למציאת ציטוטים חסרים." techs={['MCP', 'pgvector']} />
+                <NodeCard type="agent" icon={Search} isHe={isHe} titleEn="8. Knowledge" titleHe="8. סוכן ידע" descEn="arXiv / PubMed searches for literature." descHe="שאיבת ספרות מ-PubMed ו-arXiv." techs={['PubMed API', 'arXiv API']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="agent" icon={MessageSquare} isHe={isHe} titleEn="9. SciReview" titleHe="9. עימות סוקרים" descEn="Harsh (Claude) + Analyst (GPT-4o) + Optimist" descHe="ביקורת רב-מודלית (Claude, GPT-4o, Gemini)" techs={['GPT-4o-mini', 'Gemini 1.5 Pro']} />
@@ -528,7 +528,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 
                 <div className="flex w-full max-w-[380px] justify-between gap-4 relative z-10">
                   <div className="flex-1 flex justify-center">
-                    <NodeCard type="queue" icon={User} isHe={isHe} titleEn="Pause & Notify" titleHe="השהיה והתראה" descEn="WebSocket → User solves → Resume" descHe="התראה → המשתמש פותר בממשק → חידוש" techs={['WebSockets', 'Inngest']} />
+                    <NodeCard type="queue" icon={User} isHe={isHe} titleEn="Auto / Manual Solve" titleHe="פתרון אוטומטי/ידני" descEn="2Captcha API OR User UI Modal" descHe="פתרון אוטומטי (API) או ע"י המשתמש בממשק" techs={['2Captcha', 'Inngest']} />
                   </div>
                   <div className="flex-1 flex justify-center">
                     <NodeCard type="rpa" icon={CheckCircle2} isHe={isHe} titleEn="Final Submit" titleHe="הגשה סופית" descEn="Click Submit → Scrape Tracking ID" descHe="לחיצה על שליחה → חילוץ מזהה מעקב" techs={['Playwright']} />
