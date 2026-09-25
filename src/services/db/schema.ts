@@ -213,6 +213,8 @@ export const papers = pgTable("papers", {
   targetJournalId: integer("target_journal_id").references(() => journals.id),
   originalFileUrl: text("original_file_url"),
   originalFormat: text("original_format"),
+  rejections: jsonb("rejections"),
+  suggestedJournals: jsonb("suggested_journals"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({

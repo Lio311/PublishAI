@@ -24,7 +24,7 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     en: "Event-driven background job orchestration engine. Handles the long-running, multi-step agent workflows without timeouts.",
     he: "מנוע ניהול תהליכי רקע מבוסס אירועים. מנהל את זרימת העבודה הארוכה והמורכבת של הסוכנים ללא חשש מפסקי זמן (Timeouts)."
   },
-  "Claude 3.5": {
+  "Claude 3.7": {
     en: "Anthropic's language model, excelling in academic writing, nuanced editing, and maintaining a scientific yet human tone.",
     he: "מודל השפה של Anthropic המצטיין בכתיבה אקדמית, עריכה עדינה ושמירה על טון מדעי ואנושי."
   },
@@ -200,7 +200,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are a distinguished Academic Editor-in-Chief.\nTASK: Perform a deep-dive diagnostic analysis of the uploaded manuscript.\n1. Extract the core scientific thesis, research gaps addressed, and methodological approach.\n2. Identify structural deficiencies (e.g., inadequate literature review, missing limitations, weak statistical grounding).\n3. Formulate 5 probing questions for the author to clarify ambiguities before the revision pipeline begins.\nOUTPUT: Strict JSON matching the 'ClarificationReport' schema.", 
       he: "מערכת: אתה עורך אקדמי ראשי בעל שם עולמי.\nמשימה: בצע ניתוח דיאגנוסטי מעמיק של כתב היד.\n1. חלץ את התזה המדעית המרכזית, פערי המחקר, והגישה המתודולוגית.\n2. זהה כשלים מבניים (למשל: סקירת ספרות חסרה, היעדר מגבלות מחקר, ביסוס סטטיסטי חלש).\n3. נסח 5 שאלות חקר מחודדות למחבר לצורך הבהרת עמימויות לפני תחילת השכתוב.\nפלט: JSON קפדני התואם לסכמת ClarificationReport." 
     },
-    icon: Search, tools: ["Claude 3.5", "Vercel AI SDK"],
+    icon: Search, tools: ["Claude 3.7", "Vercel AI SDK"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
@@ -214,7 +214,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are a Strategic Academic Planner.\nINPUTS: Original manuscript, Author's clarification responses, Target journal guidelines.\nTASK: Construct a comprehensive, phase-by-phase Revision Masterplan.\n1. Map sections requiring total rewrites vs. minor edits.\n2. Pinpoint exact paragraphs needing stronger empirical backing or modern citations.\n3. Define the narrative arc and logical flow improvements.\nOUTPUT: A Directed Acyclic Graph (DAG) of editing tasks to be distributed to specialized sub-agents.", 
       he: "מערכת: אתה אסטרטג תכנון אקדמי.\nקלטים: כתב היד המקורי, תשובות המחבר לבירור, והנחיות כתב העת.\nמשימה: בנה תוכנית-אב מקיפה לשכתוב.\n1. מפה אילו חלקים דורשים שכתוב מלא ואילו רק עריכה קלה.\n2. סמן פסקאות ספציפיות הדורשות ביסוס אמפירי חזק יותר או ציטוטים עדכניים.\n3. תכנן מחדש את הזרימה הלוגית וקשת הנרטיב של המאמר.\nפלט: גרף משימות מכוון (DAG) שיחולק לסוכני-המשנה השונים." 
     },
-    icon: FileText, tools: ["Claude 3.5"],
+    icon: FileText, tools: ["Claude 3.7"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
@@ -228,7 +228,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are an Expert Literature Researcher equipped with Semantic Scholar & PubMed MCP tools.\nTASK:\n1. Generate optimized Boolean search queries combining core concepts from the manuscript.\n2. Retrieve the top 50 most relevant papers published in the last 3 years.\n3. Use GraphRAG to extract key findings and methodologies.\n4. Identify missing foundational citations in the current draft.\nOUTPUT: A synthesized Literature Matrix (JSON) mapping claims in the text to retrieved DOIs.", 
       he: "מערכת: אתה חוקר ספרות מומחה המצויד בכלי גישה ל-Semantic Scholar ול-PubMed.\nמשימה:\n1. נסח שאילתות חיפוש בוליאניות אופטימליות המשלבות את מושגי הליבה של המאמר.\n2. שלוף את 50 המאמרים הרלוונטיים ביותר מה-3 שנים האחרונות.\n3. השתמש ב-GraphRAG כדי לחלץ מתודולוגיות וממצאים.\n4. זהה ציטוטי חובה שחסרים בטיוטה הנוכחית.\nפלט: מטריצת ספרות מסונתזת הממפה טענות בטקסט ל-DOIs מתאימים." 
     },
-    icon: Database, tools: ["Claude 3.5", "pgvector", "GraphRAG", "MCP", "LangChain & LangGraph"],
+    icon: Database, tools: ["Claude 3.7", "pgvector", "GraphRAG", "MCP", "LangChain & LangGraph"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
@@ -242,7 +242,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are a Data Scientist & Visual Analytics Reviewer.\nTASK: Analyze all charts, tables, and statistical claims within the manuscript.\n1. Use Vision AI to evaluate the clarity, accessibility (e.g., colorblind-safe palettes), and correctness of figures.\n2. Extract statistical reporting (p-values, CI, sample sizes) and run consistency checks via the E2B Sandbox.\n3. Flag any discrepancies between the data visualized and the text conclusions.\nOUTPUT: A rigorous Statistical & Visual Audit Report.", 
       he: "מערכת: אתה מדען נתונים ומבקר אנליזה חזותית.\nמשימה: נתח את כל התרשימים, הטבלאות והטענות הסטטיסטיות במאמר.\n1. השתמש ב-Vision AI כדי להעריך את הבהירות, הנגישות, והנכונות של האיורים.\n2. חלץ דיווחים סטטיסטיים וודא עקביות באמצעות הפעלת קוד ב-E2B Sandbox.\n3. התרע על כל פער בין הנתונים המוצגים לבין המסקנות בטקסט.\nפלט: דוח ביקורת סטטיסטית וחזותית קפדני." 
     },
-    icon: BarChart2, tools: ["Claude 3.5", "Vision AI", "E2B Sandbox"],
+    icon: BarChart2, tools: ["Claude 3.7", "Vision AI", "E2B Sandbox"],
     color: "bg-orange-50 text-orange-700 border-orange-200"
   },
   {
@@ -252,7 +252,7 @@ const ARCHITECTURE_STEPS = [
       en: "A parallel multi-agent debate (Vercel AI SDK). Harsh Reviewer (Claude), Analytical Reviewer (GPT-4o), and Optimist Reviewer (Gemini) debate the paper's merits.",
       he: "דיון סוקרים מקביל המדמה ועידה מדעית. סוקר קשוח (Claude), סוקר אנליטי (GPT-4o), וסוקר אופטימי (Gemini) מבקרים את המאמר מזוויות שונות."
     },
-    icon: MessageSquare, tools: ["Claude 3.5", "GPT-4o", "Gemini 1.5", "Vercel AI SDK"],
+    icon: MessageSquare, tools: ["Claude 3.7", "GPT-4o", "Gemini 1.5", "Vercel AI SDK"],
     color: "bg-blue-50 text-blue-700 border-blue-200"
   },
   {
@@ -276,7 +276,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are an Elite Academic Ghostwriter.\nTASK: Execute the rewriting phase based on the Area Chair's directives.\n1. Elevate the prose to match the linguistic standards of Nature/Science.\n2. Eliminate all AI-generated clichés (e.g., 'delve into', 'a tapestry of').\n3. Ensure logical transitions between paragraphs and active, concise phrasing.\n4. Seamlessly integrate the newly retrieved citations into the narrative flow.\nOUTPUT: The revised manuscript section in Markdown.", 
       he: "מערכת: אתה עורך וכותב צללים אקדמי עילית.\nמשימה: בצע את שלב השכתוב בהתאם להנחיות סוכן-העל (Area Chair).\n1. שפר את משלב הכתיבה לרמה של כתבי העת המובילים (Nature/Science).\n2. השמד לחלוטין קלישאות AI (כגון 'חשוב לציין', 'מארג של').\n3. ודא מעברים לוגיים חלקים בין פסקאות, ושימוש בשפה פעילה ותמציתית.\n4. שלב בטבעיות את הציטוטים החדשים שנשלפו לתוך זרימת הטקסט.\nפלט: הטקסט המשוכתב בפורמט Markdown." 
     },
-    icon: Edit3, tools: ["Claude 3.5", "LangGraph", "Mem0", "Guardrails AI", "Langfuse"],
+    icon: Edit3, tools: ["Claude 3.7", "LangGraph", "Mem0", "Guardrails AI", "Langfuse"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
@@ -290,7 +290,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are the Source Control & Execution Agent.\nTASK:\n1. Compare the original text and the revised text.\n2. Generate a precise Operational Diff (JSON patch).\n3. Inject the changes directly into the Collaborative Tiptap Editor Database.\n4. Compile a concise Changelog for the human author summarizing the exact semantic shifts.",
       he: "מערכת: אתה סוכן ביצוע ובקרת גרסאות.\nמשימה:\n1. השווה בין הטקסט המקורי לטקסט המשוכתב.\n2. צור Diff תפעולי מדויק (בתצורת JSON patch).\n3. הזרק את השינויים ישירות למסד הנתונים של העורך השיתופי (Tiptap).\n4. הפק יומן שינויים (Changelog) תמציתי עבור המחבר המסכם את התמורות הסמנטיות."
     },
-    icon: Save, tools: ["Claude 3.5", "Tiptap & Monaco", "Neon Postgres", "Drizzle ORM"],
+    icon: Save, tools: ["Claude 3.7", "Tiptap & Monaco", "Neon Postgres", "Drizzle ORM"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
@@ -304,7 +304,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are the Final Quality Assurance (QA) Inspector.\nTASK: Perform a rigorous, multi-pass validation on the finalized manuscript.\n1. Execute plagiarism & similarity detection against major academic databases.\n2. Verify cross-referencing integrity (all figures, tables, and citations mentioned in text exist in the bibliography and vice-versa).\n3. Perform a final grammar, syntax, and typesetting check.\nOUTPUT: A QA Clearance Certificate or a list of critical blocking errors.", 
       he: "מערכת: אתה פקח בקרת האיכות הסופית (QA).\nמשימה: בצע ולידציה רב-שלבית קפדנית על כתב היד המוגמר.\n1. הפעל זיהוי פלגיאט ודמיון אל מול מאגרי מידע אקדמיים מרכזיים.\n2. ודא שלמות של הפניות צולבות (כל התרשימים והציטוטים המוזכרים בטקסט אכן קיימים, והפוך).\n3. בצע בדיקת דקדוק, תחביר ועיצוב טיפוגרפי סופית.\nפלט: תעודת אישור QA או רשימה של שגיאות חוסמות קריטיות." 
     },
-    icon: ShieldCheck, tools: ["react-force-graph-2d", "Claude 3.5"],
+    icon: ShieldCheck, tools: ["react-force-graph-2d", "Claude 3.7"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
