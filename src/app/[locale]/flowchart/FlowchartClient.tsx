@@ -303,10 +303,10 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             </div>
             <div className="p-6 md:p-10 flex flex-col items-center w-full relative">
               <div className="flex flex-col lg:flex-row justify-between items-center w-full">
-                <NodeCard type="user" icon={User} isHe={isHe} titleEn="1. User UI" titleHe="1. ממשק משתמש" descEn="Upload Draft Manuscript & Target Journal" descHe="העלאת טיוטת מאמר וכתב עת יעד" techs={['Next.js 16', 'Tiptap']} />
+                <NodeCard type="user" icon={User} isHe={isHe} titleEn="1. User UI" titleHe="1. ממשק משתמש" descEn="Upload Draft Manuscript & Target Journal" descHe="העלאת טיוטת מאמר וכתב עת יעד" techs={['Next.js 16', 'Tailwind CSS', 'Vercel Blob']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} label={{ en: 'File', he: 'קובץ' }} />
-                <NodeCard type="infra" icon={Code} isHe={isHe} titleEn="2. Parser" titleHe="2. מנתח מסמכים" descEn="Extract raw text from PDF/DOCX" descHe="חילוץ טקסט גולמי מהמסמך" techs={['Mammoth', 'PDF Parser']} />
+                <NodeCard type="infra" icon={Code} isHe={isHe} titleEn="2. Parser" titleHe="2. מנתח מסמכים" descEn="Extract raw text from PDF/DOCX" descHe="חילוץ טקסט גולמי מהמסמך" techs={['Vercel AI SDK', 'Mammoth', 'PDF Parser']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} label={{ en: 'Raw text', he: 'טקסט' }} />
                 <NodeCard type="infra" icon={FileText} isHe={isHe} titleEn="3. Metadata" titleHe="3. מטא-דאטה" descEn="Extract Authors, Keywords, Abstract" descHe="חילוץ מחברים, מילות מפתח, תקציר" techs={['Claude 3.5 Haiku', 'Zod']} />
@@ -333,7 +333,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             <div className="p-6 md:p-10 flex flex-col items-center w-full relative">
               {/* Row 1 */}
               <div className="flex flex-col lg:flex-row justify-between items-center w-full relative z-10">
-                <NodeCard type="agent" icon={Bot} isHe={isHe} titleEn="Orchestrator" titleHe="מנצח הסוכנים" descEn="Instantiates Context. Routes through 10 agents." descHe="מנווט ברצף דרך סוכנים מומחים." techs={['LangGraph', 'Langfuse']} />
+                <NodeCard type="agent" icon={Bot} isHe={isHe} titleEn="Orchestrator" titleHe="מנצח הסוכנים" descEn="Instantiates Context. Routes through 10 agents." descHe="מנווט ברצף דרך סוכנים מומחים." techs={['LangGraph', 'Langfuse', 'Vercel AI SDK']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="agent" icon={Search} isHe={isHe} titleEn="6. Clarification" titleHe="6. סוכן הבהרה" descEn="Extracts editorial goals & constraints" descHe="מחלץ יעדי עריכה ואילוצי כתב עת" techs={['Claude 3.7']} />
@@ -345,7 +345,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="agent" icon={Search} isHe={isHe} titleEn="8. Knowledge" titleHe="8. סוכן ידע" descEn="MCP → PubMed. GraphRAG for citations." descHe="GraphRAG למציאת ציטוטים חסרים." techs={['MCP', 'pgvector']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={MessageSquare} isHe={isHe} titleEn="9. SciReview" titleHe="9. עימות סוקרים" descEn="Harsh (Claude) + Analyst (GPT-4o) + Optimist" descHe="ביקורת רב-מודלית (Claude, GPT-4o, Gemini)" techs={['GPT-4o', 'Gemini 1.5']} />
+                <NodeCard type="agent" icon={MessageSquare} isHe={isHe} titleEn="9. SciReview" titleHe="9. עימות סוקרים" descEn="Harsh (Claude) + Analyst (GPT-4o) + Optimist" descHe="ביקורת רב-מודלית (Claude, GPT-4o, Gemini)" techs={['GPT-4o-mini', 'Gemini 1.5 Pro']} />
                 
                 <TurnArrow isHe={isHe} direction="right-to-left" />
                 <VerticalFlowArrow isHe={isHe} length="h-16 lg:hidden" />
@@ -353,19 +353,19 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
 
               {/* Row 2 - RTL mapped logically via flex-row-reverse on desktop */}
               <div className={`mt-0 lg:mt-12 flex flex-col lg:flex-row items-center w-full relative justify-between z-10 ${isHe ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
-                <NodeCard type="agent" icon={Layers} isHe={isHe} titleEn="Area Chair (o1)" titleHe="סוכן-על (o1)" descEn="Synthesizes debate into concrete action plan" descHe="מסנתז דיבייט לתוכנית פעולה עמוקה" techs={['OpenAI o1']} />
+                <NodeCard type="agent" icon={Layers} isHe={isHe} titleEn="Area Chair (o1)" titleHe="סוכן-על (o1)" descEn="Synthesizes debate into concrete action plan" descHe="מסנתז דיבייט לתוכנית פעולה עמוקה" techs={['o1-preview']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} reverse={true} label={{en: 'Plan', he: 'תוכנית'}} />
                 <NodeCard type="agent" icon={Brain} isHe={isHe} titleEn="Mem0 Context" titleHe="הקשר Mem0" descEn="Fetch user style preferences from memory" descHe="שליפת העדפות סגנון כתיבה מהזיכרון" techs={['Mem0', 'Upstash Redis']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} reverse={true} />
-                <NodeCard type="agent" icon={Edit3} isHe={isHe} titleEn="10. Writer" titleHe="10. סוכן כתיבה" descEn="Rewrites prose to Nature/Science standards." descHe="שכתוב איטרטיבי לרמה של Nature/Science." techs={['Claude 3.7', 'Langfuse']} />
+                <NodeCard type="agent" icon={Edit3} isHe={isHe} titleEn="10. Writer" titleHe="10. סוכן כתיבה" descEn="Rewrites prose to Nature/Science standards." descHe="שכתוב איטרטיבי לרמה של Nature/Science." techs={['Claude 3.7 Sonnet', 'E2B Code Interpreter']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} reverse={true} />
                 <NodeCard type="logic" icon={ShieldCheck} isHe={isHe} titleEn="Guardrails AI" titleHe="בדיקת בטיחות" descEn="Validate: no PII leakage, no hallucinations" descHe="ולידציה: ללא PII, טון אקדמי, ללא הזיות" techs={['Guardrails AI']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} reverse={true} />
-                <NodeCard type="agent" icon={Code} isHe={isHe} titleEn="11. Execution" titleHe="11. סוכן ביצוע" descEn="Applies line-by-line diff. Generates JSON patch." descHe="מחיל שינויים סעיף-אחר-סעיף ומייצר Diff." techs={['Claude 3.7', 'Tiptap']} />
+                <NodeCard type="agent" icon={Code} isHe={isHe} titleEn="11. Execution" titleHe="11. סוכן ביצוע" descEn="Applies line-by-line diff. Generates JSON patch." descHe="מחיל שינויים סעיף-אחר-סעיף ומייצר Diff." techs={['Claude 3.7 Sonnet']} />
                 
                 <TurnArrow isHe={isHe} direction="left-to-right" />
                 <VerticalFlowArrow isHe={isHe} length="h-16 lg:hidden" />
@@ -379,7 +379,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="agent" icon={CheckCircle} isHe={isHe} titleEn="14. QaAgent" titleHe="14. סוכן QA" descEn="Final consistency, formatting, grammar check" descHe="בדיקת עקביות סופית, עיצוב ודקדוק" techs={['Claude 3.7', 'Jest']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={ListChecks} isHe={isHe} titleEn="15. Verification" titleHe="15. סוכן אימות" descEn="Verify journal guidelines compliance" descHe="אימות עמידה מלאה בהנחיות כתב העת" techs={['OpenAI o1']} />
+                <NodeCard type="agent" icon={ListChecks} isHe={isHe} titleEn="15. Verification" titleHe="15. סוכן אימות" descEn="Verify journal guidelines compliance" descHe="אימות עמידה מלאה בהנחיות כתב העת" techs={['o1-preview']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="agent" icon={FileText} isHe={isHe} titleEn="16. Cover Letter" titleHe="16. מכתב מקדים" descEn="Generate persuasive letter to Editor-in-Chief" descHe="יצירת מכתב מקדים משכנע לעורך" techs={['Claude 3.7']} />
@@ -401,7 +401,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             </div>
             <div className="p-6 md:p-10 flex flex-col items-center w-full relative z-10">
               <div className="flex flex-col lg:flex-row justify-center items-center w-full relative">
-                <NodeCard type="user" icon={User} isHe={isHe} titleEn="20. Approve" titleHe="20. אישור והגשה" descEn="User reviews final paper and clicks 'Approve & Submit'" descHe="המשתמש סוקר את המאמר ולוחץ 'אשר והגש'" techs={['Next.js 16']} />
+                <NodeCard type="user" icon={User} isHe={isHe} titleEn="20. Approve" titleHe="20. אישור והגשה" descEn="User reviews final paper and clicks 'Approve & Submit'" descHe="המשתמש סוקר את המאמר ולוחץ 'אשר והגש'" techs={['Next.js 16', 'NextAuth.js']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 
@@ -447,7 +447,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
               </div>
               <div className="p-6 md:p-8 flex flex-col items-center justify-between h-[85%]">
                 <div className="flex flex-col lg:flex-row items-center justify-between w-full mb-2">
-                  <NodeCard type="rpa" icon={Globe} isHe={isHe} titleEn="WordPress/OJS API" titleHe="WordPress / OJS" descEn="Execute direct POST to REST APIs" descHe="ביצוע קריאות REST API ישירות" techs={['Next.js 16']} />
+                  <NodeCard type="rpa" icon={Globe} isHe={isHe} titleEn="WordPress/OJS API" titleHe="WordPress / OJS" descEn="Execute direct POST to REST APIs" descHe="ביצוע קריאות REST API ישירות" techs={['Next.js 16', 'NextAuth.js']} />
                   <VerticalFlowArrow isHe={isHe} length="h-8 lg:hidden" />
                   <FlowArrow isHe={isHe} />
                   <NodeCard type="success" icon={CheckCircle2} isHe={isHe} titleEn="Success ✓" titleHe="הצלחה ✓" descEn="Submission complete" descHe="ההגשה הושלמה" techs={['Neon Postgres']} />
@@ -456,7 +456,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <OrDivider isHe={isHe} />
                 
                 <div className="flex flex-col lg:flex-row items-center justify-between w-full mb-2 mt-2">
-                  <NodeCard type="rpa" icon={Globe} isHe={isHe} titleEn="EditorialManager API" titleHe="EditorialManager API" descEn="Execute API stub requests securely" descHe="ביצוע קריאות API מאובטחות" techs={['Next.js 16']} />
+                  <NodeCard type="rpa" icon={Globe} isHe={isHe} titleEn="EditorialManager API" titleHe="EditorialManager API" descEn="Execute API stub requests securely" descHe="ביצוע קריאות API מאובטחות" techs={['Next.js 16', 'NextAuth.js']} />
                   <VerticalFlowArrow isHe={isHe} length="h-8 lg:hidden" />
                   <FlowArrow isHe={isHe} />
                   <NodeCard type="success" icon={CheckCircle2} isHe={isHe} titleEn="Success ✓" titleHe="הצלחה ✓" descEn="Submission complete" descHe="ההגשה הושלמה" techs={['Neon Postgres']} />
@@ -538,7 +538,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="agent" icon={Brain} isHe={isHe} titleEn="37. Rebuttal Agent" titleHe="37. סוכן מענה" descEn="Read critique → Generate rebuttalStrategy" descHe="ניתוח הביקורת → יצירת אסטרטגיית מענה" techs={['OpenAI o1', 'Mem0']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="user" icon={User} isHe={isHe} titleEn="38. User Approve" titleHe="38. אישור משתמש" descEn="Approve Rebuttal Strategy in UI" descHe="אישור אסטרטגיית המענה בממשק" techs={['Next.js 16']} />
+                <NodeCard type="user" icon={User} isHe={isHe} titleEn="38. User Approve" titleHe="38. אישור משתמש" descEn="Approve Rebuttal Strategy in UI" descHe="אישור אסטרטגיית המענה בממשק" techs={['Next.js 16', 'NextAuth.js']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="agent" icon={RefreshCw} isHe={isHe} titleEn="39. Re-run Pipeline" titleHe="39. הרצה חוזרת" descEn="Apply requested edits via Agent Pipeline" descHe="החלת השינויים דרך צינור הסוכנים" techs={['LangGraph']} />
