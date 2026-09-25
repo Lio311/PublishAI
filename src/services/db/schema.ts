@@ -409,6 +409,8 @@ export const submissions = pgTable("submissions", {
   
   remotePostId: text("remote_post_id"),
   remotePostUrl: text("remote_post_url"),
+  remoteLastUpdatedAt: timestamp("remote_last_updated_at"),
+  autoReplyRevisions: boolean("auto_reply_revisions").default(false),
   confirmationId: text("confirmation_id"),
   responseData: jsonb("response_data"),
   
@@ -484,6 +486,9 @@ export const reviewThreads = pgTable("review_threads", {
   status: text("status").default("pending").notNull(),
   roundNumber: integer("round_number").default(1),
   rawReport: text("raw_report"),
+  emailThreadId: text("email_thread_id"),
+  emailMessageId: text("email_message_id"),
+  attachments: jsonb("attachments"),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
