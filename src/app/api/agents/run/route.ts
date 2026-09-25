@@ -1,60 +1,77 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { publishAiGraph } from "@/services/agents/graph/workflow";
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { thread_id, documentContent, userId, humanFeedback } = await req.json();
-    
-    if (!thread_id) {
-      return NextResponse.json({ error: "thread_id is required" }, { status: 400 });
-    }
+    const { paperId, action, feedback } = await req.json();
 
-    const config = { configurable: { thread_id } };
-
-    // Check if graph is interrupted
-    const graphState = await publishAiGraph.getState(config);
-    const isInterrupted = graphState.next.includes("humanReview");
-
-    let result;
-
-    if (isInterrupted && humanFeedback) {
-      // Resume the graph with user feedback
-      result = await publishAiGraph.invoke(
-        { humanFeedback, messages: [new HumanMessage(humanFeedback)] }, 
-        config
-      );
-    } else if (isInterrupted && !humanFeedback) {
-      // Resume without feedback (Approve)
-      result = await publishAiGraph.invoke({ humanFeedback: null }, config);
-    } else {
-      // Start fresh
-      result = await publishAiGraph.invoke(
-        { 
-          documentContent, 
-          userId, 
-          messages: [new HumanMessage(`Please review and edit: ${documentContent}`)] 
-        }, 
-        config
+    if (!paperId || !action) {
+      return NextResponse.json(
+        { error: "Missing required fields: paperId or action" },
+        { status: 400 }
       );
     }
 
-    // Check if it paused again
-    const newState = await publishAiGraph.getState(config);
-    const requiresApproval = newState.next.includes("humanReview");
+    const config = {
+      configurable: { thread_id: paperId },
+    };
 
-    return NextResponse.json({
-      status: requiresApproval ? "awaiting_approval" : "completed",
-      documentContent: result?.documentContent || newState.values.documentContent,
-      validationErrors: result?.validationErrors || newState.values.validationErrors,
-      thread_id
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          if (action === "start") {
+            // Start a new run with the initial state
+            const streamEvents = await publishAiGraph.streamEvents(
+              { paperId }, // initial state
+              { ...config, version: "v2" }
+            );
+
+            for await (const event of streamEvents) {
+              controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+            }
+          } else if (action === "resume") {
+            if (feedback) {
+              // Update state with feedback
+              await publishAiGraph.updateState(config, { feedback });
+            }
+
+            // Resume the run by passing null as input
+            const streamEvents = await publishAiGraph.streamEvents(
+              null,
+              { ...config, version: "v2" }
+            );
+
+            for await (const event of streamEvents) {
+              controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+            }
+          } else {
+            controller.enqueue(
+              encoder.encode(JSON.stringify({ error: "Invalid action" }) + "\n")
+            );
+          }
+        } catch (error) {
+          console.error("Agent error:", error);
+          controller.enqueue(
+            encoder.encode(
+              JSON.stringify({ error: (error as Error).message || "Unknown error" }) + "\n"
+            )
+          );
+        } finally {
+          controller.close();
+        }
+      },
     });
 
-  } catch (error: any) {
-    console.error("Agent Run Error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to run agent" },
-      { status: 500 }
-    );
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
+  } catch (error) {
+    console.error("API error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
