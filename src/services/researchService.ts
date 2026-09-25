@@ -1,7 +1,9 @@
 /**
  * Research Service
- * Mocks the process of collecting full-text articles and references.
+ * Collects reference data by fetching literature details from the literature service.
  */
+
+import { literatureService } from './literature/literatureService';
 
 export interface ArticleReference {
   urlOrDoi: string;
@@ -13,29 +15,55 @@ export interface ArticleReference {
 
 export class ResearchService {
   /**
-   * Mocks fetching reference content given URLs or DOIs, simulating
-   * the collection of full-text articles.
+   * Fetches reference content given URLs or DOIs, using the LiteratureService.
    * 
    * @param urlsOrDois Array of URLs or DOIs to fetch.
    * @returns Promise resolving to an array of ArticleReference objects.
    */
   async fetchReferenceContent(urlsOrDois: string[]): Promise<ArticleReference[]> {
-    console.log(`[ResearchService] Mocking fetch for ${urlsOrDois.length} references...`);
+    console.log(`[ResearchService] Fetching content for ${urlsOrDois.length} references...`);
     
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     if (!urlsOrDois || !Array.isArray(urlsOrDois)) {
       return [];
     }
 
-    return urlsOrDois.map((id, index) => ({
-      urlOrDoi: id,
-      title: `Mocked Scientific Article Title ${index + 1}`,
-      fullText: `This is the mocked full-text content for the article referenced by ${id}. It contains a comprehensive overview of the research methodology, results, and conclusions.`,
-      authors: [`Author ${index + 1}A`, `Author ${index + 1}B`],
-      publicationYear: new Date().getFullYear(),
-    }));
+    const references: ArticleReference[] = [];
+
+    for (const id of urlsOrDois) {
+      try {
+        const result = await literatureService.search(id, { limit: 1 });
+        if (result.items && result.items.length > 0) {
+          const item = result.items[0];
+          references.push({
+            urlOrDoi: id,
+            title: item.title || `Article ${id}`,
+            fullText: item.abstract || `No abstract available for ${id}.`,
+            authors: item.authors ? item.authors.map(a => a.name) : ['Unknown'],
+            publicationYear: item.year || new Date().getFullYear(),
+          });
+        } else {
+          // Fallback if not found
+          references.push({
+            urlOrDoi: id,
+            title: `Article ${id}`,
+            fullText: `No content found for ${id}.`,
+            authors: ['Unknown'],
+            publicationYear: new Date().getFullYear(),
+          });
+        }
+      } catch (error) {
+        console.error(`[ResearchService] Error fetching reference ${id}:`, error);
+        references.push({
+          urlOrDoi: id,
+          title: `Article ${id}`,
+          fullText: `Error fetching content for ${id}.`,
+          authors: ['Unknown'],
+          publicationYear: new Date().getFullYear(),
+        });
+      }
+    }
+
+    return references;
   }
 }
 

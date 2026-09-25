@@ -1,6 +1,7 @@
-/**
- * Mock service for checking journal AI policies and generating disclosures.
- */
+import { db } from "./db";
+import { journals } from "./db/schema";
+import { ilike } from "drizzle-orm";
+
 export interface PolicyCheckResult {
   isCompliant: boolean;
   disclosureString: string;
@@ -20,35 +21,38 @@ export class PolicyService {
   ): Promise<PolicyCheckResult> {
     console.log(`Checking AI policy for journal: ${journalName}`);
     
-    // Simulate database lookup / policy evaluation
-    await new Promise(resolve => setTimeout(resolve, 800));
-
     if (!journalName) {
       throw new Error('Journal name is required to check policy.');
     }
 
-    const normalizedJournalName = journalName.toLowerCase();
+    const journal = await db.query.journals.findFirst({
+      where: ilike(journals.name, `%${journalName}%`)
+    });
 
-    // Mock policy rules
-    if (normalizedJournalName.includes('nature')) {
+    if (!journal) {
       return {
         isCompliant: true,
-        disclosureString: `Disclosure: Generative AI tools were used for ${aiUsageDetails}. The authors take full responsibility for the content.`,
-        restrictions: ['AI cannot be listed as an author', 'Generated images must be explicitly declared']
-      };
-    } else if (normalizedJournalName.includes('strict')) {
-      return {
-        isCompliant: false,
-        disclosureString: '',
-        restrictions: ['No generative AI allowed in writing or data analysis']
+        disclosureString: `AI Usage Declaration: The authors utilized AI assistance for ${aiUsageDetails}. All data and conclusions have been verified by the human authors.`,
+        restrictions: ['AI must be disclosed in the methodology or acknowledgements section']
       };
     }
 
-    // Default policy
+    const rules = (journal.rules as any) || {};
+
+    if (rules.strict) {
+      return {
+        isCompliant: false,
+        disclosureString: '',
+        restrictions: rules.restrictions || ['No generative AI allowed in writing or data analysis']
+      };
+    }
+
     return {
-      isCompliant: true,
-      disclosureString: `AI Usage Declaration: The authors utilized AI assistance for ${aiUsageDetails}. All data and conclusions have been verified by the human authors.`,
-      restrictions: ['AI must be disclosed in the methodology or acknowledgements section']
+      isCompliant: rules.isCompliant !== undefined ? rules.isCompliant : true,
+      disclosureString: rules.disclosureString 
+        ? rules.disclosureString.replace('{aiUsageDetails}', aiUsageDetails)
+        : `Disclosure: Generative AI tools were used for ${aiUsageDetails}. The authors take full responsibility for the content.`,
+      restrictions: rules.restrictions || ['AI cannot be listed as an author', 'Generated images must be explicitly declared']
     };
   }
 }
