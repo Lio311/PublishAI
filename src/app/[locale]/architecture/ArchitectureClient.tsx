@@ -599,7 +599,7 @@ export default function ArchitectureClient({ isAdmin }: { isAdmin: boolean }) {
   };
 
   return (
-    <DashboardLayout isAdmin={isAdmin} showSidebar={isAdmin}>
+    <DashboardLayout isAdmin={isAdmin} showSidebar={true}>
       <div className="p-4 md:p-8 w-full max-w-[95%] mx-auto min-h-screen">
       <div className="mb-8 text-start flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>

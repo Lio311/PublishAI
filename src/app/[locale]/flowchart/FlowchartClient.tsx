@@ -187,6 +187,18 @@ function BranchLabel({ text, color = 'text-green-600' }: { text: string; color?:
   return <span className={`text-[10.5px] font-extrabold ${color} bg-white px-2 py-0.5 rounded border border-slate-200 shadow-sm relative z-20 mb-1`}>{text}</span>;
 }
 
+
+function OrDivider({ isHe, labelEn = 'OR', labelHe = 'או (נתיב חלופי)' }: { isHe: boolean, labelEn?: string, labelHe?: string }) {
+  return (
+    <div className="w-full flex items-center justify-center my-1.5 z-20 relative">
+      <div className="absolute w-full h-[1px] bg-slate-200/50 -z-10"></div>
+      <div className="bg-white border-2 border-slate-300 rounded-full px-2.5 py-0.5 shadow-sm text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+        {isHe ? labelHe : labelEn}
+      </div>
+    </div>
+  );
+}
+
 // ═══════════════════════════════════════════
 // Main Component
 // ═══════════════════════════════════════════
@@ -196,7 +208,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
   const isHe = locale === 'he';
 
   return (
-    <DashboardLayout isAdmin={isAdmin} showSidebar={isAdmin}>
+    <DashboardLayout isAdmin={isAdmin} showSidebar={true}>
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pb-20 overflow-x-hidden" dir={isHe ? 'rtl' : 'ltr'}>
 
         {/* ══ HEADER ══ */}
@@ -356,10 +368,11 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                      <BranchLabel text={isHe ? 'כן (נתיב מהיר)' : 'Yes (Fast)'} />
                      <FlowArrow isHe={isHe} />
                   </div>
-                  <div className="flex items-center w-full mt-10 relative">
+                  <div className="w-full mt-2 mb-1"><OrDivider isHe={isHe} labelEn="OR" labelHe="או" /></div>
+                  <div className="flex items-center w-full mt-2 relative">
                      <BranchLabel text={isHe ? 'לא (נתיב מורכב)' : 'No (Complex)'} color="text-purple-600" />
                      {/* Draw line routing down and across */}
-                     <div className="absolute top-[50%] left-[50%] w-[100%] h-12 border-b-[3px] border-l-[3px] border-slate-400 rounded-bl-xl -z-10 translate-x-[20px] translate-y-[-48px]"></div>
+                     <div className="absolute top-[50%] left-[50%] w-[100%] h-12 border-b-[3px] border-l-[3px] border-slate-400 rounded-bl-xl -z-10 translate-x-[20px] translate-y-[-38px]"></div>
                   </div>
                 </div>
 
@@ -388,19 +401,25 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <p className="text-sm opacity-90">{isHe ? 'מצריך הרשאות מלאות מראש' : 'Requires explicit prior authorization'}</p>
               </div>
               <div className="p-6 md:p-8 flex flex-col items-center justify-between h-[85%]">
-                <div className="flex flex-col lg:flex-row items-center justify-between w-full mb-4">
+                <div className="flex flex-col lg:flex-row items-center justify-between w-full mb-2">
                   <NodeCard type="rpa" icon={Globe} isHe={isHe} titleEn="WordPress/OJS API" titleHe="WordPress / OJS" descEn="Execute direct POST to REST APIs" descHe="ביצוע קריאות REST API ישירות" techs={['Next.js 16']} />
                   <VerticalFlowArrow isHe={isHe} length="h-8 lg:hidden" />
                   <FlowArrow isHe={isHe} />
                   <NodeCard type="success" icon={CheckCircle2} isHe={isHe} titleEn="Success ✓" titleHe="הצלחה ✓" descEn="Submission complete" descHe="ההגשה הושלמה" techs={['Neon Postgres']} />
                 </div>
-                <div className="flex flex-col lg:flex-row items-center justify-between w-full mb-4">
+                
+                <OrDivider isHe={isHe} />
+                
+                <div className="flex flex-col lg:flex-row items-center justify-between w-full mb-2 mt-2">
                   <NodeCard type="rpa" icon={Globe} isHe={isHe} titleEn="EditorialManager API" titleHe="EditorialManager API" descEn="Execute API stub requests securely" descHe="ביצוע קריאות API מאובטחות" techs={['Next.js 16']} />
                   <VerticalFlowArrow isHe={isHe} length="h-8 lg:hidden" />
                   <FlowArrow isHe={isHe} />
                   <NodeCard type="success" icon={CheckCircle2} isHe={isHe} titleEn="Success ✓" titleHe="הצלחה ✓" descEn="Submission complete" descHe="ההגשה הושלמה" techs={['Neon Postgres']} />
                 </div>
-                <div className="flex flex-col lg:flex-row items-center justify-between w-full">
+                
+                <OrDivider isHe={isHe} />
+                
+                <div className="flex flex-col lg:flex-row items-center justify-between w-full mt-2">
                   <NodeCard type="rpa" icon={Mail} isHe={isHe} titleEn="EmailAdapter" titleHe="מתאם אימייל" descEn="Multipart MIME → SMTP → Editor" descHe="שליחת מייל עם חבילת הגשה ישירות לעורך" techs={['Nodemailer']} />
                   <VerticalFlowArrow isHe={isHe} length="h-8 lg:hidden" />
                   <FlowArrow isHe={isHe} />
@@ -431,6 +450,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                        <FlowArrow isHe={isHe} />
                        <NodeCard type="rpa" icon={Eye} isHe={isHe} titleEn="Vision AI" titleHe="ראייה ממוחשבת" descEn="Claude → JSON {X,Y} → Click" descHe="גיבוי - קואורדינטות ראייה ולחיצה" techs={['Vision AI']} />
                      </div>
+                     <div className="w-1/2 ml-auto"><OrDivider isHe={isHe} labelEn="OR" labelHe="או" /></div>
                      <div className="flex items-center rounded-lg pr-2 w-full">
                        <FlowArrow isHe={isHe} />
                        <NodeCard type="rpa" icon={Edit3} isHe={isHe} titleEn="Fill & Upload" titleHe="מילוי והעלאה" descEn="fillForm() & uploadFiles()" descHe="מילוי טפסים והעלאת קבצי מאמר" techs={['Playwright']} />
@@ -448,6 +468,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                        <FlowArrow isHe={isHe} />
                        <NodeCard type="queue" icon={User} isHe={isHe} titleEn="Pause & Notify" titleHe="השהיה והתראה" descEn="WebSocket → User solves → Resume" descHe="התראה → המשתמש פותר בממשק → חידוש" techs={['WebSockets', 'Inngest']} />
                      </div>
+                     <div className="w-1/2 ml-auto"><OrDivider isHe={isHe} labelEn="OR" labelHe="או" /></div>
                      <div className="flex items-center rounded-lg pr-2 w-full">
                        <FlowArrow isHe={isHe} />
                        <NodeCard type="rpa" icon={CheckCircle2} isHe={isHe} titleEn="Final Submit" titleHe="הגשה סופית" descEn="Click Submit → Scrape Tracking ID" descHe="לחיצה על שליחה → חילוץ מזהה מעקב" techs={['Playwright']} />
