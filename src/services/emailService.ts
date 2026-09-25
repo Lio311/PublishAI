@@ -1,3 +1,8 @@
+import pdfParse from 'pdf-parse';
+import { db } from '@/services/db';
+import { journals, submissions, journalConnections } from '@/services/db/schema';
+import { eq, ilike, and } from 'drizzle-orm';
+
 export interface IncomingEmailData {
   sender: string;
   recipient?: string;
@@ -5,20 +10,6 @@ export interface IncomingEmailData {
   body: string;
   attachments?: any[]; // TODO: Define specific attachment type
 }
-
-// Dummy database service for scaffolding (can be mocked in tests)
-export const db = {
-  findSubmissionId: async (journalName: string, articleTitle: string): Promise<string | null> => {
-    return null;
-  }
-};
-
-// Dummy PDF parser service for scaffolding
-export const pdfParser = {
-  extractComments: async (attachment: any): Promise<string[]> => {
-    return [];
-  }
-};
 
 /**
  * Process incoming emails for the Ping-Pong (Revision) phase.
@@ -40,7 +31,27 @@ export async function processIncomingReviewEmail(emailData: IncomingEmailData) {
   const articleTitle = emailData.subject.replace(/^(re|fwd|fw):\s*/i, '').trim();
 
   // Cross-reference Journal Name and Article Title in the database to find the correct `submission_id`.
-  const submissionId = await db.findSubmissionId(journalName, articleTitle);
+  let submissionId: string | null = null;
+  
+  try {
+    const result = await db.select({ id: submissions.id })
+      .from(submissions)
+      .innerJoin(journalConnections, eq(submissions.connectionId, journalConnections.id))
+      .innerJoin(journals, eq(journalConnections.journalId, journals.id))
+      .where(
+        and(
+          ilike(journals.name, `%${journalName}%`),
+          ilike(submissions.submittedTitle, `%${articleTitle}%`)
+        )
+      )
+      .limit(1);
+
+    if (result.length > 0) {
+      submissionId = result[0].id.toString();
+    }
+  } catch (err) {
+    console.error('Error finding submissionId:', err);
+  }
 
   const comments: string[] = [];
 
@@ -48,8 +59,17 @@ export async function processIncomingReviewEmail(emailData: IncomingEmailData) {
   if (emailData.attachments && emailData.attachments.length > 0) {
     for (const attachment of emailData.attachments) {
       if (attachment.contentType === 'application/pdf' || attachment.filename?.endsWith('.pdf')) {
-        const extracted = await pdfParser.extractComments(attachment);
-        comments.push(...extracted);
+        try {
+          if (attachment.content) {
+            const buffer = Buffer.isBuffer(attachment.content) 
+              ? attachment.content 
+              : Buffer.from(attachment.content, 'base64');
+            const pdfData = await pdfParse(buffer);
+            comments.push(pdfData.text);
+          }
+        } catch (err) {
+          console.error(`Error parsing PDF attachment ${attachment.filename}:`, err);
+        }
       }
     }
   }

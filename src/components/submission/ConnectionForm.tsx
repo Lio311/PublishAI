@@ -13,7 +13,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
   const t = useTranslations("submission.connection");
   const locale = useLocale();
   const isHe = locale === "he";
-  const [platform, setPlatform] = useState<"wordpress" | "ojs">("wordpress");
+  const [platform, setPlatform] = useState<"wordpress" | "ojs" | "email">("wordpress");
   const [siteUrl, setSiteUrl] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -93,7 +93,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
       </div>
 
       <div className="p-6 space-y-5">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <label className={`border rounded-lg p-4 cursor-pointer transition-colors ${platform === "wordpress" ? "border-sky-500 bg-sky-50" : "border-slate-200 hover:border-blue-300"}`}>
             <input 
               type="radio" 
@@ -118,6 +118,19 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
             />
             <div className="font-semibold text-slate-800">OJS (Open Journal Systems)</div>
             <div className="text-xs text-slate-500 mt-1">OJS 3.x REST API</div>
+          </label>
+
+          <label className={`border rounded-lg p-4 cursor-pointer transition-colors ${platform === "email" ? "border-sky-500 bg-sky-50" : "border-slate-200 hover:border-blue-300"}`}>
+            <input 
+              type="radio" 
+              name="platform" 
+              value="email"
+              className="sr-only"
+              checked={platform === "email"}
+              onChange={() => setPlatform("email")}
+            />
+            <div className="font-semibold text-slate-800">Gmail / Outlook</div>
+            <div className="text-xs text-slate-500 mt-1">Email / OAuth Integration</div>
           </label>
         </div>
 
