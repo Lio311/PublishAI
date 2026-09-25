@@ -421,7 +421,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             </div>
           </div>
 
-          <VerticalFlowArrow isHe={isHe} length="h-16" label={{ en: "Update DB → Awaiting user approval", he: "עדכון מסד → המתנה לאישור משתמש" }} />
+          <VerticalFlowArrow isHe={isHe} length="h-16" label={{ en: "Update DB → Awaiting user approval", he: "עדכון מסד ← המתנה לאישור משתמש" }} />
 
           {/* ══════════════════════════════════
                PHASE 3
@@ -531,7 +531,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                     <NodeCard type="queue" icon={User} isHe={isHe} titleEn="Auto / Manual Solve" titleHe="פתרון אוטומטי/ידני" descEn="2Captcha API OR User UI Modal" descHe="פתרון אוטומטי (API) או על ידי המשתמש בממשק" techs={['2Captcha', 'Inngest']} />
                   </div>
                   <div className="flex-1 flex justify-center">
-                    <NodeCard type="rpa" icon={CheckCircle2} isHe={isHe} titleEn="Final Submit" titleHe="הגשה סופית" descEn="Click Submit → Scrape Tracking ID" descHe="לחיצה על שליחה → חילוץ מזהה מעקב" techs={['Playwright']} />
+                    <NodeCard type="rpa" icon={CheckCircle2} isHe={isHe} titleEn="Final Submit" titleHe="הגשה סופית" descEn="Click Submit → Scrape Tracking ID" descHe="לחיצה על שליחה ← חילוץ מזהה מעקב" techs={['Playwright']} />
                   </div>
                 </div>
 
@@ -556,7 +556,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="user" icon={User} isHe={isHe} titleEn="Rebuttal UI" titleHe="ממשק משתמש" descEn="User pastes Reviewer Comments" descHe="המשתמש מדביק את הערות הסוקרים" techs={['Next.js 16', 'RebuttalPanel']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={Brain} isHe={isHe} titleEn="Rebuttal Agent" titleHe="סוכן מענה" descEn="Read critique → Generate strategy & letter" descHe="ניתוח הביקורת → יצירת אסטרטגיה ומכתב" techs={['GPT-4o', 'LangGraph']} />
+                <NodeCard type="agent" icon={Brain} isHe={isHe} titleEn="Rebuttal Agent" titleHe="סוכן מענה" descEn="Read critique → Generate strategy & letter" descHe="ניתוח הביקורת ← יצירת אסטרטגיה ומכתב" techs={['GPT-4o', 'LangGraph']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="user" icon={User} isHe={isHe} titleEn="User Approve" titleHe="אישור משתמש" descEn="Approve Rebuttal Strategy in UI" descHe="אישור אסטרטגיית המענה בממשק" techs={['Next.js 16', 'NextAuth.js']} />
