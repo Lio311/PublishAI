@@ -2,7 +2,7 @@ import { inngest } from "../client";
 import { Sandbox } from '@e2b/code-interpreter';
 
 export const runPreflightCheck = inngest.createFunction(
-  { id: "run-preflight-check", event: "paper.preflight" } as any,
+  { id: "run-preflight-check", event: "paper/preflight" } as any,
   
   async ({ event, step }: { event: any, step: any }) => {
     const { code, dependencies, datasets } = event.data;

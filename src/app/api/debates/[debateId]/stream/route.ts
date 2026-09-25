@@ -14,19 +14,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ deba
         isClosed = true;
       });
 
-      let lastMessageId = "";
+      const seenIds = new Set<string>();
 
       while (!isClosed) {
         const msgs = await db.select()
           .from(debateMessages)
           .where(eq(debateMessages.debateId, debateId));
         
-        const newMsgs = msgs.filter(m => m.id !== lastMessageId);
+        const newMsgs = msgs.filter(m => !seenIds.has(m.id));
         
-        if (newMsgs.length > 0) {
-          const latest = newMsgs[newMsgs.length - 1];
-          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(latest)}\n\n`));
-          lastMessageId = latest.id;
+        for (const msg of newMsgs) {
+          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(msg)}\n\n`));
+          seenIds.add(msg.id);
         }
 
         await new Promise(resolve => setTimeout(resolve, 2000));

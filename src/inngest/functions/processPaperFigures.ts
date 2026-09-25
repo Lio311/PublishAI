@@ -4,7 +4,7 @@ import { db } from "../../services/db";
 import { figures, figureAnalyses } from "../../services/db/schema";
 
 export const processPaperFigures = inngest.createFunction(
-  { id: "process-paper-figures", name: "Process Paper Figures & Vision AI", event: "paper.uploaded" } as any,
+  { id: "process-paper-figures", name: "Process Paper Figures & Vision AI", event: "paper/uploaded" } as any,
   async ({ event, step }: { event: any, step: any }) => {
     const { paperId, paperVersionId, documentUrl } = event.data;
 

@@ -5,7 +5,7 @@ import { debateAgents, debates } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 
 export const scientificReviewDebate = inngest.createFunction(
-  { id: "scientific-review-debate", event: "submission.review.started" } as any,
+  { id: "scientific-review-debate", event: "submission/review-started" } as any,
   async ({ event, step }: { event: any, step: any }) => {
     const { paperId } = event.data;
 

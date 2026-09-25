@@ -364,6 +364,15 @@ export const submissionStatusEnum = pgEnum("submission_status", [
   "failed",
   "draft",
   "rejected",
+  "with_editor",
+  "under_review",
+  "reviews_received",
+  "revision_requested",
+  "revised_submitted",
+  "accepted",
+  "in_proofs",
+  "published",
+  "withdrawn",
 ]);
 
 export const captchaStrategyEnum = pgEnum("captcha_strategy", ["auto", "manual"]);
@@ -609,7 +618,16 @@ export const scientificRelationships = pgTable("scientific_relationships", {
 // ═══════════════════════════════════════════════════════
 
 export const feedbackOutcomeEnum = pgEnum("feedback_outcome", [
-  "accepted", "rejected", "revision_required"
+  "accepted", "rejected",
+  "with_editor",
+  "under_review",
+  "reviews_received",
+  "revision_requested",
+  "revised_submitted",
+  "accepted",
+  "in_proofs",
+  "published",
+  "withdrawn", "revision_required"
 ]);
 
 export const rlhfFeedbackLogs = pgTable("rlhf_feedback_logs", {

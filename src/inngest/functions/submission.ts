@@ -57,7 +57,7 @@ export const processSubmission = inngest.createFunction(
 
     if (result.status === "requires_captcha") {
       const captchaEvent = await step.waitForEvent("wait-for-captcha", {
-        event: "submission.captcha.solved",
+        event: "submission/captcha-solved",
         timeout: "24h",
         match: "data.submissionId",
       });
@@ -88,7 +88,7 @@ export const processSubmission = inngest.createFunction(
 
     if (result.status === "requires_2fa") {
       const twoFAEvent = await step.waitForEvent("wait-for-2fa", {
-        event: "submission.2fa.solved",
+        event: "submission/2fa-solved",
         timeout: "1h",
         match: "data.submissionId",
       });

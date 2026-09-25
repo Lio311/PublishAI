@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     }
 
     await inngest.send({
-      name: "submission.captcha.solved",
+      name: "submission/captcha-solved",
       data: {
         submissionId,
         solution,

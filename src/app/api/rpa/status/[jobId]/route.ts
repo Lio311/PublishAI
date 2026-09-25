@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-
-// Temporary mock status storage
-const jobStatuses: Record<string, any> = {};
+import { db } from '@/services/db';
+import { rpaJobs, submissions } from '@/services/db/schema';
+import { eq } from 'drizzle-orm';
 
 export async function GET(
   request: Request,
@@ -9,27 +9,58 @@ export async function GET(
 ) {
   const { jobId } = await params;
   
-  if (!jobStatuses[jobId]) {
-    jobStatuses[jobId] = {
-      status: 'initializing',
-      message: 'Initializing submission...',
-      progress: 10
-    };
-  }
+  try {
+    const [job] = await db.select().from(rpaJobs).where(eq(rpaJobs.id, jobId));
+    if (!job) {
+      return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+    }
 
-  // For demonstration, let's auto-progress the status if it's not paused/completed
-  const current = jobStatuses[jobId];
-  if (current.status === 'initializing') {
-    jobStatuses[jobId] = { status: 'logging_in', message: 'Logging into publisher portal...', progress: 30 };
-  } else if (current.status === 'logging_in') {
-    jobStatuses[jobId] = { status: 'uploading', message: 'Uploading manuscript files...', progress: 50 };
-  } else if (current.status === 'uploading') {
-    jobStatuses[jobId] = { status: 'filling_forms', message: 'Filling submission forms...', progress: 70 };
-  } else if (current.status === 'filling_forms') {
-    jobStatuses[jobId] = { status: 'paused', message: 'Please complete the APC payment on the portal.', progress: 75 };
-  } else if (current.status === 'resumed') {
-    jobStatuses[jobId] = { status: 'completed', message: 'Submission completed successfully.', progress: 100 };
+    return NextResponse.json({
+      status: job.status,
+      message: job.currentStep || 'Running...',
+      progress: job.status === 'completed' ? 100 : job.status === 'error' ? 0 : 50,
+      stateData: job.stateData,
+      errorLog: job.errorLog,
+    });
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
+}
 
-  return NextResponse.json(jobStatuses[jobId]);
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ jobId: string }> }
+) {
+  const { jobId } = await params;
+  
+  try {
+    const body = await request.json();
+    const { status, currentStep, stateData, errorLog } = body;
+
+    const [existing] = await db.select().from(rpaJobs).where(eq(rpaJobs.id, jobId));
+    
+    if (!existing) {
+      return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+    }
+
+    await db.update(rpaJobs)
+      .set({
+        status: status || existing.status,
+        currentStep: currentStep || existing.currentStep,
+        stateData: stateData || existing.stateData,
+        errorLog: errorLog || existing.errorLog,
+        updatedAt: new Date(),
+      })
+      .where(eq(rpaJobs.id, jobId));
+      
+    if (status === 'completed' && existing.submissionId) {
+      await db.update(submissions).set({ status: 'submitted' }).where(eq(submissions.id, existing.submissionId));
+    } else if (status === 'error' && existing.submissionId) {
+      await db.update(submissions).set({ status: 'failed' }).where(eq(submissions.id, existing.submissionId));
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
