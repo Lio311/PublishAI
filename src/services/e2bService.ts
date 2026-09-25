@@ -12,6 +12,11 @@ export async function runPythonInSandbox(
 
     // 2. Download files from URLs and write to Sandbox
     for (const file of dataFiles) {
+            // Validate URL for SSRF
+      const parsedUrl = new URL(file.url);
+      if (parsedUrl.protocol !== "https:" || parsedUrl.hostname === "localhost" || parsedUrl.hostname.startsWith("127.") || parsedUrl.hostname.startsWith("169.254.") || parsedUrl.hostname.startsWith("10.") || parsedUrl.hostname.startsWith("192.168.")) {
+        throw new Error("Invalid URL for security reasons");
+      }
       const response = await fetch(file.url);
       if (!response.ok) {
         throw new Error(`Failed to fetch file: ${file.url}`);

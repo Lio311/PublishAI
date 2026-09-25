@@ -23,7 +23,7 @@ ${state.documentContent}
   });
 
   const output = response.content as string;
-  const validationErrors = output.includes("PASS") ? [] : [output];
+  const validationErrors = output.trim() === "PASS" ? [] : [output];
 
   return {
     validationErrors,

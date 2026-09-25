@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
           } else if (action === "resume") {
             if (feedback) {
               // Update state with feedback
-              await publishAiGraph.updateState(config, { feedback });
+              await publishAiGraph.updateState(config, { humanFeedback: feedback });
             }
 
             // Resume the run by passing null as input

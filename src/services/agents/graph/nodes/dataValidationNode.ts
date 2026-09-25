@@ -1,7 +1,7 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage } from "@langchain/core/messages";
 import { PublishAIState } from "../state";
-import { executePython } from "../../../pythonSandbox";
+import { runPythonInSandbox } from "../../../e2bService";
 import { z } from "zod";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
 
@@ -29,7 +29,16 @@ ${JSON.stringify(state.dataSchema)}
   const scriptResult = await scriptModel.invoke([new HumanMessage(scriptPrompt)]);
   
   // 2. Execute Python
-  const pythonOutput = await executePython(scriptResult.script, "mock_data_url.csv");
+    const dataUrl = state.dataSchema?.url || "https://example.com/mock.csv";
+  const safeScript = scriptResult.script; // e2bService runs it safely via runCode
+  let pythonOutput;
+  try {
+    const e2bResult = await runPythonInSandbox(safeScript, [{ filename: "data.csv", url: dataUrl }]);
+    pythonOutput = e2bResult.logs + "\n" + JSON.stringify(e2bResult.results);
+  } catch (e: any) {
+    console.error("E2B execution failed", e);
+    pythonOutput = "Execution failed: " + e.message;
+  }
 
   // 3. Compare output and generate annotations
   const annotationSchema = z.object({
