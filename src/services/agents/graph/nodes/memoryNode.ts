@@ -1,5 +1,5 @@
 import { PublishAIState } from "../state";
-import { memoryClient } from "@/lib/mem0";
+import { mem0 } from "@/lib/mem0";
 
 export const retrieveMemoryNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   const lastMessage = state.messages[state.messages.length - 1];
@@ -9,14 +9,14 @@ export const retrieveMemoryNode = async (state: PublishAIState): Promise<Partial
   }
 
   try {
-    const searchResponse = await memoryClient.search(lastMessage.content, {
-      userId: state.userId,
-      topK: 5,
+    const searchResponse = await mem0.search(lastMessage.content, {
+      user_id: state.userId,
     } as any);
 
-    const memoryContext = searchResponse.results
-      .map((result: any) => `- ${result.memory}`)
-      .join("\n");
+    const results = (searchResponse as any).results || searchResponse;
+    const memoryContext = Array.isArray(results) 
+      ? results.map((result: any) => `- ${result.memory}`).join("\n")
+      : "";
 
     return { memoryContext };
   } catch (e) {
@@ -34,12 +34,11 @@ export const updateMemoryNode = async (state: PublishAIState): Promise<Partial<P
   const aiMessage = state.messages[messagesCount - 1];
 
   try {
-    await memoryClient.add([
-      { role: "user", content: userMessage.content as string },
-      { role: "assistant", content: aiMessage.content as string }
-    ], {
-      userId: state.userId
-    });
+    await mem0.add(
+      [{ role: "user", content: userMessage.content as string },
+       { role: "assistant", content: aiMessage.content as string }],
+      { user_id: state.userId } as any
+    );
   } catch (e) {
     console.warn("Mem0 update failed", e);
   }

@@ -47,6 +47,16 @@ export const PublishAIStateAnnotation = Annotation.Root({
     reducer: (x, y) => y ?? x,
     default: () => [],
   }),
+  clarification: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
+  plan: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
+  literature: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
+  scientificReview: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
+  draft: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
+  edits: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
+  integrityResult: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
+  qa: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
+  verification: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
+  coverLetter: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
 });
 
 export type PublishAIState = typeof PublishAIStateAnnotation.State;

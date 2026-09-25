@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-10 flex flex-col items-center">
+
+<div class="w-full flex flex-col items-center">
+  <div class="w-24 h-24 bg-yellow-400 rotate-45 mb-4"></div>
+  
+  <div class="h-4 w-[3px] bg-slate-400"></div>
+
+  <div class="flex w-full max-w-[320px] relative">
+    <div class="absolute top-0 left-[50%] right-[20px] h-[3px] bg-slate-400"></div>
+    <div class="absolute top-0 left-[20px] right-[50%] h-[3px] bg-slate-400"></div>
+
+    <div class="flex-1 flex flex-col items-center">
+      <div class="h-10 w-[3px] bg-slate-400 relative">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-600 rounded-full border border-slate-200 z-10 whitespace-nowrap">
+          כן (נמצאו)
+        </div>
+        <div class="absolute bottom-[-1px] left-1/2 -translate-x-1/2 border-t-[8px] border-t-slate-400 border-x-[5px] border-x-transparent translate-y-full"></div>
+      </div>
+      <div class="mt-4 w-32 h-20 bg-blue-500 rounded-xl"></div>
+    </div>
+
+    <div class="flex-1 flex flex-col items-center">
+      <div class="h-10 w-[3px] bg-slate-400 relative">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-600 rounded-full border border-slate-200 z-10 whitespace-nowrap">
+          לא (גיבוי)
+        </div>
+        <div class="absolute bottom-[-1px] left-1/2 -translate-x-1/2 border-t-[8px] border-t-slate-400 border-x-[5px] border-x-transparent translate-y-full"></div>
+      </div>
+      <div class="mt-4 w-32 h-20 bg-blue-500 rounded-xl"></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

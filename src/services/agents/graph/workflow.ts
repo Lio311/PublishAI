@@ -1,45 +1,55 @@
 import { StateGraph, START, END, MemorySaver } from "@langchain/langgraph";
 import { PublishAIStateAnnotation, PublishAIState } from "./state";
-import { retrieveMemoryNode } from "./nodes/memoryNode";
-import { writingNode } from "./nodes/writingNode";
-import { validateNode } from "./nodes/validateNode";
+import { clarificationNode } from "./nodes/clarificationNode";
+import { planningNode } from "./nodes/planningNode";
+import { literatureNode } from "./nodes/literatureNode";
+import { executionNode } from "./nodes/executionNode";
+import { scientificReviewNode } from "./nodes/scientificReviewNode";
+import { draftNode } from "./nodes/draftNode";
+import { editsNode } from "./nodes/editsNode";
+import { integrityNode } from "./nodes/integrityNode";
+import { qaNode } from "./nodes/qaNode";
+import { verificationNode } from "./nodes/verificationNode";
+import { coverLetterNode } from "./nodes/coverLetterNode";
 
-const routeAfterValidation = (state: PublishAIState) => {
-  if (state.validationErrors && state.validationErrors.length > 0) {
-    return "writingNode"; // Fix errors
+const routeAfterIntegrity = (state: PublishAIState) => {
+  // If integrity fails, route to END or error state.
+  // Assuming a fail condition is represented when integrityResult has some error or "fail" property,
+  // we'll route to END for now as per instructions.
+  if (state.integrityResult === "fail" || state.integrityResult?.status === "fail" || state.integrityResult?.success === false) {
+    return END;
   }
-  return "humanReview";
-};
-
-const routeAfterHuman = (state: PublishAIState) => {
-  if (state.humanFeedback) {
-    return "writingNode"; // Address feedback
-  }
-  return END;
-};
-
-// Human-in-the-loop node doesn't strictly need to do much besides wait.
-// By returning an empty object, it doesn't change the state.
-const humanReviewNode = async (state: PublishAIState) => {
-  return {};
+  return "qaNode";
 };
 
 const builder = new StateGraph(PublishAIStateAnnotation)
-  .addNode("memoryNode", retrieveMemoryNode)
-  .addNode("writingNode", writingNode)
-  .addNode("validateNode", validateNode)
-  .addNode("humanReview", humanReviewNode)
-  
-  .addEdge(START, "memoryNode")
-  .addEdge("memoryNode", "writingNode")
-  .addEdge("writingNode", "validateNode")
-  .addConditionalEdges("validateNode", routeAfterValidation)
-  .addConditionalEdges("humanReview", routeAfterHuman);
+  .addNode("clarificationNode", clarificationNode)
+  .addNode("planningNode", planningNode)
+  .addNode("literatureNode", literatureNode)
+  .addNode("executionNode", executionNode)
+  .addNode("scientificReviewNode", scientificReviewNode)
+  .addNode("draftNode", draftNode)
+  .addNode("editsNode", editsNode)
+  .addNode("integrityNode", integrityNode)
+  .addNode("qaNode", qaNode)
+  .addNode("verificationNode", verificationNode)
+  .addNode("coverLetterNode", coverLetterNode)
+
+  .addEdge(START, "clarificationNode")
+  .addEdge("clarificationNode", "planningNode")
+  .addEdge("planningNode", "literatureNode")
+  .addEdge("literatureNode", "executionNode")
+  .addEdge("executionNode", "scientificReviewNode")
+  .addEdge("scientificReviewNode", "draftNode")
+  .addEdge("draftNode", "editsNode")
+  .addEdge("editsNode", "integrityNode")
+  .addConditionalEdges("integrityNode", routeAfterIntegrity)
+  .addEdge("qaNode", "verificationNode")
+  .addEdge("verificationNode", "coverLetterNode")
+  .addEdge("coverLetterNode", END);
 
 const checkpointer = new MemorySaver();
 
-// Compile the graph with a breakpoint BEFORE humanReview
 export const publishAiGraph = builder.compile({
   checkpointer,
-  interruptBefore: ["humanReview"]
 });
