@@ -1,4 +1,6 @@
-import { BaseNavigator } from './base-navigator';
+import * as fs from 'fs';
+
+const newContent = `import { BaseNavigator } from './base-navigator';
 import { WorkflowResult } from '../types';
 
 export class GenericNavigator extends BaseNavigator {
@@ -7,14 +9,14 @@ export class GenericNavigator extends BaseNavigator {
     if (el) {
       await el.click();
     } else {
-      console.log(`[RPA] DOM selectors failed for '${description}'. Engaging Vision AI Fallback...`);
+      console.log(\`[RPA] DOM selectors failed for '\${description}'. Engaging Vision AI Fallback...\`);
       const screenshotBuffer = await this.page.screenshot();
       
       // Placeholder: Send screenshotBuffer to Claude 3.5 Sonnet / gpt-4o vision model
-      // Prompt: "Find the ${description} button/link on this page and return its [X, Y] coordinates."
+      // Prompt: "Find the \${description} button/link on this page and return its [X, Y] coordinates."
       const mockVisionApiResponse = { x: 450, y: 320 }; // Example mocked response
       
-      console.log(`[RPA] Vision model returned [X, Y]: [${mockVisionApiResponse.x}, ${mockVisionApiResponse.y}]. Clicking...`);
+      console.log(\`[RPA] Vision model returned [X, Y]: [\${mockVisionApiResponse.x}, \${mockVisionApiResponse.y}]. Clicking...\`);
       await this.page.mouse.click(mockVisionApiResponse.x, mockVisionApiResponse.y);
     }
   }
@@ -71,7 +73,7 @@ export class GenericNavigator extends BaseNavigator {
     const fileInput = await this.page.$('input[type="file"]');
     if (fileInput && this.config.submissionPayload.attachments?.length > 0) {
       // For now, log the intent — actual file upload requires temp file creation
-      console.log(`[RPA] ${this.config.submissionPayload.attachments.length} files ready for upload`);
+      console.log(\`[RPA] \${this.config.submissionPayload.attachments.length} files ready for upload\`);
       this.markStep('upload-files');
     }
     await this.screenshots.capture(this.page, 'files-uploaded');
@@ -86,13 +88,13 @@ export class GenericNavigator extends BaseNavigator {
         console.log('[RPA] Captcha detected. Strategy is auto. Invoking 2Captcha-like service...');
         // Placeholder for 2Captcha API call
         // const token = await invoke2Captcha(...);
-        // await this.page.evaluate(`document.getElementById("g-recaptcha-response").innerHTML="${token}";`);
+        // await this.page.evaluate(\`document.getElementById("g-recaptcha-response").innerHTML="\${token}";\`);
         console.log('[RPA] Captcha solved automatically.');
       } else {
         const screenshot = this.screenshots.getLast();
         return {
           status: 'requires_captcha',
-          screenshotUrl: screenshot ? `data:image/png;base64,${screenshot.buffer.toString('base64')}` : undefined,
+          screenshotUrl: screenshot ? \`data:image/png;base64,\${screenshot.buffer.toString('base64')}\` : undefined,
           stepsCompleted: this.stepsCompleted,
           message: 'CAPTCHA detected — awaiting user intervention',
         };
@@ -114,7 +116,7 @@ export class GenericNavigator extends BaseNavigator {
 
     // Try to extract tracking ID from confirmation page
     const pageText = await this.page.textContent('body');
-    const trackingMatch = pageText?.match(/(?:Manuscript|Tracking|Submission)\s*(?:ID|Number|#)?\s*[:=]?\s*([A-Z0-9-]+)/i);
+    const trackingMatch = pageText?.match(/(?:Manuscript|Tracking|Submission)\\s*(?:ID|Number|#)?\\s*[:=]?\\s*([A-Z0-9-]+)/i);
 
     this.markStep('submit');
     return {
@@ -124,3 +126,6 @@ export class GenericNavigator extends BaseNavigator {
     };
   }
 }
+`;
+
+fs.writeFileSync('src/services/rpa/portal-navigators/generic-navigator.ts', newContent);

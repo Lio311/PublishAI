@@ -18,6 +18,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [captchaStrategy, setCaptchaStrategy] = useState<"auto" | "manual">("auto");
   
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string; userRole?: string } | null>(null);
@@ -34,7 +35,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
       const res = await fetch("/api/journal-connection/test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ platform, siteUrl, username, password }),
+        body: JSON.stringify({ platform, siteUrl, username, password, captchaStrategy }),
       });
       
       const data = await res.json();
@@ -68,6 +69,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
           username, 
           password, 
           displayName,
+          captchaStrategy,
           testResult 
         }),
       });
@@ -155,6 +157,18 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">{isHe ? "אסטרטגיית זיהוי רובוטים (Captcha)" : "Captcha Strategy"}</label>
+          <select 
+            value={captchaStrategy}
+            onChange={(e) => setCaptchaStrategy(e.target.value as "auto" | "manual")}
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none"
+          >
+            <option value="auto">{isHe ? "אוטומטי (מומלץ)" : "Auto (Recommended)"}</option>
+            <option value="manual">{isHe ? "ידני" : "Manual"}</option>
+          </select>
         </div>
 
         <div>

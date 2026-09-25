@@ -57,6 +57,10 @@ export const PublishAIStateAnnotation = Annotation.Root({
   qa: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
   verification: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
   coverLetter: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
+  knowledgeContext: Annotation<string>({
+    reducer: (x, y) => x + (y ? "\n" + y : ""),
+    default: () => "",
+  }),
 });
 
 export type PublishAIState = typeof PublishAIStateAnnotation.State;

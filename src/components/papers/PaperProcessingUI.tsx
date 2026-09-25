@@ -153,9 +153,14 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
   const [isFinished, setIsFinished] = useState(false);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Captcha state
+  const [requiresCaptcha, setRequiresCaptcha] = useState(initialStatus === "requires_captcha");
+  const [captchaInput, setCaptchaInput] = useState("");
+  const [submittingCaptcha, setSubmittingCaptcha] = useState(false);
+
   // Auto-advance for visual simulation
   useEffect(() => {
-    if (isFinished) return;
+    if (isFinished || requiresCaptcha) return;
     
     // Scroll current step into view
     const currentEl = stepRefs.current[currentStepIndex];
@@ -175,10 +180,56 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
     }, 4500); // 4.5 seconds per agent for simulation
 
     return () => clearTimeout(timer);
-  }, [currentStepIndex, isFinished]);
+  }, [currentStepIndex, isFinished, requiresCaptcha]);
+
+  const handleCaptchaSubmit = async () => {
+    try {
+      setSubmittingCaptcha(true);
+      const res = await fetch(`/api/submissions/${paperId}/captcha`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ captcha: captchaInput })
+      });
+      if (res.ok) {
+        setRequiresCaptcha(false);
+        setCaptchaInput("");
+      } else {
+        alert("Failed to submit captcha");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmittingCaptcha(false);
+    }
+  };
 
   return (
     <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] p-8 border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] relative overflow-hidden">
+      {requiresCaptcha && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <h3 className="text-xl font-bold text-slate-800 mb-4">Solve Captcha</h3>
+            <p className="text-slate-600 mb-6">A captcha is required to continue the submission process.</p>
+            <input 
+              type="text" 
+              value={captchaInput}
+              onChange={(e) => setCaptchaInput(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-4 py-2 mb-6"
+              placeholder="Enter captcha text..."
+            />
+            <button
+              onClick={handleCaptchaSubmit}
+              disabled={submittingCaptcha || !captchaInput}
+              className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            >
+              {submittingCaptcha ? "Submitting..." : "Submit Captcha"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Subtle background glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-sky-50/50 via-transparent to-sky-50/50 pointer-events-none" />
       <h2 className="text-2xl font-bold mb-8 text-slate-800">{t("workingProcess")}</h2>
@@ -244,7 +295,29 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
           <div className="absolute inset-0 bg-gradient-to-br from-green-100/30 to-emerald-50/20 pointer-events-none" />
           <CheckCircle className="w-14 h-14 text-green-500 mx-auto mb-5 drop-shadow-sm" />
           <h3 className="text-2xl font-bold text-green-800 mb-3">{t("processComplete")}</h3>
-          <p className="text-green-700/90">{t("processCompleteDesc")}</p>
+          <p className="text-green-700/90 mb-6">{t("processCompleteDesc")}</p>
+          
+          <button
+            onClick={async () => {
+              try {
+                // Mock submission ID for the UI flow trigger if a real one isn't present in this context
+                const submissionId = paperId || 1; 
+                const res = await fetch(`/api/submissions/${submissionId}/submit`, {
+                  method: "POST",
+                });
+                if (res.ok) {
+                  alert("RPA Autonomous Submission initiated successfully!");
+                } else {
+                  alert("Failed to initiate submission.");
+                }
+              } catch (err) {
+                console.error("Submission failed:", err);
+              }
+            }}
+            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-sky-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+          >
+            Approve & Submit
+          </button>
         </div>
       )}
 

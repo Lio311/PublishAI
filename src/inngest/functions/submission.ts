@@ -65,6 +65,25 @@ export const processSubmission = inngest.createFunction(
       if (!captchaEvent) {
         throw new Error("Captcha not solved within 24 hours");
       }
+
+      await step.run("resume-submission-after-captcha", async () => {
+        const sub = await db.query.submissions.findFirst({
+          where: eq(submissions.id, submissionId),
+          with: { connection: true } as any,
+        });
+        const conn = (sub as any)?.connection;
+        if (!conn) throw new Error("No connection found for submission");
+
+        const { decrypt } = await import("@/services/security/encryption");
+        
+        // Pass the solution back to the navigator to continue
+        return await runSubmissionWorkflow(submissionId.toString(), {
+          siteUrl: conn.siteUrl,
+          username: decrypt(conn.encryptedUsername),
+          password: decrypt(conn.encryptedPassword),
+          captchaSolution: captchaEvent.data.solution,
+        } as any);
+      });
     }
 
     if (result.status === "requires_2fa") {

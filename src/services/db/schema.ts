@@ -359,6 +359,8 @@ export const submissionStatusEnum = pgEnum("submission_status", [
   "draft",
 ]);
 
+export const captchaStrategyEnum = pgEnum("captcha_strategy", ["auto", "manual"]);
+
 // ═══════════════════════════════════════════════════════
 // TABLE: journal_connections
 // ═══════════════════════════════════════════════════════
@@ -383,6 +385,8 @@ export const journalConnections = pgTable("journal_connections", {
   lastError: text("last_error"),
   remoteUserDisplayName: text("remote_user_display_name"),
   remoteUserRole: text("remote_user_role"),
+  
+  captchaStrategy: captchaStrategyEnum("captcha_strategy").default("auto"),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -796,3 +800,34 @@ export const rpaJobs = pgTable("rpa_jobs", {
 
 export type RpaJob = typeof rpaJobs.$inferSelect;
 export type NewRpaJob = typeof rpaJobs.$inferInsert;
+
+// ═══════════════════════════════════════════════════════
+// GRAPHRAG (Entities & Relationships)
+// ═══════════════════════════════════════════════════════
+
+export const entities = pgTable("entities", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  type: text("type"),
+  description: text("description"),
+  metadata: jsonb("metadata"),
+  embedding: vector("embedding", { dimensions: 1536 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const relationships = pgTable("relationships", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sourceId: uuid("source_id").references(() => entities.id, { onDelete: "cascade" }).notNull(),
+  targetId: uuid("target_id").references(() => entities.id, { onDelete: "cascade" }).notNull(),
+  type: text("type").notNull(),
+  description: text("description"),
+  metadata: jsonb("metadata"),
+  embedding: vector("embedding", { dimensions: 1536 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type Entity = typeof entities.$inferSelect;
+export type NewEntity = typeof entities.$inferInsert;
+
+export type Relationship = typeof relationships.$inferSelect;
+export type NewRelationship = typeof relationships.$inferInsert;

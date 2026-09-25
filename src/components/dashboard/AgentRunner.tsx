@@ -2,15 +2,26 @@
 
 import { useState } from "react";
 
-export function AgentRunner({ paperId = "123" }: { paperId?: string }) {
-  const [status, setStatus] = useState<"IDLE" | "RUNNING" | "PAUSED" | "COMPLETED" | "ERROR">("IDLE");
+export function AgentRunner({ paperId = "123", onResult, onStatusChange, onLog }: { paperId?: string, onResult?: (result: any) => void, onStatusChange?: (status: "IDLE" | "RUNNING" | "PAUSED" | "COMPLETED" | "ERROR") => void, onLog?: (log: string) => void }) {
+  const [status, setInternalStatus] = useState<"IDLE" | "RUNNING" | "PAUSED" | "COMPLETED" | "ERROR">("IDLE");
   const [feedback, setFeedback] = useState("");
   const [result, setResult] = useState<any>(null);
   const [logs, setLogs] = useState<string[]>([]);
 
+  const setStatus = (newStatus: "IDLE" | "RUNNING" | "PAUSED" | "COMPLETED" | "ERROR" | ((prev: any) => any)) => {
+    setInternalStatus(prev => {
+      const updated = typeof newStatus === "function" ? newStatus(prev) : newStatus;
+      onStatusChange?.(updated);
+      return updated;
+    });
+  };
+
   const runStream = async (action: "start" | "resume") => {
     setStatus("RUNNING");
-    if (action === "start") setLogs([]);
+    if (action === "start") {
+      setLogs([]);
+      onLog?.("");
+    }
     
     try {
       const res = await fetch("/api/agents/run", {
@@ -35,7 +46,9 @@ export function AgentRunner({ paperId = "123" }: { paperId?: string }) {
           for (const line of lines) {
             try {
               const event = JSON.parse(line);
-              setLogs(prev => [...prev, `[${event.event}] ${event.name}`]);
+              const logMsg = `[${event.event}] ${event.name}`;
+              setLogs(prev => [...prev, logMsg]);
+              onLog?.(logMsg);
               
               // If we reached an interrupt (or the end), update status
               if (event.event === "on_interrupt") {
@@ -44,7 +57,9 @@ export function AgentRunner({ paperId = "123" }: { paperId?: string }) {
               }
               // If finished
               if (event.event === "on_chain_end" && event.name === "LangGraph") {
-                 setResult(event.data?.output);
+                 const out = event.data?.output;
+                 setResult(out);
+                 onResult?.(out);
               }
             } catch (e) {
               // Ignore parse errors on partial chunks

@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/auth";
-import { db } from "@/services/db";
-import { submissions } from "@/services/db/schema";
-import { eq } from "drizzle-orm";
-import { checkRateLimit } from "@/services/rate-limit";
-import { SubmissionService } from "@/services/submission";
+import { inngest } from "@/inngest/client";
 
 export async function POST(
   req: NextRequest,
@@ -14,14 +10,6 @@ export async function POST(
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const rateLimitResult = await checkRateLimit(session.user.id);
-    if (!rateLimitResult.success) {
-      return NextResponse.json(
-        { error: "Too many requests. Please try again later." },
-        { status: 429 }
-      );
     }
 
     const { id } = await params;
@@ -34,42 +22,15 @@ export async function POST(
       );
     }
 
-    // Verify submission exists and belongs to user
-    let existingSubmission: any = null;
-    try {
-      if (db?.query?.submissions) {
-        existingSubmission = await db.query.submissions.findFirst({
-          where: eq(submissions.id, submissionId),
-        });
-      }
-    } catch (dbErr) {
-      console.warn("[API submissions/[id]/submit] DB query fallback:", dbErr);
-    }
-
-    if (existingSubmission && existingSubmission.userId && existingSubmission.userId !== session.user.id) {
-      return NextResponse.json(
-        { error: "Forbidden: Not authorized to submit this manuscript" },
-        { status: 403 }
-      );
-    }
-
-    const body = await req.json().catch(() => ({}));
-    const { notes, targetJournalId, publishMode, metadata } = body;
-
-    // Execute submission logic and event recording
-    const result = await SubmissionService.submitPaper(submissionId, {
-      submissionId,
-      userId: session.user.id,
-      notes,
-      targetJournalId,
-      publishMode,
-      metadata,
+    // Trigger Inngest background job for the RPA workflow
+    await inngest.send({
+      name: "submission/process",
+      data: { submissionId },
     });
 
     return NextResponse.json({
       success: true,
-      message: "Submission submitted successfully",
-      submission: result,
+      message: "Submission process triggered via Inngest",
     });
   } catch (error: any) {
     console.error("[API submissions/[id]/submit POST] Error:", error);
