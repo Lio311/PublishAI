@@ -1,28 +1,48 @@
+import { Document, Packer, Paragraph, TextRun } from "docx";
+
 /**
- * Mock service for exporting documents to Word (.docx)
+ * Service for exporting documents to Word (.docx)
  */
 export class DocumentExportService {
   /**
    * Exports an HTML or Markdown article to a .docx file format.
    * @param content The HTML or Markdown content to export.
    * @param title The title of the document.
-   * @returns A Buffer containing the generated .docx file (mocked).
+   * @returns A Buffer containing the generated .docx file.
    */
   public async exportToDocx(content: string, title: string): Promise<Buffer> {
-    console.log(`Mocking export of document "${title}" to .docx format...`);
-    
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
     if (!content) {
       throw new Error('Content is required for export.');
     }
 
-    // In a real scenario, we might use python-docx via a python bridge or docx npm package
-    // Here we return a mock buffer representing the .docx file
-    const mockDocxContent = `Mock DOCX Content for ${title}\n\n${content.substring(0, 50)}...`;
-    
-    return Buffer.from(mockDocxContent, 'utf-8');
+    const doc = new Document({
+      sections: [
+        {
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: title,
+                  bold: true,
+                  size: 48,
+                }),
+              ],
+            }),
+            ...content.split('\n').map(line => 
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: line,
+                  }),
+                ],
+              })
+            )
+          ],
+        },
+      ],
+    });
+
+    return await Packer.toBuffer(doc);
   }
 }
 
