@@ -13,6 +13,9 @@ import { integrityNode } from "./nodes/integrityNode";
 import { qaNode } from "./nodes/qaNode";
 import { verificationNode } from "./nodes/verificationNode";
 import { coverLetterNode } from "./nodes/coverLetterNode";
+import { retrieveMemoryNode, updateMemoryNode } from "./nodes/memoryNode";
+import { guardrailsNode } from "./nodes/guardrailsNode";
+
 
 const routeAfterIntegrity = (state: PublishAIState) => {
   // If integrity fails, route to END or error state.
@@ -35,20 +38,26 @@ const builder = new StateGraph(PublishAIStateAnnotation)
   .addNode("integrityNode", integrityNode)
   .addNode("qaNode", qaNode)
   .addNode("verificationNode", verificationNode)
-  .addNode("coverLetterNode", coverLetterNode)
+    .addNode("coverLetterNode", coverLetterNode)
+  .addNode("retrieveMemoryNode", retrieveMemoryNode)
+  .addNode("updateMemoryNode", updateMemoryNode)
+  .addNode("guardrailsNode", guardrailsNode)
 
   .addEdge(START, "clarificationNode")
   .addEdge("clarificationNode", "planningNode")
   .addEdge("planningNode", "literatureNode")
   .addEdge("literatureNode", "executionNode")
   .addEdge("executionNode", "scientificReviewNode")
-  .addEdge("scientificReviewNode", "draftNode")
-  .addEdge("draftNode", "editsNode")
+  .addEdge("scientificReviewNode", "retrieveMemoryNode")
+  .addEdge("retrieveMemoryNode", "draftNode")
+  .addEdge("draftNode", "guardrailsNode")
+  .addEdge("guardrailsNode", "editsNode")
   .addEdge("editsNode", "integrityNode")
   .addConditionalEdges("integrityNode", routeAfterIntegrity)
   .addEdge("qaNode", "verificationNode")
   .addEdge("verificationNode", "coverLetterNode")
-  .addEdge("coverLetterNode", END);
+  .addEdge("coverLetterNode", "updateMemoryNode")
+  .addEdge("updateMemoryNode", END);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
