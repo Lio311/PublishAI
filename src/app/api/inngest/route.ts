@@ -3,6 +3,7 @@ import { inngest } from "../../../inngest/client";
 import { processPaper, sendWeeklyDigest, processPaperRejected } from "../../../inngest/functions";
 import { processSubmission } from "../../../inngest/functions/submission";
 import { ingestDocument } from "../../../inngest/functions/ingestDocument";
+import { syncCitations } from "../../../inngest/functions/citations";
 
 // Create an API that serves zero-downtime background jobs
 export const { GET, POST, PUT } = serve({
@@ -13,5 +14,6 @@ export const { GET, POST, PUT } = serve({
     processSubmission,
     processPaperRejected,
     ingestDocument,
+    syncCitations,
   ],
 });

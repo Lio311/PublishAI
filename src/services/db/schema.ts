@@ -217,6 +217,9 @@ export const papers = pgTable("papers", {
   originalFormat: text("original_format"),
   rejections: jsonb("rejections"),
   suggestedJournals: jsonb("suggested_journals"),
+  doi: text("doi"),
+  citationsCount: integer("citations_count").default(0),
+  lastCitationCheck: timestamp("last_citation_check"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
@@ -835,3 +838,22 @@ export type NewEntity = typeof entities.$inferInsert;
 
 export type Relationship = typeof relationships.$inferSelect;
 export type NewRelationship = typeof relationships.$inferInsert;
+
+
+
+// ═══════════════════════════════════════════════════════
+// RLHF AGENT EVALUATIONS
+// ═══════════════════════════════════════════════════════
+
+export const agentEvaluations = pgTable("agent_evaluations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  agentName: text("agent_name").notNull(),
+  inputContext: text("input_context").notNull(),
+  aiOutput: text("ai_output").notNull(),
+  rating: integer("rating"),
+  feedbackText: text("feedback_text"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type AgentEvaluation = typeof agentEvaluations.$inferSelect;
+export type NewAgentEvaluation = typeof agentEvaluations.$inferInsert;
