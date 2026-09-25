@@ -528,7 +528,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 
                 <div className="flex w-full max-w-[380px] justify-between gap-4 relative z-10">
                   <div className="flex-1 flex justify-center">
-                    <NodeCard type="queue" icon={User} isHe={isHe} titleEn="Auto / Manual Solve" titleHe="פתרון אוטומטי/ידני" descEn="2Captcha API OR User UI Modal" descHe="פתרון אוטומטי (API) או ע"י המשתמש בממשק" techs={['2Captcha', 'Inngest']} />
+                    <NodeCard type="queue" icon={User} isHe={isHe} titleEn="Auto / Manual Solve" titleHe="פתרון אוטומטי/ידני" descEn="2Captcha API OR User UI Modal" descHe="פתרון אוטומטי (API) או על ידי המשתמש בממשק" techs={['2Captcha', 'Inngest']} />
                   </div>
                   <div className="flex-1 flex justify-center">
                     <NodeCard type="rpa" icon={CheckCircle2} isHe={isHe} titleEn="Final Submit" titleHe="הגשה סופית" descEn="Click Submit → Scrape Tracking ID" descHe="לחיצה על שליחה → חילוץ מזהה מעקב" techs={['Playwright']} />
