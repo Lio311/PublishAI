@@ -1,15 +1,7 @@
-import re
-
-with open("src/app/[locale]/(dashboard)/admin/architecture/ArchitectureClient.tsx", "r", encoding="utf-8") as f:
+with open("src/app/[locale]/flowchart/FlowchartClient.tsx", "r") as f:
     content = f.read()
 
-# Add Terminal to the lucide-react import
-content = re.sub(
-    r'import \{([^\}]+)\} from "lucide-react";',
-    lambda m: f'import {{{m.group(1)}, Terminal}} from "lucide-react";' if 'Terminal' not in m.group(1) else m.group(0),
-    content
-)
+content = content.replace("Settings, Mail, User, Bot, Scissors, ListChecks, GitMerge, RefreshCw, AlertTriangle, CheckCircle2 }", "Settings, Mail, User, Bot, Scissors, ListChecks, GitMerge, RefreshCw, AlertTriangle, CheckCircle2, ArrowRight }")
 
-with open("src/app/[locale]/(dashboard)/admin/architecture/ArchitectureClient.tsx", "w", encoding="utf-8") as f:
+with open("src/app/[locale]/flowchart/FlowchartClient.tsx", "w") as f:
     f.write(content)
-

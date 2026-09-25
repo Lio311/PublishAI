@@ -8,7 +8,7 @@ import {
   Code, FileText, Database, Zap, Brain, Search, Edit3, MessageSquare,
   ShieldCheck, CheckCircle, Download, Globe, Lock, Eye, Settings, Mail, User,
   Bot, Scissors, ListChecks, RefreshCw, AlertTriangle, CheckCircle2, Box, HelpCircle, Workflow, BarChart2,
-  Shield, Cpu, Fingerprint, Activity, Key, Layers
+  Shield, Cpu, Fingerprint, Activity, Key, Layers, ArrowRight
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════
@@ -400,38 +400,30 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
               <h2 className="text-xl font-bold">{isHe ? 'שלב 3: אישור, הרשאות ושער הגשה' : 'Phase 3: Approval, Permissions & Submission Gateway'}</h2>
             </div>
             <div className="p-6 md:p-10 flex flex-col items-center w-full relative z-10">
-              <div className="flex flex-col lg:flex-row justify-center items-center w-full relative">
-                <NodeCard type="user" icon={User} isHe={isHe} titleEn="20. Approve" titleHe="20. אישור והגשה" descEn="User reviews final paper and clicks 'Approve & Submit'" descHe="המשתמש סוקר את המאמר ולוחץ 'אשר והגש'" techs={['Next.js 16', 'NextAuth.js']} />
-                <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
-                <FlowArrow isHe={isHe} />
-                
-                <NodeCard type="logic" icon={Key} isDiamond isHe={isHe} titleEn="Auth Given?" titleHe="הרשאות הוענקו?" descEn="Has user linked OAuth / Email creds?" descHe="האם המשתמש העניק הרשאות API/Email?" />
-                
-                {/* Branching from Auth */}
-                <div className="hidden lg:flex flex-col mx-2 items-center justify-center min-w-[120px]">
-                  <div className="flex items-center w-full">
-                     <BranchLabel text={isHe ? 'כן (נתיב מהיר)' : 'Yes (Fast)'} />
-                     <FlowArrow isHe={isHe} />
-                  </div>
-                  <div className="w-full mt-2 mb-1"><OrDivider isHe={isHe} labelEn="OR" labelHe="או" /></div>
-                  <div className="flex items-center w-full mt-2 relative">
-                     <BranchLabel text={isHe ? 'לא (נתיב מורכב)' : 'No (Complex)'} color="text-purple-600" />
-                     {/* Draw line routing down and across */}
-                     <div className="absolute top-[50%] left-[50%] w-[100%] h-12 border-b-[3px] border-l-[3px] border-slate-400 rounded-bl-xl -z-10 translate-x-[20px] translate-y-[-38px]"></div>
-                  </div>
+              
+              <NodeCard type="user" icon={User} isHe={isHe} titleEn="20. Approve" titleHe="20. אישור והגשה" descEn="User reviews final paper and clicks 'Approve & Submit'" descHe="המשתמש סוקר את המאמר ולוחץ 'אשר והגש'" techs={['Next.js 16', 'NextAuth.js']} />
+              
+              <VerticalFlowArrow isHe={isHe} length="h-8" />
+              
+              <NodeCard type="logic" icon={Key} isDiamond isHe={isHe} titleEn="Auth Given?" titleHe="הרשאות הוענקו?" descEn="Has user linked API / Email creds?" descHe="האם המשתמש העניק הרשאות API/Email?" />
+              
+              <SplitFork isHe={isHe} yesLabel={isHe ? 'כן (פענוח)' : 'Yes (Decrypt)'} noLabel={isHe ? 'לא (דילוג)' : 'No (Skip)'} />
+              
+              <div className="flex w-full max-w-[380px] justify-between gap-4 relative z-10">
+                <div className="flex-1 flex justify-center">
+                  <NodeCard type="rpa" icon={Lock} isHe={isHe} titleEn="22. AES Decrypt" titleHe="22. פענוח הרשאות" descEn="Decrypt API tokens / Email passwords safely" descHe="פענוח מאובטח של סיסמאות וטוקנים" techs={['AES-256-GCM', 'Neon Postgres']} />
                 </div>
-
-                <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" label={{en: "Yes (Fast)", he: "כן (מהיר)"}} />
-
-                <NodeCard type="rpa" icon={Lock} isHe={isHe} titleEn="22. AES Decrypt" titleHe="22. פענוח הרשאות" descEn="Decrypt API tokens / Email passwords safely" descHe="פענוח מאובטח של סיסמאות וטוקנים" techs={['AES-256-GCM', 'Neon Postgres']} />
-                <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
-                <FlowArrow isHe={isHe} />
-                
-                <NodeCard type="logic" icon={Settings} isDiamond isHe={isHe} titleEn="23. Route Platform" titleHe="23. ניתוב פלטפורמה" descEn="Route by: WordPress / Editorial Mgr / Email" descHe="ניתוב פנימי לממשק המתאים" />
+                <div className="flex-1 flex justify-center">
+                  <NodeCard type="queue" icon={ArrowRight} isHe={isHe} titleEn="Skip Decrypt" titleHe="דילוג על פענוח" descEn="Proceed directly to fallback route" descHe="המשך לנתיב חלופי ללא הרשאות מיוחדות" techs={['NextAuth.js']} />
+                </div>
               </div>
+
+              <MergeFork />
+              
+              <NodeCard type="logic" icon={Settings} isDiamond isHe={isHe} titleEn="23. Route Platform" titleHe="23. ניתוב פלטפורמה" descEn="Route by: WordPress / Editorial Mgr / Email" descHe="ניתוב פנימי לממשק המתאים" />
+            
             </div>
           </div>
-
           <VerticalFlowArrow isHe={isHe} length="h-16" label={{ en: "Split to 4 Lanes", he: "פיצול ל-4 נתיבים" }} />
 
           {/* ══════════════════════════════════
