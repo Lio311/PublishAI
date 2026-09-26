@@ -255,7 +255,7 @@ export default function SystemFlowModal({
         setIsFinished(true);
         setCompletedSteps(new Set(FLOW_STEPS.map((_, i) => i)));
         // Scroll to marketing message after render
-        setTimeout(() => scrollToFinish(), 400);
+        completionTimerRef.current = setTimeout(() => scrollToFinish(), 400);
       } else {
         // Start animation from beginning
         if (typeof window !== 'undefined') {
@@ -308,8 +308,8 @@ export default function SystemFlowModal({
 
       case "closing":
         // Description collapses, mark as completed
-        setCompletedSteps((prev) => new Set(prev).add(currentStepIndex));
         timerRef.current = setTimeout(() => {
+          setCompletedSteps((prev) => new Set(prev).add(currentStepIndex));
           const nextIndex = currentStepIndex + 1;
           if (nextIndex < FLOW_STEPS.length) {
             // Move to next step
@@ -370,25 +370,27 @@ export default function SystemFlowModal({
     }, INITIAL_DELAY);
   };
 
-  const handlePauseResume = () => {
-    if (isPaused) {
-      setIsPaused(false);
-      // Re-trigger current phase to continue
-      setAnimPhase((prev) => prev);
-    } else {
-      setIsPaused(true);
-      clearTimer();
-    }
-  };
-
-  
+  const handlePauseResume = useCallback(() => {
+    setIsPaused((prev) => {
+      const next = !prev;
+      if (next) {
+        clearTimer();
+      }
+      return next;
+    });
+  }, [clearTimer]);
 
   // Close on escape
    
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleClose();
-      if (e.key === " ") {
+      if (
+        e.key === " " &&
+        (e.target as HTMLElement)?.tagName !== "BUTTON" &&
+        (e.target as HTMLElement)?.tagName !== "INPUT" &&
+        (e.target as HTMLElement)?.tagName !== "TEXTAREA"
+      ) {
         e.preventDefault();
         handlePauseResume();
       }
@@ -401,8 +403,7 @@ export default function SystemFlowModal({
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, handleClose, isPaused]);
+  }, [isOpen, handleClose, handlePauseResume]);
 
   if (!isOpen && !isClosing) return null;
 
@@ -423,10 +424,16 @@ export default function SystemFlowModal({
           isClosing ? "opacity-0" : "opacity-100"
         }`}
         onClick={handleClose}
+        aria-hidden="true"
       />
 
       {/* Modal */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="system-flow-title"
+        aria-describedby="system-flow-subtitle"
+        dir={isRtl ? "rtl" : "ltr"}
         className={`relative w-full max-w-4xl max-h-[90vh] bg-white/75 backdrop-blur-2xl rounded-3xl shadow-[0_16px_48px_rgba(0,0,0,0.1)] border border-white/60 overflow-hidden transition-all duration-500 flex flex-col ${
           isClosing
             ? "scale-95 opacity-0 translate-y-4"
@@ -446,19 +453,21 @@ export default function SystemFlowModal({
                 <div className="p-2 bg-sky-800/10 rounded-lg backdrop-blur-sm">
                   <Workflow className="w-6 h-6 text-sky-800" />
                 </div>
-                <h2 className="text-2xl font-bold text-sky-800 tracking-tight">{t("title")}</h2>
+                <h2 id="system-flow-title" className="text-2xl font-bold text-sky-800 tracking-tight">{t("title")}</h2>
               </div>
               <div className="mt-2 text-blue-800 text-sm max-w-lg leading-relaxed opacity-90">
-                <p className="text-blue-800 text-sm mt-0.5">{t("subtitle")}</p>
+                <p id="system-flow-subtitle" className="text-blue-800 text-sm mt-0.5">{t("subtitle")}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               {/* Pause / Play button */}
               {!isFinished && currentStepIndex >= 0 && (
                 <button
+                  type="button"
                   onClick={handlePauseResume}
-                  className="p-2.5 hover:bg-sky-800/10 rounded-xl transition-all duration-200 group"
-                  title={isPaused ? "Resume" : "Pause"}
+                  className="p-2.5 hover:bg-sky-800/10 rounded-xl transition-all duration-200 group cursor-pointer"
+                  title={isPaused ? (isRtl ? "המשך הפעלה" : "Resume") : (isRtl ? "השהה" : "Pause")}
+                  aria-label={isPaused ? (isRtl ? "המשך הפעלה" : "Resume flow") : (isRtl ? "השהה תהליך" : "Pause flow")}
                 >
                   {isPaused ? (
                     <Play className="w-5 h-5 text-blue-800 group-hover:text-sky-800 transition-colors" />
@@ -468,15 +477,19 @@ export default function SystemFlowModal({
                 </button>
               )}
               <button
+                type="button"
                 onClick={handleReplay}
-                className="p-2.5 hover:bg-sky-800/10 rounded-xl transition-all duration-200 group"
+                className="p-2.5 hover:bg-sky-800/10 rounded-xl transition-all duration-200 group cursor-pointer"
                 title={t("replay")}
+                aria-label={t("replay")}
               >
                 <RotateCcw className="w-5 h-5 text-blue-800 group-hover:text-sky-800 transition-colors group-hover:rotate-[-360deg] duration-500" />
               </button>
               <button
+                type="button"
                 onClick={handleClose}
-                className="p-2.5 hover:bg-sky-800/10 rounded-xl transition-all duration-200 group"
+                className="p-2.5 hover:bg-sky-800/10 rounded-xl transition-all duration-200 group cursor-pointer"
+                aria-label={isRtl ? "סגור חלון" : "Close dialog"}
               >
                 <X className="w-5 h-5 text-blue-800 group-hover:text-sky-800 transition-colors" />
               </button>
@@ -484,7 +497,14 @@ export default function SystemFlowModal({
           </div>
 
           {/* Progress bar */}
-          <div className="mt-4 h-1.5 bg-sky-800/10 rounded-full overflow-hidden">
+          <div
+            className="mt-4 h-1.5 bg-sky-800/10 rounded-full overflow-hidden"
+            role="progressbar"
+            aria-valuenow={Math.round(progressPercent)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={isRtl ? "התקדמות תהליך" : "Flow progress"}
+          >
             <div
               className="h-full bg-sky-800/60 rounded-full transition-all duration-700 ease-out"
               style={{
@@ -579,7 +599,7 @@ export default function SystemFlowModal({
                       </div>
                       {/* Step number badge */}
                       <div
-                        className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                        className={`absolute -top-2 ${isRtl ? "-left-2" : "-right-2"} w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
                           transition-all duration-300
                           ${
                             isCurrent && !isCompleted
@@ -702,8 +722,9 @@ export default function SystemFlowModal({
                 </div>
 
                 <button
+                  type="button"
                   onClick={handleClose}
-                  className="mt-4 px-8 py-3 bg-gradient-to-r from-blue-400 to-sky-400 hover:from-sky-500 hover:to-sky-500 text-white font-bold rounded-xl shadow-lg shadow-sky-300/30 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
+                  className="mt-4 px-8 py-3 bg-gradient-to-r from-blue-400 to-sky-400 hover:from-sky-500 hover:to-sky-500 text-white font-bold rounded-xl shadow-lg shadow-sky-300/30 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2 cursor-pointer"
                 >
                   <span>{t("startNow")}</span>
                 </button>

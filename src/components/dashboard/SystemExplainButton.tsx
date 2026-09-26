@@ -13,6 +13,10 @@ export default function SystemExplainButton() {
   return (
     <>
       <motion.button
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded={isModalOpen}
+        aria-label={t("button")}
         onClick={() => setIsModalOpen(true)}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}

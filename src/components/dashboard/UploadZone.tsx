@@ -23,15 +23,21 @@ export default function UploadZone() {
     };
   }, []);
 
-  const handleUpload = async (files: FileList | File[]) => {
+  const handleUpload = useCallback(async (files: FileList | File[]) => {
     if (isUploading || uploadSuccess) return;
     setIsUploading(true);
     try {
       const fileArray = Array.from(files);
       if (fileArray.length === 0) return;
 
-      const manuscriptFiles = fileArray.filter(f => !f.name.endsWith('.csv') && !f.name.endsWith('.xlsx'));
-      const datasetFiles = fileArray.filter(f => f.name.endsWith('.csv') || f.name.endsWith('.xlsx'));
+      const manuscriptFiles = fileArray.filter(f => {
+        const lower = f.name.toLowerCase();
+        return !lower.endsWith('.csv') && !lower.endsWith('.xlsx');
+      });
+      const datasetFiles = fileArray.filter(f => {
+        const lower = f.name.toLowerCase();
+        return lower.endsWith('.csv') || lower.endsWith('.xlsx');
+      });
 
       if (datasetFiles.length > 0) {
         const analyzeData = new FormData();
@@ -87,7 +93,7 @@ export default function UploadZone() {
     } finally {
       setIsUploading(false);
     }
-  };
+  }, [isUploading, uploadSuccess, router, t]);
 
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -96,6 +102,7 @@ export default function UploadZone() {
 
   const onDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
     setIsDragging(false);
   }, []);
 
@@ -106,7 +113,7 @@ export default function UploadZone() {
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleUpload(e.dataTransfer.files);
     }
-  }, []);
+  }, [handleUpload]);
 
   const handleClickZone = (e: React.MouseEvent) => {
     if (isUploading || uploadSuccess) return;
@@ -128,6 +135,7 @@ export default function UploadZone() {
       role="button"
       tabIndex={isUploading || uploadSuccess ? -1 : 0}
       aria-label={t("dragTitle")}
+      aria-busy={isUploading}
       onClick={handleClickZone}
       onKeyDown={handleKeyDown}
       onDragOver={onDragOver}

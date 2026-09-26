@@ -223,11 +223,18 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
         <div className="grid grid-cols-1 md:grid-cols-4 min-h-[500px]">
           {/* Settings Sidebar */}
           <div
+            role="tablist"
+            aria-orientation="vertical"
+            aria-label={isHe ? "הגדרות חשבון" : "Account Settings"}
             className={`${
               isHe ? "border-l border-slate-200" : "border-r border-slate-200"
             } bg-slate-50/70 p-4 space-y-1.5`}
           >
             <button
+              id="tab-profile"
+              role="tab"
+              aria-selected={activeTab === "profile"}
+              aria-controls="panel-profile"
               type="button"
               onClick={() => setActiveTab("profile")}
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-semibold rounded-xl transition-colors cursor-pointer ${
@@ -240,6 +247,10 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
               <span>{isHe ? "פרופיל" : "Profile"}</span>
             </button>
             <button
+              id="tab-notifications"
+              role="tab"
+              aria-selected={activeTab === "notifications"}
+              aria-controls="panel-notifications"
               type="button"
               onClick={() => setActiveTab("notifications")}
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-semibold rounded-xl transition-colors cursor-pointer ${
@@ -252,6 +263,10 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
               <span>{isHe ? "התראות" : "Notifications"}</span>
             </button>
             <button
+              id="tab-privacy"
+              role="tab"
+              aria-selected={activeTab === "privacy"}
+              aria-controls="panel-privacy"
               type="button"
               onClick={() => setActiveTab("privacy")}
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-semibold rounded-xl transition-colors cursor-pointer ${
@@ -264,6 +279,10 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
               <span>{isHe ? "פרטיות" : "Privacy"}</span>
             </button>
             <button
+              id="tab-api_keys"
+              role="tab"
+              aria-selected={activeTab === "api_keys"}
+              aria-controls="panel-api_keys"
               type="button"
               onClick={() => setActiveTab("api_keys")}
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-semibold rounded-xl transition-colors cursor-pointer ${
@@ -280,7 +299,12 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
           {/* Settings Content */}
           <div className="md:col-span-3 p-6 sm:p-8">
             {activeTab === "profile" && (
-              <div className="space-y-6">
+              <div
+                id="panel-profile"
+                role="tabpanel"
+                aria-labelledby="tab-profile"
+                className="space-y-6"
+              >
                 <div>
                   <h3 className="text-lg font-bold text-slate-900 mb-1">
                     {isHe ? "פרטים אישיים" : "Personal Information"}
@@ -349,7 +373,12 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
             )}
 
             {activeTab === "notifications" && (
-              <div className="space-y-6">
+              <div
+                id="panel-notifications"
+                role="tabpanel"
+                aria-labelledby="tab-notifications"
+                className="space-y-6"
+              >
                 <div>
                   <h3 className="text-lg font-bold text-slate-900 mb-1">
                     {isHe ? "הגדרות התראות" : "Notification Settings"}
@@ -376,7 +405,7 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
                             onChange={(e) => handleSettingChange("emailNotifications", e.target.checked)}
                             className="sr-only peer"
                           />
-                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-sky-500 peer-focus-visible:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
                         </label>
                       </div>
                     </div>
@@ -399,7 +428,7 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
                             onChange={handleBrowserNotificationsToggle}
                             className="sr-only peer"
                           />
-                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-sky-500 peer-focus-visible:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
                         </label>
                       </div>
                     </div>
@@ -422,7 +451,7 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
                             onChange={(e) => handleSettingChange("weeklyDigest", e.target.checked)}
                             className="sr-only peer"
                           />
-                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-sky-500 peer-focus-visible:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
                         </label>
                       </div>
                     </div>
@@ -433,7 +462,12 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
             )}
 
             {activeTab === "privacy" && (
-              <div className="space-y-6">
+              <div
+                id="panel-privacy"
+                role="tabpanel"
+                aria-labelledby="tab-privacy"
+                className="space-y-6"
+              >
                 <div>
                   <h3 className="text-lg font-bold text-slate-900 mb-1">
                     {isHe ? "פרטיות ואבטחה" : "Privacy & Security"}
@@ -460,7 +494,7 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
                             onChange={(e) => handleSettingChange("publicProfile", e.target.checked)}
                             className="sr-only peer"
                           />
-                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-sky-500 peer-focus-visible:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
                         </label>
                       </div>
                     </div>
@@ -483,7 +517,7 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
                             onChange={(e) => handleSettingChange("dataCollectionForAi", e.target.checked)}
                             className="sr-only peer"
                           />
-                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-sky-500 peer-focus-visible:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
                         </label>
                       </div>
                     </div>
@@ -505,7 +539,12 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
             )}
 
             {activeTab === "api_keys" && (
-              <div className="space-y-6">
+              <div
+                id="panel-api_keys"
+                role="tabpanel"
+                aria-labelledby="tab-api_keys"
+                className="space-y-6"
+              >
                 <div>
                   <h3 className="text-lg font-bold text-slate-900 mb-1">
                     {isHe ? "חיבורי API חיצוניים" : "External API Integrations"}
