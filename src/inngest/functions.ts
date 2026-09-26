@@ -29,8 +29,8 @@ import { AgentContext, AgentResult, Stage } from "@/services/agents/base-agent";
 import {
   getTransporter,
   getSenderAddress,
+  sendWeeklyDigestEmail,
 } from "@/services/email/notification-service";
-import { renderWeeklyDigestTemplate } from "@/services/email/templates";
 
 export const processPaper = inngest.createFunction(
   {
@@ -276,26 +276,20 @@ export const sendWeeklyDigest = inngest.createFunction(
             highlights.push("No new paper changes this week. Start a new manuscript anytime!");
           }
 
-          const template = renderWeeklyDigestTemplate({
-            recipientEmail: user.email!,
-            recipientName: user.name || undefined,
-            papersCount: totalPapers.length,
-            submissionsCount: completedCount,
-            highlights,
-          });
+          const result = await sendWeeklyDigestEmail(
+            user.email!,
+            user.name || undefined,
+            {
+              papersCount: totalPapers.length,
+              submissionsCount: completedCount,
+              highlights,
+              throwOnError: true,
+            }
+          );
 
-          const mailer = await getTransporter();
-          const from = getSenderAddress();
-
-          await mailer.sendMail({
-            from,
-            to: user.email!,
-            subject: template.subject,
-            html: template.html,
-            text: template.text,
-          });
-
-          sentCount++;
+          if (result.success) {
+            sentCount++;
+          }
         } catch (error) {
           console.error(`Failed to send weekly digest to ${user.email}:`, error);
         }

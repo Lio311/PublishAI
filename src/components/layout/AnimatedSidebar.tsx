@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, usePathname, useRouter } from "@/app/i18n/routing";
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { FileText, Home, Settings, LogOut, LogIn, Globe, Book, Link as LinkIcon, Send, Share2, Brain, X, Workflow, BarChart3 } from "lucide-react";
+import { FileText, Home, Settings, LogOut, LogIn, Globe, Book, Link as LinkIcon, Send, Share2, Brain, X, Workflow, BarChart3, User } from "lucide-react";
 
-export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean, onClose?: () => void }) {
+export default function AnimatedSidebar({ isAdmin = false, onClose }: { isAdmin?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
   const t = useTranslations("Sidebar");
   const locale = useLocale();
@@ -28,33 +28,39 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
     router.replace(pathname, { locale: nextLocale });
   };
 
-  const menuItems = [
-    { name: t("home"), icon: Home, href: `/` },
-    { name: t("myPapers"), icon: FileText, href: `/papers` },
-    { name: t("connections"), icon: LinkIcon, href: `/connections` },
-    { name: t("rules"), icon: Book, href: `/journals` },
-    { name: t("submissions"), icon: Send, href: `/submissions` },
-    { name: t("analytics"), icon: BarChart3, href: `/analytics` },
-    { name: t("settings"), icon: Settings, href: `/settings` },
-  ];
+  const menuItems = useMemo(() => {
+    const items = [
+      { name: t("home"), icon: Home, href: `/` },
+      { name: t("myPapers"), icon: FileText, href: `/papers` },
+      { name: t("connections"), icon: LinkIcon, href: `/connections` },
+      { name: t("rules"), icon: Book, href: `/journals` },
+      { name: t("submissions"), icon: Send, href: `/submissions` },
+      { name: t("analytics"), icon: BarChart3, href: `/analytics` },
+      { name: t("settings"), icon: Settings, href: `/settings` },
+    ];
 
-  if (isAdmin) {
-    menuItems.push({ name: t("admin"), icon: Globe, href: `/admin` });
-    menuItems.push({ name: t("learning"), icon: Brain, href: `/learning` });
-    
-    // Admin-only menu items, but accessible via direct link to anyone with site password
-    menuItems.push({ name: t("architecture"), icon: Share2, href: `/architecture` });
-    menuItems.push({ name: t("flowchart"), icon: Workflow, href: `/flowchart` });
-  }
+    if (isAdmin) {
+      items.push({ name: t("admin"), icon: Globe, href: `/admin` });
+      items.push({ name: t("learning"), icon: Brain, href: `/learning` });
+      
+      // Admin-only menu items, but accessible via direct link to anyone with site password
+      items.push({ name: t("architecture"), icon: Share2, href: `/architecture` });
+      items.push({ name: t("flowchart"), icon: Workflow, href: `/flowchart` });
+    }
 
-  const activeItem = [...menuItems].sort((a, b) => b.href.length - a.href.length).find(
-    item => item.href === '/' ? pathname === '/' : (pathname === item.href || pathname.startsWith(`${item.href}/`))
-  );
+    return items;
+  }, [t, isAdmin]);
+
+  const activeItem = useMemo(() => {
+    return [...menuItems].sort((a, b) => b.href.length - a.href.length).find(
+      item => item.href === '/' ? pathname === '/' : (pathname === item.href || pathname.startsWith(`${item.href}/`))
+    );
+  }, [menuItems, pathname]);
 
   return (
     <aside 
-      aria-label={t("navigation")}
-      className="relative w-[280px] h-full min-h-[100dvh] md:min-h-0 md:h-[calc(100vh-2rem)] lg:h-[calc(100vh-3rem)] m-0 md:m-4 lg:m-6 flex flex-col justify-between rounded-none md:rounded-[2rem] bg-white/95 md:bg-white/70 backdrop-blur-2xl border-none md:border md:border-white/50 shadow-[2px_0_32px_rgba(0,0,0,0.05)] overflow-hidden z-20"
+      aria-label={t("sidebar")}
+      className="relative w-[280px] max-w-[85vw] h-full min-h-[100dvh] md:min-h-0 md:h-[calc(100vh-2rem)] lg:h-[calc(100vh-3rem)] m-0 md:m-4 lg:m-6 flex flex-col justify-between rounded-none md:rounded-[2rem] bg-white/95 md:bg-white/70 backdrop-blur-2xl border-none md:border md:border-white/50 shadow-[2px_0_32px_rgba(0,0,0,0.05)] overflow-hidden z-20"
     >
       {/* Subtle animated gradient background inside sidebar */}
       <div className="absolute inset-0 bg-gradient-to-b from-sky-50/30 to-transparent pointer-events-none" aria-hidden="true" />
@@ -75,6 +81,7 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
           <Link 
             href="/" 
             aria-label="PublishAI Home"
+            onClick={onClose}
             className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 rounded-2xl block"
           >
             <Image 
@@ -90,75 +97,108 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
         
         <motion.nav 
           aria-label={t("navigation")}
-          className="space-y-0.5 lg:space-y-1 flex-1 overflow-y-auto scrollbar-hide min-h-0"
+          className="flex-1 overflow-y-auto scrollbar-hide min-h-0"
           onMouseLeave={() => setHoveredIndex(null)}
         >
-          {menuItems.map((item, index) => {
-            const isActive = activeItem?.href === item.href;
-            
-            return (
-              <motion.div
-                key={item.name}
-                className="relative"
-                onMouseEnter={() => setHoveredIndex(index)}
-              >
-                <Link
-                  href={item.href}
-                  aria-current={isActive ? "page" : undefined}
-                  className={`relative flex items-center justify-between px-4 py-2.5 rounded-2xl font-medium transition-colors duration-300 z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
-                    isActive ? "text-sky-800" : "text-slate-500 hover:text-slate-800"
-                  }`}
+          <ul role="list" className="space-y-0.5 lg:space-y-1">
+            {menuItems.map((item, index) => {
+              const isActive = activeItem?.href === item.href;
+              
+              return (
+                <li
+                  key={item.href}
+                  role="listitem"
+                  className="relative"
+                  onMouseEnter={() => setHoveredIndex(index)}
                 >
-                  <div className="flex items-center gap-3.5">
-                    <item.icon aria-hidden="true" className={`w-5 h-5 transition-transform duration-300 ${isActive ? "text-sky-500 scale-110" : "text-slate-400 group-hover:text-slate-600"}`} />
-                    <span className="tracking-wide text-[15px]">{item.name}</span>
-                  </div>
-                  
+                  <Link
+                    href={item.href}
+                    onClick={onClose}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`relative flex items-center justify-between px-4 py-2.5 rounded-2xl font-medium transition-colors duration-300 z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
+                      isActive ? "text-sky-800" : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <item.icon aria-hidden="true" className={`w-5 h-5 transition-transform duration-300 ${isActive ? "text-sky-500 scale-110" : "text-slate-400 group-hover:text-slate-600"}`} />
+                      <span className="tracking-wide text-[15px]">{item.name}</span>
+                    </div>
+                    
+                    {isActive && (
+                      <motion.div
+                        layoutId="active-arrow"
+                        aria-hidden="true"
+                        className="w-1.5 h-1.5 rounded-full bg-sky-500 shadow-[0_0_8px_rgba(37,99,235,0.6)]"
+                      />
+                    )}
+                  </Link>
+
+                  {/* Hover Background */}
+                  <AnimatePresence>
+                    {hoveredIndex === index && !isActive && (
+                      <motion.div
+                        layoutId="sidebar-hover"
+                        aria-hidden="true"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 bg-slate-100/60 rounded-2xl z-0"
+                      />
+                    )}
+                  </AnimatePresence>
+
+                  {/* Active Background */}
                   {isActive && (
                     <motion.div
-                      layoutId="active-arrow"
+                      layoutId="sidebar-active"
                       aria-hidden="true"
-                      className="w-1.5 h-1.5 rounded-full bg-sky-500 shadow-[0_0_8px_rgba(37,99,235,0.6)]"
+                      className="absolute inset-0 bg-gradient-to-r from-sky-100/80 to-sky-50/30 rounded-2xl border border-sky-200/50 shadow-[inset_0_2px_10px_rgba(255,255,255,1)] z-0"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
-                </Link>
-
-                {/* Hover Background */}
-                <AnimatePresence>
-                  {hoveredIndex === index && !isActive && (
-                    <motion.div
-                      layoutId="sidebar-hover"
-                      aria-hidden="true"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="absolute inset-0 bg-slate-100/60 rounded-2xl z-0"
-                    />
-                  )}
-                </AnimatePresence>
-
-                {/* Active Background */}
-                {isActive && (
-                  <motion.div
-                    layoutId="sidebar-active"
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-gradient-to-r from-sky-100/80 to-sky-50/30 rounded-2xl border border-sky-200/50 shadow-[inset_0_2px_10px_rgba(255,255,255,1)] z-0"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-              </motion.div>
-            );
-          })}
+                </li>
+              );
+            })}
+          </ul>
         </motion.nav>
       </div>
 
       {/* Bottom Section */}
-      <div className="p-4 lg:px-6 lg:py-4 relative z-10 shrink-0">
-        <div className="p-1.5 bg-slate-100/50 rounded-2xl border border-slate-200/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] backdrop-blur-md">
+      <div className="p-4 pb-6 md:pb-4 lg:px-6 lg:py-4 relative z-10 shrink-0">
+        <div className="p-1.5 bg-slate-100/50 rounded-2xl border border-slate-200/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] backdrop-blur-md space-y-1">
+          {/* Authenticated User State */}
+          {mounted && session?.user && (
+            <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/70 border border-slate-200/60 shadow-xs mb-1">
+              {session.user.image ? (
+                <img 
+                  src={session.user.image} 
+                  alt={session.user.name || "User avatar"} 
+                  className="w-7 h-7 rounded-full object-cover border border-slate-200 shrink-0" 
+                />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-sky-100 text-sky-700 font-semibold text-xs flex items-center justify-center border border-sky-200 shrink-0" aria-hidden="true">
+                  {(session.user.name || session.user.email || "U").charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-slate-800 truncate leading-tight">
+                  {session.user.name || session.user.email?.split('@')[0]}
+                </p>
+                {session.user.email && (
+                  <p className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
+                    {session.user.email}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Language Switcher */}
           <button 
             type="button"
             onClick={toggleLanguage}
-            aria-label={locale === 'he' ? 'Switch to English' : 'עבור לעברית'}
+            aria-label={t("switchLanguage")}
+            title={t("switchLanguage")}
             className="flex w-full items-center justify-between px-4 py-2 rounded-xl font-medium text-slate-600 hover:bg-white hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 transition-all duration-300 group"
           >
             <div className="flex items-center gap-3">
@@ -171,7 +211,7 @@ export default function AnimatedSidebar({ isAdmin, onClose }: { isAdmin: boolean
           
           <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent mx-2 my-1" aria-hidden="true" />
           
-          {session ? (
+          {mounted && session ? (
             <button 
               type="button"
               onClick={() => signOut()} 

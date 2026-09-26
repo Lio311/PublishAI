@@ -1,5 +1,6 @@
 /**
  * Dynamic email templates for PublishAI notifications and submission lifecycle.
+ * Provides resilient HTML & Plain-text fallbacks, sanitization, and responsive email layouts.
  */
 
 export interface EmailTemplateOutput {
@@ -32,7 +33,7 @@ export interface AwaitingApprovalTemplateParams {
 export interface SubmissionSuccessTemplateParams {
   recipientEmail: string;
   paperTitle: string;
-  postUrl: string;
+  postUrl?: string;
   journalName?: string;
   recipientName?: string;
   confirmationId?: string;
@@ -65,8 +66,20 @@ export interface WeeklyDigestTemplateParams {
   supportEmail?: string;
 }
 
+export interface GenericNotificationTemplateParams {
+  recipientEmail: string;
+  title: string;
+  message: string;
+  recipientName?: string;
+  actionUrl?: string;
+  actionText?: string;
+  details?: Record<string, string>;
+  appName?: string;
+  supportEmail?: string;
+}
+
 /**
- * Escapes characters that have special meaning in HTML to prevent injection.
+ * Escapes characters that have special meaning in HTML to prevent injection / XSS.
  */
 export function escapeHtml(str: string): string {
   if (!str) return '';
@@ -79,7 +92,131 @@ export function escapeHtml(str: string): string {
 }
 
 /**
+ * Converts rich HTML into clean, human-readable plain text as a fallback.
+ * Strips script/style tags, resolves links into "text (url)", and unescapes common entities.
+ */
+export function htmlToPlainText(html: string): string {
+  if (!html) return '';
+
+  let text = html;
+
+  // Remove style, script, head, and noscript elements completely
+  text = text.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+  text = text.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+  text = text.replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '');
+
+  // Convert links: <a href="url">label</a> -> label (url) or just url
+  text = text.replace(/<a\s+(?:[^>]*?\s+)?href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi, (_, url, label) => {
+    const cleanLabel = label.replace(/<[^>]+>/g, '').trim();
+    if (!url || url.startsWith('mailto:') && cleanLabel === url.replace('mailto:', '')) {
+      return cleanLabel || url;
+    }
+    if (cleanLabel && cleanLabel !== url) {
+      return `${cleanLabel} (${url})`;
+    }
+    return url;
+  });
+
+  // Convert headings to separated uppercase-ish text
+  text = text.replace(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi, '\n\n$1\n');
+
+  // Convert list items
+  text = text.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '\n• $1');
+
+  // Convert paragraph / div / br to newlines
+  text = text.replace(/<p[^>]*>/gi, '\n\n');
+  text = text.replace(/<\/p>/gi, '');
+  text = text.replace(/<div[^>]*>/gi, '\n');
+  text = text.replace(/<\/div>/gi, '');
+  text = text.replace(/<br\s*\/?>/gi, '\n');
+  text = text.replace(/<hr\s*\/?>/gi, '\n---\n');
+
+  // Strip all other remaining HTML tags
+  text = text.replace(/<[^>]+>/g, '');
+
+  // Decode common HTML entities
+  text = text
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&ldquo;/g, '"')
+    .replace(/&rdquo;/g, '"')
+    .replace(/&bull;/g, '•')
+    .replace(/&check;/g, '✓')
+    .replace(/&rarr;/g, '->')
+    .replace(/&copy;/g, '©');
+
+  // Normalize whitespace: collapse lines with just spaces, avoid more than 2 consecutive newlines
+  text = text
+    .split('\n')
+    .map(line => line.trimEnd())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+  return text;
+}
+
+/**
+ * Converts plain text to a formatted HTML email body when only text is provided.
+ */
+export function plainTextToHtml(text: string, title?: string): string {
+  if (!text) return '';
+
+  const escaped = escapeHtml(text);
+  // Auto-link absolute URLs
+  const linked = escaped.replace(
+    /(https?:\/\/[^\s<]+)/g,
+    '<a href="$1" style="color: #4f46e5; text-decoration: underline;">$1</a>'
+  );
+
+  // Convert double newlines to paragraphs, single newlines to br
+  const paragraphs = linked
+    .split(/\n\s*\n/)
+    .map(p => `<p style="font-size: 15px; line-height: 1.6; margin: 0 0 16px 0; color: #334155;">${p.replace(/\n/g, '<br/>')}</p>`)
+    .join('');
+
+  return renderBaseLayout(paragraphs, {
+    title: title || 'PublishAI Notification',
+  });
+}
+
+/**
+ * Generates a branded plain-text layout matching the base HTML container.
+ */
+export function renderBaseTextLayout(contentText: string, options: BaseLayoutOptions): string {
+  const appName = options.appName || process.env.NEXT_PUBLIC_APP_NAME || 'Publish AI';
+  const supportEmail = options.supportEmail || process.env.SUPPORT_EMAIL || 'support@publish-ai.com';
+  const currentYear = new Date().getFullYear();
+
+  const parts = [
+    `=== ${appName} ===`,
+    ``,
+    contentText.trim(),
+  ];
+
+  if (options.actionUrl && options.actionText) {
+    parts.push(``, `${options.actionText}:`, options.actionUrl);
+  }
+
+  parts.push(
+    ``,
+    `---`,
+    `Sent by ${appName} • Autonomous Academic Publishing Platform`,
+    `Need help? Contact ${supportEmail}`,
+    `© ${currentYear} ${appName}. All rights reserved.`
+  );
+
+  return parts.join('\n');
+}
+
+/**
  * Wraps dynamic content in a responsive, branded HTML email container.
+ * Built with email-client-safe tables and inline CSS for maximum compatibility.
  */
 export function renderBaseLayout(contentHtml: string, options: BaseLayoutOptions): string {
   const appName = options.appName || process.env.NEXT_PUBLIC_APP_NAME || 'Publish AI';
@@ -88,11 +225,21 @@ export function renderBaseLayout(contentHtml: string, options: BaseLayoutOptions
 
   const actionButtonHtml = options.actionUrl && options.actionText
     ? `
-      <div style="margin: 32px 0 24px 0; text-align: center;">
-        <a href="${escapeHtml(options.actionUrl)}" style="background-color: #4f46e5; color: #ffffff; padding: 13px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; display: inline-block; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
-          ${escapeHtml(options.actionText)}
-        </a>
-      </div>
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 16px 0;">
+        <tr>
+          <td align="center">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="center" bgcolor="#4f46e5" style="border-radius: 6px;">
+                  <a href="${escapeHtml(options.actionUrl)}" target="_blank" style="background-color: #4f46e5; color: #ffffff; padding: 13px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; display: inline-block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                    ${escapeHtml(options.actionText)}
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
     `
     : '';
 
@@ -138,6 +285,7 @@ export function renderAwaitingApprovalTemplate(params: AwaitingApprovalTemplateP
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'http://localhost:3000';
   const dashboardUrl = params.dashboardUrl || `${baseUrl}/papers/${params.paperId}`;
   const recipientGreeting = params.recipientName ? `Hello ${escapeHtml(params.recipientName)},` : 'Hello,';
+  const textGreeting = params.recipientName ? `Hello ${params.recipientName},` : 'Hello,';
   const subject = `Your manuscript is ready for review: ${params.paperTitle}`;
 
   const summary = params.stagesSummary || 'Our autonomous agents have optimized the formatting, enhanced academic tone, verified citations, and generated a simulated peer review report.';
@@ -177,14 +325,17 @@ export function renderAwaitingApprovalTemplate(params: AwaitingApprovalTemplateP
   const text = [
     `Manuscript Ready for Review`,
     ``,
-    recipientGreeting,
+    textGreeting,
     ``,
     `The AI revision process for your manuscript "${params.paperTitle}" has been successfully completed.`,
     summary,
     params.customMessage ? `\nNote: ${params.customMessage}\n` : '',
+    `Please inspect the full diff, review the simulated reviewers' feedback, and confirm approval before journal submission.`,
+    ``,
     `Review and approve your manuscript changes here:`,
     dashboardUrl,
     ``,
+    params.supportEmail ? `Need help? Contact: ${params.supportEmail}\n` : '',
     `Best regards,`,
     `The ${appName} Team`,
   ].filter(Boolean).join('\n');
@@ -198,6 +349,7 @@ export function renderAwaitingApprovalTemplate(params: AwaitingApprovalTemplateP
 export function renderSubmissionSuccessTemplate(params: SubmissionSuccessTemplateParams): EmailTemplateOutput {
   const appName = params.appName || process.env.NEXT_PUBLIC_APP_NAME || 'Publish AI';
   const recipientGreeting = params.recipientName ? `Hello ${escapeHtml(params.recipientName)},` : 'Hello,';
+  const textGreeting = params.recipientName ? `Hello ${params.recipientName},` : 'Hello,';
   const targetJournal = params.journalName ? ` to ${params.journalName}` : '';
   const subject = `Your paper "${params.paperTitle}" was successfully submitted${targetJournal}`;
 
@@ -207,6 +359,17 @@ export function renderSubmissionSuccessTemplate(params: SubmissionSuccessTemplat
         <code style="color: #0f172a; font-weight: 600; margin-left: 6px; font-family: monospace;">${escapeHtml(params.confirmationId)}</code>
        </div>`
     : '';
+
+  const postUrlHtml = params.postUrl
+    ? `<p style="font-size: 15px; line-height: 1.6; margin-bottom: 16px; color: #475569;">
+        You can track the ongoing status of your paper and manage submission receipts via the portal:
+       </p>
+       <p style="font-size: 14px; word-break: break-all; margin-top: 16px; color: #64748b;">
+         Submission URL: <a href="${escapeHtml(params.postUrl)}" style="color: #4f46e5;">${escapeHtml(params.postUrl)}</a>
+       </p>`
+    : `<p style="font-size: 15px; line-height: 1.6; margin-bottom: 16px; color: #475569;">
+        You can track ongoing progress and status updates directly in your PublishAI dashboard.
+       </p>`;
 
   const bodyHtml = `
     <div style="display: flex; align-items: center; margin-bottom: 16px;">
@@ -219,12 +382,7 @@ export function renderSubmissionSuccessTemplate(params: SubmissionSuccessTemplat
       We&apos;re happy to let you know that your paper <strong>&ldquo;${escapeHtml(params.paperTitle)}&rdquo;</strong> was successfully submitted${params.journalName ? ` to <strong>${escapeHtml(params.journalName)}</strong>` : ' to the journal'}.
     </p>
     ${confirmationSnippetHtml}
-    <p style="font-size: 15px; line-height: 1.6; margin-bottom: 16px; color: #475569;">
-      You can track the ongoing status of your paper and manage submission receipts via the portal:
-    </p>
-    <p style="font-size: 14px; word-break: break-all; margin-top: 16px; color: #64748b;">
-      Submission URL: <a href="${escapeHtml(params.postUrl)}" style="color: #4f46e5;">${escapeHtml(params.postUrl)}</a>
-    </p>
+    ${postUrlHtml}
     <p style="font-size: 15px; line-height: 1.6; margin-top: 24px; color: #475569;">
       Best regards,<br>
       <strong>The ${escapeHtml(appName)} Team</strong>
@@ -236,20 +394,21 @@ export function renderSubmissionSuccessTemplate(params: SubmissionSuccessTemplat
     previewText: `Your paper "${params.paperTitle}" was submitted successfully.`,
     appName,
     supportEmail: params.supportEmail,
-    actionUrl: params.postUrl,
-    actionText: 'View Submission on Journal Portal',
+    actionUrl: params.postUrl || undefined,
+    actionText: params.postUrl ? 'View Submission on Journal Portal' : undefined,
   });
 
   const text = [
     `Submission Successful`,
     ``,
-    recipientGreeting,
+    textGreeting,
     ``,
     `We're happy to let you know that your paper "${params.paperTitle}" was successfully submitted${params.journalName ? ` to ${params.journalName}` : ' to the journal'}.`,
     params.confirmationId ? `Confirmation Reference: ${params.confirmationId}` : '',
     ``,
-    `View your submission here:`,
-    params.postUrl,
+    params.postUrl
+      ? `View your submission here:\n${params.postUrl}`
+      : `Track your submission status in your ${appName} dashboard.`,
     ``,
     `Best regards,`,
     `The ${appName} Team`,
@@ -264,6 +423,7 @@ export function renderSubmissionSuccessTemplate(params: SubmissionSuccessTemplat
 export function renderSubmissionFailedTemplate(params: SubmissionFailedTemplateParams): EmailTemplateOutput {
   const appName = params.appName || process.env.NEXT_PUBLIC_APP_NAME || 'Publish AI';
   const recipientGreeting = params.recipientName ? `Hello ${escapeHtml(params.recipientName)},` : 'Hello,';
+  const textGreeting = params.recipientName ? `Hello ${params.recipientName},` : 'Hello,';
   const subject = `Action Required: Submission failed for "${params.paperTitle}"`;
   const actionUrl = params.retryUrl || params.settingsUrl;
   const actionText = params.retryUrl ? 'Retry Submission' : (params.settingsUrl ? 'Review Journal Settings' : undefined);
@@ -302,31 +462,46 @@ export function renderSubmissionFailedTemplate(params: SubmissionFailedTemplateP
     actionText,
   });
 
-  const text = [
+  const textParts = [
     `Submission Encountered an Issue`,
     ``,
-    recipientGreeting,
+    textGreeting,
     ``,
     `We attempted to submit your paper "${params.paperTitle}"${params.journalName ? ` to ${params.journalName}` : ''}, but encountered an error:`,
     ``,
     `Error details: ${params.errorMessage}`,
     ``,
     `Please check your journal credentials and connection settings in the system, and try again.`,
-    actionUrl ? `Action Link: ${actionUrl}` : '',
+  ];
+
+  if (params.retryUrl) {
+    textParts.push(`Retry Submission: ${params.retryUrl}`);
+  }
+  if (params.settingsUrl) {
+    textParts.push(`Journal Settings: ${params.settingsUrl}`);
+  } else if (!params.retryUrl && actionUrl) {
+    textParts.push(`Action Link: ${actionUrl}`);
+  }
+
+  textParts.push(
     ``,
     `Best regards,`,
-    `The ${appName} Team`,
-  ].filter(Boolean).join('\n');
+    `The ${appName} Team`
+  );
+
+  const text = textParts.filter(Boolean).join('\n');
 
   return { subject, html, text };
 }
 
 /**
  * Builds email content for weekly activity digests.
+ * Uses cross-client HTML tables to ensure cards render reliably across email clients.
  */
 export function renderWeeklyDigestTemplate(params: WeeklyDigestTemplateParams): EmailTemplateOutput {
   const appName = params.appName || process.env.NEXT_PUBLIC_APP_NAME || 'Publish AI';
   const recipientGreeting = params.recipientName ? `Hello ${escapeHtml(params.recipientName)},` : 'Hello,';
+  const textGreeting = params.recipientName ? `Hello ${params.recipientName},` : 'Hello,';
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'http://localhost:3000';
   const dashboardUrl = params.dashboardUrl || `${baseUrl}/dashboard`;
   const subject = `Your Weekly Digest from ${appName}`;
@@ -350,16 +525,22 @@ export function renderWeeklyDigestTemplate(params: WeeklyDigestTemplateParams): 
     <p style="font-size: 15px; line-height: 1.6; margin-bottom: 16px;">
       Here is your weekly summary of activity across your manuscripts and submissions in <strong>${escapeHtml(appName)}</strong>:
     </p>
-    <div style="display: flex; gap: 12px; margin: 20px 0;">
-      <div style="flex: 1; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
-        <div style="font-size: 24px; font-weight: 700; color: #4f46e5;">${params.papersCount ?? 0}</div>
-        <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Active Papers</div>
-      </div>
-      <div style="flex: 1; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
-        <div style="font-size: 24px; font-weight: 700; color: #16a34a;">${params.submissionsCount ?? 0}</div>
-        <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Submissions</div>
-      </div>
-    </div>
+
+    <!-- Email-Client-Safe Stat Cards Table -->
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+      <tr>
+        <td width="48%" valign="top" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
+          <div style="font-size: 24px; font-weight: 700; color: #4f46e5;">${params.papersCount ?? 0}</div>
+          <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Active Papers</div>
+        </td>
+        <td width="4%">&nbsp;</td>
+        <td width="48%" valign="top" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
+          <div style="font-size: 24px; font-weight: 700; color: #16a34a;">${params.submissionsCount ?? 0}</div>
+          <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Submissions</div>
+        </td>
+      </tr>
+    </table>
+
     ${highlightsHtml}
     <p style="font-size: 15px; line-height: 1.6; margin-top: 24px; color: #475569;">
       Best regards,<br>
@@ -379,7 +560,7 @@ export function renderWeeklyDigestTemplate(params: WeeklyDigestTemplateParams): 
   const text = [
     `Weekly Publishing Digest`,
     ``,
-    recipientGreeting,
+    textGreeting,
     ``,
     `Active Papers: ${params.papersCount ?? 0}`,
     `Submissions: ${params.submissionsCount ?? 0}`,
@@ -390,6 +571,88 @@ export function renderWeeklyDigestTemplate(params: WeeklyDigestTemplateParams): 
     `Best regards,`,
     `The ${appName} Team`,
   ].filter(Boolean).join('\n');
+
+  return { subject, html, text };
+}
+
+/**
+ * Builds email content for generic system notifications.
+ */
+export function renderGenericNotificationTemplate(params: GenericNotificationTemplateParams): EmailTemplateOutput {
+  const appName = params.appName || process.env.NEXT_PUBLIC_APP_NAME || 'Publish AI';
+  const recipientGreeting = params.recipientName ? `Hello ${escapeHtml(params.recipientName)},` : 'Hello,';
+  const textGreeting = params.recipientName ? `Hello ${params.recipientName},` : 'Hello,';
+  const subject = params.title;
+
+  let detailsHtml = '';
+  let detailsText = '';
+
+  if (params.details && Object.keys(params.details).length > 0) {
+    detailsHtml = `
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px 18px; margin: 18px 0;">
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+          ${Object.entries(params.details)
+            .map(([k, v]) => `
+              <tr>
+                <td style="padding: 4px 8px 4px 0; color: #64748b; font-size: 13px; font-weight: 600;">${escapeHtml(k)}:</td>
+                <td style="padding: 4px 0; color: #0f172a; font-size: 13px;">${escapeHtml(v)}</td>
+              </tr>
+            `).join('')}
+        </table>
+      </div>
+    `;
+
+    detailsText = Object.entries(params.details)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join('\n');
+  }
+
+  const bodyHtml = `
+    <h2 style="color: #1e1b4b; font-size: 22px; margin-top: 0; margin-bottom: 16px; font-weight: 700;">
+      ${escapeHtml(params.title)}
+    </h2>
+    <p style="font-size: 15px; line-height: 1.6; margin-bottom: 16px;">${recipientGreeting}</p>
+    <p style="font-size: 15px; line-height: 1.6; margin-bottom: 16px;">
+      ${escapeHtml(params.message)}
+    </p>
+    ${detailsHtml}
+    <p style="font-size: 15px; line-height: 1.6; margin-top: 24px; color: #475569;">
+      Best regards,<br>
+      <strong>The ${escapeHtml(appName)} Team</strong>
+    </p>
+  `;
+
+  const html = renderBaseLayout(bodyHtml, {
+    title: subject,
+    appName,
+    supportEmail: params.supportEmail,
+    actionUrl: params.actionUrl,
+    actionText: params.actionText,
+  });
+
+  const textParts = [
+    params.title,
+    ``,
+    textGreeting,
+    ``,
+    params.message,
+  ];
+
+  if (detailsText) {
+    textParts.push(``, detailsText);
+  }
+
+  if (params.actionUrl && params.actionText) {
+    textParts.push(``, `${params.actionText}: ${params.actionUrl}`);
+  }
+
+  textParts.push(
+    ``,
+    `Best regards,`,
+    `The ${appName} Team`
+  );
+
+  const text = textParts.filter(Boolean).join('\n');
 
   return { subject, html, text };
 }

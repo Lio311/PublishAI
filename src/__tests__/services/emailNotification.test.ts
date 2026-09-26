@@ -5,6 +5,10 @@ import {
   setTransporter,
   getSenderAddress,
   sendAwaitingApprovalEmail,
+  sendWeeklyDigestEmail,
+  sendEmail,
+  verifyTransport,
+  isTransientError,
 } from "../../services/email/notification-service";
 import {
   sendSubmissionSuccessEmail,
@@ -12,10 +16,14 @@ import {
 } from "../../services/email/submission-email";
 import {
   escapeHtml,
+  htmlToPlainText,
+  plainTextToHtml,
+  renderBaseTextLayout,
   renderAwaitingApprovalTemplate,
   renderSubmissionSuccessTemplate,
   renderSubmissionFailedTemplate,
   renderWeeklyDigestTemplate,
+  renderGenericNotificationTemplate,
 } from "../../services/email/templates";
 
 describe("Email Templates", () => {
@@ -361,6 +369,275 @@ describe("Email Sending Services & Error Handling", () => {
           throwOnError: true,
         })
       ).rejects.toThrow("Fatal SMTP error");
+    });
+  });
+
+  describe("HTML and Plain-text conversion utilities", () => {
+    it("converts rich HTML to clean plain text fallback", () => {
+      const html = `
+        <style>body { color: red; }</style>
+        <h2>Manuscript Accepted</h2>
+        <p>Congratulations! Your paper was accepted.<br/>Check details below.</p>
+        <ul>
+          <li>Reviewer 1: Accepted &amp; endorsed</li>
+          <li>Reviewer 2: Minor &quot;typos&quot; fixed</li>
+        </ul>
+        <p>Visit <a href="https://example.com/portal">Author Portal</a> or contact <a href="mailto:support@publish-ai.com">support@publish-ai.com</a>.</p>
+      `;
+
+      const text = htmlToPlainText(html);
+      expect(text).toContain("Manuscript Accepted");
+      expect(text).toContain("Congratulations! Your paper was accepted.");
+      expect(text).toContain("• Reviewer 1: Accepted & endorsed");
+      expect(text).toContain('• Reviewer 2: Minor "typos" fixed');
+      expect(text).toContain("Author Portal (https://example.com/portal)");
+      expect(text).toContain("support@publish-ai.com");
+      expect(text).not.toContain("<style>");
+      expect(text).not.toContain("<h2>");
+    });
+
+    it("converts plain text to HTML with autolinks and paragraphs", () => {
+      const text = "Hello Author,\n\nPlease visit https://publish-ai.com/review to approve.\n\nThanks!";
+      const html = plainTextToHtml(text, "Action Required");
+
+      expect(html).toContain("<!DOCTYPE html>");
+      expect(html).toContain("Action Required");
+      expect(html).toContain('<a href="https://publish-ai.com/review"');
+      expect(html).toContain("Hello Author,");
+    });
+
+    it("renders branded base text layout with footer", () => {
+      const textLayout = renderBaseTextLayout("Content message here", {
+        title: "Test Layout",
+        appName: "TestApp",
+        supportEmail: "help@test.com",
+        actionUrl: "https://test.com/action",
+        actionText: "Click Here",
+      });
+
+      expect(textLayout).toContain("=== TestApp ===");
+      expect(textLayout).toContain("Content message here");
+      expect(textLayout).toContain("Click Here:\nhttps://test.com/action");
+      expect(textLayout).toContain("Need help? Contact help@test.com");
+    });
+  });
+
+  describe("renderGenericNotificationTemplate", () => {
+    it("renders generic notification with details and CTA", () => {
+      const template = renderGenericNotificationTemplate({
+        recipientEmail: "user@example.com",
+        recipientName: "Dr. Alice",
+        title: "Citation Sync Complete",
+        message: "Your paper citations have been updated.",
+        details: {
+          "Indexed Citations": "42",
+          "h-index Impact": "+1",
+        },
+        actionUrl: "https://publish-ai.com/papers/123/citations",
+        actionText: "View Citations",
+      });
+
+      expect(template.subject).toBe("Citation Sync Complete");
+      expect(template.html).toContain("Dr. Alice");
+      expect(template.html).toContain("Indexed Citations");
+      expect(template.html).toContain("42");
+      expect(template.html).toContain("View Citations");
+      expect(template.text).toContain("Indexed Citations: 42");
+      expect(template.text).toContain("View Citations: https://publish-ai.com/papers/123/citations");
+    });
+  });
+
+  describe("Template fallbacks and edge-cases", () => {
+    it("handles missing postUrl gracefully in submission success template", () => {
+      const output = renderSubmissionSuccessTemplate({
+        recipientEmail: "author@example.com",
+        paperTitle: "Quantum Mechanics",
+        postUrl: "",
+      });
+
+      expect(output.html).not.toContain('href=""');
+      expect(output.html).toContain("PublishAI dashboard");
+      expect(output.text).toContain("Track your submission status");
+    });
+
+    it("includes both retry and settings URL in submission failed text fallback", () => {
+      const output = renderSubmissionFailedTemplate({
+        recipientEmail: "author@example.com",
+        paperTitle: "Quantum Mechanics",
+        errorMessage: "Connection timeout",
+        retryUrl: "https://publish-ai.com/retry/1",
+        settingsUrl: "https://publish-ai.com/settings/conn",
+      });
+
+      expect(output.text).toContain("Retry Submission: https://publish-ai.com/retry/1");
+      expect(output.text).toContain("Journal Settings: https://publish-ai.com/settings/conn");
+    });
+  });
+
+  describe("Resend Transport and getTransporter Configuration", () => {
+    it("configures Resend SMTP when RESEND_API_KEY is present", async () => {
+      process.env.RESEND_API_KEY = "re_test_123456789";
+      delete process.env.SMTP_HOST;
+
+      const createTransportSpy = jest.spyOn(nodemailer, "createTransport");
+
+      await getTransporter();
+
+      expect(createTransportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          host: "smtp.resend.com",
+          port: 465,
+          secure: true,
+          auth: {
+            user: "resend",
+            pass: "re_test_123456789",
+          },
+        })
+      );
+    });
+
+    it("configures secure: true when SMTP_PORT is 465", async () => {
+      process.env.SMTP_HOST = "mail.myorg.org";
+      process.env.SMTP_PORT = "465";
+      delete process.env.SMTP_SECURE;
+
+      const createTransportSpy = jest.spyOn(nodemailer, "createTransport");
+
+      await getTransporter();
+
+      expect(createTransportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          host: "mail.myorg.org",
+          port: 465,
+          secure: true,
+        })
+      );
+    });
+
+    it("respects RESEND_FROM in getSenderAddress", () => {
+      delete process.env.SMTP_FROM;
+      delete process.env.EMAIL_FROM;
+      process.env.RESEND_FROM = "notifications@my-verified-domain.com";
+
+      expect(getSenderAddress()).toBe("notifications@my-verified-domain.com");
+    });
+
+    it("memoizes transporter promise across concurrent calls", async () => {
+      delete process.env.SMTP_HOST;
+      delete process.env.RESEND_API_KEY;
+
+      const [t1, t2] = await Promise.all([getTransporter(), getTransporter()]);
+      expect(t1).toBe(t2);
+    });
+  });
+
+  describe("sendEmail with automatic fallback & retry handling", () => {
+    it("automatically generates text fallback from html when text is omitted", async () => {
+      const mockSendMail = jest.fn().mockResolvedValue({ messageId: "msg-auto-text" });
+      setTransporter({ sendMail: mockSendMail } as any);
+
+      await sendEmail({
+        to: "author@example.com",
+        subject: "Review Complete",
+        html: "<h2>Review Complete</h2><p>Your paper has passed all checks.</p>",
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "author@example.com",
+          text: expect.stringContaining("Review Complete\n\nYour paper has passed all checks."),
+        })
+      );
+    });
+
+    it("automatically generates html fallback from text when html is omitted", async () => {
+      const mockSendMail = jest.fn().mockResolvedValue({ messageId: "msg-auto-html" });
+      setTransporter({ sendMail: mockSendMail } as any);
+
+      await sendEmail({
+        to: "author@example.com",
+        subject: "Notice",
+        text: "Important account notice.\nPlease review.",
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "author@example.com",
+          html: expect.stringContaining("Important account notice."),
+        })
+      );
+    });
+
+    it("retries transient error and succeeds on subsequent attempt", async () => {
+      const mockSendMail = jest
+        .fn()
+        .mockRejectedValueOnce(Object.assign(new Error("Connection reset"), { code: "ECONNRESET" }))
+        .mockResolvedValueOnce({ messageId: "msg-retry-success" });
+
+      setTransporter({ sendMail: mockSendMail } as any);
+
+      const result = await sendEmail({
+        to: "user@example.com",
+        subject: "Retry Test",
+        text: "Testing retries",
+        maxRetries: 2,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.messageId).toBe("msg-retry-success");
+      expect(mockSendMail).toHaveBeenCalledTimes(2);
+    });
+
+    it("correctly identifies transient error codes", () => {
+      expect(isTransientError({ code: "ECONNRESET" })).toBe(true);
+      expect(isTransientError({ code: "ETIMEDOUT" })).toBe(true);
+      expect(isTransientError({ status: 429 })).toBe(true);
+      expect(isTransientError({ message: "rate limit exceeded" })).toBe(true);
+      expect(isTransientError(new Error("Invalid recipient address syntax"))).toBe(false);
+    });
+  });
+
+  describe("sendWeeklyDigestEmail", () => {
+    it("successfully dispatches weekly digest email", async () => {
+      const mockSendMail = jest.fn().mockResolvedValue({ messageId: "msg-digest-101" });
+      setTransporter({ sendMail: mockSendMail } as any);
+
+      const result = await sendWeeklyDigestEmail("researcher@uni.edu", "Marie", {
+        papersCount: 5,
+        submissionsCount: 3,
+        highlights: ["Nature Physics submission pending"],
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.messageId).toBe("msg-digest-101");
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "researcher@uni.edu",
+          subject: expect.stringContaining("Weekly Digest"),
+          text: expect.stringContaining("Active Papers: 5"),
+          html: expect.stringContaining("Active Papers"),
+        })
+      );
+    });
+  });
+
+  describe("verifyTransport", () => {
+    it("calls transporter verify and returns success", async () => {
+      const mockVerify = jest.fn().mockResolvedValue(true);
+      const mailer = { verify: mockVerify } as any;
+
+      const result = await verifyTransport(mailer);
+      expect(result.success).toBe(true);
+      expect(mockVerify).toHaveBeenCalled();
+    });
+
+    it("returns error message when verify fails", async () => {
+      const mockVerify = jest.fn().mockRejectedValue(new Error("Authentication failed"));
+      const mailer = { verify: mockVerify } as any;
+
+      const result = await verifyTransport(mailer);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Authentication failed");
     });
   });
 });

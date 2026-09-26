@@ -17,7 +17,8 @@
     "closeMenu": "סגור תפריט",
     "openMenu": "פתח תפריט ניווט",
     "switchLanguage": "החלף שפה",
-    "skipToContent": "דלג לתוכן המרכזי"
+    "skipToContent": "דלג לתוכן המרכזי",
+    "sidebar": "סרגל צד"
   },
   "Dashboard": {
     "title": "ברוך הבא ל-PublishAI",
@@ -43,7 +44,8 @@
         "name": "שם המאמר",
         "journal": "יעד (כתב עת)",
         "status": "סטטוס",
-        "date": "תאריך העלאה"
+        "date": "תאריך העלאה",
+        "actions": "פעולות"
       },
       "notConfigured": "לא הוגדר עדיין",
       "status": {
@@ -52,7 +54,9 @@
         "completed": "הושלם",
         "failed": "נכשל",
         "unknown": "לא ידוע"
-      }
+      },
+      "viewAll": "צפה בכל המאמרים",
+      "open": "פתח"
     }
   },
   "SystemFlow": {
@@ -164,5 +168,183 @@
     "common": {
       "cancel": "ביטול"
     }
+  },
+  "Auth": {
+    "loginTitle": "התחברות למערכת",
+    "loginSubtitle": "ההתחברות מתבצעת באופן מאובטח דרך חשבון גוגל",
+    "registerTitle": "יצירת משתמש חדש",
+    "registerSubtitle": "ההרשמה מתבצעת באופן מאובטח דרך חשבון גוגל",
+    "continueGoogle": "התחברות עם Google"
+  },
+  "Footer": {
+    "systemName": "PublishAI",
+    "description": "מערכת אוטומטית לעריכה, שכתוב והגשת מאמרים אקדמיים",
+    "allRightsReserved": "כל הזכויות שמורות.",
+    "architecture": "ארכיטקטורה",
+    "flowchart": "תרשים זרימה",
+    "privacy": "מדיניות פרטיות",
+    "terms": "תנאי שימוש"
+  },
+  "common": {
+    "note": "הערה חשובה:",
+    "spam_warning": "עיתונים אינם שולחים תמיד דוא\"ל עבור כל שינוי סטטוס, והודעות החלטה עלולות להגיע לתיקיית הספאם. אנא בדוק את תיקיית הספאם מדי פעם.",
+    "cancel": "ביטול",
+    "save": "שמור",
+    "delete": "מחק",
+    "retry": "נסה שוב",
+    "back": "חזרה",
+    "loading": "טוען...",
+    "actions": "פעולות",
+    "open": "פתח",
+    "viewAll": "צפה בהכל",
+    "status": "סטטוס",
+    "date": "תאריך",
+    "id": "מספר",
+    "title": "כותרת",
+    "user": "משתמש",
+    "completed": "הושלם",
+    "inProgress": "בעיבוד",
+    "pending": "ממתין",
+    "failed": "נכשל",
+    "unknown": "לא ידוע"
+  },
+  "Papers": {
+    "title": "המאמרים שלי",
+    "subtitle": "נהל, ערוך ועקוב אחר תהליך השיפוט והשיפור של כל מאמריך.",
+    "uploadNew": "העלאת מאמר חדש",
+    "searchPlaceholder": "חיפוש לפי כותרת או כתב עת...",
+    "totalCount": "מאמרים בסך הכל",
+    "emptyDescription": "העלה קובץ PDF ראשון כדי להתחיל בניתוח נתונים, דיון מומחים וסבבי שיפוט אוטונומיים.",
+    "uploadNow": "העלה מאמר עכשיו",
+    "openWorkspace": "פתח סביבה",
+    "backToList": "חזרה לרשימת המאמרים",
+    "submissionProgress": "התקדמות ההגשה",
+    "downloadOriginal": "הורד קובץ מקור",
+    "style": "סגנון",
+    "tabs": {
+      "editor": "עורך",
+      "editorDesc": "עריכת טקסט עשיר עם מעקב שינויי AI",
+      "processing": "עיבוד",
+      "processingDesc": "סטטוס שרשרת עיבוד ותהליך עבודה",
+      "dataSandbox": "ארגז חול נתונים",
+      "dataSandboxDesc": "ניתוח סטטיסטי ואימות נתונים",
+      "knowledgeGraph": "גרף ידע",
+      "knowledgeGraphDesc": "קשרי ישויות ואימות לוגי",
+      "aiDebate": "דיון מומחי AI",
+      "aiDebateDesc": "ביקורת עמיתים וחקירה נגדית אוטונומית",
+      "visionAi": "בינת ראייה",
+      "visionAiDesc": "חילוץ איורים ובדיקת תוצרים חזותיים"
+    },
+    "status": {
+      "in_progress": "בעיבוד",
+      "awaiting_approval": "ממתין לאישור",
+      "completed": "הושלם",
+      "failed": "נכשל",
+      "unknown": "לא ידוע"
+    }
+  },
+  "Admin": {
+    "title": "ניהול מערכת",
+    "subtitle": "מעקב מקיף אחר פעילות המערכת, משתמשים ומאמרים - נתוני זמן אמת.",
+    "stats": {
+      "totalUsers": "סה״כ משתמשים",
+      "totalPapers": "סה״כ מאמרים",
+      "inProgress": "מאמרים בתהליך",
+      "completed": "מאמרים שהושלמו"
+    },
+    "recentActivity": {
+      "title": "פעילות אחרונה (מעקב מאמרים)",
+      "headers": {
+        "id": "מספר",
+        "title": "כותרת",
+        "user": "משתמש",
+        "date": "תאריך יצירה",
+        "status": "סטטוס"
+      },
+      "noData": "אין נתונים להצגה"
+    },
+    "status": {
+      "completed": "הושלם",
+      "in_progress": "בתהליך",
+      "pending": "ממתין",
+      "failed": "נכשל"
+    }
+  },
+  "Journals": {
+    "title": "חוקי עיתונים",
+    "subtitle": "ניהול חוקי עיצוב והגשה לעיתוני יעד שונים.",
+    "verified": "מאומת",
+    "aiGenerated": "AI",
+    "required": "חובה",
+    "optional": "אופציונלי",
+    "citation": "ציטוט",
+    "abstract": "תקציר",
+    "articleTypes": "סוגי מאמרים",
+    "coverLetter": "מכתב נלווה",
+    "words": "מילים",
+    "structured": "מובנה",
+    "unstructured": "לא מובנה",
+    "noLimit": "ללא מגבלה",
+    "figs": "איורים",
+    "refs": "מקורות",
+    "more": "נוספים",
+    "wordLimit": "מגבלת מילים:",
+    "none": "ללא",
+    "default": "ברירת מחדל",
+    "unknown": "לא ידוע",
+    "instructionsForAuthors": "הוראות למחברים"
+  },
+  "Connections": {
+    "title": "חיבור לעיתונים",
+    "subtitle": "ניהול חיבורים פעילים לעיתונים ופלטפורמות פרסום חיצוניות."
+  },
+  "Learning": {
+    "title": "למידת המערכת (AI Learning)",
+    "subtitle": "עמוד זה מציג את הכללים והתובנות שהמערכת למדה מתוך הבקשות שלכם ומהערות סוקרים של כתבי עת. כללים המוגדרים כ-Actionable מוזרקים אוטומטית למודלי השפה בעת יצירת טקסט חדש כדי למנוע טעויות דומות בעתיד.",
+    "stats": {
+      "totalLearnings": "סך הכל כללים",
+      "actionableRules": "כללים פעילים",
+      "userInsights": "תובנות ממשתמשים",
+      "reviewerInsights": "תובנות מסוקרים"
+    },
+    "empty": "אין עדיין תובנות במערכת",
+    "userRequest": "הערת משתמש",
+    "reviewerFeedback": "הערת סוקר",
+    "issueCategory": "קטגוריית הבעיה",
+    "productInsight": "תובנת מוצר (טלמטריה)",
+    "actionableRule": "כלל אופרטיבי (Prompt Injection)",
+    "active": "פעיל",
+    "inactive": "לא פעיל"
+  },
+  "Errors": {
+    "somethingWentWrong": "אירעה שגיאה בלתי צפויה",
+    "unexpectedDesc": "המערכת נתקלה בבעיה בעיבוד הבקשה שלך. אנא נסה לרענן את העמוד.",
+    "tryAgain": "נסה שוב",
+    "dashboard": "לוח בקרה",
+    "home": "חזרה לדף הבית",
+    "pageNotFound": "העמוד המבוקש לא נמצא",
+    "pageNotFoundDesc": "העמוד שחיפשת אינו קיים, הוסר או שכתובתו שונתה.",
+    "dashboardError": "שגיאה בטעינת נתוני לוח הבקרה",
+    "dashboardErrorDesc": "חלה בעיה בעת שליפת המידע. אנא נסה לטעון שוב או חזור לדף הראשי.",
+    "paperError": "שגיאה בטעינת פרטי המאמר",
+    "paperErrorDesc": "חלה בעיה בטעינת המאמר או בניתוח הנתונים שלו.",
+    "backToPapers": "חזרה לרשימת המאמרים"
+  },
+  "RLHF": {
+    "title": "הערכות למידה מחיזוקים (RLHF)",
+    "loading": "טוען הערכות...",
+    "empty": "אין הערכות נוספות לסקירה. הכל מעודכן!",
+    "agent": "סוכן",
+    "evalId": "מזהה הערכה",
+    "currentRating": "דירוג נוכחי",
+    "unrated": "ללא דירוג",
+    "inputContext": "הקשר קלט",
+    "aiOutput": "פלט בינה מלאכותית",
+    "optionalFeedback": "משוב אופציונלי",
+    "feedbackPlaceholder": "מה הסוכן עשה טוב או טעון שיפור?",
+    "good": "טוב (+1)",
+    "bad": "טעון שיפור (-1)",
+    "skip": "דלג",
+    "reviewing": "סוקר {current} מתוך {total} הערכות אחרונות"
   }
 }

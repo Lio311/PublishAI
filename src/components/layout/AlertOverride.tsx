@@ -11,8 +11,23 @@ export default function AlertOverride() {
     if (typeof window !== "undefined") {
       const originalAlert = window.alert;
       window.alert = (message?: any) => {
-        toast(message?.toString() || "Alert");
+        let displayMessage = "Alert";
+        if (typeof message === "string") {
+          displayMessage = message;
+        } else if (message instanceof Error) {
+          displayMessage = message.message;
+        } else if (typeof message === "object" && message !== null) {
+          try {
+            displayMessage = JSON.stringify(message);
+          } catch {
+            displayMessage = String(message);
+          }
+        } else if (message !== undefined && message !== null) {
+          displayMessage = String(message);
+        }
+        toast(displayMessage);
       };
+
       return () => {
         window.alert = originalAlert;
       };

@@ -17,7 +17,8 @@
     "closeMenu": "Close menu",
     "openMenu": "Open navigation menu",
     "switchLanguage": "Switch language",
-    "skipToContent": "Skip to main content"
+    "skipToContent": "Skip to main content",
+    "sidebar": "Sidebar"
   },
   "Dashboard": {
     "title": "Welcome to PublishAI",
@@ -43,7 +44,8 @@
         "name": "Paper Title",
         "journal": "Target Journal",
         "status": "Status",
-        "date": "Upload Date"
+        "date": "Upload Date",
+        "actions": "Actions"
       },
       "notConfigured": "Not configured yet",
       "status": {
@@ -52,7 +54,9 @@
         "completed": "Completed",
         "failed": "Failed",
         "unknown": "Unknown"
-      }
+      },
+      "viewAll": "View all papers",
+      "open": "Open"
     }
   },
   "SystemFlow": {
@@ -164,5 +168,183 @@
     "common": {
       "cancel": "Cancel"
     }
+  },
+  "Auth": {
+    "loginTitle": "Sign in to your account",
+    "loginSubtitle": "Authentication is securely handled via Google",
+    "registerTitle": "Create an account",
+    "registerSubtitle": "Registration is securely handled via Google",
+    "continueGoogle": "Continue with Google"
+  },
+  "Footer": {
+    "systemName": "PublishAI",
+    "description": "Automated Academic Paper Revision & Submission Platform",
+    "allRightsReserved": "All rights reserved.",
+    "architecture": "Architecture",
+    "flowchart": "Flowchart",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  },
+  "common": {
+    "note": "Important Note:",
+    "spam_warning": "Journals may not send emails for every status change, and decision emails sometimes go to spam. Please check your spam folder if you haven't received an update in a while.",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "retry": "Try Again",
+    "back": "Back",
+    "loading": "Loading...",
+    "actions": "Actions",
+    "open": "Open",
+    "viewAll": "View all",
+    "status": "Status",
+    "date": "Date",
+    "id": "ID",
+    "title": "Title",
+    "user": "User",
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "pending": "Pending",
+    "failed": "Failed",
+    "unknown": "Unknown"
+  },
+  "Papers": {
+    "title": "My Papers",
+    "subtitle": "Manage, review, and track the autonomous publication pipeline for all your manuscripts.",
+    "uploadNew": "Upload New Paper",
+    "searchPlaceholder": "Search papers by title or journal...",
+    "totalCount": "papers total",
+    "emptyDescription": "Upload your first PDF to launch autonomous multi-agent review, data validation, and journal compliance checks.",
+    "uploadNow": "Upload Manuscript",
+    "openWorkspace": "Open",
+    "backToList": "Back to Papers",
+    "submissionProgress": "Submission Progress",
+    "downloadOriginal": "Download Original",
+    "style": "Style",
+    "tabs": {
+      "editor": "Editor",
+      "editorDesc": "Rich text editing with AI track changes",
+      "processing": "Processing",
+      "processingDesc": "Pipeline status & publication workflow",
+      "dataSandbox": "Data Sandbox",
+      "dataSandboxDesc": "Statistical analysis & data verification",
+      "knowledgeGraph": "Knowledge Graph",
+      "knowledgeGraphDesc": "Entity relationships & logic validation",
+      "aiDebate": "AI Debate",
+      "aiDebateDesc": "Autonomous peer review & cross-examination",
+      "visionAi": "Vision AI",
+      "visionAiDesc": "Figure extraction & visual artifact checks"
+    },
+    "status": {
+      "in_progress": "In Progress",
+      "awaiting_approval": "Awaiting Approval",
+      "completed": "Completed",
+      "failed": "Failed",
+      "unknown": "Unknown"
+    }
+  },
+  "Admin": {
+    "title": "System Administration",
+    "subtitle": "Comprehensive tracking of system activity, users, and papers - real-time data.",
+    "stats": {
+      "totalUsers": "Total Users",
+      "totalPapers": "Total Papers",
+      "inProgress": "In Progress",
+      "completed": "Completed Papers"
+    },
+    "recentActivity": {
+      "title": "Recent Activity (Paper Tracking)",
+      "headers": {
+        "id": "ID",
+        "title": "Title",
+        "user": "User",
+        "date": "Date",
+        "status": "Status"
+      },
+      "noData": "No data to display"
+    },
+    "status": {
+      "completed": "Completed",
+      "in_progress": "In Progress",
+      "pending": "Pending",
+      "failed": "Failed"
+    }
+  },
+  "Journals": {
+    "title": "Journal Rules",
+    "subtitle": "Manage formatting and submission rules for target journals.",
+    "verified": "Verified",
+    "aiGenerated": "AI-generated",
+    "required": "Required",
+    "optional": "Optional",
+    "citation": "Citation",
+    "abstract": "Abstract",
+    "articleTypes": "Article Types",
+    "coverLetter": "Cover Letter",
+    "words": "words",
+    "structured": "Structured",
+    "unstructured": "Unstructured",
+    "noLimit": "No limit",
+    "figs": "figs",
+    "refs": "refs",
+    "more": "more",
+    "wordLimit": "Word Limit:",
+    "none": "None",
+    "default": "Default",
+    "unknown": "Unknown",
+    "instructionsForAuthors": "Instructions for Authors"
+  },
+  "Connections": {
+    "title": "Journal Connections",
+    "subtitle": "Manage your active connections to external journals and publishing platforms."
+  },
+  "Learning": {
+    "title": "AI Learning & Telemetry",
+    "subtitle": "This page displays the rules and insights the system has learned from user rewrite requests and journal reviewer comments. Rules marked as Actionable are automatically injected into the LLM during text generation to prevent similar errors in the future.",
+    "stats": {
+      "totalLearnings": "Total Learnings",
+      "actionableRules": "Actionable Rules",
+      "userInsights": "User Insights",
+      "reviewerInsights": "Reviewer Insights"
+    },
+    "empty": "No learning data available yet",
+    "userRequest": "User Request",
+    "reviewerFeedback": "Reviewer Feedback",
+    "issueCategory": "Issue Category",
+    "productInsight": "Product Insight",
+    "actionableRule": "Actionable Rule",
+    "active": "active",
+    "inactive": "inactive"
+  },
+  "Errors": {
+    "somethingWentWrong": "Something went wrong",
+    "unexpectedDesc": "An unexpected error occurred while processing your request. Please try refreshing.",
+    "tryAgain": "Try Again",
+    "dashboard": "Dashboard",
+    "home": "Back to Dashboard",
+    "pageNotFound": "Page Not Found",
+    "pageNotFoundDesc": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.",
+    "dashboardError": "Unable to load dashboard",
+    "dashboardErrorDesc": "There was a problem loading this section. Please try again or return to the main dashboard.",
+    "paperError": "Failed to load paper",
+    "paperErrorDesc": "We encountered an issue loading this manuscript or its AI analysis data.",
+    "backToPapers": "Back to Papers"
+  },
+  "RLHF": {
+    "title": "RLHF Evaluations",
+    "loading": "Loading evaluations...",
+    "empty": "No more evaluations to review. You are all caught up!",
+    "agent": "Agent",
+    "evalId": "Eval ID",
+    "currentRating": "Current Rating",
+    "unrated": "Unrated",
+    "inputContext": "Input Context",
+    "aiOutput": "AI Output",
+    "optionalFeedback": "Optional Feedback",
+    "feedbackPlaceholder": "What did the agent do well/poorly?",
+    "good": "Good (+1)",
+    "bad": "Bad (-1)",
+    "skip": "Skip",
+    "reviewing": "Reviewing {current} of {total} recent evaluations"
   }
 }

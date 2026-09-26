@@ -1,8 +1,7 @@
 import {
-  getTransporter,
-  getSenderAddress,
-  getSafeTestMessageUrl,
+  sendEmail,
   SendEmailResult,
+  isTransientError,
 } from "./notification-service";
 import {
   renderSubmissionSuccessTemplate,
@@ -20,6 +19,7 @@ export interface SubmissionSuccessOptions {
   supportEmail?: string;
   fromEmail?: string;
   throwOnError?: boolean;
+  maxRetries?: number;
 }
 
 export interface SubmissionFailedOptions {
@@ -32,6 +32,7 @@ export interface SubmissionFailedOptions {
   supportEmail?: string;
   fromEmail?: string;
   throwOnError?: boolean;
+  maxRetries?: number;
 }
 
 /**
@@ -45,9 +46,6 @@ export async function sendSubmissionSuccessEmail(
   options?: SubmissionSuccessOptions
 ): Promise<SendEmailResult> {
   try {
-    const mailer = await getTransporter();
-    const from = getSenderAddress(options?.fromEmail);
-
     const templateParams: SubmissionSuccessTemplateParams = {
       recipientEmail: userEmail,
       paperTitle,
@@ -62,30 +60,23 @@ export async function sendSubmissionSuccessEmail(
 
     const { subject, html, text } = renderSubmissionSuccessTemplate(templateParams);
 
-    const info = await mailer.sendMail({
-      from,
+    const result = await sendEmail({
       to: userEmail,
       subject,
-      text,
       html,
+      text,
+      from: options?.fromEmail,
+      throwOnError: options?.throwOnError,
+      maxRetries: options?.maxRetries,
     });
 
-    const previewUrl = getSafeTestMessageUrl(mailer, info);
-
-    console.log(
-      `[Email Service] Success email sent to ${userEmail}. Message ID: ${info?.messageId || "N/A"}`
-    );
-
-    if (previewUrl) {
-      console.log(`[Email Service] Preview URL: ${previewUrl}`);
+    if (result.success) {
+      console.log(
+        `[Email Service] Success email sent to ${userEmail}. Message ID: ${result.messageId || "N/A"}`
+      );
     }
 
-    return {
-      success: true,
-      messageId: info?.messageId,
-      previewUrl,
-      ...info,
-    };
+    return result;
   } catch (error: any) {
     console.error(`[Email Service] Error sending submission success email to ${userEmail}:`, error);
 
@@ -96,6 +87,7 @@ export async function sendSubmissionSuccessEmail(
     return {
       success: false,
       error: error?.message || String(error),
+      isTransient: isTransientError(error),
     };
   }
 }
@@ -111,9 +103,6 @@ export async function sendSubmissionFailedEmail(
   options?: SubmissionFailedOptions
 ): Promise<SendEmailResult> {
   try {
-    const mailer = await getTransporter();
-    const from = getSenderAddress(options?.fromEmail);
-
     const templateParams: SubmissionFailedTemplateParams = {
       recipientEmail: userEmail,
       paperTitle,
@@ -129,30 +118,23 @@ export async function sendSubmissionFailedEmail(
 
     const { subject, html, text } = renderSubmissionFailedTemplate(templateParams);
 
-    const info = await mailer.sendMail({
-      from,
+    const result = await sendEmail({
       to: userEmail,
       subject,
-      text,
       html,
+      text,
+      from: options?.fromEmail,
+      throwOnError: options?.throwOnError,
+      maxRetries: options?.maxRetries,
     });
 
-    const previewUrl = getSafeTestMessageUrl(mailer, info);
-
-    console.log(
-      `[Email Service] Failed email sent to ${userEmail}. Message ID: ${info?.messageId || "N/A"}`
-    );
-
-    if (previewUrl) {
-      console.log(`[Email Service] Preview URL: ${previewUrl}`);
+    if (result.success) {
+      console.log(
+        `[Email Service] Failed email sent to ${userEmail}. Message ID: ${result.messageId || "N/A"}`
+      );
     }
 
-    return {
-      success: true,
-      messageId: info?.messageId,
-      previewUrl,
-      ...info,
-    };
+    return result;
   } catch (error: any) {
     console.error(`[Email Service] Error sending submission failed email to ${userEmail}:`, error);
 
@@ -163,6 +145,7 @@ export async function sendSubmissionFailedEmail(
     return {
       success: false,
       error: error?.message || String(error),
+      isTransient: isTransientError(error),
     };
   }
 }

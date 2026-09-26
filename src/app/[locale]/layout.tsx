@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
 import "../globals.css";
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { getMessages, setRequestLocale } from 'next-intl/server';
 import { routing } from "@/app/i18n/routing";
 import { notFound } from 'next/navigation';
 import GlobalPasswordProtection from '@/components/layout/GlobalPasswordProtection';
@@ -13,6 +13,10 @@ import DynamicBackground from '@/components/layout/DynamicBackground';
 import AlertOverride from '@/components/layout/AlertOverride';
 
 const openSans = Open_Sans({ subsets: ["latin", "hebrew"] });
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export const metadata: Metadata = {
   title: "PublishAI - Automated Academic Paper Revision",
@@ -38,6 +42,8 @@ export default async function RootLayout({
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }
+
+  setRequestLocale(locale);
 
   // Providing all messages to the client
   // side is the easiest way to get started

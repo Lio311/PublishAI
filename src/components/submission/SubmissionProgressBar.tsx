@@ -117,10 +117,8 @@ export default function SubmissionProgressBar({ currentStatus }: { currentStatus
       
       {currentStatus === "submitted" || currentStatus === "with_editor" ? (
         <div role="note" className="mt-6 p-4 bg-amber-50 text-amber-800 text-sm rounded-xl border border-amber-200">
-          <strong>{isHe ? "הערה חשובה:" : (t("note") || "Note:")}</strong>{" "}
-          {isHe 
-            ? "עיתונים אינם שולחים תמיד דוא\"ל עבור כל שינוי סטטוס, והודעות החלטה עלולות להגיע לתיקיית הספאם. אנא בדוק את תיקיית הספאם מדי פעם." 
-            : (t("spam_warning") || "Journals may not send emails for every status change, and decision emails sometimes go to spam. Please check your spam folder if you haven't received an update in a while.")}
+          <strong>{t("note")}</strong>{" "}
+          {t("spam_warning")}
         </div>
       ) : null}
     </div>

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { db } from "@/services/db";
 import { papers, journals } from "@/services/db/schema";
 import { desc, eq } from "drizzle-orm";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { checkIsAdmin } from "@/services/auth-utils";
 import { auth } from "@/app/auth";
 import { redirect } from "next/navigation";
@@ -18,6 +18,7 @@ export default async function Home({
 }) {
   const resolvedParams = await params;
   const locale = resolvedParams.locale;
+  setRequestLocale(locale);
   const isAdmin = await checkIsAdmin();
   const isHe = locale === "he";
 
@@ -173,7 +174,7 @@ export default async function Home({
               href={`/${locale}/papers`}
               className="text-xs font-semibold text-sky-600 hover:text-sky-700 flex items-center gap-1 transition-colors"
             >
-              <span>{isHe ? "צפה בכל המאמרים" : "View all papers"}</span>
+              <span>{t("recentPapers.viewAll")}</span>
               <NavArrow className="w-3.5 h-3.5" />
             </Link>
           )}
@@ -193,7 +194,7 @@ export default async function Home({
                     <th className="px-6 py-3.5">{t("recentPapers.headers.journal")}</th>
                     <th className="px-6 py-3.5">{t("recentPapers.headers.status")}</th>
                     <th className="px-6 py-3.5">{t("recentPapers.headers.date")}</th>
-                    <th className="px-6 py-3.5 text-right rtl:text-left">{isHe ? "פעולות" : "Actions"}</th>
+                    <th className="px-6 py-3.5 text-right rtl:text-left">{t("recentPapers.headers.actions")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -219,7 +220,7 @@ export default async function Home({
                           href={`/${locale}/papers/${paper.id}`}
                           className="inline-flex items-center gap-1 text-xs font-semibold text-sky-600 hover:text-sky-700 hover:bg-sky-50 px-2.5 py-1 rounded-lg transition-colors"
                         >
-                          <span>{isHe ? "פתח" : "Open"}</span>
+                          <span>{t("recentPapers.open")}</span>
                           <NavArrow className="w-3.5 h-3.5" />
                         </Link>
                       </td>
