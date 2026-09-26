@@ -3,6 +3,7 @@ import { db } from "@/services/db";
 import { submissions, papers, journalConnections } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/app/auth";
+import { checkRateLimit } from "@/services/rate-limit";
 
 export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
@@ -11,27 +12,59 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const rateLimitResult = await checkRateLimit(session.user.id);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const { id } = await context.params;
     const submissionId = Number(id);
+
+    if (isNaN(submissionId) || submissionId <= 0) {
+      return NextResponse.json(
+        { error: "Invalid submission ID" },
+        { status: 400 }
+      );
+    }
+
     const userId = session.user.id;
 
     // Find the submission by ID
     const submission = await db.query.submissions.findFirst({
       where: eq(submissions.id, submissionId),
-      with: { connection: true }
+      with: { connection: true },
     });
 
     if (!submission) {
       return NextResponse.json({ error: "Submission not found" }, { status: 404 });
     }
 
+    // Authorization: Verify caller owns this submission
+    if (submission.userId !== userId) {
+      return NextResponse.json(
+        { error: "Forbidden: Not authorized to cascade this submission" },
+        { status: 403 }
+      );
+    }
+
     // Find the associated paper
     const paper = await db.query.papers.findFirst({
-      where: eq(papers.id, submission.paperId)
+      where: eq(papers.id, submission.paperId),
     });
 
     if (!paper) {
       return NextResponse.json({ error: "Paper not found" }, { status: 404 });
+    }
+
+    // Authorization: Verify caller owns the paper
+    if (paper.userId !== userId) {
+      return NextResponse.json(
+        { error: "Forbidden: Not authorized to modify this paper" },
+        { status: 403 }
+      );
     }
 
     // Check its cascadeQueue
@@ -64,7 +97,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
           where: (jc, { eq, and }) => and(
             eq(jc.userId, userId),
             eq(jc.journalId, nextJournalId)
-          )
+          ),
         });
       }
 
@@ -75,7 +108,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
           platform: 'email',
           siteUrl: 'http://example.com',
           encryptedUsername: 'dummy',
-          encryptedPassword: 'dummy'
+          encryptedPassword: 'dummy',
         }).returning();
         connection = newConn;
       }
@@ -90,7 +123,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       return insertedSub;
     });
 
-    // Trigger the AI pipeline
+    // Trigger the AI pipeline asynchronously
     const previousJournalId = (submission.connection as any)?.journalId;
 
     try {
@@ -102,14 +135,16 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
           action: 'cascade',
           paperId: paper.id,
           targetJournalId: nextJournalIdStr,
-          previousJournalId: previousJournalId
-        })
-      }).catch(err => console.error("Agent run failed inline", err));
+          previousJournalId: previousJournalId,
+        }),
+      }).catch(err => {
+        console.warn("[cascade] Agent run notification skipped or failed:", err?.message || err);
+      });
     } catch (err) {
-      console.error("Failed to trigger agent run", err);
+      console.warn("[cascade] Failed to trigger agent run:", err);
     }
 
-    return NextResponse.json(newSubmission);
+    return NextResponse.json(newSubmission, { status: 201 });
   } catch (error: any) {
     console.error("Error in cascade route:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

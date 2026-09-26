@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { db } from "@/services/db";
-import { submissions } from "@/services/db/schema";
+import { submissions, papers, journalConnections } from "@/services/db/schema";
 import { auth } from "@/app/auth";
 import { inngest } from "@/inngest/client";
 import { eq, desc } from "drizzle-orm";
 import { checkRateLimit } from "@/services/rate-limit";
+
+const createSubmissionSchema = z.object({
+  paperId: z.coerce.number().int().positive("paperId must be a positive integer"),
+  connectionId: z.coerce.number().int().positive("connectionId must be a positive integer"),
+  publishMode: z.enum(["draft", "publish", "review"]).default("draft").optional(),
+});
 
 export async function POST(req: Request) {
   try {
@@ -18,17 +25,49 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
     }
 
-    const body = await req.json();
-    const { paperId, connectionId, publishMode } = body;
+    let rawBody: unknown;
+    try {
+      rawBody = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
 
-    if (!paperId || !connectionId) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    const parseResult = createSubmissionSchema.safeParse(rawBody);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: "Validation error", details: parseResult.error.format() },
+        { status: 400 }
+      );
+    }
+
+    const { paperId, connectionId, publishMode } = parseResult.data;
+
+    // Authorization: Verify paper exists and belongs to current user
+    const paper = await db.query.papers.findFirst({
+      where: eq(papers.id, paperId),
+    });
+    if (!paper) {
+      return NextResponse.json({ error: "Paper not found" }, { status: 404 });
+    }
+    if (paper.userId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden: Not authorized to submit this paper" }, { status: 403 });
+    }
+
+    // Authorization: Verify journal connection exists and belongs to current user
+    const connection = await db.query.journalConnections.findFirst({
+      where: eq(journalConnections.id, connectionId),
+    });
+    if (!connection) {
+      return NextResponse.json({ error: "Journal connection not found" }, { status: 404 });
+    }
+    if (connection.userId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden: Not authorized to use this journal connection" }, { status: 403 });
     }
 
     // Create submission record immediately without blocking on metadata extraction
     const newSubmission = await db.insert(submissions).values({
-      paperId: Number(paperId),
-      connectionId: Number(connectionId),
+      paperId,
+      connectionId,
       userId: session.user.id,
       publishMode: publishMode || "draft",
       status: "preparing",

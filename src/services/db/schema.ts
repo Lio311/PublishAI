@@ -895,6 +895,8 @@ export type NewAgentEvaluation = typeof agentEvaluations.$inferInsert;
 export const usersRelations = relations(users, ({ many }) => ({
   papers: many(papers),
   documents: many(documents),
+  submissions: many(submissions),
+  journalConnections: many(journalConnections),
 }));
 
 export const papersRelations = relations(papers, ({ one, many }) => ({
@@ -907,6 +909,7 @@ export const papersRelations = relations(papers, ({ one, many }) => ({
     references: [journals.id],
   }),
   documents: many(documents),
+  submissions: many(submissions),
 }));
 
 export const documentsRelations = relations(documents, ({ one, many }) => ({
@@ -934,4 +937,65 @@ export const citationsRelations = relations(citations, ({ one }) => ({
 
 export const journalsRelations = relations(journals, ({ many }) => ({
   papers: many(papers),
+  journalConnections: many(journalConnections),
 }));
+
+export const journalConnectionsRelations = relations(journalConnections, ({ one, many }) => ({
+  user: one(users, {
+    fields: [journalConnections.userId],
+    references: [users.id],
+  }),
+  journal: one(journals, {
+    fields: [journalConnections.journalId],
+    references: [journals.id],
+  }),
+  submissions: many(submissions),
+}));
+
+export const submissionsRelations = relations(submissions, ({ one, many }) => ({
+  user: one(users, {
+    fields: [submissions.userId],
+    references: [users.id],
+  }),
+  paper: one(papers, {
+    fields: [submissions.paperId],
+    references: [papers.id],
+  }),
+  connection: one(journalConnections, {
+    fields: [submissions.connectionId],
+    references: [journalConnections.id],
+  }),
+  submissionLogs: many(submissionLogs),
+  submissionEvents: many(submissionEvents),
+  reviewThreads: many(reviewThreads),
+}));
+
+export const submissionLogsRelations = relations(submissionLogs, ({ one }) => ({
+  submission: one(submissions, {
+    fields: [submissionLogs.submissionId],
+    references: [submissions.id],
+  }),
+}));
+
+export const submissionEventsRelations = relations(submissionEvents, ({ one }) => ({
+  submission: one(submissions, {
+    fields: [submissionEvents.submissionId],
+    references: [submissions.id],
+  }),
+}));
+
+export const reviewThreadsRelations = relations(reviewThreads, ({ one, many }) => ({
+  submission: one(submissions, {
+    fields: [reviewThreads.submissionId],
+    references: [submissions.id],
+  }),
+  comments: many(reviewComments),
+}));
+
+export const reviewCommentsRelations = relations(reviewComments, ({ one }) => ({
+  thread: one(reviewThreads, {
+    fields: [reviewComments.threadId],
+    references: [reviewThreads.id],
+  }),
+}));
+

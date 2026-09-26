@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/app/auth";
 import { db } from "@/services/db";
 import { submissions } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import { checkRateLimit } from "@/services/rate-limit";
 import { SubmissionService } from "@/services/submission";
+
+const updateStatusSchema = z.object({
+  status: z.string().min(1, "Status is required"),
+  notes: z.string().optional(),
+  stage: z.string().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  force: z.boolean().optional(),
+});
 
 export async function GET(
   req: NextRequest,
@@ -34,7 +43,7 @@ export async function GET(
       );
     }
 
-    // Verify submission ownership if DB record exists
+    // Verify submission existence and ownership
     let existingSubmission: any = null;
     try {
       if (db?.query?.submissions) {
@@ -46,7 +55,14 @@ export async function GET(
       console.warn("[API submissions/[id]/status] DB query fallback:", dbErr);
     }
 
-    if (existingSubmission && existingSubmission.userId && existingSubmission.userId !== session.user.id) {
+    if (!existingSubmission) {
+      return NextResponse.json(
+        { error: "Submission not found" },
+        { status: 404 }
+      );
+    }
+
+    if (existingSubmission.userId !== session.user.id) {
       return NextResponse.json(
         { error: "Forbidden: Not authorized to view this submission" },
         { status: 403 }
@@ -57,13 +73,6 @@ export async function GET(
       SubmissionService.getSubmissionStatus(submissionId),
       SubmissionService.getSubmissionEvents(submissionId),
     ]);
-
-    if (!summary && !existingSubmission && events.length === 0) {
-      return NextResponse.json(
-        { error: "Submission not found" },
-        { status: 404 }
-      );
-    }
 
     return NextResponse.json({
       success: true,
@@ -109,27 +118,44 @@ export async function PATCH(
       );
     }
 
-    // Verify submission ownership
+    // Verify submission existence and ownership
     const existingSubmission = await db.query.submissions.findFirst({
       where: eq(submissions.id, submissionId),
     });
+
+    if (!existingSubmission) {
+      return NextResponse.json(
+        { error: "Submission not found" },
+        { status: 404 }
+      );
+    }
     
-    if (!existingSubmission || existingSubmission.userId !== session.user.id) {
+    if (existingSubmission.userId !== session.user.id) {
       return NextResponse.json(
         { error: "Forbidden: Not authorized to modify this submission" },
         { status: 403 }
       );
     }
 
-    const body = await req.json().catch(() => ({}));
-    const { status, notes, stage, metadata, force } = body;
-
-    if (!status) {
+    let rawBody: unknown;
+    try {
+      rawBody = await req.json();
+    } catch {
       return NextResponse.json(
-        { error: "Missing required field: status" },
+        { error: "Invalid JSON body" },
         { status: 400 }
       );
     }
+
+    const parseResult = updateStatusSchema.safeParse(rawBody);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: "Validation error", details: parseResult.error.format() },
+        { status: 400 }
+      );
+    }
+
+    const { status, notes, stage, metadata, force } = parseResult.data;
 
     const result = await SubmissionService.updateSubmissionStatus(submissionId, status, {
       actor: "author",

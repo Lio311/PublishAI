@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/auth";
+import { db } from "@/services/db";
+import { submissions } from "@/services/db/schema";
+import { eq } from "drizzle-orm";
 import { inngest } from "@/inngest/client";
+import { checkRateLimit } from "@/services/rate-limit";
 
 export async function POST(
   req: NextRequest,
@@ -12,6 +16,14 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const rateLimitResult = await checkRateLimit(session.user.id);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const { id } = await params;
     const submissionId = Number(id);
 
@@ -19,6 +31,25 @@ export async function POST(
       return NextResponse.json(
         { error: "Invalid submission ID" },
         { status: 400 }
+      );
+    }
+
+    // Authorization: Verify submission exists and belongs to current user
+    const submission = await db.query.submissions.findFirst({
+      where: eq(submissions.id, submissionId),
+    });
+
+    if (!submission) {
+      return NextResponse.json(
+        { error: "Submission not found" },
+        { status: 404 }
+      );
+    }
+
+    if (submission.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: "Forbidden: Not authorized to trigger this submission" },
+        { status: 403 }
       );
     }
 
