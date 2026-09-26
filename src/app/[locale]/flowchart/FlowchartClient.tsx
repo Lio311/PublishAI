@@ -352,7 +352,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="infra" icon={FileText} isHe={isHe} titleEn="Metadata" titleHe="מטא-דאטה" descEn="Extract Authors, Keywords, Abstract" descHe="חילוץ מחברים, מילות מפתח, תקציר" techs={['Claude 3.7', 'Zod']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} label={{ en: 'Enrich', he: 'העשרה' }} />
-                <NodeCard type="agent" icon={Database} isHe={isHe} titleEn="JCR & Predict" titleHe="ניבוי וחיזוי" descEn="Fetch JCR metrics & Predict Acceptance %" descHe="הבאת מדדי כתב עת וניבוי אחוזי קבלה" techs={['JCR API', 'GPT-4o']} />
+                <NodeCard type="agent" icon={Database} isHe={isHe} titleEn="JCR & Predict" titleHe="ניבוי וחיזוי" descEn="Fetch JCR metrics & Predict Acceptance %" descHe="הבאת מדדי כתב עת וניבוי אחוזי קבלה" techs={['OpenAlex API', 'GPT-4o']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} label={{ en: 'JSON', he: 'JSON' }} />
                 <NodeCard type="db" icon={Database} isHe={isHe} titleEn="Database" titleHe="מסד נתונים" descEn="Save initial record. Return ID." descHe="שמירת רשומה. החזרת מזהה." techs={['Drizzle ORM', 'Neon Postgres']} />
