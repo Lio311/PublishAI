@@ -1,3 +1,5 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+
 export interface McpServerContext {
   userId?: string;
   requireAuth?: boolean;
@@ -5,13 +7,4 @@ export interface McpServerContext {
   allowedConnectionIds?: number[];
 }
 
-export interface McpTextContent {
-  type: "text";
-  text: string;
-  [key: string]: unknown;
-}
-
-export interface McpToolResult {
-  content: McpTextContent[];
-  isError?: boolean;
-}
+export type McpToolResult = CallToolResult;

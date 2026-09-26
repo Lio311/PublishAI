@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const LiteratureSearchSchema = z.object({
   query: z
-    .string({ required_error: "Parameter 'query' is required." })
+    .string()
     .trim()
     .min(1, "Search query cannot be empty.")
     .max(500, "Search query must not exceed 500 characters."),
@@ -31,7 +31,7 @@ export const LiteratureSearchSchema = z.object({
 
 export const CitationByDoiSchema = z.object({
   doi: z
-    .string({ required_error: "Parameter 'doi' is required." })
+    .string()
     .trim()
     .min(3, "DOI cannot be empty.")
     .max(250, "DOI must not exceed 250 characters.")
@@ -60,12 +60,12 @@ export const OjsSubmissionSchema = z.object({
   siteUrl: z.string().url().optional(),
   apiToken: z.string().min(1).optional(),
   title: z
-    .string({ required_error: "Parameter 'title' is required." })
+    .string()
     .trim()
     .min(1, "Manuscript title cannot be empty.")
     .max(500, "Title must not exceed 500 characters."),
   abstract: z
-    .string({ required_error: "Parameter 'abstract' is required." })
+    .string()
     .trim()
     .min(1, "Manuscript abstract cannot be empty."),
   authors: z
@@ -89,12 +89,12 @@ export const WordPressDraftSchema = z.object({
   username: z.string().min(1).optional(),
   appPassword: z.string().min(1).optional(),
   title: z
-    .string({ required_error: "Parameter 'title' is required." })
+    .string()
     .trim()
     .min(1, "Post title cannot be empty.")
     .max(500, "Title must not exceed 500 characters."),
   content: z
-    .string({ required_error: "Parameter 'content' is required." })
+    .string()
     .trim()
     .min(1, "Post content cannot be empty."),
   excerpt: z.string().optional(),

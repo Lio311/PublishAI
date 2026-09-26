@@ -1,5 +1,3 @@
-import crypto from "crypto";
-
 /**
  * PublishAI CSRF Protection Service
  *
@@ -195,7 +193,8 @@ export function validateCsrf(
 /**
  * Creates an HMAC CSRF token tied to a session ID or user ID.
  */
-export function generateCsrfToken(sessionId: string, secret?: string): string {
+
+export async function generateCsrfToken(sessionId: string, secret?: string): Promise<string> {
   const tokenSecret =
     secret ||
     process.env.AUTH_SECRET ||
@@ -203,23 +202,40 @@ export function generateCsrfToken(sessionId: string, secret?: string): string {
     "fallback-csrf-secret";
   const timestamp = Date.now().toString();
   const data = `${sessionId}:${timestamp}`;
-  const hmac = crypto
-    .createHmac("sha256", tokenSecret)
-    .update(data)
-    .digest("hex");
+
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(tokenSecret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(data));
+  const hmac = Array.from(new Uint8Array(signature))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+
   return `${data}:${hmac}`;
 }
 
-/**
- * Verifies an HMAC CSRF token.
- * Validates cryptographic signature and ensures token is not expired (default: 2 hours).
- */
-export function verifyCsrfToken(
+
+function timingSafeEqualStr(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+export async function verifyCsrfToken(
   token: string,
   sessionId: string,
   secret?: string,
   maxAgeMs = 2 * 60 * 60 * 1000
-): boolean {
+): Promise<boolean> {
   if (!token || typeof token !== "string") return false;
 
   const parts = token.split(":");
@@ -238,17 +254,22 @@ export function verifyCsrfToken(
     process.env.AUTH_SECRET ||
     process.env.NEXTAUTH_SECRET ||
     "fallback-csrf-secret";
-  const expectedHmac = crypto
-    .createHmac("sha256", tokenSecret)
-    .update(`${tokSessionId}:${tokTimestamp}`)
-    .digest("hex");
+    
+  const data = `${tokSessionId}:${tokTimestamp}`;
+  
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(tokenSecret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(data));
+  const expectedHmac = Array.from(new Uint8Array(signature))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 
-  try {
-    return crypto.timingSafeEqual(
-      Buffer.from(tokHmac, "hex"),
-      Buffer.from(expectedHmac, "hex")
-    );
-  } catch {
-    return false;
-  }
+  return timingSafeEqualStr(tokHmac, expectedHmac);
 }

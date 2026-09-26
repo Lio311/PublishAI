@@ -1,3 +1,5 @@
+import { webcrypto } from "crypto";
+Object.defineProperty(global, 'crypto', { value: webcrypto });
 import {
   isSafeRedirect,
   getSafeRedirectUrl,
@@ -195,12 +197,12 @@ describe("Security Service Audit Test Suite", () => {
       expect(validateCsrf(validReq).isAllowed).toBe(true);
     });
 
-    it("generates and verifies HMAC CSRF tokens", () => {
-      const token = generateCsrfToken("user_session_1", "test-secret");
-      expect(verifyCsrfToken(token, "user_session_1", "test-secret")).toBe(true);
-      expect(verifyCsrfToken(token, "different_session", "test-secret")).toBe(false);
-      expect(verifyCsrfToken(token, "user_session_1", "wrong-secret")).toBe(false);
-      expect(verifyCsrfToken("malformed-token", "user_session_1", "test-secret")).toBe(false);
+    it("generates and verifies HMAC CSRF tokens", async () => {
+      const token = await generateCsrfToken("user_session_1", "test-secret");
+      expect(await verifyCsrfToken(token, "user_session_1", "test-secret")).toBe(true);
+      expect(await verifyCsrfToken(token, "different_session", "test-secret")).toBe(false);
+      expect(await verifyCsrfToken(token, "user_session_1", "wrong-secret")).toBe(false);
+      expect(await verifyCsrfToken("malformed-token", "user_session_1", "test-secret")).toBe(false);
     });
   });
 

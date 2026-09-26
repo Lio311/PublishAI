@@ -74,8 +74,9 @@ describe('MCP Servers Security & Functionality Audit', () => {
       const result = formatMcpError(errWithKey);
 
       expect(result.isError).toBe(true);
-      expect(result.content[0].text).not.toContain('sk-ant-api03-abcdefghijklmnopqrstuvwxyz');
-      expect(result.content[0].text).toContain('[REDACTED_ANTHROPIC_KEY]');
+      const text = (result.content[0] as any).text;
+      expect(text).not.toContain('sk-ant-api03-abcdefghijklmnopqrstuvwxyz');
+      expect(text).toContain('[REDACTED_ANTHROPIC_KEY]');
     });
   });
 
