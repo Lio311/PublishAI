@@ -2,7 +2,7 @@
 
 import React from "react";
 import { FileQuestion, Home } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/app/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
 
 export default function NotFound() {
@@ -32,7 +32,7 @@ export default function NotFound() {
 
         <div className="pt-2">
           <Link
-            href={`/${locale}`}
+            href="/"
             className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl transition-all shadow-xs cursor-pointer"
           >
             <Home className="w-4 h-4" />

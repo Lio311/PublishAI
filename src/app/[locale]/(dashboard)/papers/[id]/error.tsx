@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { AlertCircle, RefreshCw, ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/app/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
 
 export default function PaperDetailsError({
@@ -53,7 +53,7 @@ export default function PaperDetailsError({
         </button>
 
         <Link
-          href={`/${locale}/papers`}
+          href="/papers"
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition-all cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4 rtl:rotate-180" />

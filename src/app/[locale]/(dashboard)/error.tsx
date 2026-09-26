@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { AlertTriangle, RefreshCw, LayoutDashboard } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/app/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
 
 export default function DashboardError({
@@ -53,7 +53,7 @@ export default function DashboardError({
         </button>
 
         <Link
-          href={`/${locale}`}
+          href="/"
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition-all cursor-pointer"
         >
           <LayoutDashboard className="w-4 h-4" />

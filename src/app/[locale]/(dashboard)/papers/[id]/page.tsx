@@ -7,7 +7,7 @@ import PaperTabs from "./PaperTabs";
 import { auth } from "@/app/auth";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { checkIsAdmin } from "@/services/auth-utils";
-import Link from "next/link";
+import { Link } from "@/app/i18n/routing";
 import { ArrowLeft, Download, Calendar, Building2, ExternalLink } from "lucide-react";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import SubmissionProgressBar from "@/components/submission/SubmissionProgressBar";
