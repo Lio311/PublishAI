@@ -1,8 +1,11 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
-import { literatureService, CrossrefClient } from '@/services/literature/literatureService';
+import { literatureService } from '@/services/literature/literatureService';
+import { McpServerContext } from './types';
+import { formatMcpError, formatMcpSuccess } from './utils';
+import { CitationByDoiSchema, LiteratureSearchSchema } from './validation';
 
-export function createLiteratureMcpServer() {
+export function createLiteratureMcpServer(context?: McpServerContext) {
   const server = new Server(
     {
       name: "publishai-literature-mcp",
@@ -14,8 +17,6 @@ export function createLiteratureMcpServer() {
       },
     }
   );
-
-  const crossrefClient = new CrossrefClient();
 
   server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
@@ -32,84 +33,86 @@ export function createLiteratureMcpServer() {
               },
               limit: {
                 type: "number",
-                description: "Maximum number of results to return (default: 5)",
-              }
+                description: "Maximum number of results to return (1-50, default: 5)",
+              },
+              offset: {
+                type: "number",
+                description: "Offset index for pagination (default: 0)",
+              },
+              sources: {
+                type: "array",
+                items: {
+                  type: "string",
+                  enum: ["pubmed", "crossref", "semanticscholar"],
+                },
+                description: "Sources to search. Defaults to all.",
+              },
             },
             required: ["query"],
           },
         },
         {
           name: "get_citation_by_doi",
-          description: "Fetch a specific citation by DOI",
+          description: "Fetch a specific citation and paper metadata by DOI.",
           inputSchema: {
             type: "object",
             properties: {
               doi: {
                 type: "string",
-                description: "The DOI of the article",
+                description: "The DOI of the article (e.g., '10.1038/s41586-020-2649-2')",
               },
             },
             required: ["doi"],
           },
-        }
+        },
       ],
     };
   });
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    if (request.params.name === "search_literature") {
-      const query = request.params.arguments?.query as string;
-      const limit = request.params.arguments?.limit as number | undefined;
-      
-      if (!query) {
-        throw new Error("Query is required");
+    try {
+      if (context?.requireAuth && !context.userId && !context.apiKey) {
+        return formatMcpError("Unauthorized: Authentication is required to execute literature MCP tools.");
       }
 
-      try {
-        const results = await literatureService.search(query, { limit });
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(results, null, 2),
-            },
-          ],
-        };
-      } catch (error: any) {
-         return {
-           content: [{ type: "text", text: `Error: ${error.message}`}],
-           isError: true,
-         }
-      }
-    }
-
-    if (request.params.name === "get_citation_by_doi") {
-      const doi = request.params.arguments?.doi as string;
-      
-      if (!doi) {
-        throw new Error("DOI is required");
-      }
-
-      try {
-        const result = await literatureService.getByDoi(doi);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
-      } catch (error: any) {
-        return {
-           content: [{ type: "text", text: `Error: ${error.message}`}],
-           isError: true,
+      if (request.params.name === "search_literature") {
+        const parseResult = LiteratureSearchSchema.safeParse(request.params.arguments || {});
+        if (!parseResult.success) {
+          const issueMsg = parseResult.error.issues.map((i) => i.message).join("; ");
+          return formatMcpError(`Invalid parameters for 'search_literature': ${issueMsg}`);
         }
-      }
-    }
 
-    throw new Error(`Tool not found: ${request.params.name}`);
+        const { query, limit, offset, sources } = parseResult.data;
+        const results = await literatureService.search(query, {
+          limit,
+          offset,
+          sources: sources as any,
+        });
+
+        return formatMcpSuccess(results);
+      }
+
+      if (request.params.name === "get_citation_by_doi") {
+        const parseResult = CitationByDoiSchema.safeParse(request.params.arguments || {});
+        if (!parseResult.success) {
+          const issueMsg = parseResult.error.issues.map((i) => i.message).join("; ");
+          return formatMcpError(`Invalid parameters for 'get_citation_by_doi': ${issueMsg}`);
+        }
+
+        const { doi } = parseResult.data;
+        const result = await literatureService.getByDoi(doi);
+        return formatMcpSuccess(result);
+      }
+
+      return formatMcpError(
+        `Tool not found: '${request.params.name}'. Supported tools: 'search_literature', 'get_citation_by_doi'.`
+      );
+    } catch (error: any) {
+      return formatMcpError(error, "Failed to execute literature tool");
+    }
   });
 
   return server;
 }
+
+export const server = createLiteratureMcpServer();

@@ -80,53 +80,55 @@ export default function DashboardLayout({
 
   // Focus management and focus trapping when mobile menu is open
   useEffect(() => {
-    if (isMobile && isMobileMenuOpen) {
-      // Focus first focusable element inside the drawer
-      const focusables = sidebarRef.current?.querySelectorAll<HTMLElement>(
+    if (!isMobile || !isMobileMenuOpen) {
+      return;
+    }
+    // Focus first focusable element inside the drawer
+    const focusables = sidebarRef.current?.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusables && focusables.length > 0) {
+      focusables[0].focus();
+    }
+
+    // Trap focus inside drawer
+    const handleTabKey = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || !sidebarRef.current) return;
+      const currentFocusables = sidebarRef.current.querySelectorAll<HTMLElement>(
         'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
       );
-      if (focusables && focusables.length > 0) {
-        focusables[0].focus();
-      }
+      if (!currentFocusables || currentFocusables.length === 0) return;
 
-      // Trap focus inside drawer
-      const handleTabKey = (e: KeyboardEvent) => {
-        if (e.key !== "Tab" || !sidebarRef.current) return;
-        const currentFocusables = sidebarRef.current.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        );
-        if (!currentFocusables || currentFocusables.length === 0) return;
+      const first = currentFocusables[0];
+      const last = currentFocusables[currentFocusables.length - 1];
 
-        const first = currentFocusables[0];
-        const last = currentFocusables[currentFocusables.length - 1];
-
-        if (e.shiftKey) {
-          if (document.activeElement === first) {
-            e.preventDefault();
-            last.focus();
-          }
-        } else {
-          if (document.activeElement === last) {
-            e.preventDefault();
-            first.focus();
-          }
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
         }
-      };
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
 
-      window.addEventListener("keydown", handleTabKey);
-      return () => window.removeEventListener("keydown", handleTabKey);
-    }
+    window.addEventListener("keydown", handleTabKey);
+    return () => window.removeEventListener("keydown", handleTabKey);
   }, [isMobile, isMobileMenuOpen]);
 
   // Lock body scroll when mobile menu is open to prevent background scrolling
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
+    if (!isMobileMenuOpen) {
+      return;
     }
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
   }, [isMobileMenuOpen]);
 
   return (

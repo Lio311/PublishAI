@@ -4,9 +4,24 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./src/app/i18n/request.ts');
 
 const nextConfig: NextConfig = {
-  // your existing config
-  // @ts-ignore
+  reactStrictMode: true,
+  poweredByHeader: false,
+  compress: true,
   allowedDevOrigins: ['127.0.0.1', 'localhost', '::1'],
+  serverExternalPackages: ['pdf-parse', 'mammoth', 'xlsx', 'docx', 'sharp', 'pg'],
+  images: {
+    formats: ['image/avif', 'image/webp'],
+  },
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'recharts',
+      'framer-motion',
+      '@tiptap/react',
+      'sonner',
+      '@neondatabase/serverless',
+    ],
+  },
   async headers() {
     return [
       {

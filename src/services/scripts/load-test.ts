@@ -1,30 +1,8 @@
-import { Inngest } from "inngest";
+import { runLoadTest } from "../../scripts/load-test";
+import { runScript } from "../../scripts/env";
 
-/**
- * Load Testing Script
- * Simulates multiple concurrent users uploading documents at the exact same time
- * to ensure Neon DB handles connections and Inngest queues properly.
- */
-async function runLoadTest() {
-  const inngest = new Inngest({ id: "publish-ai" });
-  
-  const concurrentUsers = 5;
-  const events = [];
+export { runLoadTest };
 
-  for (let i = 0; i < concurrentUsers; i++) {
-    events.push({
-      name: "paper/uploaded",
-      data: {
-        paperId: `LOAD-TEST-${i + 1}`,
-        textContent: `[LOAD TEST ${i + 1}] Analyzing load performance.`,
-      },
-    });
-  }
-
-  console.log(`Firing ${concurrentUsers} concurrent uploads...`);
-  await inngest.send(events);
-  
-  console.log("Load test events dispatched successfully.");
+if (require.main === module || process.argv[1]?.endsWith("load-test.ts")) {
+  runScript("load-test", runLoadTest);
 }
-
-runLoadTest().catch(console.error);

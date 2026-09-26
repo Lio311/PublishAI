@@ -1,7 +1,13 @@
+import * as dotenv from 'dotenv';
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import * as baseSchema from './schema';
 import * as embeddingsSchema from './schema/embeddings';
+
+if (!process.env.DATABASE_URL) {
+  dotenv.config({ path: '.env.local' });
+  dotenv.config({ path: '.env' });
+}
 
 const schema = { ...baseSchema, ...embeddingsSchema };
 

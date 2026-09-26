@@ -18,7 +18,7 @@ interface State {
 }
 
 export default class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
-  public state: State = {
+  public override state: State = {
     hasError: false,
     error: null,
     errorInfo: null,
@@ -29,7 +29,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, State> 
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error(`[ErrorBoundary${this.props.name ? `:${this.props.name}` : ""}]`, error, errorInfo);
     this.setState({ errorInfo });
   }
@@ -45,7 +45,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, State> 
     this.setState((prev) => ({ showDetails: !prev.showDetails }));
   };
 
-  public render() {
+  public override render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;

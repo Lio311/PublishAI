@@ -7,9 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:e2e": "playwright test",
-    "seed": "tsx src/services/db/seed.ts"
+    "seed": "tsx src/scripts/seed.ts",
+    "test:qa": "tsx src/scripts/qa-runner.ts",
+    "test:load": "tsx src/scripts/load-test.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.57",
@@ -32,7 +35,6 @@
     "@tiptap/pm": "^3.31.3",
     "@tiptap/react": "^3.31.3",
     "@tiptap/starter-kit": "^3.31.3",
-    "@types/nodemailer": "^8.0.1",
     "@upstash/ratelimit": "^2.1.0",
     "@upstash/redis": "^1.38.4",
     "@vercel/blob": "^2.8.0",
@@ -75,6 +77,7 @@
     "@testing-library/react": "^16.3.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.1",
     "@types/pdf-parse": "^1.1.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
