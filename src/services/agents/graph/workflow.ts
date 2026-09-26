@@ -1,6 +1,6 @@
 import { StateGraph, START, END, MemorySaver } from "@langchain/langgraph";
 import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
-import { Pool } from "pg";
+import { getSafePgPool } from "@/services/db/pool";
 import { PublishAIStateAnnotation, PublishAIState } from "./state";
 import { clarificationNode } from "./nodes/clarificationNode";
 import { planningNode } from "./nodes/planningNode";
@@ -80,12 +80,9 @@ const builder = new StateGraph(PublishAIStateAnnotation)
   .addEdge("coverLetterNode", "updateMemoryNode")
   .addEdge("updateMemoryNode", END);
 
-const checkpointer = process.env.DATABASE_URL
-  ? new PostgresSaver(
-      new Pool({
-        connectionString: process.env.DATABASE_URL,
-      })
-    )
+const pgPool = getSafePgPool();
+const checkpointer = pgPool
+  ? new PostgresSaver(pgPool)
   : new MemorySaver();
 
 export const publishAiGraph = builder.compile({

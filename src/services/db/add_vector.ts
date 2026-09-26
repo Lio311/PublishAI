@@ -1,18 +1,19 @@
-import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
-import * as dotenv from "dotenv";
-dotenv.config({ path: ".env.local" });
+import { validateDatabaseUrl } from "../../scripts/env";
 
-const sql = neon(process.env.DATABASE_URL!);
-const db = drizzle(sql);
-
-async function main() {
+export async function addVectorExtension(): Promise<void> {
+  const databaseUrl = validateDatabaseUrl();
   console.log("Adding vector extension...");
+  const sql = neon(databaseUrl);
   await sql`CREATE EXTENSION IF NOT EXISTS vector;`;
   console.log("Vector extension added successfully!");
-  process.exit(0);
 }
-main().catch((err) => {
-  console.error("Failed to add vector extension", err);
-  process.exit(1);
-});
+
+if (require.main === module || process.argv[1]?.endsWith("add_vector.ts")) {
+  addVectorExtension()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error("Failed to add vector extension", err);
+      process.exit(1);
+    });
+}

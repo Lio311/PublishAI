@@ -121,6 +121,16 @@ export function getClientIp(req: Request): string {
   const cfConnectingIp = req.headers.get("cf-connecting-ip");
   if (cfConnectingIp) return cfConnectingIp.trim();
 
+  const trueClientIp = req.headers.get("true-client-ip");
+  if (trueClientIp) return trueClientIp.trim();
+
+  const xClientIp = req.headers.get("x-client-ip");
+  if (xClientIp) return xClientIp.trim();
+
+  if ("ip" in req && typeof (req as any).ip === "string" && (req as any).ip) {
+    return (req as any).ip.trim();
+  }
+
   return "127.0.0.1";
 }
 

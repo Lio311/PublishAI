@@ -1,19 +1,22 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 import { migrate } from "drizzle-orm/neon-http/migrator";
-import * as dotenv from "dotenv";
-dotenv.config({ path: ".env.local" });
+import { validateDatabaseUrl } from "../../scripts/env";
 
-const sql = neon(process.env.DATABASE_URL!);
-const db = drizzle(sql);
-
-async function main() {
+export async function runMigrations(): Promise<void> {
+  const databaseUrl = validateDatabaseUrl();
   console.log("Running migrations...");
+  const sql = neon(databaseUrl);
+  const db = drizzle(sql);
   await migrate(db, { migrationsFolder: "src/services/db/migrations" });
   console.log("Migrations applied successfully!");
-  process.exit(0);
 }
-main().catch((err) => {
-  console.error("Migration failed", err);
-  process.exit(1);
-});
+
+if (require.main === module || process.argv[1]?.endsWith("migrate.ts")) {
+  runMigrations()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error("Migration failed", err);
+      process.exit(1);
+    });
+}
