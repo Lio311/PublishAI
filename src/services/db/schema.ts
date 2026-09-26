@@ -35,6 +35,7 @@ export const stageEnum = pgEnum("stage", [
   "qa", 
   "verification", 
   "compilation",
+  "cover_letter",
   "rebuttal"
 ]);
 

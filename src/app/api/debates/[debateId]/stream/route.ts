@@ -35,7 +35,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ deba
           seenIds.add(msg.id);
         }
 
-        if (debate.status === "completed" || debate.status === "failed") {
+        if (debate.status === "consensus_reached" || debate.status === "failed") {
           isClosed = true;
           controller.close();
           break;

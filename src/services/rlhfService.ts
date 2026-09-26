@@ -27,14 +27,14 @@ export async function logFeedbackOutcome(
     orderBy: [desc(paperVersions.versionNumber)]
   });
 
-  if (!connection || !latestVersion) {
+  if (!connection || !connection.journalId || !latestVersion) {
     throw new Error("Could not find related connection or paper version");
   }
 
   await db.insert(rlhfFeedbackLogs).values({
     submissionId,
     paperVersionId: latestVersion.id,
-    journalId: connection.journalId,
+    journalId: connection.journalId as number,
     outcome,
     reviewerComments,
     correctionData: {}
