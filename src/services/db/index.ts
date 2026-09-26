@@ -1,13 +1,7 @@
-import * as dotenv from 'dotenv';
 import { neon, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import * as baseSchema from './schema';
 import * as embeddingsSchema from './schema/embeddings';
-
-if (!process.env.DATABASE_URL) {
-  dotenv.config({ path: '.env.local' });
-  dotenv.config({ path: '.env' });
-}
 
 export const schema = { ...baseSchema, ...embeddingsSchema };
 export type AppSchema = typeof schema;
@@ -140,4 +134,3 @@ export const db: AppDb = globalForDb.__publish_ai_db__!;
 export * from './schema';
 export * from './schema/embeddings';
 export * from './zod';
-export * from './pool';
