@@ -90,7 +90,8 @@ const techColors: Record<string, string> = {
   'Sharp': 'bg-pink-100 text-pink-800 border-pink-300',
   'Pandas': 'bg-blue-100 text-blue-800 border-blue-300',
   'Scipy': 'bg-indigo-100 text-indigo-800 border-indigo-300',
-
+  'Rate Limiter': 'bg-rose-100 text-rose-800 border-rose-300',
+  'Environment Validator': 'bg-teal-100 text-teal-800 border-teal-300',
 };
 
 // ═══════════════════════════════════════════
@@ -463,6 +464,10 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
               
               <VerticalFlowArrow isHe={isHe} length="h-8" />
               
+              <NodeCard type="logic" icon={ShieldCheck} isHe={isHe} titleEn="Security Gateway" titleHe="שער אבטחה" descEn="Strict Environment Validation (No Fallbacks) & CSRF Web Crypto" descHe="אימות סביבה קפדני (ללא Fallbacks) ואימות CSRF Web Crypto" techs={['Environment Validator', 'Next.js 16']} />
+              
+              <VerticalFlowArrow isHe={isHe} length="h-8" />
+              
               <NodeCard type="logic" icon={Key} isDiamond isHe={isHe} titleEn="Auth Given?" titleHe="הרשאות הוענקו?" descEn="Has user linked API / Email creds?" descHe="האם המשתמש העניק הרשאות API/Email?" />
               
               <SplitFork isHe={isHe} yesLabel={isHe ? 'כן (פענוח)' : 'Yes (Decrypt)'} noLabel={isHe ? 'לא (דילוג)' : 'No (Skip)'} />
@@ -497,7 +502,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
               </div>
               <div className="p-6 md:p-8 flex flex-col items-center justify-between h-[85%]">
                 <div className="flex flex-col lg:flex-row items-center justify-between w-full mb-2">
-                  <NodeCard type="rpa" icon={Globe} isHe={isHe} titleEn="WordPress/OJS API" titleHe="WordPress / OJS" descEn="Execute direct POST to REST APIs" descHe="ביצוע קריאות REST API ישירות" techs={['Next.js 16', 'NextAuth.js']} />
+                  <NodeCard type="rpa" icon={Globe} isHe={isHe} titleEn="WordPress/OJS API" titleHe="WordPress / OJS" descEn="Execute direct POST to REST APIs" descHe="ביצוע קריאות REST API ישירות" techs={['Next.js 16', 'NextAuth.js', 'Rate Limiter']} />
                   <VerticalFlowArrow isHe={isHe} length="h-8 lg:hidden" />
                   <FlowArrow isHe={isHe} />
                   <NodeCard type="success" icon={CheckCircle2} isHe={isHe} titleEn="Success ✓" titleHe="הצלחה ✓" descEn="Submission complete" descHe="ההגשה הושלמה" techs={['Neon Postgres']} />
@@ -506,7 +511,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <OrDivider isHe={isHe} />
                 
                 <div className="flex flex-col lg:flex-row items-center justify-between w-full mb-2 mt-2">
-                  <NodeCard type="rpa" icon={Globe} isHe={isHe} titleEn="EditorialManager API" titleHe="EditorialManager API" descEn="Execute API stub requests securely" descHe="ביצוע קריאות API מאובטחות" techs={['Next.js 16', 'NextAuth.js']} />
+                  <NodeCard type="rpa" icon={Globe} isHe={isHe} titleEn="EditorialManager API" titleHe="EditorialManager API" descEn="Execute API stub requests securely" descHe="ביצוע קריאות API מאובטחות" techs={['Next.js 16', 'NextAuth.js', 'Rate Limiter']} />
                   <VerticalFlowArrow isHe={isHe} length="h-8 lg:hidden" />
                   <FlowArrow isHe={isHe} />
                   <NodeCard type="success" icon={CheckCircle2} isHe={isHe} titleEn="Success ✓" titleHe="הצלחה ✓" descEn="Submission complete" descHe="ההגשה הושלמה" techs={['Neon Postgres']} />
@@ -515,7 +520,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <OrDivider isHe={isHe} />
                 
                 <div className="flex flex-col lg:flex-row items-center justify-between w-full mt-2">
-                  <NodeCard type="rpa" icon={Mail} isHe={isHe} titleEn="EmailAdapter" titleHe="מתאם אימייל" descEn="Multipart MIME → SMTP → Editor" descHe="שליחת מייל עם חבילת הגשה ישירות לעורך" techs={['Nodemailer']} />
+                  <NodeCard type="rpa" icon={Mail} isHe={isHe} titleEn="EmailAdapter" titleHe="מתאם אימייל" descEn="Multipart MIME → SMTP → Editor" descHe="שליחת מייל עם חבילת הגשה ישירות לעורך" techs={['Nodemailer', 'Rate Limiter']} />
                   <VerticalFlowArrow isHe={isHe} length="h-8 lg:hidden" />
                   <FlowArrow isHe={isHe} />
                   <NodeCard type="success" icon={CheckCircle2} isHe={isHe} titleEn="Success ✓" titleHe="הצלחה ✓" descEn="Submission complete" descHe="ההגשה הושלמה" techs={['Neon Postgres']} />
@@ -662,11 +667,11 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             </div>
             <div className="p-6 md:p-10 flex flex-col items-center w-full relative z-10">
               <div className="flex flex-col lg:flex-row justify-center items-center w-full relative gap-8 lg:gap-16">
-                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Citation Sync" titleHe="סנכרון ציטוטים" descEn="cron: '0 0 * * *' (Midnight)" descHe="עדכון ציטוטים מ-Semantic Scholar (חצות)" techs={['Inngest', 'Semantic Scholar']} />
+                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Citation Sync" titleHe="סנכרון ציטוטים" descEn="cron: '0 0 * * *' (Midnight) — Isolated Error Boundaries & Retries" descHe="עדכון מ-Semantic Scholar (חצות) — גבולות שגיאה מבודדים וניסיונות חוזרים (Isolated Error Boundaries & Retries)" techs={['Inngest', 'Semantic Scholar']} />
                 
-                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="RLHF Dataset" titleHe="איסוף נתוני RLHF" descEn="cron: '0 0 * * 0' (Sundays)" descHe="איסוף נתוני אימון שבועיים (ראשון בחצות)" techs={['Inngest', 'Neon Postgres']} />
+                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="RLHF Dataset" titleHe="איסוף נתוני RLHF" descEn="cron: '0 0 * * 0' (Sundays) — Isolated Error Boundaries & Retries" descHe="איסוף נתוני אימון (ראשון) — גבולות שגיאה מבודדים וניסיונות חוזרים (Isolated Error Boundaries & Retries)" techs={['Inngest', 'Neon Postgres']} />
                 
-                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Digest Email" titleHe="סיכום שבועי" descEn="cron: '0 9 * * 1' (Mondays)" descHe="שליחת עדכונים שבועית (שני בבוקר)" techs={['Inngest', 'Nodemailer']} />
+                <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Digest Email" titleHe="סיכום שבועי" descEn="cron: '0 9 * * 1' (Mondays) — Isolated Error Boundaries & Retries" descHe="שליחת עדכונים שבועית (שני) — גבולות שגיאה מבודדים וניסיונות חוזרים (Isolated Error Boundaries & Retries)" techs={['Inngest', 'Nodemailer']} />
               </div>
             </div>
           </div>

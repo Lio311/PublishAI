@@ -4,10 +4,11 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocale } from "next-intl";
 import { 
-  Upload, Search, FileText, BarChart2, Eye, MessageSquare, 
+  Upload, Search, FileText, BarChart2, MessageSquare, 
   CheckCircle, Edit3, Save, ShieldCheck, Download, 
-  Cpu, Database, Layers, X, Info, ArrowRight, BookOpen, Scissors, ListChecks, RefreshCw, GitMerge, FileCheck, Code
-, Terminal, Share2, Globe} from "lucide-react";
+  Cpu, Database, Layers, X, Info, ArrowRight, BookOpen, Scissors, ListChecks, GitMerge, FileCheck, Code,
+  Terminal, Share2, Globe 
+} from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 
 // Tools Dictionary
@@ -69,8 +70,8 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     he: "מסגרת לאבטחת AI. בודקת ומוודאת את התוצרים כדי למנוע הזיות (Hallucinations), תשובות 'רובוטיות', או יצירת קוד זדוני."
   },
   "MCP": {
-    en: "Model Context Protocol. Standardizes how AI agents securely access external tools like PubMed and Semantic Scholar databases.",
-    he: "פרוטוקול גישה למודלים. מספק תקן מאובטח שדרכו סוכני ה-AI מתקשרים עם כלים חיצונים כמו מאגרי PubMed ו-Semantic Scholar."
+    en: "Model Context Protocol. Standardizes how AI agents securely access external tools like PubMed and Semantic Scholar databases, featuring built-in SSRF protection and API key authentication.",
+    he: "פרוטוקול גישה למודלים (MCP). מספק תקן מאובטח שדרכו סוכני ה-AI מתקשרים עם כלים חיצונים כמו מאגרי PubMed ו-Semantic Scholar, הכולל הגנת SSRF מובנית ואימות מבוסס מפתח API."
   },
   "Vision AI": {
     en: "Multimodal AI capability used to extract data points, trends, and axes from charts, graphs, and visual figures in the paper.",
@@ -89,8 +90,8 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     he: "עורכי טקסט וקוד מתקדמים המשולבים בממשק המשתמש, המאפשרים למחבר לעבור על התיקונים של ה-AI בצורה נוחה (Diff)."
   },
   "Neon Postgres": {
-    en: "Serverless Postgres database that scales instantly. Stores users, papers, reviews, and vector embeddings reliably.",
-    he: "מסד נתונים Serverless מבוסס Postgres. שומר את נתוני המשתמשים, המאמרים, הביקורות והוקטורים בצורה אמינה ומהירה."
+    en: "Serverless Postgres database that scales instantly, utilizing a resilient Singleton Connection Pool pattern to prevent connection starvation in serverless runtimes. Stores users, papers, reviews, and vector embeddings reliably.",
+    he: "מסד נתונים Serverless מבוסס Postgres הפועל בתבנית מאגר חיבורים אחוד (Singleton Connection Pool) למניעת מיצוי חיבורים בריצת Serverless. שומר את נתוני המשתמשים, המאמרים, הביקורות והוקטורים בצורה אמינה ומהירה."
   },
   "react-force-graph-2d": {
     en: "Visualization library rendering the final citation map, showing how the revised paper connects to existing literature.",
@@ -203,6 +204,14 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
   "Jest": {
     en: "Delightful JavaScript Testing Framework with a focus on simplicity, used for unit testing core agent logic.",
     he: "סביבת בדיקות (טסטים) ל-JavaScript המשמשת לווידוא הלוגיקה והאמינות של סוכני ה-AI והמערכת."
+  },
+  "Rate Limiter": {
+    en: "In-memory sliding window rate limiter designed for API route protection, throttling excessive requests and mitigating abuse per IP without external dependencies.",
+    he: "מגביל קצב בקשות (Rate Limiter) בשיטת חלון מתגלגל בזיכרון להגנה על נתיבי API, מניעת עומסי תעבורה וחסימת שימוש לרעה לפי כתובת IP ללא תלות חיצונית."
+  },
+  "Environment Validator": {
+    en: "Strict startup configuration validator that verifies required environment variables and database credentials without insecure fallbacks, preventing runtime misconfigurations.",
+    he: "רכיב אימות קונפיגורציה קפדני בעליית המערכת המוודא תקינות משתני סביבה ומחרוזות חיבור למסד הנתונים ללא ערכי ברירת מחדל מדומים (Fallbacks), למניעת כשלים בזמן ריצה."
   }
 };
 
@@ -546,10 +555,10 @@ id: 9, phase: 1,
     id: 25, phase: 4,
     title: { en: "Security & Authentication", he: "אבטחה והזדהות" },
     description: { 
-      en: "Global security layers ensuring protected access to manuscripts and user accounts.",
-      he: "שכבות אבטחה גלובליות המבטיחות גישה מוגנת למאמרים ולחשבונות המשתמשים."
+      en: "Global defense-in-depth security layer featuring Web Crypto API CSRF protection, in-memory Sliding Window Rate Limiting, and strict Secrets management without fallbacks to protect manuscripts and accounts.",
+      he: "שכבות אבטחה היקפיות (Defense-in-depth) הכוללות הגנת CSRF מבוססת Web Crypto API, הגבלת קצב בקשות בחלון מתגלגל (Sliding Window Rate Limiting) וניהול סודות קפדני (Secrets management) ללא ערכי ברירת מחדל לא מאובטחים להגנה מלאה על מאמרים וחשבונות."
     },
-    icon: ShieldCheck, tools: ["NextAuth.js", "Upstash Redis", "Neon Postgres"],
+    icon: ShieldCheck, tools: ["NextAuth.js", "Upstash Redis", "Neon Postgres", "Rate Limiter", "Environment Validator"],
     color: "bg-slate-100 text-slate-700 border-slate-200"
   },
   {
