@@ -1,5 +1,6 @@
 import { BaseNavigator } from './base-navigator';
 import { WorkflowResult } from '../types';
+import { analyzeScreenshot } from '../vision-ai-fallback';
 
 export class GenericNavigator extends BaseNavigator {
   async findAndClickWithVisionFallback(selectors: string, description: string): Promise<void> {
@@ -10,12 +11,28 @@ export class GenericNavigator extends BaseNavigator {
       console.log(`[RPA] DOM selectors failed for '${description}'. Engaging Vision AI Fallback...`);
       const screenshotBuffer = await this.page.screenshot();
       
-      // Placeholder: Send screenshotBuffer to Claude 3.5 Sonnet / gpt-4o vision model
-      // Prompt: "Find the ${description} button/link on this page and return its [X, Y] coordinates."
-      const mockVisionApiResponse = { x: 450, y: 320 }; // Example mocked response
+      const pageTitle = await this.page.title();
+      const pageUrl = this.page.url();
       
-      console.log(`[RPA] Vision model returned [X, Y]: [${mockVisionApiResponse.x}, ${mockVisionApiResponse.y}]. Clicking...`);
-      await this.page.mouse.click(mockVisionApiResponse.x, mockVisionApiResponse.y);
+      const action = await analyzeScreenshot(
+        screenshotBuffer,
+        `Find and click the '${description}' element.`,
+        `Page: ${pageTitle} | URL: ${pageUrl}`
+      );
+      
+      if (action.action === 'click') {
+        if (action.selector) {
+          console.log(`[RPA] Vision model returned selector: ${action.selector}. Clicking...`);
+          await this.page.click(action.selector);
+        } else if (action.coordinates) {
+          console.log(`[RPA] Vision model returned [X, Y]: [${action.coordinates.x}, ${action.coordinates.y}]. Clicking...`);
+          await this.page.mouse.click(action.coordinates.x, action.coordinates.y);
+        } else {
+          console.log(`[RPA] Vision AI returned click action but no selector or coordinates. Cannot proceed.`);
+        }
+      } else {
+        console.log(`[RPA] Vision AI decided not to click. Action: ${action.action}, Reasoning: ${action.reasoning}`);
+      }
     }
   }
 
@@ -70,8 +87,16 @@ export class GenericNavigator extends BaseNavigator {
   async uploadFiles(): Promise<void> {
     const fileInput = await this.page.$('input[type="file"]');
     if (fileInput && this.config.submissionPayload.attachments?.length > 0) {
-      // For now, log the intent — actual file upload requires temp file creation
       console.log(`[RPA] ${this.config.submissionPayload.attachments.length} files ready for upload`);
+      
+      const filePayloads = this.config.submissionPayload.attachments.map(att => ({
+        name: att.filename,
+        mimeType: att.mimeType,
+        buffer: att.buffer,
+      }));
+      
+      await fileInput.setInputFiles(filePayloads);
+      console.log(`[RPA] Successfully set files on input`);
       this.markStep('upload-files');
     }
     await this.screenshots.capture(this.page, 'files-uploaded');

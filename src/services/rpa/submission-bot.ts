@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium, BrowserContextOptions } from 'playwright';
 import { GenericNavigator } from './portal-navigators/generic-navigator';
 import { WorkflowResult, NavigatorConfig } from './types';
 import { SubmissionPayload } from '@/services/submission/connection-types';
@@ -19,13 +19,26 @@ export interface ConnectionDetails {
 export async function runSubmissionWorkflow(
   paperId: string,
   connectionDetails?: ConnectionDetails,
-  payload?: Partial<SubmissionPayload>
+  payload?: Partial<SubmissionPayload>,
+  savedStorageState?: string
 ): Promise<WorkflowResult> {
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
+  
+  const contextOptions: BrowserContextOptions = {
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     viewport: { width: 1280, height: 800 },
-  });
+  };
+
+  if (savedStorageState) {
+    try {
+      contextOptions.storageState = JSON.parse(savedStorageState);
+      console.log(`[RPA] Restored browser storage state for resume.`);
+    } catch (e) {
+      console.warn(`[RPA] Failed to parse saved storage state, starting fresh.`);
+    }
+  }
+
+  const context = await browser.newContext(contextOptions);
 
   try {
     const page = await context.newPage();
@@ -56,12 +69,23 @@ export async function runSubmissionWorkflow(
 
     const navigator = new GenericNavigator(page, config);
 
+    // If resuming from state, maybe skip login if cookies exist.
+    // However, we rely on steps completed to know where to jump.
+    // For now, run sequentially, and navigator steps should check if already on the right page.
     await navigator.login();
     await navigator.navigateToNewSubmission();
     await navigator.fillForm();
     await navigator.uploadFiles();
 
-    return await navigator.submit();
+    const result = await navigator.submit();
+
+    // If intervention is required, capture the session state before the browser closes
+    if (result.status === 'requires_2fa' || result.status === 'requires_captcha') {
+      const state = await context.storageState();
+      result.storageState = JSON.stringify(state);
+    }
+
+    return result;
 
   } catch (error) {
     return {
@@ -70,6 +94,7 @@ export async function runSubmissionWorkflow(
       stepsCompleted: [],
     };
   } finally {
+    // Browser closes cleanly, but session is preserved in storageState if needed
     await browser.close();
   }
 }

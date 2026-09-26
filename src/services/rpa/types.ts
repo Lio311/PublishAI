@@ -7,6 +7,7 @@ export interface WorkflowResult {
   trackingId?: string;
   message?: string;
   stepsCompleted?: string[];
+  storageState?: string; // Serialized JSON string of cookies and local storage
 }
 
 export interface NavigatorConfig {
