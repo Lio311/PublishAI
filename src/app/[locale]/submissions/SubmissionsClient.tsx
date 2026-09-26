@@ -9,12 +9,14 @@ import ReviewResponseInterface, {
 } from "@/components/ReviewResponseInterface";
 import { SubmissionWizard } from "@/components/submission/SubmissionWizard";
 import { Send, MessageSquare, ArrowLeft, ExternalLink, Sparkles, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface SubmissionsClientProps {
   locale: string;
 }
 
 export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
+  const t = useTranslations("Submissions");
   const isHe = locale === "he";
   const [activeTab, setActiveTab] = useState<"submissions" | "reviews">("submissions");
   const [submissions, setSubmissions] = useState<SubmissionItem[]>([]);
@@ -93,7 +95,7 @@ export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
             }`}
           >
             <Send className="w-4 h-4 text-sky-600" />
-            <span>{isHe ? "לוח הגשות" : "Submissions Tracker"}</span>
+            <span>{t("title")}</span>
             <span className="px-2 py-0.5 rounded-full text-xs bg-slate-200 text-slate-700">
               {submissions.length}
             </span>
@@ -108,7 +110,7 @@ export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
             }`}
           >
             <MessageSquare className="w-4 h-4 text-amber-600" />
-            <span>{isHe ? "מענה לביקורת עמיתים" : "Reviewer Rebuttal & Responses"}</span>
+            <span>{t("reviewsTab")}</span>
           </button>
         </div>
 
@@ -117,8 +119,8 @@ export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
             onClick={() => setActiveTab("submissions")}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-sky-600 transition-colors cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>{isHe ? "חזרה ללוח ההגשות" : "Back to Submissions"}</span>
+            <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+            <span>{t("backToSubmissions")}</span>
           </button>
         )}
       </div>

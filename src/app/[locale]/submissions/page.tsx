@@ -1,6 +1,7 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { checkIsAdmin } from "@/services/auth-utils";
 import SubmissionsClient from "./SubmissionsClient";
+import { setRequestLocale } from "next-intl/server";
 
 export default async function SubmissionsPage({
   params,
@@ -9,7 +10,8 @@ export default async function SubmissionsPage({
 }) {
   const resolvedParams = await params;
   const locale = resolvedParams?.locale || "en";
-  const isAdmin = false;
+  setRequestLocale(locale);
+  const isAdmin = await checkIsAdmin();
 
   return (
     <DashboardLayout isAdmin={isAdmin}>

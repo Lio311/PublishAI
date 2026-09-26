@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import NetworkGraph from '@/components/analytics/NetworkGraph';
 import {
   Brain,
@@ -50,6 +50,7 @@ interface AnalyticsData {
 
 export default function AnalyticsDashboard() {
   const locale = useLocale();
+  const t = useTranslations("Analytics");
   const isHe = locale === 'he';
 
   const [data, setData] = useState<AnalyticsData | null>(null);
@@ -85,7 +86,7 @@ export default function AnalyticsDashboard() {
   if (error) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
-        <p className="text-red-500">{isHe ? 'שגיאה בטעינת נתונים' : 'Error loading data'}: {error}</p>
+        <p className="text-red-500">{t("errorLoading")}: {error}</p>
       </div>
     );
   }
@@ -95,23 +96,21 @@ export default function AnalyticsDashboard() {
       <div className="flex flex-col h-[50vh] items-center justify-center space-y-4">
         <Brain className="h-16 w-16 text-gray-300" />
         <p className="text-gray-500 text-lg text-center max-w-md">
-          {isHe 
-            ? 'אין נתונים עדיין. עבד מאמר כדי לאכלס את גרף הידע.' 
-            : 'No data yet. Process a paper to populate the knowledge graph.'}
+          {t("empty")}
         </p>
       </div>
     );
   }
 
   return (
-    <div className={`space-y-8 pb-12 ${isHe ? 'rtl' : 'ltr'}`}>
+    <div className="space-y-8 pb-12" dir={isHe ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 text-white shadow-lg">
         <h1 className="text-3xl font-bold">
-          {isHe ? 'לוח ניתוח GraphRAG' : 'GraphRAG Analytics Dashboard'}
+          {t("title")}
         </h1>
         <p className="mt-2 text-blue-100">
-          {isHe ? 'תובנות מגרף הידע שלך' : 'Insights from your knowledge graph'}
+          {t("subtitle")}
         </p>
       </div>
 
@@ -120,22 +119,22 @@ export default function AnalyticsDashboard() {
         <div className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center">
           <Brain className="h-8 w-8 text-blue-500 mb-3" />
           <div className="text-4xl font-bold text-gray-800">{data.summary.totalEntities}</div>
-          <div className="text-sm text-gray-500 mt-1">{isHe ? 'סך הכל ישויות' : 'Total Entities'}</div>
+          <div className="text-sm text-gray-500 mt-1">{t("totalEntities")}</div>
         </div>
         <div className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center">
           <Share2 className="h-8 w-8 text-emerald-500 mb-3" />
           <div className="text-4xl font-bold text-gray-800">{data.summary.totalRelationships}</div>
-          <div className="text-sm text-gray-500 mt-1">{isHe ? 'סך הכל קשרים' : 'Total Relationships'}</div>
+          <div className="text-sm text-gray-500 mt-1">{t("totalRelationships")}</div>
         </div>
         <div className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center">
           <Layers className="h-8 w-8 text-amber-500 mb-3" />
           <div className="text-2xl font-bold text-gray-800 capitalize truncate w-full">{data.summary.mostCommonEntityType || '-'}</div>
-          <div className="text-sm text-gray-500 mt-1">{isHe ? 'סוג ישות נפוץ ביותר' : 'Most Common Entity Type'}</div>
+          <div className="text-sm text-gray-500 mt-1">{t("mostCommonEntity")}</div>
         </div>
         <div className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center">
           <ArrowLeftRight className="h-8 w-8 text-red-500 mb-3" />
           <div className="text-2xl font-bold text-gray-800 capitalize truncate w-full">{data.summary.mostCommonRelationship || '-'}</div>
-          <div className="text-sm text-gray-500 mt-1">{isHe ? 'קשר נפוץ ביותר' : 'Most Common Relationship'}</div>
+          <div className="text-sm text-gray-500 mt-1">{t("mostCommonRelationship")}</div>
         </div>
       </div>
 
@@ -143,7 +142,7 @@ export default function AnalyticsDashboard() {
         {/* Section B: Entity Distribution */}
         <div className="bg-white rounded-xl shadow-md p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-6">
-            {isHe ? 'התפלגות ישויות' : 'Entity Distribution'}
+            {t("entityDistribution")}
           </h2>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -175,7 +174,7 @@ export default function AnalyticsDashboard() {
         {/* Section C: Relationship Distribution */}
         <div className="bg-white rounded-xl shadow-md p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-6">
-            {isHe ? 'התפלגות קשרים' : 'Relationship Distribution'}
+            {t("relationshipDistribution")}
           </h2>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -206,25 +205,16 @@ export default function AnalyticsDashboard() {
       {/* Section D: Top Connected Entities */}
       <div className="bg-white rounded-xl shadow-md p-6 overflow-hidden">
         <h2 className="text-xl font-bold text-gray-800 mb-6">
-      {/* Section E: Network Graph */}
-      <div className="bg-white rounded-xl shadow-md p-6 overflow-hidden">
-        <h2 className="text-xl font-bold text-gray-800 mb-6">
-          {isHe ? 'גרף קשרים' : 'Network Graph'}
-        </h2>
-        <NetworkGraph />
-      </div>
-
-
-          {isHe ? 'הישויות המקושרות ביותר' : 'Top Connected Entities'}
+          {t("topEntities")}
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className={`pb-3 font-semibold text-gray-600 ${isHe ? 'text-right pr-4' : 'text-left pl-4'}`}>#</th>
-                <th className={`pb-3 font-semibold text-gray-600 ${isHe ? 'text-right' : 'text-left'}`}>{isHe ? 'שם' : 'Name'}</th>
-                <th className={`pb-3 font-semibold text-gray-600 ${isHe ? 'text-right' : 'text-left'}`}>{isHe ? 'סוג' : 'Type'}</th>
-                <th className={`pb-3 font-semibold text-gray-600 ${isHe ? 'text-right' : 'text-left'}`}>{isHe ? 'קשרים' : 'Connections'}</th>
+                <th className={`pb-3 font-semibold text-gray-600 ${isHe ? 'text-right pr-4' : 'text-left pl-4'}`}>{t("headers.number")}</th>
+                <th className={`pb-3 font-semibold text-gray-600 ${isHe ? 'text-right' : 'text-left'}`}>{t("headers.name")}</th>
+                <th className={`pb-3 font-semibold text-gray-600 ${isHe ? 'text-right' : 'text-left'}`}>{t("headers.type")}</th>
+                <th className={`pb-3 font-semibold text-gray-600 ${isHe ? 'text-right' : 'text-left'}`}>{t("headers.connections")}</th>
               </tr>
             </thead>
             <tbody>
@@ -246,6 +236,14 @@ export default function AnalyticsDashboard() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Section E: Network Graph */}
+      <div className="bg-white rounded-xl shadow-md p-6 overflow-hidden">
+        <h2 className="text-xl font-bold text-gray-800 mb-6">
+          {t("networkGraph")}
+        </h2>
+        <NetworkGraph />
       </div>
     </div>
   );
