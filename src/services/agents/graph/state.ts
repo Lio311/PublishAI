@@ -33,8 +33,24 @@ export const PublishAIStateAnnotation = Annotation.Root({
   }),
   previousStageOutputs: Annotation<Map<Stage, AgentResult>>({
     reducer: (x, y) => {
-      const newMap = new Map(x);
-      y.forEach((value, key) => newMap.set(key, value));
+      let newMap: Map<Stage, AgentResult>;
+      if (x instanceof Map) {
+        newMap = new Map(x);
+      } else if (x && typeof x === "object") {
+        newMap = new Map(Object.entries(x) as [Stage, AgentResult][]);
+      } else {
+        newMap = new Map<Stage, AgentResult>();
+      }
+
+      if (!y) return newMap;
+
+      if (y instanceof Map) {
+        y.forEach((value, key) => newMap.set(key, value));
+      } else if (typeof y === "object") {
+        Object.entries(y).forEach(([key, value]) => {
+          newMap.set(key as Stage, value as AgentResult);
+        });
+      }
       return newMap;
     },
     default: () => new Map<Stage, AgentResult>(),
@@ -77,6 +93,10 @@ export const PublishAIStateAnnotation = Annotation.Root({
   qa: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
   verification: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
   coverLetter: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
+  journalRules: Annotation<Record<string, any>>({
+    reducer: (x, y) => y ?? x,
+    default: () => ({}),
+  }),
   knowledgeContext: Annotation<string>({
     reducer: (x, y) => x + (y ? "\n" + y : ""),
     default: () => "",
@@ -84,9 +104,17 @@ export const PublishAIStateAnnotation = Annotation.Root({
   rebuttal: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
   dataSchema: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
   dataWarnings: Annotation<any[]>({
-    reducer: (x, y) => (y ? [...x, ...y] : x),
+    reducer: (x, y) => (y ? (Array.isArray(y) ? [...x, ...y] : [...x, y]) : x),
     default: () => [],
   }),
 });
 
 export type PublishAIState = typeof PublishAIStateAnnotation.State;
+
+export function getPreviousStageOutput(state: PublishAIState, stage: Stage): AgentResult | undefined {
+  if (!state.previousStageOutputs) return undefined;
+  if (state.previousStageOutputs instanceof Map) {
+    return state.previousStageOutputs.get(stage);
+  }
+  return (state.previousStageOutputs as Record<string, AgentResult>)?.[stage];
+}

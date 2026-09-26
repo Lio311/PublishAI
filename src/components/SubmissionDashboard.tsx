@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Send,
   CheckCircle2,
@@ -65,9 +65,9 @@ export interface SubmissionDashboardProps {
   onNavigateToReviews?: (submission: SubmissionItem) => void;
   onNewSubmission?: () => void;
   onRetrySubmission?: (id: string | number) => void;
+  onRefresh?: () => void | Promise<void>;
   locale?: string;
 }
-
 
 export default function SubmissionDashboard({
   submissions: initialSubmissions = [],
@@ -75,53 +75,126 @@ export default function SubmissionDashboard({
   onNavigateToReviews,
   onNewSubmission,
   onRetrySubmission,
+  onRefresh,
   locale = "en",
 }: SubmissionDashboardProps) {
   const isHe = locale === "he";
   const [submissionsList, setSubmissionsList] = useState<SubmissionItem[]>(initialSubmissions);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [selectedItem, setSelectedItem] = useState<SubmissionItem | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [retryingId, setRetryingId] = useState<string | number | null>(null);
+  const copyTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Sync with initialSubmissions if prop updates
+  useEffect(() => {
+    setSubmissionsList(initialSubmissions);
+  }, [initialSubmissions]);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    };
+  }, []);
+
+  // Handle modal escape key
+  useEffect(() => {
+    if (!selectedItem) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedItem(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedItem]);
 
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+    if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    copyTimeoutRef.current = setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleRetry = (e: React.MouseEvent, item: SubmissionItem) => {
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      if (onRefresh) {
+        await onRefresh();
+      } else {
+        const res = await fetch("/api/submissions");
+        if (res.ok) {
+          const data = await res.json();
+          const list = Array.isArray(data) ? data : data?.submissions || [];
+          const mapped: SubmissionItem[] = list.map((s: any) => ({
+            id: s.id,
+            paperId: s.paperId,
+            title: s.submittedTitle || s.paperTitle || s.title || `Paper #${s.paperId}`,
+            journalName: s.journalName || s.siteUrl || "Connected Journal",
+            platform: s.platform || "Direct Submission",
+            status: s.status || "submitted",
+            publishMode: s.publishMode || "publish",
+            submittedAt: s.submittedAt || s.createdAt,
+            updatedAt: s.updatedAt,
+            remotePostUrl: s.remotePostUrl,
+            confirmationId: s.confirmationId || (s.remotePostId ? `CONF-${s.remotePostId}` : undefined),
+            errorLog: s.errorLog,
+          }));
+          setSubmissionsList(mapped);
+        }
+      }
+    } catch (err) {
+      console.error("Refresh error:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleRetry = async (e: React.MouseEvent, item: SubmissionItem) => {
     e.stopPropagation();
     setRetryingId(item.id);
     if (onRetrySubmission) {
       onRetrySubmission(item.id);
     }
-    setTimeout(() => {
-      setSubmissionsList((prev) =>
-        prev.map((sub) =>
-          sub.id === item.id
-            ? { ...sub, status: "submitting", attemptCount: (sub.attemptCount || 0) + 1, errorLog: undefined }
-            : sub
-        )
-      );
-      setRetryingId(null);
-      // Simulate submission success after 2 seconds
-      setTimeout(() => {
+
+    try {
+      const res = await fetch(`/api/submissions/${item.id}/submit`, { method: "POST" });
+      if (res.ok) {
         setSubmissionsList((prev) =>
           prev.map((sub) =>
             sub.id === item.id
-              ? {
-                  ...sub,
-                  status: "submitted",
-                  confirmationId: `CONF-${Math.floor(100000 + Math.random() * 900000)}`,
-                  remotePostUrl: "https://journal.example.org/submissions/track",
-                }
+              ? { ...sub, status: "submitting", attemptCount: (sub.attemptCount || 0) + 1, errorLog: undefined }
               : sub
           )
         );
-      }, 2000);
-    }, 1200);
+      } else {
+        let errMsg = "Retry failed";
+        try {
+          const data = await res.json();
+          if (data?.error) errMsg = data.error;
+        } catch {}
+        setSubmissionsList((prev) =>
+          prev.map((sub) =>
+            sub.id === item.id
+              ? { ...sub, errorLog: errMsg }
+              : sub
+          )
+        );
+      }
+    } catch (err: any) {
+      setSubmissionsList((prev) =>
+        prev.map((sub) =>
+          sub.id === item.id
+            ? { ...sub, errorLog: err?.message || "Network error during retry" }
+            : sub
+        )
+      );
+    } finally {
+      setRetryingId(null);
+    }
   };
 
   const filteredSubmissions = submissionsList.filter((item) => {
@@ -251,16 +324,19 @@ export default function SubmissionDashboard({
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => {
-              setSubmissionsList([]);
-            }}
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-all shadow-xs cursor-pointer"
+            type="button"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            aria-busy={isRefreshing}
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-all shadow-xs cursor-pointer disabled:opacity-50"
             title={isHe ? "רענן נתונים" : "Refresh data"}
+            aria-label={isHe ? "רענן נתונים" : "Refresh data"}
           >
-            <RefreshCw className="w-4 h-4 text-slate-500" />
-            <span className="hidden sm:inline">{isHe ? "רענן" : "Refresh"}</span>
+            <RefreshCw className={`w-4 h-4 text-slate-500 ${isRefreshing ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">{isRefreshing ? (isHe ? "מרענן..." : "Refreshing...") : (isHe ? "רענן" : "Refresh")}</span>
           </button>
           <button
+            type="button"
             onClick={onNewSubmission}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-sm shadow-sky-200 cursor-pointer"
           >
@@ -369,10 +445,11 @@ export default function SubmissionDashboard({
           <div className="flex flex-wrap items-center gap-3">
             {/* Search */}
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
               <input
                 type="text"
                 placeholder={isHe ? "חיפוש לפי כותרת, עיתון, מזהה..." : "Search title, journal, ID..."}
+                aria-label={isHe ? "חיפוש הגשות לפי כותרת, עיתון, או מזהה" : "Search submissions by title, journal, or ID"}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 pr-3 py-1.5 text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all w-60 md:w-64"
@@ -380,7 +457,11 @@ export default function SubmissionDashboard({
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex items-center bg-slate-200/60 p-1 rounded-xl text-xs font-medium text-slate-600">
+            <div 
+              role="tablist"
+              aria-label={isHe ? "סינון רשימת הגשות" : "Filter submissions list"}
+              className="flex items-center bg-slate-200/60 p-1 rounded-xl text-xs font-medium text-slate-600"
+            >
               {[
                 { key: "all", label: isHe ? "הכל" : "All" },
                 { key: "review", label: isHe ? "בביקורת" : "Under Review" },
@@ -390,6 +471,9 @@ export default function SubmissionDashboard({
               ].map((f) => (
                 <button
                   key={f.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={selectedFilter === f.key}
                   onClick={() => setSelectedFilter(f.key)}
                   className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
                     selectedFilter === f.key
@@ -422,11 +506,21 @@ export default function SubmissionDashboard({
             filteredSubmissions.map((sub) => (
               <div
                 key={sub.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`${sub.title}, ${sub.journalName}, ${sub.status}`}
                 onClick={() => {
                   setSelectedItem(sub);
                   onSelectSubmission?.(sub);
                 }}
-                className="p-5 hover:bg-slate-50/80 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer group"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelectedItem(sub);
+                    onSelectSubmission?.(sub);
+                  }
+                }}
+                className="p-5 hover:bg-slate-50/80 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-sky-500 rounded-xl"
               >
                 {/* Left Content */}
                 <div className="space-y-2 max-w-2xl">
@@ -543,8 +637,17 @@ export default function SubmissionDashboard({
 
       {/* Submission Detail Modal */}
       {selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4"
+          onClick={() => setSelectedItem(null)}
+        >
+          <div 
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="submission-modal-title"
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200"
+          >
             {/* Modal Header */}
             <div className="px-6 py-5 border-b border-slate-100 flex items-start justify-between gap-4 bg-slate-50/50">
               <div>
@@ -554,12 +657,14 @@ export default function SubmissionDashboard({
                     {selectedItem.platform || "Platform"}
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 leading-snug">
+                <h3 id="submission-modal-title" className="text-lg font-bold text-slate-900 leading-snug">
                   {selectedItem.title}
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setSelectedItem(null)}
+                aria-label="Close dialog"
                 className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200/50 rounded-full transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -666,7 +771,7 @@ export default function SubmissionDashboard({
                 <a
                   href={selectedItem.remotePostUrl}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-xs font-medium text-sky-600 hover:text-sky-700"
                 >
                   <ExternalLink className="w-4 h-4" />
@@ -679,6 +784,7 @@ export default function SubmissionDashboard({
               <div className="flex items-center gap-2">
                 {selectedItem.status === "revision_required" && (
                   <button
+                    type="button"
                     onClick={() => {
                       const item = selectedItem;
                       setSelectedItem(null);
@@ -691,6 +797,7 @@ export default function SubmissionDashboard({
                 )}
                 {selectedItem.status === "failed" && (
                   <button
+                    type="button"
                     onClick={(e) => {
                       handleRetry(e, selectedItem);
                       setSelectedItem(null);
@@ -701,6 +808,7 @@ export default function SubmissionDashboard({
                   </button>
                 )}
                 <button
+                  type="button"
                   onClick={() => setSelectedItem(null)}
                   className="px-4 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
                 >

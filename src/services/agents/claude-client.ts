@@ -1,22 +1,42 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 export const claude = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || "",
+  apiKey: process.env.ANTHROPIC_API_KEY || "dummy-key-for-initialization",
 });
 
-export type ClaudeModel = "claude-3-opus-20240229" | "claude-3-7-sonnet-20250219" | "claude-3-5-sonnet-20241022";
+export type ClaudeModel =
+  | "claude-3-opus-20240229"
+  | "claude-3-7-sonnet-20250219"
+  | "claude-3-5-sonnet-20241022"
+  | (string & {});
+
+export interface AskClaudeOptions {
+  maxTokens?: number;
+  temperature?: number;
+  system?: string;
+}
 
 export async function askClaude(
   prompt: string, 
   model: ClaudeModel = "claude-3-7-sonnet-20250219",
-  system?: string
+  systemOrOptions?: string | AskClaudeOptions
 ): Promise<{ text: string; tokensUsed: number }> {
   try {
-    const max_tokens = model === "claude-3-opus-20240229" ? 4096 : 8192;
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.warn("[claude-client] ANTHROPIC_API_KEY is not set. API request may fail.");
+    }
+
+    const options: AskClaudeOptions = typeof systemOrOptions === "string" 
+      ? { system: systemOrOptions } 
+      : (systemOrOptions || {});
+
+    const max_tokens = options.maxTokens ?? (typeof model === "string" && model.includes("opus") ? 4096 : 8192);
+
     const msg = await claude.messages.create({
       model,
       max_tokens,
-      system,
+      system: options.system,
+      temperature: options.temperature,
       messages: [{ role: "user", content: prompt }],
     });
 
@@ -27,7 +47,7 @@ export async function askClaude(
     
     return {
       text,
-      tokensUsed: msg.usage.input_tokens + msg.usage.output_tokens,
+      tokensUsed: (msg.usage?.input_tokens ?? 0) + (msg.usage?.output_tokens ?? 0),
     };
   } catch (error) {
     console.error("Claude API Error:", error);

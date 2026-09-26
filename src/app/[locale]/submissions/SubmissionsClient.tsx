@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import SubmissionDashboard, {
   SubmissionItem,
 } from "@/components/SubmissionDashboard";
 import ReviewResponseInterface, {
   ReviewerCommentData,
 } from "@/components/ReviewResponseInterface";
-import { Send, MessageSquare, ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
+import { SubmissionWizard } from "@/components/submission/SubmissionWizard";
+import { Send, MessageSquare, ArrowLeft, ExternalLink, Sparkles, X } from "lucide-react";
 
 interface SubmissionsClientProps {
   locale: string;
@@ -18,6 +19,7 @@ export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
   const [activeTab, setActiveTab] = useState<"submissions" | "reviews">("submissions");
   const [submissions, setSubmissions] = useState<SubmissionItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showWizard, setShowWizard] = useState<boolean>(false);
   const [selectedSubmissionForReview, setSelectedSubmissionForReview] = useState<{
     paperTitle: string;
     journalName: string;
@@ -28,46 +30,45 @@ export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
     manuscriptId: "",
   });
 
-  // Attempt to fetch submissions from the backend API, falling back to rich mock data
+  const loadSubmissions = useCallback(async (isMounted = true) => {
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/submissions");
+      if (res.ok) {
+        const data = await res.json();
+        const rawList = Array.isArray(data) ? data : (data?.submissions || []);
+        if (isMounted) {
+          const mapped: SubmissionItem[] = rawList.map((s: any) => ({
+            id: s.id,
+            paperId: s.paperId,
+            title: s.submittedTitle || s.paperTitle || s.title || `Paper #${s.paperId}`,
+            journalName: s.journalName || s.connection?.displayName || s.siteUrl || "Connected Journal",
+            platform: s.platform || s.connection?.platform || "Direct Submission",
+            status: s.status || "submitted",
+            publishMode: s.publishMode || "publish",
+            submittedAt: s.submittedAt || s.createdAt,
+            updatedAt: s.updatedAt,
+            remotePostUrl: s.remotePostUrl,
+            confirmationId: s.confirmationId || (s.remotePostId ? `CONF-${s.remotePostId}` : undefined),
+            errorLog: s.errorLog,
+          }));
+          setSubmissions(mapped);
+        }
+      }
+    } catch (err) {
+      console.warn("Could not fetch API submissions:", err);
+    } finally {
+      if (isMounted) setIsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
-    async function loadSubmissions() {
-      try {
-        setIsLoading(true);
-        const res = await fetch("/api/submissions");
-        if (res.ok) {
-          const data = await res.json();
-          if (data && Array.isArray(data.submissions) && data.submissions.length > 0 && isMounted) {
-            const mapped: SubmissionItem[] = data.submissions.map((s: any) => ({
-              id: s.id,
-              paperId: s.paperId,
-              title: s.paperTitle || s.title || `Paper #${s.paperId}`,
-              journalName: s.journalName || s.siteUrl || "Connected Journal",
-              platform: s.platform || "Direct Submission",
-              status: s.status || "submitted",
-              publishMode: s.publishMode || "publish",
-              submittedAt: s.createdAt,
-              updatedAt: s.updatedAt,
-              remotePostUrl: s.remotePostUrl,
-              confirmationId: s.confirmationId || (s.remotePostId ? `CONF-${s.remotePostId}` : undefined),
-              errorLog: s.errorLog,
-            }));
-            // Merge with mock submissions to guarantee rich presentation
-            setSubmissions(mapped);
-          }
-        }
-      } catch (err) {
-        console.warn("Could not fetch API submissions, using default data.", err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    }
-
-    loadSubmissions();
+    loadSubmissions(isMounted);
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [loadSubmissions]);
 
   const handleNavigateToReviews = (sub: SubmissionItem) => {
     setSelectedSubmissionForReview({
@@ -127,6 +128,8 @@ export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
         <SubmissionDashboard
           submissions={submissions}
           onNavigateToReviews={handleNavigateToReviews}
+          onNewSubmission={() => setShowWizard(true)}
+          onRefresh={() => loadSubmissions()}
           locale={locale}
         />
       ) : (
@@ -136,6 +139,27 @@ export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
           manuscriptId={selectedSubmissionForReview.manuscriptId}
           locale={locale}
         />
+      )}
+
+      {/* Submission Wizard Modal */}
+      {showWizard && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4"
+          onClick={() => setShowWizard(false)}
+        >
+          <div 
+            className="w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <SubmissionWizard
+              onComplete={() => {
+                setShowWizard(false);
+                loadSubmissions();
+              }}
+              onCancel={() => setShowWizard(false)}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

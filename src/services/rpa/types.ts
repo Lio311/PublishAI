@@ -24,5 +24,7 @@ export interface NavigatorConfig {
   storageState?: string;
   resumedSteps?: string[];
   navigationTimeout?: number;
+  initialStateData?: Record<string, unknown>;
+  stateData?: Record<string, unknown>;
 }
 

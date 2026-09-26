@@ -24,8 +24,12 @@ export class ScreenshotManager {
       const buffer = await page.screenshot({ fullPage: false, timeout: 5000 });
       
       // Prune oldest screenshots to prevent heap memory exhaustion
-      if (this.screenshots.length >= this.maxScreenshots) {
-        this.screenshots.shift();
+      while (this.screenshots.length >= this.maxScreenshots) {
+        const removed = this.screenshots.shift();
+        if (removed) {
+          // Explicitly release memory reference
+          removed.buffer = Buffer.alloc(0);
+        }
       }
 
       this.screenshots.push({ step: stepName, buffer, timestamp: new Date() });
@@ -38,11 +42,19 @@ export class ScreenshotManager {
   }
 
   getAll(): ScreenshotEntry[] {
-    return this.screenshots;
+    return [...this.screenshots];
+  }
+
+  getCount(): number {
+    return this.screenshots.length;
   }
 
   getLast(): ScreenshotEntry | undefined {
     return this.screenshots[this.screenshots.length - 1];
+  }
+
+  getScreenshotForStep(stepName: string): ScreenshotEntry | undefined {
+    return this.screenshots.slice().reverse().find(s => s.step === stepName);
   }
 
   getLastBase64(): string | undefined {
@@ -60,6 +72,9 @@ export class ScreenshotManager {
    * Clears in-memory screenshot buffers to prevent memory leaks after workflow completion.
    */
   clear(): void {
+    for (const entry of this.screenshots) {
+      entry.buffer = Buffer.alloc(0);
+    }
     this.screenshots = [];
   }
 

@@ -16,44 +16,48 @@ export function SecurityBriefing({ onAccept, onCancel }: SecurityBriefingProps) 
   const isHe = locale === "he";
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden max-w-2xl mx-auto">
+    <div 
+      className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden max-w-2xl mx-auto"
+      role="region"
+      aria-labelledby="security-briefing-title"
+    >
       <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-3">
-        <Shield className="w-6 h-6 text-sky-500" />
-        <h2 className="text-xl font-bold text-slate-800">{t("title")}</h2>
+        <Shield className="w-6 h-6 text-sky-500 shrink-0" aria-hidden="true" />
+        <h2 id="security-briefing-title" className="text-xl font-bold text-slate-800">{t("title")}</h2>
       </div>
       
       <div className="p-6 space-y-6 text-slate-600">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-slate-800 font-semibold">
-            <Info className="w-5 h-5 text-sky-500" />
-            <h3>{t("whyCredentials")}</h3>
+            <Info className="w-5 h-5 text-sky-500 shrink-0" aria-hidden="true" />
+            <h3 className="text-base font-semibold">{t("whyCredentials")}</h3>
           </div>
           <p className="text-sm pl-7">{t("whyCredentialsDesc")}</p>
         </div>
 
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-slate-800 font-semibold">
-            <Lock className="w-5 h-5 text-emerald-500" />
-            <h3>{t("howProtected")}</h3>
+            <Lock className="w-5 h-5 text-emerald-500 shrink-0" aria-hidden="true" />
+            <h3 className="text-base font-semibold">{t("howProtected")}</h3>
           </div>
           <ul className="text-sm space-y-2 pl-7">
             <li className="flex items-start gap-2">
-              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" aria-hidden="true" />
               <span>{t("encryption")}</span>
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" aria-hidden="true" />
               <span>{t("neverPlaintext")}</span>
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" aria-hidden="true" />
               <span>{t("deleteAnytime")}</span>
             </li>
           </ul>
         </div>
 
         <div className="bg-sky-50 border border-sky-100 rounded-lg p-4 text-sm flex gap-3">
-          <AlertTriangle className="w-5 h-5 text-sky-500 shrink-0" />
+          <AlertTriangle className="w-5 h-5 text-sky-500 shrink-0" aria-hidden="true" />
           <div>
             <span className="font-semibold text-sky-800 block mb-1">{isHe ? "סיסמאות יישום (Application Passwords) בוורדפרס" : "WordPress Application Passwords"}</span>
             <p className="text-blue-800">
@@ -63,12 +67,14 @@ export function SecurityBriefing({ onAccept, onCancel }: SecurityBriefingProps) 
         </div>
 
         <div className="pt-4 border-t border-slate-200">
-          <label className="flex items-center gap-3 cursor-pointer group">
+          <label htmlFor="security-consent-checkbox" className="flex items-center gap-3 cursor-pointer group">
             <input 
+              id="security-consent-checkbox"
               type="checkbox" 
-              className="w-5 h-5 text-sky-500 rounded border-slate-300 focus:ring-sky-500"
+              className="w-5 h-5 text-sky-500 rounded border-slate-300 focus:ring-sky-500 focus:ring-2 outline-none"
               checked={accepted}
               onChange={(e) => setAccepted(e.target.checked)}
+              aria-required="true"
             />
             <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">
               {t("consent")}
@@ -79,12 +85,14 @@ export function SecurityBriefing({ onAccept, onCancel }: SecurityBriefingProps) 
 
       <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex justify-between items-center">
         <button 
+          type="button"
           onClick={onCancel}
           className="px-4 py-2 text-slate-600 font-medium hover:text-slate-900 transition-colors"
         >
           {t("cancel")}
         </button>
         <button 
+          type="button"
           onClick={onAccept}
           disabled={!accepted}
           className="px-6 py-2 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"

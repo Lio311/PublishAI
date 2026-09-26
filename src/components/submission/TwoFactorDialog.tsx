@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { KeyRound, X, Loader2 } from "lucide-react";
 
@@ -17,6 +17,18 @@ export function TwoFactorDialog({ isOpen, onClose, onSubmit }: TwoFactorDialogPr
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  // Handle Escape key to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,44 +39,62 @@ export function TwoFactorDialog({ isOpen, onClose, onSubmit }: TwoFactorDialogPr
     setError("");
     
     try {
-      await onSubmit(code);
+      await onSubmit(code.trim());
       setCode("");
     } catch (err: any) {
-      setError(err.message || "Failed to verify 2FA code.");
+      setError(err?.message || "Failed to verify 2FA code.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="two-factor-title"
+        aria-describedby="two-factor-desc"
+        className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100">
           <div className="flex items-center gap-2">
-            <KeyRound className="w-5 h-5 text-sky-500" />
-            <h2 className="text-lg font-semibold text-slate-800">{t("title")}</h2>
+            <KeyRound className="w-5 h-5 text-sky-500" aria-hidden="true" />
+            <h2 id="two-factor-title" className="text-lg font-semibold text-slate-800">{t("title")}</h2>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+          <button 
+            type="button"
+            onClick={onClose} 
+            className="text-slate-400 hover:text-slate-600 p-1 rounded-md transition-colors cursor-pointer"
+            aria-label="Close dialog"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6">
-          <p className="text-sm text-slate-600 mb-6">
+        <form onSubmit={handleSubmit} className="p-6" noValidate>
+          <p id="two-factor-desc" className="text-sm text-slate-600 mb-6">
             {t("description")}
           </p>
           
           <div className="space-y-4">
             <div>
-              <label htmlFor="code" className="block text-sm font-medium text-slate-700 mb-1">
+              <label htmlFor="two-factor-code" className="block text-sm font-medium text-slate-700 mb-1">
                 {t("codeLabel")}
               </label>
               <input
-                id="code"
+                id="two-factor-code"
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="123456"
+                aria-required="true"
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? "two-factor-error" : undefined}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none text-center tracking-widest font-mono text-lg"
                 autoComplete="one-time-code"
                 autoFocus
@@ -73,7 +103,7 @@ export function TwoFactorDialog({ isOpen, onClose, onSubmit }: TwoFactorDialogPr
             </div>
             
             {error && (
-              <div className="text-sm text-rose-600 bg-rose-50 p-2 rounded border border-rose-100">
+              <div id="two-factor-error" role="alert" className="text-sm text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-100">
                 {error}
               </div>
             )}
@@ -81,7 +111,8 @@ export function TwoFactorDialog({ isOpen, onClose, onSubmit }: TwoFactorDialogPr
             <button
               type="submit"
               disabled={isSubmitting || !code.trim()}
-              className="w-full py-2.5 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
+              aria-busy={isSubmitting}
+              className="w-full py-2.5 bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 text-white font-medium rounded-lg hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
               {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
               {t("verify")}

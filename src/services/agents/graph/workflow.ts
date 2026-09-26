@@ -1,4 +1,4 @@
-import { StateGraph, START, END } from "@langchain/langgraph";
+import { StateGraph, START, END, MemorySaver } from "@langchain/langgraph";
 import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
 import { Pool } from "pg";
 import { PublishAIStateAnnotation, PublishAIState } from "./state";
@@ -18,22 +18,28 @@ import { guardrailsNode } from "./nodes/guardrailsNode";
 import { rebuttalNode } from "./nodes/rebuttalNode";
 import { cascadeNode } from "./nodes/cascadeNode";
 
-const routeAfterIntegrity = (state: PublishAIState) => {
-  // If integrity fails, route to END or error state.
-  // Assuming a fail condition is represented when integrityResult has some error or "fail" property,
-  // we'll route to END for now as per instructions.
-  if (state.integrityResult === "fail" || state.integrityResult?.status === "fail" || state.integrityResult?.success === false) {
+export const routeAfterIntegrity = (state: PublishAIState) => {
+  // If integrity fails, route to END
+  if (
+    state.integrityResult === "fail" ||
+    state.integrityResult?.status === "fail" ||
+    state.integrityResult?.success === false ||
+    state.integrityResult?.passed === false
+  ) {
     return END;
   }
   return "qaNode";
 };
 
-const routeFromStart = (state: PublishAIState) => {
-  if (state.action === 'cascade' || state.targetJournalId) {
+export const routeFromStart = (state: PublishAIState) => {
+  if (state.action === 'cascade') {
     return "cascadeNode";
   }
-  if (state.reviewerComments) {
+  if (state.action === 'start_rebuttal' || (state.reviewerComments && state.action !== 'start')) {
     return "rebuttalNode";
+  }
+  if (state.previousJournalId && state.action !== 'start' && state.action !== 'start_rebuttal') {
+    return "cascadeNode";
   }
   return "clarificationNode";
 };

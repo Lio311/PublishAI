@@ -32,9 +32,18 @@ export async function analyzeScreenshot(
   instruction: string,
   pageContext?: string
 ): Promise<VisionAIAction> {
+  if (!screenshotBuffer || screenshotBuffer.length === 0) {
+    return {
+      action: 'none',
+      reasoning: 'Screenshot buffer is empty or invalid.',
+    };
+  }
+
   try {
+    const visionModelName = process.env.ANTHROPIC_MODEL || 'claude-3-7-sonnet-20250219';
+
     const { object } = await generateObject({
-      model: anthropic('claude-sonnet-4-20250514'),
+      model: anthropic(visionModelName),
       schema: VisionActionSchema,
       messages: [
         {
@@ -79,6 +88,8 @@ Rules:
  * Runs a multi-step Vision AI loop: take screenshot → analyze → execute → repeat.
  * Useful for complex multi-step form interactions where DOM structure is unknown.
  * 
+ * @param page Playwright Page instance
+ * @param goal Goal description
  * @param maxSteps Maximum number of vision-guided steps before giving up
  */
 export async function runVisionLoop(
@@ -89,9 +100,23 @@ export async function runVisionLoop(
   const actions: VisionAIAction[] = [];
 
   for (let i = 0; i < maxSteps; i++) {
-    const screenshot = await page.screenshot({ fullPage: false });
-    const pageTitle = await page.title();
-    const pageUrl = page.url();
+    if (!page || (typeof page.isClosed === 'function' && page.isClosed())) {
+      console.warn(`[VisionAI] Page is closed, terminating vision loop at step ${i + 1}`);
+      break;
+    }
+
+    let screenshot: Buffer;
+    let pageTitle = '';
+    let pageUrl = '';
+
+    try {
+      screenshot = await page.screenshot({ fullPage: false, timeout: 5000 });
+      pageTitle = await page.title().catch(() => '');
+      pageUrl = page.url();
+    } catch (captureErr) {
+      console.error(`[VisionAI] Screenshot capture failed at step ${i + 1}:`, captureErr);
+      break;
+    }
 
     const action = await analyzeScreenshot(
       screenshot,
@@ -106,31 +131,31 @@ export async function runVisionLoop(
       break;
     }
 
-    // Execute the action
+    // Execute the action safely with timeouts and error boundary
     try {
       switch (action.action) {
         case 'click':
           if (action.selector) {
-            await page.click(action.selector);
+            await page.click(action.selector, { timeout: 5000 });
           } else if (action.coordinates) {
             await page.mouse.click(action.coordinates.x, action.coordinates.y);
           }
           break;
         case 'type':
           if (action.selector && action.value) {
-            await page.fill(action.selector, action.value);
+            await page.fill(action.selector, action.value, { timeout: 5000 });
           }
           break;
         case 'select':
           if (action.selector && action.value) {
-            await page.selectOption(action.selector, action.value);
+            await page.selectOption(action.selector, action.value, { timeout: 5000 });
           }
           break;
         case 'scroll':
           await page.mouse.wheel(0, 300);
           break;
       }
-      await page.waitForLoadState('domcontentloaded');
+      await page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
     } catch (execError) {
       console.error(`[VisionAI] Failed to execute action at step ${i + 1}:`, execError);
     }
