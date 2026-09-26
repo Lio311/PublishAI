@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { publishAiGraph } from "@/services/agents/graph/workflow";
+import { auth } from "@/app/auth";
+import { db } from "@/services/db";
+import { papers } from "@/services/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { paperId, action, feedback, reviewerComments, dataSchema } = await req.json();
 
     if (!paperId || !action) {
@@ -10,6 +19,19 @@ export async function POST(req: NextRequest) {
         { error: "Missing required fields: paperId or action" },
         { status: 400 }
       );
+    }
+
+    const userId = session.user.id;
+
+    // Verify paper authorization if paper exists in DB
+    const parsedPaperId = parseInt(paperId, 10);
+    if (!isNaN(parsedPaperId)) {
+      const paper = await db.query.papers.findFirst({
+        where: eq(papers.id, parsedPaperId),
+      });
+      if (paper && paper.userId && paper.userId !== userId) {
+        return NextResponse.json({ error: "Forbidden: You do not own this manuscript" }, { status: 403 });
+      }
     }
 
     const config = {
@@ -21,9 +43,9 @@ export async function POST(req: NextRequest) {
       async start(controller) {
         try {
           if (["start", "start_rebuttal", "cascade"].includes(action)) {
-            // Start a new run with the initial state
+            // Start a new run with the initial state and user context
             const streamEvents = await publishAiGraph.streamEvents(
-              { paperId, action, reviewerComments: reviewerComments || "", dataSchema }, // initial state
+              { paperId, action, reviewerComments: reviewerComments || "", dataSchema, userId }, // initial state
               { ...config, version: "v2" }
             );
 

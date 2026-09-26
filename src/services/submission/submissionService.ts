@@ -1,26 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@/services/db";
-import { papers, submissions, submissionLogs } from "@/services/db/schema";
+import { papers, submissions, submissionLogs, submissionEvents } from "@/services/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { pgTable, serial, text, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
 import { SubmissionStatusService } from "./submissionStatusService";
 import { JournalSubmissionStatus, SubmissionTrackingSummary } from "./types";
 
-/**
- * Assumed schema for submission_events table.
- * Designed to align with the Database agent's Epic 3 schema expansion.
- */
-export const submissionEvents = pgTable("submission_events", {
-  id: serial("id").primaryKey(),
-  submissionId: integer("submission_id"),
-  paperId: integer("paper_id"),
-  eventType: text("event_type").notNull(),
-  fromStatus: text("from_status"),
-  toStatus: text("to_status"),
-  actor: text("actor").default("system"),
-  details: jsonb("details"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
 export interface SubmissionEvent {
   id: number;

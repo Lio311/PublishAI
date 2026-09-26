@@ -31,6 +31,23 @@ export async function logFeedbackOutcome(
     throw new Error("Could not find related connection or paper version");
   }
 
+  // Check for existing log to guarantee idempotency on retries
+  const existing = await db.query.rlhfFeedbackLogs.findFirst({
+    where: and(
+      eq(rlhfFeedbackLogs.submissionId, submissionId),
+      eq(rlhfFeedbackLogs.paperVersionId, latestVersion.id),
+      eq(rlhfFeedbackLogs.outcome, outcome)
+    )
+  });
+
+  if (existing) {
+    await db.update(rlhfFeedbackLogs).set({
+      reviewerComments,
+      journalId: connection.journalId as number,
+    }).where(eq(rlhfFeedbackLogs.id, existing.id));
+    return;
+  }
+
   await db.insert(rlhfFeedbackLogs).values({
     submissionId,
     paperVersionId: latestVersion.id,

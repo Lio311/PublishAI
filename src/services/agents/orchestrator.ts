@@ -13,12 +13,19 @@ export class AgentOrchestrator {
   ): Promise<AgentResult> {
     // 1. Insert stage record in its own step to ensure idempotency
     const stageRecordId = await this.step.run(`init-stage-${agent.stage}`, async () => {
+      const paperIdNum = Number(context.paperId);
+      if (isNaN(paperIdNum)) {
+        throw new Error(`Invalid paperId: ${context.paperId}`);
+      }
       const [stageRecord] = await db.insert(paperStages).values({
-        paperId: Number(context.paperId),
+        paperId: paperIdNum,
         stage: agent.stage,
         status: "in_progress",
         startedAt: new Date(),
       }).returning();
+      if (!stageRecord) {
+        throw new Error(`Failed to initialize paper stage record for stage: ${agent.stage}`);
+      }
       return stageRecord.id;
     });
 

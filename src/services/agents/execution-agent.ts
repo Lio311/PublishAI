@@ -7,12 +7,16 @@ export class ExecutionAgent extends BaseAgent {
   model = "claude-3-opus-20240229";
 
   async execute(context: AgentContext): Promise<AgentResult> {
-    const writingOutput = context.previousStageOutputs.get("writing")?.output;
+    const writingResult = context.previousStageOutputs instanceof Map
+      ? context.previousStageOutputs.get("writing")
+      : (context.previousStageOutputs as any)?.["writing"];
+    const writingOutput = writingResult?.output;
     if (!writingOutput) {
       return this.formatOutput("No writing output to execute.", "completed", 0);
     }
 
-    const prompt = `Create a structured summary of the changes made between the original manuscript and the rewritten version.\n\nOriginal:\n<manuscript>\n${context.manuscriptText}\n</manuscript>\n\nRewritten:\n<rewritten>\n${writingOutput}\n</rewritten>`;
+    const manuscript = context.manuscriptText || "";
+    const prompt = `Create a structured summary of the changes made between the original manuscript and the rewritten version.\n\nOriginal:\n<manuscript>\n${manuscript}\n</manuscript>\n\nRewritten:\n<rewritten>\n${writingOutput}\n</rewritten>`;
     
     try {
       context.manuscriptText = writingOutput;

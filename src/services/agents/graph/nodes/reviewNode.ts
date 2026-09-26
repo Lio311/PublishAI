@@ -12,18 +12,25 @@ export const reviewNode = async (state: PublishAIState): Promise<Partial<Publish
   const prompt = `You are a Review Agent. Review the final document content and provide feedback or confirm it is ready for publication.
   
 Document:
-${state.documentContent}`;
+${state.documentContent || "No document content provided."}`;
 
   const messages = [
     new SystemMessage(prompt),
-    ...state.messages,
+    ...(state.messages || []),
   ];
 
-  const response = await llm.invoke(messages, {
-    callbacks: [langfuseLangchainHandler],
-  });
+  try {
+    const response = await llm.invoke(messages, {
+      callbacks: [langfuseLangchainHandler],
+    });
 
-  return {
-    messages: [response],
-  };
+    return {
+      messages: [response],
+    };
+  } catch (error: any) {
+    console.error("[reviewNode] Execution failed:", error);
+    return {
+      validationErrors: [`Review step failed: ${error?.message || "Unknown error"}`],
+    };
+  }
 };

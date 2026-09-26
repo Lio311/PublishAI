@@ -5,7 +5,10 @@ import { generateObject, generateText } from "ai";
 import { AI_MODELS } from "@/services/ai/provider";
 import { z } from "zod";
 
-export async function extractFiguresFromDocument(documentUrlOrText: string): Promise<Array<{imageUrl: string, legend: string, figureNumber: number, resolution: number}>> {
+export async function extractFiguresFromDocument(documentUrlOrText?: string): Promise<Array<{imageUrl: string, legend: string, figureNumber: number, resolution: number}>> {
+  if (!documentUrlOrText) {
+    return [];
+  }
   console.log(`Extracting figures from document...`);
   
   let textToAnalyze = documentUrlOrText;

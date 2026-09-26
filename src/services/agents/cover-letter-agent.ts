@@ -53,8 +53,9 @@ export class CoverLetterAgent extends BaseAgent {
     const journalName = String((context.journalRules as any)?.name || "the target journal");
     const rules = (context.journalRules as any)?.coverLetterRules;
     
+    const preview = (context.manuscriptText || "").substring(0, 8000);
     let prompt = `You are an academic editor. Write a professional cover letter for the following manuscript being submitted to the journal "${journalName}".\n\n`;
-    prompt += `Here is the manuscript abstract/intro to base it on:\n${context.manuscriptText.substring(0, 2000)}\n\n`;
+    prompt += `Here is the manuscript abstract/intro to base it on:\n${preview}\n\n`;
 
     if (rules) {
       if (rules.templatePrompt) {

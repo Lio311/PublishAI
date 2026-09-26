@@ -1,6 +1,6 @@
 import { db } from "@/services/db";
 import { scientificEntities, scientificRelationships } from "@/services/db/schema";
-import { inArray } from "drizzle-orm";
+import { inArray, eq } from "drizzle-orm";
 import { GraphData } from "./entityExtractor";
 
 export async function buildGraphFromRelationships(
@@ -42,6 +42,11 @@ export async function buildGraphFromRelationships(
   })).filter(r => r.sourceEntityId && r.targetEntityId);
 
   if (validRelationships.length > 0) {
+    // Delete existing relationships for this paper to ensure idempotency on retries
+    await db
+      .delete(scientificRelationships)
+      .where(eq(scientificRelationships.paperId, paperId));
+
     await db.insert(scientificRelationships).values(validRelationships);
   }
 }

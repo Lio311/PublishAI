@@ -14,29 +14,41 @@ Previous Journal ID: ${state.previousJournalId || 'Unknown'}
 Target Journal ID: ${state.targetJournalId || 'Unknown'}
 
 Here is the current document content:
-${state.documentContent}
+${state.documentContent || "No document content provided."}
 
 Based on the target journal requirements, please provide the necessary formatting edits (e.g., word count cuts, citation style changes).
 Respond with a JSON object containing a list of edits under the key "edits". Each edit should specify "section" and "instruction".
 `;
 
-  const response = await llm.invoke([
-    { role: "system", content: "You are a helpful academic formatting assistant. Return only valid JSON." },
-    { role: "user", content: prompt }
-  ], {
-    response_format: { type: "json_object" }
-  });
-
-  let edits;
   try {
-    const parsed = JSON.parse(response.content as string);
-    edits = parsed.edits || parsed;
-  } catch (e) {
-    edits = [{ section: "All", instruction: response.content as string }];
-  }
+    const response = await llm.invoke([
+      { role: "system", content: "You are a helpful academic formatting assistant. Return only valid JSON." },
+      { role: "user", content: prompt }
+    ], {
+      response_format: { type: "json_object" }
+    });
 
-  return {
-    edits,
-    messages: [new AIMessage("Generated cascade edits based on target journal requirements.")],
-  };
+    const contentStr = typeof response.content === "string" 
+      ? response.content 
+      : (Array.isArray(response.content) ? response.content.map(c => typeof c === "string" ? c : (c as any).text || "").join("") : String(response.content));
+
+    let edits;
+    try {
+      const parsed = JSON.parse(contentStr);
+      edits = parsed.edits || parsed;
+    } catch (e) {
+      edits = [{ section: "All", instruction: contentStr }];
+    }
+
+    return {
+      edits,
+      messages: [new AIMessage("Generated cascade edits based on target journal requirements.")],
+    };
+  } catch (error: any) {
+    console.error("[cascadeNode] Execution failed:", error);
+    return {
+      edits: [{ section: "All", instruction: `Cascade analysis failed: ${error?.message || "Unknown error"}` }],
+      messages: [new AIMessage(`Cascade analysis failed: ${error?.message || "Unknown error"}`)],
+    };
+  }
 };

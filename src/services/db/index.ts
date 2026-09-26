@@ -13,3 +13,8 @@ if (!databaseUrl) {
 
 const sql = neon(databaseUrl || "postgres://dummy:dummy@dummy/dummy");
 export const db = drizzle(sql, { schema });
+
+export * from './schema';
+export * from './schema/embeddings';
+export * from './zod';
+

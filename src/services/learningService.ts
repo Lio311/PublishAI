@@ -93,6 +93,32 @@ Your task is to analyze this feedback for two purposes:
       prompt,
     });
 
+    // Check for existing feedback record to ensure step idempotency on retries
+    const existing = await db
+      .select({ id: aiSystemFeedback.id })
+      .from(aiSystemFeedback)
+      .where(
+        and(
+          eq(aiSystemFeedback.sourceId, submissionId.toString()),
+          eq(aiSystemFeedback.sourceType, "reviewer_feedback")
+        )
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      await db
+        .update(aiSystemFeedback)
+        .set({
+          journalId,
+          category: object.category,
+          productInsight: object.productInsight,
+          isActionable: object.isActionable,
+          ruleText: object.ruleText,
+        })
+        .where(eq(aiSystemFeedback.id, existing[0].id));
+      return;
+    }
+
     await db.insert(aiSystemFeedback).values({
       journalId,
       sourceType: "reviewer_feedback",
@@ -104,6 +130,7 @@ Your task is to analyze this feedback for two purposes:
     });
   } catch (error) {
     console.error("Failed to extract reviewer feedback:", error);
+    throw error;
   }
 }
 

@@ -7,7 +7,10 @@ export class KnowledgeAgent extends BaseAgent {
   model = "claude-3-7-sonnet-20250219";
 
   async execute(context: AgentContext): Promise<AgentResult> {
-    const clarification = context.previousStageOutputs.get("clarification")?.output || "";
+    const clarificationResult = context.previousStageOutputs instanceof Map
+      ? context.previousStageOutputs.get("clarification")
+      : (context.previousStageOutputs as any)?.["clarification"];
+    const clarification = clarificationResult?.output || "";
     const kwPrompt = `Extract 3 main search queries for academic literature based on this text:\n${clarification}\nOutput ONLY the 3 queries, separated by commas, with no additional text, numbering, or formatting.`;
     
     let tokensUsed = 0;

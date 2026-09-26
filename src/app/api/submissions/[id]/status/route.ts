@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/app/auth";
 import { db } from "@/services/db";
-import { submissions } from "@/services/db/schema";
+import { submissions, submissionStatusEnumValues } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import { checkRateLimit } from "@/services/rate-limit";
 import { SubmissionService } from "@/services/submission";
 
 const updateStatusSchema = z.object({
-  status: z.string().min(1, "Status is required"),
+  status: z.enum(submissionStatusEnumValues),
   notes: z.string().optional(),
   stage: z.string().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),

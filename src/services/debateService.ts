@@ -7,6 +7,16 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { google } from "@ai-sdk/google";
 
 export async function initializeDebate(paperId: number): Promise<string> {
+  const existing = await db
+    .select({ id: debates.id })
+    .from(debates)
+    .where(eq(debates.paperId, paperId))
+    .limit(1);
+
+  if (existing.length > 0) {
+    return existing[0].id;
+  }
+
   const [debate] = await db.insert(debates).values({
     paperId,
     topic: "Scientific Review Debate",

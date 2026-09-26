@@ -16,16 +16,17 @@ import {
   vector
 } from "drizzle-orm/pg-core";
 
-export const statusEnum = pgEnum("status", [
+export const statusEnumValues = [
   "pending", 
   "in_progress", 
   "awaiting_approval", 
   "approved", 
   "completed", 
   "failed"
-]);
+] as const;
+export const statusEnum = pgEnum("status", statusEnumValues);
 
-export const stageEnum = pgEnum("stage", [
+export const stageEnumValues = [
   "clarification", 
   "planning", 
   "knowledge", 
@@ -37,7 +38,8 @@ export const stageEnum = pgEnum("stage", [
   "compilation",
   "cover_letter",
   "rebuttal"
-]);
+] as const;
+export const stageEnum = pgEnum("stage", stageEnumValues);
 
 export const users = pgTable("users", {
   id: text("id")
@@ -52,7 +54,10 @@ export const users = pgTable("users", {
   stripePriceId: text("stripe_price_id"),
   stripeCurrentPeriodEnd: timestamp("stripe_current_period_end", { mode: "date" }),
   credits: integer("credits").default(3),
-});
+}, (table) => ({
+  emailIdx: index("users_email_idx").on(table.email),
+  stripeCustomerIdIdx: index("users_stripe_customer_id_idx").on(table.stripeCustomerId),
+}));
 
 export const accounts = pgTable(
   "account",
@@ -116,7 +121,9 @@ export const journals = pgTable("journals", {
   requiredSections: jsonb("required_sections"), // Ordered array of mandatory sections
   dataSource: text("data_source").default("ai-generated"), // "official-website" | "ai-generated"
   lastVerifiedAt: timestamp("last_verified_at"),
-});
+}, (table) => ({
+  nameIdx: index("journals_name_idx").on(table.name),
+}));
 
 // ═══════════════════════════════════════════════════════
 // JOURNAL ENRICHMENT: CITATION RULES (1:1 per journal)
@@ -212,8 +219,8 @@ export const papers = pgTable("papers", {
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   status: statusEnum("status").default("pending"),
-  targetJournalId: integer("target_journal_id").references(() => journals.id),
-  currentJournalId: integer("current_journal_id").references(() => journals.id),
+  targetJournalId: integer("target_journal_id").references(() => journals.id, { onDelete: "set null" }),
+  currentJournalId: integer("current_journal_id").references(() => journals.id, { onDelete: "set null" }),
   cascadeQueue: jsonb("cascade_queue").$type<string[]>(),
   originalFileUrl: text("original_file_url"),
   originalFormat: text("original_format"),
@@ -227,6 +234,9 @@ export const papers = pgTable("papers", {
 }, (table) => ({
   userIdIdx: index("papers_user_id_idx").on(table.userId),
   statusIdx: index("papers_status_idx").on(table.status),
+  targetJournalIdIdx: index("papers_target_journal_id_idx").on(table.targetJournalId),
+  currentJournalIdIdx: index("papers_current_journal_id_idx").on(table.currentJournalId),
+  createdAtIdx: index("papers_created_at_idx").on(table.createdAt),
 }));
 
 export const paperVersions = pgTable("paper_versions", {
@@ -256,6 +266,7 @@ export const paperStages = pgTable("paper_stages", {
 }, (table) => ({
   paperIdIdx: index("paper_stages_paper_id_idx").on(table.paperId),
   stageIdx: index("paper_stages_stage_idx").on(table.stage),
+  statusIdx: index("paper_stages_status_idx").on(table.status),
 }));
 
 export const references = pgTable("references", {
@@ -270,6 +281,7 @@ export const references = pgTable("references", {
   bibtexEntry: text("bibtex_entry"),
 }, (table) => ({
   paperIdIdx: index("references_paper_id_idx").on(table.paperId),
+  doiIdx: index("references_doi_idx").on(table.doi),
 }));
 
 // ═══════════════════════════════════════════════════════
@@ -295,6 +307,8 @@ export const documents = pgTable("documents", {
   userIdIdx: index("documents_user_id_idx").on(table.userId),
   paperIdIdx: index("documents_paper_id_idx").on(table.paperId),
   statusIdx: index("documents_status_idx").on(table.status),
+  targetJournalIdIdx: index("documents_target_journal_id_idx").on(table.targetJournalId),
+  createdAtIdx: index("documents_created_at_idx").on(table.createdAt),
 }));
 
 export const citations = pgTable("citations", {
@@ -345,21 +359,23 @@ export const userSettings = pgTable("user_settings", {
 // ENUMS FOR SUBMISSION MODULE
 // ═══════════════════════════════════════════════════════
 
-export const journalPlatformEnum = pgEnum("journal_platform", [
+export const journalPlatformEnumValues = [
   "wordpress",           // REST API — /wp-json/wp/v2/
   "ojs",                 // REST API — /api/v1/
   "email",               // Direct email submission via SMTP
   "editorial_manager",   // Aries Systems Editorial Manager
-]);
+] as const;
+export const journalPlatformEnum = pgEnum("journal_platform", journalPlatformEnumValues);
 
-export const connectionStatusEnum = pgEnum("connection_status", [
+export const connectionStatusEnumValues = [
   "untested",
   "connected",
   "failed",
   "expired",
-]);
+] as const;
+export const connectionStatusEnum = pgEnum("connection_status", connectionStatusEnumValues);
 
-export const submissionStatusEnum = pgEnum("submission_status", [
+export const submissionStatusEnumValues = [
   "preparing",
   "submitting",
   "submitted",
@@ -375,9 +391,11 @@ export const submissionStatusEnum = pgEnum("submission_status", [
   "in_proofs",
   "published",
   "withdrawn",
-]);
+] as const;
+export const submissionStatusEnum = pgEnum("submission_status", submissionStatusEnumValues);
 
-export const captchaStrategyEnum = pgEnum("captcha_strategy", ["auto", "manual"]);
+export const captchaStrategyEnumValues = ["auto", "manual"] as const;
+export const captchaStrategyEnum = pgEnum("captcha_strategy", captchaStrategyEnumValues);
 
 // ═══════════════════════════════════════════════════════
 // TABLE: journal_connections
@@ -389,7 +407,7 @@ export const journalConnections = pgTable("journal_connections", {
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   journalId: integer("journal_id")
-    .references(() => journals.id),
+    .references(() => journals.id, { onDelete: "set null" }),
   
   platform: journalPlatformEnum("platform").notNull(),
   siteUrl: text("site_url").notNull(),
@@ -410,6 +428,8 @@ export const journalConnections = pgTable("journal_connections", {
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
   userIdIdx: index("journal_connections_user_id_idx").on(table.userId),
+  journalIdIdx: index("journal_connections_journal_id_idx").on(table.journalId),
+  connectionStatusIdx: index("journal_connections_status_idx").on(table.connectionStatus),
 }));
 
 // ═══════════════════════════════════════════════════════
@@ -422,7 +442,7 @@ export const submissions = pgTable("submissions", {
     .references(() => papers.id, { onDelete: "cascade" })
     .notNull(),
   connectionId: integer("connection_id")
-    .references(() => journalConnections.id)
+    .references(() => journalConnections.id, { onDelete: "cascade" })
     .notNull(),
   userId: text("user_id")
     .references(() => users.id, { onDelete: "cascade" })
@@ -467,6 +487,8 @@ export const submissions = pgTable("submissions", {
   paperIdIdx: index("submissions_paper_id_idx").on(table.paperId),
   userIdIdx: index("submissions_user_id_idx").on(table.userId),
   statusIdx: index("submissions_status_idx").on(table.status),
+  connectionIdIdx: index("submissions_connection_id_idx").on(table.connectionId),
+  createdAtIdx: index("submissions_created_at_idx").on(table.createdAt),
 }));
 
 // ═══════════════════════════════════════════════════════
@@ -482,7 +504,10 @@ export const submissionLogs = pgTable("submission_logs", {
   level: text("level").notNull(),
   message: text("message").notNull(),
   details: jsonb("details"),
-});
+}, (table) => ({
+  submissionIdIdx: index("submission_logs_submission_id_idx").on(table.submissionId),
+  timestampIdx: index("submission_logs_timestamp_idx").on(table.timestamp),
+}));
 
 // ═══════════════════════════════════════════════════════
 // TABLE: submission_events (EPIC 3)
@@ -491,16 +516,21 @@ export const submissionLogs = pgTable("submission_logs", {
 export const submissionEvents = pgTable("submission_events", {
   id: serial("id").primaryKey(),
   submissionId: integer("submission_id")
-    .references(() => submissions.id, { onDelete: "cascade" })
-    .notNull(),
+    .references(() => submissions.id, { onDelete: "cascade" }),
+  paperId: integer("paper_id")
+    .references(() => papers.id, { onDelete: "cascade" }),
   fromStatus: text("from_status"),
-  toStatus: text("to_status").notNull(),
+  toStatus: text("to_status"),
   eventType: text("event_type"),
+  actor: text("actor").default("system"),
   description: text("description"),
+  details: jsonb("details"),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
   submissionIdIdx: index("submission_events_submission_id_idx").on(table.submissionId),
+  paperIdIdx: index("submission_events_paper_id_idx").on(table.paperId),
+  createdAtIdx: index("submission_events_created_at_idx").on(table.createdAt),
 }));
 
 export const submission_events = submissionEvents;
@@ -558,9 +588,10 @@ export const review_comments = reviewComments;
 // UPGRADE 1: DATA SCIENCE SANDBOX
 // ═══════════════════════════════════════════════════════
 
-export const sandboxStatusEnum = pgEnum("sandbox_status", [
+export const sandboxStatusEnumValues = [
   "pending", "running", "completed", "failed"
-]);
+] as const;
+export const sandboxStatusEnum = pgEnum("sandbox_status", sandboxStatusEnumValues);
 
 export const dataFiles = pgTable("data_files", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -582,28 +613,36 @@ export const sandboxRuns = pgTable("sandbox_runs", {
   analysisResults: jsonb("analysis_results"),
   createdAt: timestamp("created_at").defaultNow(),
   completedAt: timestamp("completed_at"),
-});
+}, (table) => ({
+  paperIdIdx: index("sandbox_runs_paper_id_idx").on(table.paperId),
+  createdAtIdx: index("sandbox_runs_created_at_idx").on(table.createdAt),
+}));
 
 export const generatedCharts = pgTable("generated_charts", {
   id: uuid("id").primaryKey().defaultRandom(),
-  sandboxRunId: uuid("sandbox_run_id").references(() => sandboxRuns.id).notNull(),
+  sandboxRunId: uuid("sandbox_run_id").references(() => sandboxRuns.id, { onDelete: "cascade" }).notNull(),
   paperId: integer("paper_id").references(() => papers.id, { onDelete: "cascade" }).notNull(),
   chartUrl: text("chart_url").notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  sandboxRunIdIdx: index("generated_charts_sandbox_run_id_idx").on(table.sandboxRunId),
+  paperIdIdx: index("generated_charts_paper_id_idx").on(table.paperId),
+}));
 
 // ═══════════════════════════════════════════════════════
 // UPGRADE 2: KNOWLEDGE GRAPH & GraphRAG
 // ═══════════════════════════════════════════════════════
 
-export const entityTypeEnum = pgEnum("entity_type", [
+export const entityTypeEnumValues = [
   "drug", "protein", "gene", "disease", "concept", "study", "method"
-]);
+] as const;
+export const entityTypeEnum = pgEnum("entity_type", entityTypeEnumValues);
 
-export const relationshipTypeEnum = pgEnum("relationship_type", [
+export const relationshipTypeEnumValues = [
   "affects", "contradicts", "supports", "causes", "treats", "correlates"
-]);
+] as const;
+export const relationshipTypeEnum = pgEnum("relationship_type", relationshipTypeEnumValues);
 
 export const scientificEntities = pgTable("scientific_entities", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -622,35 +661,43 @@ export const scientificRelationships = pgTable("scientific_relationships", {
   paperId: integer("paper_id").references(() => papers.id, { onDelete: "set null" }),
   confidenceScore: real("confidence_score").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  sourceEntityIdIdx: index("scientific_relationships_source_id_idx").on(table.sourceEntityId),
+  targetEntityIdIdx: index("scientific_relationships_target_id_idx").on(table.targetEntityId),
+  paperIdIdx: index("scientific_relationships_paper_id_idx").on(table.paperId),
+}));
 
 // ═══════════════════════════════════════════════════════
 // UPGRADE 3: RLHF DATA FLYWHEEL
 // ═══════════════════════════════════════════════════════
 
-export const feedbackOutcomeEnum = pgEnum("feedback_outcome", [
+export const feedbackOutcomeEnumValues = [
   "accepted", "rejected",
   "with_editor",
   "under_review",
   "reviews_received",
   "revision_requested",
   "revised_submitted",
-  "accepted",
   "in_proofs",
   "published",
   "withdrawn", "revision_required"
-]);
+] as const;
+export const feedbackOutcomeEnum = pgEnum("feedback_outcome", feedbackOutcomeEnumValues);
 
 export const rlhfFeedbackLogs = pgTable("rlhf_feedback_logs", {
   id: uuid("id").primaryKey().defaultRandom(),
-  submissionId: integer("submission_id").references(() => submissions.id).notNull(),
-  paperVersionId: integer("paper_version_id").references(() => paperVersions.id).notNull(),
-  journalId: integer("journal_id").references(() => journals.id).notNull(),
+  submissionId: integer("submission_id").references(() => submissions.id, { onDelete: "cascade" }).notNull(),
+  paperVersionId: integer("paper_version_id").references(() => paperVersions.id, { onDelete: "cascade" }).notNull(),
+  journalId: integer("journal_id").references(() => journals.id, { onDelete: "cascade" }).notNull(),
   outcome: feedbackOutcomeEnum("outcome").notNull(),
   reviewerComments: text("reviewer_comments"),
   correctionData: jsonb("correction_data").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  submissionIdIdx: index("rlhf_feedback_logs_submission_id_idx").on(table.submissionId),
+  paperVersionIdIdx: index("rlhf_feedback_logs_paper_version_id_idx").on(table.paperVersionId),
+  journalIdIdx: index("rlhf_feedback_logs_journal_id_idx").on(table.journalId),
+}));
 
 export const promptStrategies = pgTable("prompt_strategies", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -662,18 +709,22 @@ export const promptStrategies = pgTable("prompt_strategies", {
 
 export const abTestAllocations = pgTable("ab_test_allocations", {
   id: uuid("id").primaryKey().defaultRandom(),
-  submissionId: integer("submission_id").references(() => submissions.id).notNull(),
-  promptStrategyId: uuid("prompt_strategy_id").references(() => promptStrategies.id).notNull(),
+  submissionId: integer("submission_id").references(() => submissions.id, { onDelete: "cascade" }).notNull(),
+  promptStrategyId: uuid("prompt_strategy_id").references(() => promptStrategies.id, { onDelete: "cascade" }).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  submissionIdIdx: index("ab_test_allocations_submission_id_idx").on(table.submissionId),
+  promptStrategyIdIdx: index("ab_test_allocations_prompt_strategy_id_idx").on(table.promptStrategyId),
+}));
 
 // ═══════════════════════════════════════════════════════
 // UPGRADE 4: MULTI-AGENT DEBATE (SWARM)
 // ═══════════════════════════════════════════════════════
 
-export const debateStatusEnum = pgEnum("debate_status", [
-  "pending", "in_progress", "consensus_reached", "failed"
-]);
+export const debateStatusEnumValues = [
+  "pending", "in_progress", "consensus_reached", "completed", "failed"
+] as const;
+export const debateStatusEnum = pgEnum("debate_status", debateStatusEnumValues);
 
 export const debates = pgTable("debates", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -683,7 +734,10 @@ export const debates = pgTable("debates", {
   consensusSummary: text("consensus_summary"),
   startedAt: timestamp("started_at").defaultNow(),
   completedAt: timestamp("completed_at"),
-});
+}, (table) => ({
+  paperIdIdx: index("debates_paper_id_idx").on(table.paperId),
+  statusIdx: index("debates_status_idx").on(table.status),
+}));
 
 export const debateAgents = pgTable("debate_agents", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -691,17 +745,22 @@ export const debateAgents = pgTable("debate_agents", {
   name: text("name").notNull(),
   persona: text("persona").notNull(),
   systemPrompt: text("system_prompt").notNull(),
-});
+}, (table) => ({
+  debateIdIdx: index("debate_agents_debate_id_idx").on(table.debateId),
+}));
 
 export const debateMessages = pgTable("debate_messages", {
   id: uuid("id").primaryKey().defaultRandom(),
   debateId: uuid("debate_id").references(() => debates.id, { onDelete: "cascade" }).notNull(),
-  agentId: uuid("agent_id").references(() => debateAgents.id),
+  agentId: uuid("agent_id").references(() => debateAgents.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
   round: integer("round").notNull(),
   isConsensusProposal: boolean("is_consensus_proposal").default(false),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  debateIdIdx: index("debate_messages_debate_id_idx").on(table.debateId),
+  agentIdIdx: index("debate_messages_agent_id_idx").on(table.agentId),
+}));
 
 // ═══════════════════════════════════════════════════════
 // UPGRADE 5: MULTIMODAL VISION AI
@@ -710,7 +769,7 @@ export const debateMessages = pgTable("debate_messages", {
 export const figures = pgTable("figures", {
   id: uuid("id").primaryKey().defaultRandom(),
   paperId: integer("paper_id").references(() => papers.id, { onDelete: "cascade" }).notNull(),
-  paperVersionId: integer("paper_version_id").references(() => paperVersions.id).notNull(),
+  paperVersionId: integer("paper_version_id").references(() => paperVersions.id, { onDelete: "cascade" }).notNull(),
   figureNumber: integer("figure_number").notNull(),
   imageUrl: text("image_url").notNull(),
   originalLegend: text("original_legend"),
@@ -719,7 +778,10 @@ export const figures = pgTable("figures", {
   qualityScore: integer("quality_score"),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  paperIdIdx: index("figures_paper_id_idx").on(table.paperId),
+  paperVersionIdIdx: index("figures_paper_version_id_idx").on(table.paperVersionId),
+}));
 
 export const figureAnalyses = pgTable("figure_analyses", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -731,7 +793,9 @@ export const figureAnalyses = pgTable("figure_analyses", {
   issuesFound: jsonb("issues_found"),
   rawAnalysis: jsonb("raw_analysis"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  figureIdIdx: index("figure_analyses_figure_id_idx").on(table.figureId),
+}));
 
 // ═══════════════════════════════════════════════════════
 // INFERRED TYPES
@@ -813,15 +877,20 @@ export const aiSystemFeedback = pgTable("ai_system_feedback", {
   isActionable: boolean("is_actionable").default(false), // whether to inject ruleText into prompts
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
-});
+}, (table) => ({
+  userIdIdx: index("ai_system_feedback_user_id_idx").on(table.userId),
+  journalIdIdx: index("ai_system_feedback_journal_id_idx").on(table.journalId),
+  isActionableIdx: index("ai_system_feedback_is_actionable_idx").on(table.isActionable),
+}));
 
 // ═══════════════════════════════════════════════════════
 // RPA AUTOMATED SUBMISSION
 // ═══════════════════════════════════════════════════════
 
-export const rpaJobStatusEnum = pgEnum("rpa_job_status", [
+export const rpaJobStatusEnumValues = [
   "pending", "running", "paused", "completed", "error"
-]);
+] as const;
+export const rpaJobStatusEnum = pgEnum("rpa_job_status", rpaJobStatusEnumValues);
 
 export const rpaJobs = pgTable("rpa_jobs", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -832,7 +901,10 @@ export const rpaJobs = pgTable("rpa_jobs", {
   errorLog: text("error_log"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  submissionIdIdx: index("rpa_jobs_submission_id_idx").on(table.submissionId),
+  statusIdx: index("rpa_jobs_status_idx").on(table.status),
+}));
 
 export type RpaJob = typeof rpaJobs.$inferSelect;
 export type NewRpaJob = typeof rpaJobs.$inferInsert;
@@ -849,7 +921,10 @@ export const entities = pgTable("entities", {
   metadata: jsonb("metadata"),
   embedding: vector("embedding", { dimensions: 1536 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  nameIdx: index("entities_name_idx").on(table.name),
+  typeIdx: index("entities_type_idx").on(table.type),
+}));
 
 export const relationships = pgTable("relationships", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -860,15 +935,16 @@ export const relationships = pgTable("relationships", {
   metadata: jsonb("metadata"),
   embedding: vector("embedding", { dimensions: 1536 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  sourceIdIdx: index("relationships_source_id_idx").on(table.sourceId),
+  targetIdIdx: index("relationships_target_id_idx").on(table.targetId),
+}));
 
 export type Entity = typeof entities.$inferSelect;
 export type NewEntity = typeof entities.$inferInsert;
 
 export type Relationship = typeof relationships.$inferSelect;
 export type NewRelationship = typeof relationships.$inferInsert;
-
-
 
 // ═══════════════════════════════════════════════════════
 // RLHF AGENT EVALUATIONS
@@ -887,16 +963,150 @@ export const agentEvaluations = pgTable("agent_evaluations", {
 export type AgentEvaluation = typeof agentEvaluations.$inferSelect;
 export type NewAgentEvaluation = typeof agentEvaluations.$inferInsert;
 
+// ═══════════════════════════════════════════════════════
+// ADDITIONAL INFERRED TYPES
+// ═══════════════════════════════════════════════════════
+
+export type Account = typeof accounts.$inferSelect;
+export type NewAccount = typeof accounts.$inferInsert;
+
+export type Session = typeof sessions.$inferSelect;
+export type NewSession = typeof sessions.$inferInsert;
+
+export type VerificationToken = typeof verificationTokens.$inferSelect;
+export type NewVerificationToken = typeof verificationTokens.$inferInsert;
+
+export type UserSettings = typeof userSettings.$inferSelect;
+export type NewUserSettings = typeof userSettings.$inferInsert;
+
+export type JournalConnection = typeof journalConnections.$inferSelect;
+export type NewJournalConnection = typeof journalConnections.$inferInsert;
+
+export type SubmissionLog = typeof submissionLogs.$inferSelect;
+export type NewSubmissionLog = typeof submissionLogs.$inferInsert;
+
+export type DataFile = typeof dataFiles.$inferSelect;
+export type NewDataFile = typeof dataFiles.$inferInsert;
+
+export type SandboxRun = typeof sandboxRuns.$inferSelect;
+export type NewSandboxRun = typeof sandboxRuns.$inferInsert;
+
+export type GeneratedChart = typeof generatedCharts.$inferSelect;
+export type NewGeneratedChart = typeof generatedCharts.$inferInsert;
+
+export type ScientificEntity = typeof scientificEntities.$inferSelect;
+export type NewScientificEntity = typeof scientificEntities.$inferInsert;
+
+export type ScientificRelationship = typeof scientificRelationships.$inferSelect;
+export type NewScientificRelationship = typeof scientificRelationships.$inferInsert;
+
+export type RlhfFeedbackLog = typeof rlhfFeedbackLogs.$inferSelect;
+export type NewRlhfFeedbackLog = typeof rlhfFeedbackLogs.$inferInsert;
+
+export type PromptStrategy = typeof promptStrategies.$inferSelect;
+export type NewPromptStrategy = typeof promptStrategies.$inferInsert;
+
+export type AbTestAllocation = typeof abTestAllocations.$inferSelect;
+export type NewAbTestAllocation = typeof abTestAllocations.$inferInsert;
+
+export type Debate = typeof debates.$inferSelect;
+export type NewDebate = typeof debates.$inferInsert;
+
+export type DebateAgent = typeof debateAgents.$inferSelect;
+export type NewDebateAgent = typeof debateAgents.$inferInsert;
+
+export type DebateMessage = typeof debateMessages.$inferSelect;
+export type NewDebateMessage = typeof debateMessages.$inferInsert;
+
+export type Figure = typeof figures.$inferSelect;
+export type NewFigure = typeof figures.$inferInsert;
+
+export type FigureAnalysis = typeof figureAnalyses.$inferSelect;
+export type NewFigureAnalysis = typeof figureAnalyses.$inferInsert;
+
+export type PaperVersion = typeof paperVersions.$inferSelect;
+export type NewPaperVersion = typeof paperVersions.$inferInsert;
+
+export type PaperStage = typeof paperStages.$inferSelect;
+export type NewPaperStage = typeof paperStages.$inferInsert;
+
+export type AiSystemFeedback = typeof aiSystemFeedback.$inferSelect;
+export type NewAiSystemFeedback = typeof aiSystemFeedback.$inferInsert;
 
 // ═══════════════════════════════════════════════════════
 // RELATIONS
 // ═══════════════════════════════════════════════════════
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   papers: many(papers),
   documents: many(documents),
   submissions: many(submissions),
   journalConnections: many(journalConnections),
+  accounts: many(accounts),
+  sessions: many(sessions),
+  settings: one(userSettings),
+  aiSystemFeedback: many(aiSystemFeedback),
+}));
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+  }),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userSettingsRelations = relations(userSettings, ({ one }) => ({
+  user: one(users, {
+    fields: [userSettings.userId],
+    references: [users.id],
+  }),
+}));
+
+export const journalsRelations = relations(journals, ({ one, many }) => ({
+  papers: many(papers, { relationName: "targetJournalPapers" }),
+  currentPapers: many(papers, { relationName: "currentJournalPapers" }),
+  journalConnections: many(journalConnections),
+  citationRules: one(journalCitationRules),
+  articleTypes: many(journalArticleTypes),
+  abstractRules: one(journalAbstractRules),
+  coverLetterRules: one(journalCoverLetterRules),
+  aiSystemFeedback: many(aiSystemFeedback),
+  rlhfFeedbackLogs: many(rlhfFeedbackLogs),
+}));
+
+export const journalCitationRulesRelations = relations(journalCitationRules, ({ one }) => ({
+  journal: one(journals, {
+    fields: [journalCitationRules.journalId],
+    references: [journals.id],
+  }),
+}));
+
+export const journalArticleTypesRelations = relations(journalArticleTypes, ({ one }) => ({
+  journal: one(journals, {
+    fields: [journalArticleTypes.journalId],
+    references: [journals.id],
+  }),
+}));
+
+export const journalAbstractRulesRelations = relations(journalAbstractRules, ({ one }) => ({
+  journal: one(journals, {
+    fields: [journalAbstractRules.journalId],
+    references: [journals.id],
+  }),
+}));
+
+export const journalCoverLetterRulesRelations = relations(journalCoverLetterRules, ({ one }) => ({
+  journal: one(journals, {
+    fields: [journalCoverLetterRules.journalId],
+    references: [journals.id],
+  }),
 }));
 
 export const papersRelations = relations(papers, ({ one, many }) => ({
@@ -907,9 +1117,46 @@ export const papersRelations = relations(papers, ({ one, many }) => ({
   targetJournal: one(journals, {
     fields: [papers.targetJournalId],
     references: [journals.id],
+    relationName: "targetJournalPapers",
+  }),
+  currentJournal: one(journals, {
+    fields: [papers.currentJournalId],
+    references: [journals.id],
+    relationName: "currentJournalPapers",
   }),
   documents: many(documents),
   submissions: many(submissions),
+  versions: many(paperVersions),
+  stages: many(paperStages),
+  references: many(references),
+  dataFiles: many(dataFiles),
+  sandboxRuns: many(sandboxRuns),
+  debates: many(debates),
+  figures: many(figures),
+  submissionEvents: many(submissionEvents),
+}));
+
+export const paperVersionsRelations = relations(paperVersions, ({ one, many }) => ({
+  paper: one(papers, {
+    fields: [paperVersions.paperId],
+    references: [papers.id],
+  }),
+  figures: many(figures),
+  rlhfFeedbackLogs: many(rlhfFeedbackLogs),
+}));
+
+export const paperStagesRelations = relations(paperStages, ({ one }) => ({
+  paper: one(papers, {
+    fields: [paperStages.paperId],
+    references: [papers.id],
+  }),
+}));
+
+export const referencesRelations = relations(references, ({ one }) => ({
+  paper: one(papers, {
+    fields: [references.paperId],
+    references: [papers.id],
+  }),
 }));
 
 export const documentsRelations = relations(documents, ({ one, many }) => ({
@@ -921,7 +1168,19 @@ export const documentsRelations = relations(documents, ({ one, many }) => ({
     fields: [documents.paperId],
     references: [papers.id],
   }),
+  targetJournal: one(journals, {
+    fields: [documents.targetJournalId],
+    references: [journals.id],
+  }),
   citations: many(citations),
+  chunks: many(documentChunks),
+}));
+
+export const documentChunksRelations = relations(documentChunks, ({ one }) => ({
+  document: one(documents, {
+    fields: [documentChunks.documentId],
+    references: [documents.id],
+  }),
 }));
 
 export const citationsRelations = relations(citations, ({ one }) => ({
@@ -933,11 +1192,6 @@ export const citationsRelations = relations(citations, ({ one }) => ({
     fields: [citations.paperId],
     references: [papers.id],
   }),
-}));
-
-export const journalsRelations = relations(journals, ({ many }) => ({
-  papers: many(papers),
-  journalConnections: many(journalConnections),
 }));
 
 export const journalConnectionsRelations = relations(journalConnections, ({ one, many }) => ({
@@ -968,6 +1222,9 @@ export const submissionsRelations = relations(submissions, ({ one, many }) => ({
   submissionLogs: many(submissionLogs),
   submissionEvents: many(submissionEvents),
   reviewThreads: many(reviewThreads),
+  rpaJobs: many(rpaJobs),
+  rlhfFeedbackLogs: many(rlhfFeedbackLogs),
+  abTestAllocations: many(abTestAllocations),
 }));
 
 export const submissionLogsRelations = relations(submissionLogs, ({ one }) => ({
@@ -981,6 +1238,10 @@ export const submissionEventsRelations = relations(submissionEvents, ({ one }) =
   submission: one(submissions, {
     fields: [submissionEvents.submissionId],
     references: [submissions.id],
+  }),
+  paper: one(papers, {
+    fields: [submissionEvents.paperId],
+    references: [papers.id],
   }),
 }));
 
@@ -996,6 +1257,167 @@ export const reviewCommentsRelations = relations(reviewComments, ({ one }) => ({
   thread: one(reviewThreads, {
     fields: [reviewComments.threadId],
     references: [reviewThreads.id],
+  }),
+}));
+
+export const dataFilesRelations = relations(dataFiles, ({ one }) => ({
+  paper: one(papers, {
+    fields: [dataFiles.paperId],
+    references: [papers.id],
+  }),
+}));
+
+export const sandboxRunsRelations = relations(sandboxRuns, ({ one, many }) => ({
+  paper: one(papers, {
+    fields: [sandboxRuns.paperId],
+    references: [papers.id],
+  }),
+  charts: many(generatedCharts),
+}));
+
+export const generatedChartsRelations = relations(generatedCharts, ({ one }) => ({
+  sandboxRun: one(sandboxRuns, {
+    fields: [generatedCharts.sandboxRunId],
+    references: [sandboxRuns.id],
+  }),
+  paper: one(papers, {
+    fields: [generatedCharts.paperId],
+    references: [papers.id],
+  }),
+}));
+
+export const scientificEntitiesRelations = relations(scientificEntities, ({ many }) => ({
+  outgoingRelationships: many(scientificRelationships, { relationName: "scientificSourceEntity" }),
+  incomingRelationships: many(scientificRelationships, { relationName: "scientificTargetEntity" }),
+}));
+
+export const scientificRelationshipsRelations = relations(scientificRelationships, ({ one }) => ({
+  sourceEntity: one(scientificEntities, {
+    fields: [scientificRelationships.sourceEntityId],
+    references: [scientificEntities.id],
+    relationName: "scientificSourceEntity",
+  }),
+  targetEntity: one(scientificEntities, {
+    fields: [scientificRelationships.targetEntityId],
+    references: [scientificEntities.id],
+    relationName: "scientificTargetEntity",
+  }),
+  paper: one(papers, {
+    fields: [scientificRelationships.paperId],
+    references: [papers.id],
+  }),
+}));
+
+export const rlhfFeedbackLogsRelations = relations(rlhfFeedbackLogs, ({ one }) => ({
+  submission: one(submissions, {
+    fields: [rlhfFeedbackLogs.submissionId],
+    references: [submissions.id],
+  }),
+  paperVersion: one(paperVersions, {
+    fields: [rlhfFeedbackLogs.paperVersionId],
+    references: [paperVersions.id],
+  }),
+  journal: one(journals, {
+    fields: [rlhfFeedbackLogs.journalId],
+    references: [journals.id],
+  }),
+}));
+
+export const promptStrategiesRelations = relations(promptStrategies, ({ many }) => ({
+  allocations: many(abTestAllocations),
+}));
+
+export const abTestAllocationsRelations = relations(abTestAllocations, ({ one }) => ({
+  submission: one(submissions, {
+    fields: [abTestAllocations.submissionId],
+    references: [submissions.id],
+  }),
+  promptStrategy: one(promptStrategies, {
+    fields: [abTestAllocations.promptStrategyId],
+    references: [promptStrategies.id],
+  }),
+}));
+
+export const debatesRelations = relations(debates, ({ one, many }) => ({
+  paper: one(papers, {
+    fields: [debates.paperId],
+    references: [papers.id],
+  }),
+  agents: many(debateAgents),
+  messages: many(debateMessages),
+}));
+
+export const debateAgentsRelations = relations(debateAgents, ({ one, many }) => ({
+  debate: one(debates, {
+    fields: [debateAgents.debateId],
+    references: [debates.id],
+  }),
+  messages: many(debateMessages),
+}));
+
+export const debateMessagesRelations = relations(debateMessages, ({ one }) => ({
+  debate: one(debates, {
+    fields: [debateMessages.debateId],
+    references: [debates.id],
+  }),
+  agent: one(debateAgents, {
+    fields: [debateMessages.agentId],
+    references: [debateAgents.id],
+  }),
+}));
+
+export const figuresRelations = relations(figures, ({ one, many }) => ({
+  paper: one(papers, {
+    fields: [figures.paperId],
+    references: [papers.id],
+  }),
+  paperVersion: one(paperVersions, {
+    fields: [figures.paperVersionId],
+    references: [paperVersions.id],
+  }),
+  analyses: many(figureAnalyses),
+}));
+
+export const figureAnalysesRelations = relations(figureAnalyses, ({ one }) => ({
+  figure: one(figures, {
+    fields: [figureAnalyses.figureId],
+    references: [figures.id],
+  }),
+}));
+
+export const aiSystemFeedbackRelations = relations(aiSystemFeedback, ({ one }) => ({
+  user: one(users, {
+    fields: [aiSystemFeedback.userId],
+    references: [users.id],
+  }),
+  journal: one(journals, {
+    fields: [aiSystemFeedback.journalId],
+    references: [journals.id],
+  }),
+}));
+
+export const rpaJobsRelations = relations(rpaJobs, ({ one }) => ({
+  submission: one(submissions, {
+    fields: [rpaJobs.submissionId],
+    references: [submissions.id],
+  }),
+}));
+
+export const entitiesRelations = relations(entities, ({ many }) => ({
+  outgoingRelationships: many(relationships, { relationName: "graphragSourceEntity" }),
+  incomingRelationships: many(relationships, { relationName: "graphragTargetEntity" }),
+}));
+
+export const relationshipsRelations = relations(relationships, ({ one }) => ({
+  sourceEntity: one(entities, {
+    fields: [relationships.sourceId],
+    references: [entities.id],
+    relationName: "graphragSourceEntity",
+  }),
+  targetEntity: one(entities, {
+    fields: [relationships.targetId],
+    references: [entities.id],
+    relationName: "graphragTargetEntity",
   }),
 }));
 

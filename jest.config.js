@@ -19,7 +19,7 @@ module.exports = async () => {
   if (nextJestConfig.transformIgnorePatterns) {
     nextJestConfig.transformIgnorePatterns = nextJestConfig.transformIgnorePatterns.map(pattern => {
       if (typeof pattern === 'string' && pattern.includes('geist|')) {
-        return pattern.replaceAll('geist|', 'geist|ai|@ai-sdk|@modelcontextprotocol|@workflow|');
+        return pattern.replaceAll('geist|', 'geist|ai|@ai-sdk|@modelcontextprotocol|@workflow|@langchain|langsmith|e2b|chalk|');
       }
       return pattern;
     });

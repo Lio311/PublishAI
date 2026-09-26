@@ -6,6 +6,7 @@ export class ClarificationAgent extends BaseAgent {
   model = "claude-3-7-sonnet-20250219";
 
   async execute(context: AgentContext): Promise<AgentResult> {
+    const manuscript = context.manuscriptText || "";
     const prompt = `You are an expert academic editor.
 Analyze the academic text provided between <manuscript> tags and extract:
 1. The main thesis / objective
@@ -13,7 +14,7 @@ Analyze the academic text provided between <manuscript> tags and extract:
 3. Any obvious missing sections (e.g., no Conclusion)
 
 <manuscript>
-${context.manuscriptText}
+${manuscript}
 </manuscript>
 `;
 

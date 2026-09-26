@@ -7,7 +7,8 @@ export class CompilationAgent extends BaseAgent {
   model = "claude-3-7-sonnet-20250219";
 
   async execute(context: AgentContext): Promise<AgentResult> {
-    const prompt = `Produce a clean, final version of the following manuscript, ensuring formatting is consistent and removing any internal notes or XML tags.\n\n<manuscript>\n${context.manuscriptText}\n</manuscript>`;
+    const manuscript = context.manuscriptText || "";
+    const prompt = `Produce a clean, final version of the following manuscript, ensuring formatting is consistent and removing any internal notes or XML tags.\n\n<manuscript>\n${manuscript}\n</manuscript>`;
     
     try {
       const { text, tokensUsed } = await askClaude(prompt, this.model as import("./claude-client").ClaudeModel);

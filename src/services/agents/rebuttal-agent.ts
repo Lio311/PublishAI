@@ -14,9 +14,17 @@ export class RebuttalAgent extends BaseAgent {
     }
 
     // AR Retrieval: Fetch cross-domain analogies to improve solution diversity
-    const analogies = await fetchCrossDomainAnalogies(reviewerComments);
-    const analogiesContext = analogies.map((a, i) => `Analogy ${i + 1}: ${a}`).join("\\n");
+    let analogies: string[] = [];
+    try {
+      analogies = await fetchCrossDomainAnalogies(reviewerComments);
+    } catch (e) {
+      console.warn("[RebuttalAgent] Failed to fetch cross-domain analogies:", e);
+    }
+    const analogiesContext = analogies.length > 0 
+      ? analogies.map((a, i) => `Analogy ${i + 1}: ${a}`).join("\n")
+      : "No cross-domain analogies available.";
 
+    const manuscript = context.manuscriptText || "";
     const prompt = `You are a senior academic editor.
 The author has received the following reviewer comments for their manuscript:
 """
@@ -25,7 +33,7 @@ ${reviewerComments}
 
 The original manuscript text:
 """
-${context.manuscriptText}
+${manuscript}
 """
 
 To enhance the creativity and robustness of the rebuttal, consider these cross-domain analogies:

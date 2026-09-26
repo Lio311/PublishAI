@@ -9,15 +9,31 @@ export const draftNode = async (state: PublishAIState): Promise<Partial<PublishA
     callbacks: [langfuseLangchainHandler],
   });
 
-  const review = state.scientificReview?.output || "";
-  const prompt = `Rewrite the text to elevate the academic tone, address the following review feedback, and remove any generic AI-sounding phrases.\n\nReview:\n${review}\n\nManuscript provided between <manuscript> tags:\n<manuscript>\n${state.documentContent}\n</manuscript>`;
+  const review = state.scientificReview?.output || (typeof state.scientificReview === "string" ? state.scientificReview : "");
+  const prompt = `Rewrite the text to elevate the academic tone, address the following review feedback, and remove any generic AI-sounding phrases.\n\nReview:\n${review}\n\nManuscript provided between <manuscript> tags:\n<manuscript>\n${state.documentContent || ""}\n</manuscript>`;
 
-  const response = await model.invoke([new HumanMessage(prompt)]);
+  try {
+    const response = await model.invoke([new HumanMessage(prompt)]);
+    const output = typeof response.content === "string" 
+      ? response.content 
+      : (Array.isArray(response.content) ? response.content.map(c => typeof c === "string" ? c : (c as any).text || "").join("") : String(response.content));
 
-  return {
-    draft: {
-      output: response.content,
-      status: "completed",
-    },
-  };
+    return {
+      draft: {
+        output,
+        status: "completed",
+      },
+      documentContent: output,
+      currentStage: "writing"
+    };
+  } catch (error: any) {
+    console.error("[draftNode] Execution failed:", error);
+    return {
+      draft: {
+        output: `Draft generation failed: ${error?.message || "Unknown error"}`,
+        status: "failed",
+      },
+      currentStage: "writing"
+    };
+  }
 };
