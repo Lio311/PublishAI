@@ -46,7 +46,7 @@ const TONE_MAPPINGS: Record<string, string> = {
 };
 
 export class CoverLetterAgent extends BaseAgent {
-  stage = "compilation" as const; // Assuming it runs during compilation
+  stage = "cover_letter" as const; // Assuming it runs during compilation
   model: ClaudeModel = "claude-3-7-sonnet-20250219";
 
   async execute(context: AgentContext): Promise<AgentResult> {

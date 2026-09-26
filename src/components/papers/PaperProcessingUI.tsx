@@ -176,6 +176,7 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
           // Assuming data.status relates to our FLOW_STEPS
           if (data.status === 'completed' || data.status === 'approved') {
              setIsFinished(true);
+             setCurrentStepIndex(FLOW_STEPS.length - 1);
              setCompletedSteps(new Set(FLOW_STEPS.map((_, i) => i)));
           }
           // We can also parse event progress here if needed
@@ -196,12 +197,12 @@ export default function PaperProcessingUI({ paperId, initialStatus }: { paperId:
   const handleCaptchaSubmit = async () => {
     try {
       setSubmittingCaptcha(true);
-      const res = await fetch(`/api/submissions/${paperId}/captcha`, {
+      const res = await fetch(`/api/submissions/captcha`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ captcha: captchaInput })
+        body: JSON.stringify({ submissionId: String(paperId), solution: captchaInput })
       });
       if (res.ok) {
         setRequiresCaptcha(false);

@@ -12,9 +12,10 @@ export async function askClaude(
   system?: string
 ): Promise<{ text: string; tokensUsed: number }> {
   try {
+    const max_tokens = model === "claude-3-opus-20240229" ? 4096 : 8192;
     const msg = await claude.messages.create({
       model,
-      max_tokens: 8192,
+      max_tokens,
       system,
       messages: [{ role: "user", content: prompt }],
     });

@@ -20,12 +20,9 @@ import { SubmissionTracker } from "@/components/rpa/SubmissionTracker";
 import RejectStateHandler from "@/components/cascade/RejectStateHandler";
 import { RevisionRequestForm } from "@/components/pingpong/RevisionRequestForm";
 import { RevisionDiffViewer } from "@/components/pingpong/RevisionDiffViewer";
-import AITiptapEditor from "@/components/Editor/AITiptapEditor";
 import CitationSearch from "@/components/literature/CitationSearch";
 import { ExportAgentToggle } from "@/components/export/ExportAgentToggle";
 import UploadClarificationModal from "@/components/stage1/UploadClarificationModal";
-import { CaptchaSolver } from "@/components/submission/CaptchaSolver";
-import { TwoFactorDialog } from "@/components/submission/TwoFactorDialog";
 
 
 interface PaperTabsProps {
@@ -113,11 +110,10 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
           <ErrorBoundary name="Editor">
             <div className="space-y-8">
               <RichDocumentEditor documentId={String(paperId)} />
-              <AITiptapEditor initialContent="" />
               <CitationSearch />
               <RevisionRequestForm onSubmit={() => {}} isLoading={false} />
               <RevisionDiffViewer originalContent="" newContent="" />
-              <ExportAgentToggle paperId={String(paperId)} hasVerifiedCode={true} />
+              <ExportAgentToggle paperId={String(paperId)} hasVerifiedCode={false} codeSnippet="" datasets={[]} requirements={[]} />
             </div>
           </ErrorBoundary>
         )}
@@ -129,8 +125,6 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
               <SubmissionTracker jobId={String(paperId)} />
               <RejectStateHandler paperTitle="Sample Paper" originalJournal="Nature" recommendations={[]} />
               <UploadClarificationModal isOpen={false} onClose={() => {}} onComplete={() => {}} />
-              <CaptchaSolver submissionId={String(paperId)} />
-              <TwoFactorDialog isOpen={false} onClose={() => {}} onSubmit={async () => {}} />
             </div>
           </ErrorBoundary>
         )}

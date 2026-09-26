@@ -17,7 +17,7 @@ export function CaptchaSolver({ submissionId }: CaptchaSolverProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/submissions/${submissionId}/captcha`, {
+      const res = await fetch(`/api/submissions/captcha`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ submissionId, solution }),

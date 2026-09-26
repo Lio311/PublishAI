@@ -3,12 +3,18 @@ import { db } from "@/services/db";
 import { papers, documents, journals, submissions } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import { predictAcceptance } from "@/services/ai/acceptance-predictor";
+import { auth } from "@/app/auth";
 
 export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await context.params;
     const paperId = parseInt(id);
     
@@ -20,6 +26,11 @@ export async function POST(
     if (!paper) {
       return NextResponse.json({ error: "Paper not found" }, { status: 404 });
     }
+    
+    if (paper.userId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     // Need to do custom query for targetJournal if relations aren't set up perfectly
     const journal = paper.targetJournalId ? await db.query.journals.findFirst({ where: eq(journals.id, paper.targetJournalId) }) : null;
 

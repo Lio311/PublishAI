@@ -5,7 +5,7 @@ interface SubmissionTrackerProps {
   jobId: string;
 }
 
-type JobStatus = 'initializing' | 'logging_in' | 'uploading' | 'filling_forms' | 'paused' | 'completed' | 'failed';
+type JobStatus = 'initializing' | 'logging_in' | 'uploading' | 'filling_forms' | 'paused' | 'completed' | 'failed' | 'error';
 
 interface JobDetails {
   status: JobStatus;
@@ -38,7 +38,7 @@ export const SubmissionTracker: React.FC<SubmissionTrackerProps> = ({ jobId }) =
         
         if (data.status === 'paused') {
           setIsModalOpen(true);
-        } else if (data.status === 'completed' || data.status === 'failed') {
+        } else if (data.status === 'completed' || data.status === 'failed' || data.status === 'error') {
           // Stop polling if terminal state
           return true; // indicates done
         }
@@ -88,7 +88,8 @@ export const SubmissionTracker: React.FC<SubmissionTrackerProps> = ({ jobId }) =
   const getStatusColor = (status: JobStatus) => {
     switch (status) {
       case 'completed': return 'text-green-600 bg-green-100';
-      case 'failed': return 'text-red-600 bg-red-100';
+      case 'failed':
+      case 'error': return 'text-red-600 bg-red-100';
       case 'paused': return 'text-yellow-600 bg-yellow-100';
       default: return 'text-blue-600 bg-blue-100';
     }
@@ -103,7 +104,8 @@ export const SubmissionTracker: React.FC<SubmissionTrackerProps> = ({ jobId }) =
       case 'filling_forms': return '70%';
       case 'paused': return '75%';
       case 'completed': return '100%';
-      case 'failed': return '100%';
+      case 'failed':
+      case 'error': return '100%';
       default: return '0%';
     }
   };
@@ -135,7 +137,7 @@ export const SubmissionTracker: React.FC<SubmissionTrackerProps> = ({ jobId }) =
         <div 
           className={`h-2.5 rounded-full transition-all duration-500 ease-in-out ${
             jobDetails.status === 'completed' ? 'bg-green-500' :
-            jobDetails.status === 'failed' ? 'bg-red-500' :
+            jobDetails.status === 'failed' || jobDetails.status === 'error' ? 'bg-red-500' :
             jobDetails.status === 'paused' ? 'bg-yellow-500' : 'bg-blue-600'
           }`}
           style={{ width: getProgressWidth(jobDetails.status, jobDetails.progress) }}
@@ -176,7 +178,8 @@ const getProgressValue = (status: JobStatus): number => {
     case 'filling_forms': return 70;
     case 'paused': return 75;
     case 'completed': return 100;
-    case 'failed': return 100;
+    case 'failed':
+    case 'error': return 100;
     default: return 0;
   }
 };

@@ -1,5 +1,5 @@
 import { db } from "@/services/db";
-import { rlhfFeedbackLogs, promptStrategies, abTestAllocations, journals } from "@/services/db/schema";
+import { rlhfFeedbackLogs, promptStrategies, abTestAllocations, journals, submissions, paperVersions, journalConnections } from "@/services/db/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
 import fs from "fs/promises";
 import path from "path";
@@ -10,18 +10,31 @@ export async function logFeedbackOutcome(
   outcome: 'accepted' | 'rejected' | 'revision_required', 
   reviewerComments?: string
 ): Promise<void> {
-  const submissions = (await db.execute(sql`SELECT "paper_version_id", "journal_id" FROM "submissions" WHERE "id" = ${submissionId}`)).rows;
-  
-  if (!submissions.length) {
+  const submission = await db.query.submissions.findFirst({
+    where: eq(submissions.id, submissionId)
+  });
+
+  if (!submission) {
     throw new Error("Submission not found");
   }
 
-  const { paper_version_id, journal_id } = submissions[0];
+  const connection = await db.query.journalConnections.findFirst({
+    where: eq(journalConnections.id, submission.connectionId)
+  });
+
+  const latestVersion = await db.query.paperVersions.findFirst({
+    where: eq(paperVersions.paperId, submission.paperId),
+    orderBy: [desc(paperVersions.versionNumber)]
+  });
+
+  if (!connection || !latestVersion) {
+    throw new Error("Could not find related connection or paper version");
+  }
 
   await db.insert(rlhfFeedbackLogs).values({
     submissionId,
-    paperVersionId: paper_version_id as number,
-    journalId: journal_id as number,
+    paperVersionId: latestVersion.id,
+    journalId: connection.journalId,
     outcome,
     reviewerComments,
     correctionData: {}

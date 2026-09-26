@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
     // Fire event to start analysis pipeline
     await inngest.send({
-      name: "paper/uploaded",
+      name: "dataset/uploaded",
       data: { paperId }
     });
 

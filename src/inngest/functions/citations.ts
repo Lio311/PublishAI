@@ -10,7 +10,7 @@ export const syncCitations = inngest.createFunction(
       return db
         .select()
         .from(papers)
-        .where(and(eq(papers.status, "published" as any), isNotNull(papers.doi)));
+        .where(and(eq(papers.status, "completed" as any), isNotNull(papers.doi)));
     });
 
     for (const paper of publishedPapers) {

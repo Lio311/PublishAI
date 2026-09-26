@@ -1,13 +1,11 @@
-"use client";
+'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useLocale } from 'next-intl';
 
 const TYPE_COLORS: Record<string, string> = {
-  drug: '#3b82f6', // blue
-  protein: '#10b981', // emerald
-  gene: '#f59e0b', // amber
-  disease: '#ef4444', // red
+  author: '#3b82f6', // blue
+  journal: '#f59e0b', // amber
   concept: '#8b5cf6', // violet
   study: '#ec4899', // pink
   method: '#06b6d4', // cyan
@@ -57,7 +55,7 @@ export default function NetworkGraph() {
         const data = await res.json();
         
         // Initialize nodes with random positions
-        const initializedNodes = data.nodesRef.current.map((n: any) => ({
+        const initializedNodes = (data.nodes || []).map((n: any) => ({
           ...n,
           x: width / 2 + (Math.random() - 0.5) * 100,
           y: height / 2 + (Math.random() - 0.5) * 100,
@@ -66,7 +64,7 @@ export default function NetworkGraph() {
         }));
         
         // Link edges to node objects
-        const initializedEdges = data.edgesRef.current.map((e: any) => ({
+        const initializedEdges = (data.edges || []).map((e: any) => ({
           ...e,
           sourceNode: initializedNodes.find((n: Node) => n.id === e.source),
           targetNode: initializedNodes.find((n: Node) => n.id === e.target)

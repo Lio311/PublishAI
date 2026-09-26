@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { db } from "@/services/db";
-import { debateMessages } from "@/services/db/schema";
+import { debateMessages, debates } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ debateId: string }> }) {
@@ -17,6 +17,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ deba
       const seenIds = new Set<string>();
 
       while (!isClosed) {
+        const [debate] = await db.select().from(debates).where(eq(debates.id, debateId));
+        if (!debate) {
+            isClosed = true;
+            controller.close();
+            break;
+        }
+
         const msgs = await db.select()
           .from(debateMessages)
           .where(eq(debateMessages.debateId, debateId));
@@ -26,6 +33,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ deba
         for (const msg of newMsgs) {
           controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(msg)}\n\n`));
           seenIds.add(msg.id);
+        }
+
+        if (debate.status === "completed" || debate.status === "failed") {
+          isClosed = true;
+          controller.close();
+          break;
         }
 
         await new Promise(resolve => setTimeout(resolve, 2000));

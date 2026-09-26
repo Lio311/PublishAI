@@ -62,7 +62,6 @@ export async function PATCH(
     if (body.title !== undefined) updateData.title = body.title;
     if (body.status !== undefined) updateData.status = body.status;
     if (body.targetJournalId !== undefined) updateData.targetJournalId = body.targetJournalId ? Number(body.targetJournalId) : null;
-    if (body.publishedAt !== undefined) updateData.publishedAt = body.publishedAt ? new Date(body.publishedAt) : null;
     if (body.doi !== undefined) updateData.doi = body.doi;
 
     const [updated] = await db

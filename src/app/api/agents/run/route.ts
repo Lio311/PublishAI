@@ -20,10 +20,10 @@ export async function POST(req: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          if (action === "start") {
+          if (["start", "start_rebuttal", "cascade"].includes(action)) {
             // Start a new run with the initial state
             const streamEvents = await publishAiGraph.streamEvents(
-              { paperId, reviewerComments: reviewerComments || "", dataSchema }, // initial state
+              { paperId, action, reviewerComments: reviewerComments || "", dataSchema }, // initial state
               { ...config, version: "v2" }
             );
 

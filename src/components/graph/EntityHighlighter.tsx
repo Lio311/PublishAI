@@ -28,7 +28,7 @@ export default function EntityHighlighter({ text }: { text: string }) {
     const sorted = [...ents].sort((a, b) => b.name.length - a.name.length);
     
     // Create regex pattern
-    const pattern = new RegExp(`\\\\b(${sorted.map(e => escapeRegExp(e.name)).join('|')})\\\\b`, 'gi');
+    const pattern = new RegExp(`\\b(${sorted.map(e => escapeRegExp(e.name)).join('|')})\\b`, 'gi');
     
     const parts = content.split(pattern);
     

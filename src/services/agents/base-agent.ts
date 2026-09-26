@@ -8,6 +8,7 @@ export type Stage =
   | "qa" 
   | "verification" 
   | "compilation"
+  | "cover_letter"
   | "rebuttal";
 
 export interface AgentContext {

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { server } from "@/mcp/literatureMcpServer";
+import { createLiteratureMcpServer } from "@/mcp/literatureMcpServer";
 import { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import { JSONRPCMessage, JSONRPCMessageSchema } from '@modelcontextprotocol/sdk/types.js';
 
@@ -17,7 +17,6 @@ class NextSseTransport implements Transport {
   }
   
   async start() {
-    // Protocol.connect calls this. Connection is already established via GET.
   }
   
   async send(message: JSONRPCMessage) {
@@ -33,7 +32,6 @@ class NextSseTransport implements Transport {
     try {
       this.controller.close();
     } catch (err) {
-      // Stream might already be closed
     }
     this.onclose?.();
   }
@@ -49,13 +47,8 @@ class NextSseTransport implements Transport {
   }
 }
 
-// Global store to map session IDs to their active transports
 const activeTransports = new Map<string, NextSseTransport>();
 
-/**
- * Custom SSE Transport adapter for Next.js App Router.
- * This bridges the standard MCP Server object with Next.js web streams.
- */
 export async function GET(req: NextRequest) {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -65,14 +58,13 @@ export async function GET(req: NextRequest) {
       const transport = new NextSseTransport(sessionId, controller);
       activeTransports.set(sessionId, transport);
       
-      // Connect this transport to the singleton server.
+      const server = createLiteratureMcpServer();
       await server.connect(transport);
       
       controller.enqueue(encoder.encode('event: endpoint\n'));
       const postUrl = new URL(`/api/mcp/literature?sessionId=${sessionId}`, req.url).toString();
       controller.enqueue(encoder.encode(`data: ${postUrl}\n\n`));
       
-      // 2. Keep the connection alive
       const interval = setInterval(() => {
         try {
            controller.enqueue(encoder.encode(':\n\n'));
@@ -113,8 +105,6 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    
-    // Pass incoming message directly into the SDK's Server instance via Transport
     await transport.handlePostMessage(body);
     
     return new Response("Accepted", { status: 202 });

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { getSafeAuth, getSafeDb } from "@/services/api/db-helper";
-import { DUMMY_USER } from "@/services/api/dummy-data";
 
 export async function GET() {
   try {
@@ -41,19 +40,18 @@ export async function GET() {
       });
     }
 
-    // Default scaffold fallback when not authenticated or during early MVP dev
     return NextResponse.json({
       authenticated: false,
-      user: DUMMY_USER,
-      message: "Scaffolded session profile (dummy data active)",
-    });
+      user: null,
+      message: "Unauthenticated",
+    }, { status: 401 });
   } catch (error) {
     console.error("[API auth/me] Error:", error);
     return NextResponse.json({
       authenticated: false,
-      user: DUMMY_USER,
-      message: "Fallback scaffold profile",
-    });
+      user: null,
+      message: "Unauthenticated",
+    }, { status: 401 });
   }
 }
 
@@ -87,15 +85,7 @@ export async function PATCH(req: Request) {
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      message: "User profile updated (scaffolded)",
-      user: {
-        ...DUMMY_USER,
-        ...body,
-        updatedAt: new Date().toISOString(),
-      },
-    });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   } catch (error) {
     console.error("[API auth/me PATCH] Error:", error);
     return NextResponse.json({ error: "Failed to update profile" }, { status: 500 });
