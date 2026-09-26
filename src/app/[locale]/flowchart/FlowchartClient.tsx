@@ -388,7 +388,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="agent" icon={Search} isHe={isHe} titleEn="Knowledge" titleHe="סוכן ידע" descEn="PubMed searches for literature." descHe="שאיבת ספרות מ-PubMed." techs={['MCP', 'PubMed API']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={MessageSquare} isHe={isHe} titleEn="SciReview" titleHe="עימות סוקרים" descEn="Harsh (Claude) + Analyst (GPT-4o) + Optimist" descHe="ביקורת רב-מודלית (Claude, GPT-4o, Gemini)" techs={['GPT-4o-mini', 'Gemini 1.5 Pro']} />
+                <NodeCard type="agent" icon={MessageSquare} isHe={isHe} titleEn="SciReview" titleHe="עימות סוקרים" descEn="Harsh (GPT-4o) + Analyst (Claude) + Optimist" descHe="ביקורת רב-מודלית (Claude, GPT-4o, Gemini)" techs={['GPT-4o', 'Gemini 1.5 Pro']} />
                 
                 <SideDropArrow isRightSide={!isHe} />
                 <VerticalFlowArrow isHe={isHe} length="h-16 lg:hidden" />
@@ -419,10 +419,10 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="logic" icon={Shield} isHe={isHe} titleEn="IntegrityScanner" titleHe="סורק תקינות" descEn="Plagiarism score + AI-generation detection" descHe="בדיקת ציון פלגיאט + זיהוי כתיבת AI" techs={['Claude 3.7']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={CheckCircle} isHe={isHe} titleEn="QaAgent" titleHe="סוכן QA" descEn="Final consistency, formatting, grammar check" descHe="בדיקת עקביות סופית, עיצוב ודקדוק" techs={['Claude 3.7', 'Jest']} />
+                <NodeCard type="agent" icon={CheckCircle} isHe={isHe} titleEn="QaAgent" titleHe="סוכן QA" descEn="Final consistency, formatting, grammar check" descHe="בדיקת עקביות סופית, עיצוב ודקדוק" techs={['Claude 3.7']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={ListChecks} isHe={isHe} titleEn="Verification" titleHe="סוכן אימות" descEn="Verify journal guidelines compliance" descHe="אימות עמידה מלאה בהנחיות כתב העת" techs={['o1-preview']} />
+                <NodeCard type="agent" icon={ListChecks} isHe={isHe} titleEn="Verification" titleHe="סוכן אימות" descEn="Verify journal guidelines compliance" descHe="אימות עמידה מלאה בהנחיות כתב העת" techs={['Claude 3.7']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="agent" icon={FileText} isHe={isHe} titleEn="Cover Letter" titleHe="מכתב מקדים" descEn="Generate persuasive letter to Editor-in-Chief" descHe="יצירת מכתב מקדים משכנע לעורך" techs={['Claude 3.7']} />
