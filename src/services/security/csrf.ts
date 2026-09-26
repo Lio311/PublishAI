@@ -195,11 +195,10 @@ export function validateCsrf(
  */
 
 export async function generateCsrfToken(sessionId: string, secret?: string): Promise<string> {
-  const tokenSecret =
-    secret ||
-    process.env.AUTH_SECRET ||
-    process.env.NEXTAUTH_SECRET ||
-    process.env.NODE_ENV === "production" ? (() => { throw new Error("[Config Error] AUTH_SECRET is required in production for CSRF tokens."); })() : "dev-csrf-fallback";
+  const tokenSecret = secret || process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!tokenSecret) {
+    throw new Error("[Config Error] AUTH_SECRET is required for CSRF tokens.");
+  }
   const timestamp = Date.now().toString();
   const data = `${sessionId}:${timestamp}`;
 
@@ -249,11 +248,10 @@ export async function verifyCsrfToken(
     return false;
   }
 
-  const tokenSecret =
-    secret ||
-    process.env.AUTH_SECRET ||
-    process.env.NEXTAUTH_SECRET ||
-    process.env.NODE_ENV === "production" ? (() => { throw new Error("[Config Error] AUTH_SECRET is required in production for CSRF tokens."); })() : "dev-csrf-fallback";
+  const tokenSecret = secret || process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!tokenSecret) {
+    throw new Error("[Config Error] AUTH_SECRET is required for CSRF tokens.");
+  }
     
   const data = `${tokSessionId}:${tokTimestamp}`;
   
