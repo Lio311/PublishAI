@@ -5,8 +5,19 @@ import Anthropic from "@anthropic-ai/sdk";
 import { langfuse } from "@/lib/langfuse";
 import { memoryClient } from "@/lib/mem0";
 import { getApplicableRules, extractUserRewriteFeedback } from "@/services/learningService";
-import { withRateLimitRetry } from "./rateLimiter";
-import { DEFAULT_OPENAI_MODEL_NAME, DEFAULT_ANTHROPIC_MODEL_NAME } from "./provider";
+import { withRateLimitRetry, withModelFallback, withTimeout } from "./rateLimiter";
+import {
+  DEFAULT_OPENAI_MODEL_NAME,
+  DEFAULT_ANTHROPIC_MODEL_NAME,
+  getModelFallbackChain,
+  ModelCandidate,
+} from "./provider";
+import {
+  SYSTEM_PROMPT_GUARDRAILS,
+  sanitizePromptInput,
+  wrapPromptContext,
+  redactApiKeys,
+} from "./promptSanitizer";
 import {
   AIProvider,
   AIModel,
@@ -36,10 +47,15 @@ export function resolveProvider(provider?: AIProvider, model?: AIModel): AIProvi
 }
 
 /**
- * Create or get an Anthropic client.
+ * Create or get an Anthropic client with credential validation.
  */
 export function getAnthropicClient(apiKey?: string): Anthropic {
-  const key = apiKey || process.env.ANTHROPIC_API_KEY || "";
+  const key = apiKey || process.env.ANTHROPIC_API_KEY;
+  if (!key) {
+    throw new Error(
+      "Anthropic API key is not configured. Please set ANTHROPIC_API_KEY or provide an apiKey in options."
+    );
+  }
   return new Anthropic({ apiKey: key });
 }
 
@@ -56,266 +72,324 @@ export function getOpenAIModelInstance(modelName: string = DEFAULT_OPENAI_MODEL,
 
 /**
  * Core LLM text generation wrapper supporting both OpenAI and Anthropic
- * with integrated rate-limit handling, automatic retries, and comprehensive error trapping.
+ * with integrated rate-limit handling, automatic model fallbacks, prompt injection defense,
+ * timeouts, and comprehensive error trapping.
  */
 export async function callLLM(options: GenerateTextOptions): Promise<AIResponse> {
-  const provider = resolveProvider(options.provider, options.model);
+  const primaryProvider = resolveProvider(options.provider, options.model);
+  const primaryModel =
+    (options.model as string) ||
+    (primaryProvider === "anthropic" ? DEFAULT_ANTHROPIC_MODEL : DEFAULT_OPENAI_MODEL);
 
-  let finalSystemPrompt = options.systemPrompt;
+  // 1. Sanitize user prompt to neutralize injection tokens and secrets
+  const sanitizedUserPrompt = sanitizePromptInput(options.prompt, { warnOnInjection: true });
+
+  // 2. Build system prompt reinforced with prompt injection isolation guardrails
+  let finalSystemPrompt = options.systemPrompt
+    ? `${options.systemPrompt}\n\n${SYSTEM_PROMPT_GUARDRAILS}`
+    : SYSTEM_PROMPT_GUARDRAILS;
+
+  // 3. User preferences memory injection with safe XML wrapping
   if (options.useMemory && options.userId) {
     try {
-      const searchResponse = await memoryClient.search(options.prompt, {
+      const searchResponse = await memoryClient.search(sanitizedUserPrompt, {
         userId: options.userId,
         topK: 3,
       } as any);
-      
+
       const memoryStr = searchResponse?.results
         ? searchResponse.results.map((r: any) => `- ${r.memory}`).join("\n")
         : "";
-        
+
       if (memoryStr) {
-        finalSystemPrompt = `${finalSystemPrompt || ""}\n\n[USER PREFERENCES & CONTEXT]:\n${memoryStr}`;
+        finalSystemPrompt = `${finalSystemPrompt}\n\n${wrapPromptContext(
+          "user_preferences",
+          memoryStr,
+          "User personalized style guidelines"
+        )}`;
       }
     } catch (e) {
-      console.warn("[callLLM] Mem0 injection failed:", e);
+      console.warn("[callLLM] Mem0 memory retrieval skipped or failed:", redactApiKeys(String(e)));
     }
   }
 
-  if (provider === "anthropic") {
-    const client = getAnthropicClient(options.apiKey);
-    const model = (options.model as string) || DEFAULT_ANTHROPIC_MODEL;
-    const maxTokens = options.maxTokens || 4096;
+  // 4. Determine fallback candidates chain
+  const candidateList: ModelCandidate[] = options.fallbackModels?.length
+    ? [
+        { model: primaryModel, provider: primaryProvider },
+        ...options.fallbackModels.map((m) => ({
+          model: m as string,
+          provider: resolveProvider(undefined, m),
+        })),
+      ]
+    : getModelFallbackChain(primaryModel, primaryProvider);
 
-    try {
-      const response = await withRateLimitRetry(
-        () =>
-          client.messages.create({
-            model,
-            max_tokens: maxTokens,
-            temperature: options.temperature,
-            system: finalSystemPrompt,
-            messages: [{ role: "user", content: options.prompt }],
-          }),
-        {
-          operationName: `callLLM(anthropic:${model})`,
-          maxRetries: options.retries ?? 3,
+  const timeoutMs = options.timeoutMs ?? 30000;
+  const maxRetries = options.retries ?? 2;
+
+  // 5. Execute with automated model fallback and rate-limit recovery
+  try {
+    const { result, usedCandidate } = await withModelFallback(
+      async (candidate) => {
+        if (candidate.provider === "anthropic") {
+          const client = getAnthropicClient(options.apiKey);
+          const maxTokens = options.maxTokens || 4096;
+
+          const response = await withTimeout(
+            client.messages.create({
+              model: candidate.model,
+              max_tokens: maxTokens,
+              temperature: options.temperature,
+              system: finalSystemPrompt,
+              messages: [{ role: "user", content: sanitizedUserPrompt }],
+            }),
+            timeoutMs,
+            `callLLM(anthropic:${candidate.model})`
+          );
+
+          const textContent = response.content
+            .filter((block): block is Anthropic.TextBlock => block.type === "text")
+            .map((block) => block.text)
+            .join("\n");
+
+          const promptTokens = response.usage?.input_tokens ?? 0;
+          const completionTokens = response.usage?.output_tokens ?? 0;
+
+          return {
+            text: textContent,
+            provider: "anthropic" as AIProvider,
+            model: candidate.model,
+            tokensUsed: promptTokens + completionTokens,
+            usage: {
+              promptTokens,
+              completionTokens,
+              totalTokens: promptTokens + completionTokens,
+            },
+          };
         }
-      );
 
-      const textContent = response.content
-        .filter((block): block is Anthropic.TextBlock => block.type === "text")
-        .map((block) => block.text)
-        .join("\n");
+        // OpenAI execution path
+        const modelInstance = getOpenAIModelInstance(candidate.model, options.apiKey);
 
-      const promptTokens = response.usage?.input_tokens ?? 0;
-      const completionTokens = response.usage?.output_tokens ?? 0;
+        let trace: any = null;
+        let generation: any = null;
+        try {
+          trace = langfuse.trace({
+            name: "callLLM",
+            input: sanitizedUserPrompt,
+          });
 
-      return {
-        text: textContent,
-        provider: "anthropic",
-        model,
-        tokensUsed: promptTokens + completionTokens,
-        usage: {
-          promptTokens,
-          completionTokens,
-          totalTokens: promptTokens + completionTokens,
-        },
-      };
-    } catch (error: any) {
-      console.error(`[callLLM] Anthropic API call failed for model "${model}":`, error);
-      throw new Error(`Anthropic LLM call failed: ${error?.message || error}`);
-    }
-  }
+          generation = trace.generation({
+            name: "openai-generation",
+            model: candidate.model,
+            input: sanitizedUserPrompt,
+          });
+        } catch {
+          // Non-blocking telemetry
+        }
 
-  // Default: OpenAI
-  const modelName = (options.model as string) || DEFAULT_OPENAI_MODEL;
-  const modelInstance = getOpenAIModelInstance(modelName, options.apiKey);
+        try {
+          const genResult = await withTimeout(
+            generateText({
+              model: modelInstance,
+              prompt: sanitizedUserPrompt,
+              system: finalSystemPrompt,
+              temperature: options.temperature,
+            }),
+            timeoutMs,
+            `callLLM(openai:${candidate.model})`
+          );
 
-  let trace: any = null;
-  let generation: any = null;
-  try {
-    trace = langfuse.trace({
-      name: "callLLM",
-      input: options.prompt,
-    });
+          if (generation) {
+            try {
+              generation.end({
+                output: genResult.text,
+                usage: {
+                  promptTokens: (genResult.usage as any)?.promptTokens,
+                  completionTokens: (genResult.usage as any)?.completionTokens,
+                  totalTokens: (genResult.usage as any)?.totalTokens,
+                },
+              });
+              await langfuse.flushAsync().catch(() => {});
+            } catch {
+              // Ignore telemetry flush errors
+            }
+          }
 
-    generation = trace.generation({
-      name: "openai-generation",
-      model: modelName,
-      input: options.prompt,
-    });
-  } catch (traceErr) {
-    console.warn("[callLLM] Langfuse initialization skipped or failed:", traceErr);
-  }
-
-  try {
-    const result = await withRateLimitRetry(
-      () =>
-        generateText({
-          model: modelInstance,
-          prompt: options.prompt,
-          system: finalSystemPrompt,
-          temperature: options.temperature,
-        }),
+          return {
+            text: genResult.text,
+            provider: "openai" as AIProvider,
+            model: candidate.model,
+            tokensUsed: (genResult.usage as any)?.totalTokens,
+            usage: {
+              promptTokens: (genResult.usage as any)?.promptTokens,
+              completionTokens: (genResult.usage as any)?.completionTokens,
+              totalTokens: (genResult.usage as any)?.totalTokens,
+            },
+          };
+        } catch (openaiErr: any) {
+          if (generation) {
+            try {
+              generation.end({
+                output: null,
+                error: redactApiKeys(openaiErr?.message || String(openaiErr)),
+              });
+              await langfuse.flushAsync().catch(() => {});
+            } catch {}
+          }
+          throw openaiErr;
+        }
+      },
       {
-        operationName: `callLLM(openai:${modelName})`,
-        maxRetries: options.retries ?? 3,
+        candidates: candidateList,
+        operationName: `callLLM(${primaryModel})`,
+        retryOptions: { maxRetries },
       }
     );
 
-    if (generation) {
-      try {
-        generation.end({
-          output: result.text,
-          usage: {
-            promptTokens: (result.usage as any)?.promptTokens,
-            completionTokens: (result.usage as any)?.completionTokens,
-            totalTokens: (result.usage as any)?.totalTokens,
-          },
-        });
-        await langfuse.flushAsync().catch(() => {});
-      } catch (endErr) {
-        console.warn("[callLLM] Langfuse generation end recording failed:", endErr);
-      }
-    }
-
-    return {
-      text: result.text,
-      provider: "openai",
-      model: modelName,
-      tokensUsed: (result.usage as any)?.totalTokens,
-      usage: {
-        promptTokens: (result.usage as any)?.promptTokens,
-        completionTokens: (result.usage as any)?.completionTokens,
-        totalTokens: (result.usage as any)?.totalTokens,
-      },
-    };
-  } catch (error: any) {
-    if (generation) {
-      try {
-        generation.end({
-          output: null,
-          error: error?.message || String(error),
-        });
-        await langfuse.flushAsync().catch(() => {});
-      } catch (_) {}
-    }
-    console.error(`[callLLM] OpenAI API call failed for model "${modelName}":`, error);
-    throw new Error(`OpenAI LLM call failed: ${error?.message || error}`);
+    return result;
+  } catch (finalError: any) {
+    const safeErrMsg = redactApiKeys(finalError?.message || String(finalError));
+    console.error(`[callLLM] All candidate models failed for primary "${primaryModel}":`, safeErrMsg);
+    throw new Error(`LLM call failed after model fallbacks: ${safeErrMsg}`);
   }
 }
 
 /**
  * Multi-turn chat completion wrapper supporting OpenAI and Anthropic
- * with rate-limit handling and error recovery.
+ * with automated model fallbacks, rate-limit handling, and prompt sanitization.
  */
 export async function chatLLM(options: ChatOptions): Promise<AIResponse> {
-  const provider = resolveProvider(options.provider, options.model);
+  const primaryProvider = resolveProvider(options.provider, options.model);
+  const primaryModel =
+    (options.model as string) ||
+    (primaryProvider === "anthropic" ? DEFAULT_ANTHROPIC_MODEL : DEFAULT_OPENAI_MODEL);
 
-  if (provider === "anthropic") {
-    const client = getAnthropicClient(options.apiKey);
-    const model = (options.model as string) || DEFAULT_ANTHROPIC_MODEL;
-    const maxTokens = options.maxTokens || 4096;
+  const timeoutMs = options.timeoutMs ?? 30000;
+  const maxRetries = options.retries ?? 2;
 
-    const systemMessages = options.messages.filter((m) => m.role === "system");
-    const conversationMessages = options.messages.filter((m) => m.role !== "system");
+  // Sanitize all message inputs
+  const sanitizedMessages = options.messages.map((m) => ({
+    role: m.role,
+    content: sanitizePromptInput(m.content),
+  }));
 
-    const systemPrompt = systemMessages.map((m) => m.content).join("\n\n") || undefined;
+  const systemMessages = sanitizedMessages.filter((m) => m.role === "system");
+  const conversationMessages = sanitizedMessages.filter((m) => m.role !== "system");
 
-    const formattedMessages = conversationMessages.map((m) => ({
-      role: m.role as "user" | "assistant",
-      content: m.content,
-    }));
+  const systemPrompt = [
+    ...systemMessages.map((m) => m.content),
+    SYSTEM_PROMPT_GUARDRAILS,
+  ].join("\n\n");
 
-    try {
-      const response = await withRateLimitRetry(
-        () =>
-          client.messages.create({
-            model,
-            max_tokens: maxTokens,
-            temperature: options.temperature,
-            system: systemPrompt,
-            messages: formattedMessages,
-          }),
-        {
-          operationName: `chatLLM(anthropic:${model})`,
-          maxRetries: options.retries ?? 3,
-        }
-      );
-
-      const textContent = response.content
-        .filter((block): block is Anthropic.TextBlock => block.type === "text")
-        .map((block) => block.text)
-        .join("\n");
-
-      const promptTokens = response.usage?.input_tokens ?? 0;
-      const completionTokens = response.usage?.output_tokens ?? 0;
-
-      return {
-        text: textContent,
-        provider: "anthropic",
-        model,
-        tokensUsed: promptTokens + completionTokens,
-        usage: {
-          promptTokens,
-          completionTokens,
-          totalTokens: promptTokens + completionTokens,
-        },
-      };
-    } catch (error: any) {
-      console.error(`[chatLLM] Anthropic chat call failed for model "${model}":`, error);
-      throw new Error(`Anthropic chat completion failed: ${error?.message || error}`);
-    }
-  }
-
-  // OpenAI
-  const modelName = (options.model as string) || DEFAULT_OPENAI_MODEL;
-  const modelInstance = getOpenAIModelInstance(modelName, options.apiKey);
-
-  const systemMessage = options.messages.find((m) => m.role === "system")?.content;
-  const nonSystemMessages = options.messages.filter((m) => m.role !== "system");
+  const candidateList: ModelCandidate[] = options.fallbackModels?.length
+    ? [
+        { model: primaryModel, provider: primaryProvider },
+        ...options.fallbackModels.map((m) => ({
+          model: m as string,
+          provider: resolveProvider(undefined, m),
+        })),
+      ]
+    : getModelFallbackChain(primaryModel, primaryProvider);
 
   try {
-    const result = await withRateLimitRetry(
-      () =>
-        generateText({
-          model: modelInstance,
-          messages: nonSystemMessages.map((m) => ({
+    const { result } = await withModelFallback(
+      async (candidate) => {
+        if (candidate.provider === "anthropic") {
+          const client = getAnthropicClient(options.apiKey);
+          const maxTokens = options.maxTokens || 4096;
+
+          const formattedAnthropicMessages = conversationMessages.map((m) => ({
             role: m.role as "user" | "assistant",
             content: m.content,
-          })),
-          system: systemMessage,
-          temperature: options.temperature,
-        }),
+          }));
+
+          const response = await withTimeout(
+            client.messages.create({
+              model: candidate.model,
+              max_tokens: maxTokens,
+              temperature: options.temperature,
+              system: systemPrompt,
+              messages: formattedAnthropicMessages,
+            }),
+            timeoutMs,
+            `chatLLM(anthropic:${candidate.model})`
+          );
+
+          const textContent = response.content
+            .filter((block): block is Anthropic.TextBlock => block.type === "text")
+            .map((block) => block.text)
+            .join("\n");
+
+          const promptTokens = response.usage?.input_tokens ?? 0;
+          const completionTokens = response.usage?.output_tokens ?? 0;
+
+          return {
+            text: textContent,
+            provider: "anthropic" as AIProvider,
+            model: candidate.model,
+            tokensUsed: promptTokens + completionTokens,
+            usage: {
+              promptTokens,
+              completionTokens,
+              totalTokens: promptTokens + completionTokens,
+            },
+          };
+        }
+
+        // OpenAI chat execution
+        const modelInstance = getOpenAIModelInstance(candidate.model, options.apiKey);
+
+        const genResult = await withTimeout(
+          generateText({
+            model: modelInstance,
+            messages: conversationMessages.map((m) => ({
+              role: m.role as "user" | "assistant",
+              content: m.content,
+            })),
+            system: systemPrompt,
+            temperature: options.temperature,
+          }),
+          timeoutMs,
+          `chatLLM(openai:${candidate.model})`
+        );
+
+        return {
+          text: genResult.text,
+          provider: "openai" as AIProvider,
+          model: candidate.model,
+          tokensUsed: (genResult.usage as any)?.totalTokens,
+          usage: {
+            promptTokens: (genResult.usage as any)?.promptTokens,
+            completionTokens: (genResult.usage as any)?.completionTokens,
+            totalTokens: (genResult.usage as any)?.totalTokens,
+          },
+        };
+      },
       {
-        operationName: `chatLLM(openai:${modelName})`,
-        maxRetries: options.retries ?? 3,
+        candidates: candidateList,
+        operationName: `chatLLM(${primaryModel})`,
+        retryOptions: { maxRetries },
       }
     );
 
-    return {
-      text: result.text,
-      provider: "openai",
-      model: modelName,
-      tokensUsed: (result.usage as any)?.totalTokens,
-      usage: {
-        promptTokens: (result.usage as any)?.promptTokens,
-        completionTokens: (result.usage as any)?.completionTokens,
-        totalTokens: (result.usage as any)?.totalTokens,
-      },
-    };
+    return result;
   } catch (error: any) {
-    console.error(`[chatLLM] OpenAI chat call failed for model "${modelName}":`, error);
-    throw new Error(`OpenAI chat completion failed: ${error?.message || error}`);
+    const safeErrMsg = redactApiKeys(error?.message || String(error));
+    console.error(`[chatLLM] Chat failed across candidate models:`, safeErrMsg);
+    throw new Error(`Chat completion failed: ${safeErrMsg}`);
   }
 }
 
 /**
- * Stream text generation using Vercel AI SDK or Anthropic Stream API
- * with error boundary protection.
+ * Stream text generation with prompt injection protection and error boundary.
  */
 export async function streamLLMText(options: GenerateTextOptions) {
   const provider = resolveProvider(options.provider, options.model);
+  const sanitizedPrompt = sanitizePromptInput(options.prompt);
+  const systemPrompt = options.systemPrompt
+    ? `${options.systemPrompt}\n\n${SYSTEM_PROMPT_GUARDRAILS}`
+    : SYSTEM_PROMPT_GUARDRAILS;
 
   if (provider === "anthropic") {
     const client = getAnthropicClient(options.apiKey);
@@ -326,34 +400,37 @@ export async function streamLLMText(options: GenerateTextOptions) {
         model,
         max_tokens: options.maxTokens || 4096,
         temperature: options.temperature,
-        system: options.systemPrompt,
-        messages: [{ role: "user", content: options.prompt }],
+        system: systemPrompt,
+        messages: [{ role: "user", content: sanitizedPrompt }],
       });
     } catch (error: any) {
-      console.error(`[streamLLMText] Failed to initiate Anthropic stream for model "${model}":`, error);
-      throw new Error(`Anthropic stream initiation failed: ${error?.message || error}`);
+      const safeErrMsg = redactApiKeys(error?.message || String(error));
+      console.error(`[streamLLMText] Anthropic stream initiation failed:`, safeErrMsg);
+      throw new Error(`Anthropic stream initiation failed: ${safeErrMsg}`);
     }
   }
 
-  // OpenAI streaming via ai sdk
+  // OpenAI streaming
   const modelName = (options.model as string) || DEFAULT_OPENAI_MODEL;
   const modelInstance = getOpenAIModelInstance(modelName, options.apiKey);
 
   try {
     return streamText({
       model: modelInstance,
-      prompt: options.prompt,
-      system: options.systemPrompt,
+      prompt: sanitizedPrompt,
+      system: systemPrompt,
       temperature: options.temperature,
     });
   } catch (error: any) {
-    console.error(`[streamLLMText] Failed to initiate OpenAI stream for model "${modelName}":`, error);
-    throw new Error(`OpenAI stream initiation failed: ${error?.message || error}`);
+    const safeErrMsg = redactApiKeys(error?.message || String(error));
+    console.error(`[streamLLMText] OpenAI stream initiation failed:`, safeErrMsg);
+    throw new Error(`OpenAI stream initiation failed: ${safeErrMsg}`);
   }
 }
 
 // ============================================================================
 // Specialized Academic Writing & Research Assistant Services
+// Protected against prompt injection via XML boundary isolation
 // ============================================================================
 
 /**
@@ -366,36 +443,38 @@ Rules:
 - Maintain an authoritative, clear, and precise academic tone.
 - Ensure cohesive logical transitions between paragraphs.
 - Never invent citations; indicate missing citations with placeholders like [Author, Year] or [Citation needed].
-- Follow formatting conventions and guidelines provided.`;
+- Follow formatting conventions and guidelines provided strictly within data tags.`;
 
   const promptParts = [
-    `Section Title: ${options.sectionTitle}`,
-    `Paper Topic: ${options.paperTopic}`,
+    `Section Title: ${sanitizePromptInput(options.sectionTitle)}`,
+    wrapPromptContext("paper_topic", options.paperTopic),
   ];
 
   if (options.targetJournal) {
-    promptParts.push(`Target Journal / Venue: ${options.targetJournal}`);
+    promptParts.push(`Target Journal / Venue: ${sanitizePromptInput(options.targetJournal)}`);
   }
   if (options.outline) {
-    promptParts.push(`Section Outline / Key Points:\n${options.outline}`);
+    promptParts.push(wrapPromptContext("section_outline", options.outline, "Author provided outline"));
   }
   if (options.context) {
-    promptParts.push(`Preceding Context / Manuscript Background:\n${options.context}`);
+    promptParts.push(wrapPromptContext("manuscript_context", options.context, "Preceding manuscript text"));
   }
   if (options.guidelines) {
-    promptParts.push(`Journal Guidelines / Word Count / Special Constraints:\n${options.guidelines}`);
+    promptParts.push(wrapPromptContext("journal_guidelines", options.guidelines, "Journal constraints"));
   }
 
-  promptParts.push("\nPlease draft this complete, cohesive section now:");
+  promptParts.push("\nPlease draft this complete, cohesive section now based exclusively on the information above:");
 
   return callLLM({
     prompt: promptParts.join("\n\n"),
     systemPrompt,
-    provider: options.provider || "anthropic", // Claude default for nuanced academic writing
+    provider: options.provider || "anthropic",
     model: options.model,
+    fallbackModels: options.fallbackModels,
     apiKey: options.apiKey,
     temperature: 0.3,
     retries: options.retries,
+    timeoutMs: options.timeoutMs,
   });
 }
 
@@ -416,23 +495,30 @@ export async function refineAcademicWriting(options: RefineWritingOptions): Prom
 Task: ${instructionsByMode[options.mode] || instructionsByMode.academic_tone}
 Ensure scientific accuracy, preserve author citations and specific numbers/metrics, and adhere to publication standards.`;
 
-  let prompt = `Original Text:\n"""\n${options.text}\n"""\n\nGoal: ${options.mode}`;
+  const promptParts = [
+    `Refinement Goal: ${options.mode}`,
+    wrapPromptContext("original_text", options.text, "Manuscript text to be refined"),
+  ];
+
   if (options.feedback) {
-    prompt += `\nSpecific Revision Feedback: ${options.feedback}`;
+    promptParts.push(wrapPromptContext("revision_feedback", options.feedback, "Specific revision suggestions"));
   }
   if (options.guidelines) {
-    prompt += `\nStylistic Guidelines: ${options.guidelines}`;
+    promptParts.push(wrapPromptContext("stylistic_guidelines", options.guidelines, "Stylistic constraints"));
   }
-  prompt += `\n\nProvide the refined academic text below:`;
+
+  promptParts.push("\nProvide the refined academic text below:");
 
   return callLLM({
-    prompt,
+    prompt: promptParts.join("\n\n"),
     systemPrompt,
     provider: options.provider || "anthropic",
     model: options.model,
+    fallbackModels: options.fallbackModels,
     apiKey: options.apiKey,
     temperature: 0.2,
     retries: options.retries,
+    timeoutMs: options.timeoutMs,
   });
 }
 
@@ -450,27 +536,31 @@ The abstract must follow the standard structure:
 5. Significance & Impact: Broader implications for the field.
 Strict constraint: Do not exceed ${wordLimit} words. Avoid unexplained jargon or undefined abbreviations.`;
 
-  const sections: string[] = [`Paper Title: ${options.title}`];
-  if (options.introduction) sections.push(`Introduction Context:\n${options.introduction}`);
-  if (options.methods) sections.push(`Methodology:\n${options.methods}`);
-  if (options.results) sections.push(`Key Results:\n${options.results}`);
-  if (options.conclusion) sections.push(`Conclusion & Implications:\n${options.conclusion}`);
+  const promptParts: string[] = [
+    `Paper Title: ${sanitizePromptInput(options.title)}`,
+  ];
+  if (options.introduction) promptParts.push(wrapPromptContext("introduction_context", options.introduction));
+  if (options.methods) promptParts.push(wrapPromptContext("methodology", options.methods));
+  if (options.results) promptParts.push(wrapPromptContext("primary_results", options.results));
+  if (options.conclusion) promptParts.push(wrapPromptContext("conclusions", options.conclusion));
 
-  sections.push(`Please draft an abstract of under ${wordLimit} words based on the above information:`);
+  promptParts.push(`\nPlease draft an abstract of strictly under ${wordLimit} words based on the information above:`);
 
   return callLLM({
-    prompt: sections.join("\n\n"),
+    prompt: promptParts.join("\n\n"),
     systemPrompt,
     provider: options.provider || "openai",
     model: options.model || DEFAULT_OPENAI_MODEL,
+    fallbackModels: options.fallbackModels,
     apiKey: options.apiKey,
     temperature: 0.2,
     retries: options.retries,
+    timeoutMs: options.timeoutMs,
   });
 }
 
 /**
- * Synthesize literature findings across multiple papers.
+ * Synthesize literature findings across multiple papers with indirect injection defense.
  */
 export async function synthesizeLiterature(options: SynthesizeLiteratureOptions): Promise<AIResponse> {
   const systemPrompt = `You are a research scientist synthesizing prior literature.
@@ -479,34 +569,42 @@ Do not simply summarize each paper serially; provide an integrated thematic synt
 
   const paperSummaries = options.papers
     .map((p, idx) => {
-      return `[Paper ${idx + 1}]
-Title: ${p.title}
-Authors: ${p.authors || "Unknown"}
-Year: ${p.year || "n/a"}
-Abstract: ${p.abstract || "n/a"}
-Key Findings: ${p.keyFindings || "n/a"}`;
+      const title = sanitizePromptInput(p.title);
+      const authors = sanitizePromptInput(p.authors || "Unknown");
+      const year = sanitizePromptInput(String(p.year || "n/a"));
+      const abstract = sanitizePromptInput(p.abstract || "n/a");
+      const findings = sanitizePromptInput(p.keyFindings || "n/a");
+      return wrapPromptContext(
+        `paper_${idx + 1}`,
+        `Title: ${title}\nAuthors: ${authors}\nYear: ${year}\nAbstract: ${abstract}\nKey Findings: ${findings}`,
+        `Benchmark Paper ${idx + 1}`
+      );
     })
     .join("\n\n");
 
-  const prompt = `Topic: ${options.topic}
-${options.researchQuestion ? `Research Question: ${options.researchQuestion}\n` : ""}
-Papers to synthesize:
-${paperSummaries}
-
-Please synthesize these studies into a cohesive literature review narrative highlighting:
+  const promptParts = [
+    `Topic: ${sanitizePromptInput(options.topic)}`,
+  ];
+  if (options.researchQuestion) {
+    promptParts.push(`Research Question: ${sanitizePromptInput(options.researchQuestion)}`);
+  }
+  promptParts.push(`Papers to synthesize:\n${paperSummaries}`);
+  promptParts.push(`\nPlease synthesize these studies into a cohesive literature review narrative highlighting:
 1. State of current knowledge
 2. Methodological comparisons
 3. Identified gaps and conflicts
-4. How this motivates further investigation`;
+4. How this motivates further investigation`);
 
   return callLLM({
-    prompt,
+    prompt: promptParts.join("\n\n"),
     systemPrompt,
     provider: options.provider || "anthropic",
     model: options.model,
+    fallbackModels: options.fallbackModels,
     apiKey: options.apiKey,
     temperature: 0.3,
     retries: options.retries,
+    timeoutMs: options.timeoutMs,
   });
 }
 
@@ -515,7 +613,7 @@ Please synthesize these studies into a cohesive literature review narrative high
  */
 export async function generatePeerReviewCritique(options: PeerReviewCritiqueOptions): Promise<AIResponse> {
   const criteriaList = options.criteria?.length
-    ? options.criteria.map((c) => `- ${c}`).join("\n")
+    ? options.criteria.map((c) => `- ${sanitizePromptInput(c)}`).join("\n")
     : `- Soundness of methodology and sample size
 - Overstated claims or unsupported causal assertions
 - Missing alternative hypotheses or confounding variables
@@ -524,29 +622,26 @@ export async function generatePeerReviewCritique(options: PeerReviewCritiqueOpti
   const systemPrompt = `You are a rigorous, constructive, and demanding peer reviewer for a top-tier scientific journal.
 Provide an insightful review of the submitted section pointing out strengths, methodological limitations, potential reviewer objections, and actionable suggestions.`;
 
-  const prompt = `Section Under Review: ${options.sectionName}
-
-Manuscript Text:
-"""
-${options.text}
-"""
-
-Review Criteria:
-${criteriaList}
-
-Please provide your detailed peer review critique, categorized into:
+  const promptParts = [
+    `Section Under Review: ${sanitizePromptInput(options.sectionName)}`,
+    wrapPromptContext("manuscript_text", options.text, "Manuscript section under evaluation"),
+    wrapPromptContext("review_criteria", criteriaList, "Evaluation criteria"),
+    `\nPlease provide your detailed peer review critique, categorized into:
 1. Major Strengths
 2. Critical Vulnerabilities / Questionable Claims
-3. Recommended Revisions & Clarifications`;
+3. Recommended Revisions & Clarifications`,
+  ];
 
   return callLLM({
-    prompt,
+    prompt: promptParts.join("\n\n"),
     systemPrompt,
     provider: options.provider || "anthropic",
     model: options.model || DEFAULT_ANTHROPIC_MODEL,
+    fallbackModels: options.fallbackModels,
     apiKey: options.apiKey,
     temperature: 0.2,
     retries: options.retries,
+    timeoutMs: options.timeoutMs,
   });
 }
 
@@ -561,23 +656,28 @@ Guidelines:
 - Address the concern point-by-point with evidence and scientific rationale.
 - Clearly state what revisions were made in the manuscript and reference where they appear.`;
 
-  const prompt = `Reviewer Comment:
-"""
-${options.reviewerComment}
-"""
+  const promptParts = [
+    wrapPromptContext("reviewer_comment", options.reviewerComment, "Reviewer comment"),
+  ];
 
-${options.manuscriptContext ? `Context from Manuscript:\n${options.manuscriptContext}\n` : ""}
-${options.changesMade ? `Changes Implemented / Author Response Notes:\n${options.changesMade}\n` : ""}
+  if (options.manuscriptContext) {
+    promptParts.push(wrapPromptContext("manuscript_context", options.manuscriptContext, "Excerpt from manuscript"));
+  }
+  if (options.changesMade) {
+    promptParts.push(wrapPromptContext("author_changes", options.changesMade, "Revisions made by author"));
+  }
 
-Draft a complete, polite, and professional author response letter entry for this reviewer comment:`;
+  promptParts.push("\nDraft a complete, polite, and professional author response letter entry for this reviewer comment:");
 
   return callLLM({
-    prompt,
+    prompt: promptParts.join("\n\n"),
     systemPrompt,
     provider: options.provider || "anthropic",
     model: options.model,
+    fallbackModels: options.fallbackModels,
     apiKey: options.apiKey,
     temperature: 0.2,
     retries: options.retries,
+    timeoutMs: options.timeoutMs,
   });
 }

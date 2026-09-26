@@ -33,6 +33,7 @@ export interface GenerateTextOptions {
   systemPrompt?: string;
   provider?: AIProvider;
   model?: AIModel;
+  fallbackModels?: AIModel[];
   apiKey?: string;
   temperature?: number;
   maxTokens?: number;
@@ -40,17 +41,20 @@ export interface GenerateTextOptions {
   userId?: string;
   useMemory?: boolean;
   retries?: number;
+  timeoutMs?: number;
 }
 
 export interface ChatOptions {
   messages: AIMessage[];
   provider?: AIProvider;
   model?: AIModel;
+  fallbackModels?: AIModel[];
   apiKey?: string;
   temperature?: number;
   maxTokens?: number;
   responseFormat?: 'text' | 'json';
   retries?: number;
+  timeoutMs?: number;
 }
 
 export interface AIResponse {
@@ -74,8 +78,10 @@ export interface DraftSectionOptions {
   guidelines?: string;
   provider?: AIProvider;
   model?: AIModel;
+  fallbackModels?: AIModel[];
   apiKey?: string;
   retries?: number;
+  timeoutMs?: number;
 }
 
 export interface RefineWritingOptions {
@@ -85,10 +91,12 @@ export interface RefineWritingOptions {
   guidelines?: string;
   provider?: AIProvider;
   model?: AIModel;
+  fallbackModels?: AIModel[];
   apiKey?: string;
   userId?: string;
   journalId?: number;
   retries?: number;
+  timeoutMs?: number;
 }
 
 export interface GenerateAbstractOptions {
@@ -100,8 +108,10 @@ export interface GenerateAbstractOptions {
   wordLimit?: number;
   provider?: AIProvider;
   model?: AIModel;
+  fallbackModels?: AIModel[];
   apiKey?: string;
   retries?: number;
+  timeoutMs?: number;
 }
 
 export interface LiteraturePaper {
@@ -118,8 +128,10 @@ export interface SynthesizeLiteratureOptions {
   papers: LiteraturePaper[];
   provider?: AIProvider;
   model?: AIModel;
+  fallbackModels?: AIModel[];
   apiKey?: string;
   retries?: number;
+  timeoutMs?: number;
 }
 
 export interface PeerReviewCritiqueOptions {
@@ -128,8 +140,10 @@ export interface PeerReviewCritiqueOptions {
   criteria?: string[];
   provider?: AIProvider;
   model?: AIModel;
+  fallbackModels?: AIModel[];
   apiKey?: string;
   retries?: number;
+  timeoutMs?: number;
 }
 
 export interface ReviewResponseOptions {
@@ -138,6 +152,8 @@ export interface ReviewResponseOptions {
   changesMade?: string;
   provider?: AIProvider;
   model?: AIModel;
+  fallbackModels?: AIModel[];
   apiKey?: string;
   retries?: number;
+  timeoutMs?: number;
 }

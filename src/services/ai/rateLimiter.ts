@@ -1,7 +1,7 @@
 /**
- * Rate limiting and retry utilities for LLM provider API calls.
+ * Rate limiting, timeout, retry, and fallback utilities for LLM provider API calls.
  * Handles HTTP 429 (Rate Limit), 529 (Overloaded), transient network issues,
- * and concurrency throttling with exponential backoff and jitter.
+ * model fallbacks, timeouts, and concurrency throttling with exponential backoff and jitter.
  */
 
 export interface RetryOptions {
@@ -11,6 +11,26 @@ export interface RetryOptions {
   backoffFactor?: number;
   operationName?: string;
   onRetry?: (error: unknown, attempt: number, delayMs: number) => void;
+}
+
+export class TimeoutError extends Error {
+  readonly status = 408;
+  readonly isTimeout = true;
+  constructor(message: string) {
+    super(message);
+    this.name = "TimeoutError";
+  }
+}
+
+/**
+ * Redact potential API keys (OpenAI sk-..., Anthropic sk-ant-..., Bearer tokens) from logged messages.
+ */
+function redactSecrets(msg: string): string {
+  if (!msg) return "";
+  return msg
+    .replace(/\b(sk-[a-zA-Z0-9]{20,})\b/g, "[REDACTED_OPENAI_KEY]")
+    .replace(/\b(sk-ant-[a-zA-Z0-9_-]{20,})\b/g, "[REDACTED_ANTHROPIC_KEY]")
+    .replace(/\b(Bearer\s+)[a-zA-Z0-9._-]{20,}\b/gi, "$1[REDACTED_TOKEN]");
 }
 
 /**
@@ -31,7 +51,8 @@ export function isRateLimitError(error: any): boolean {
   if (
     error.name === "RateLimitError" ||
     error.type === "rate_limit_error" ||
-    error.code === "rate_limit_exceeded"
+    error.code === "rate_limit_exceeded" ||
+    error.code === "insufficient_quota"
   ) {
     return true;
   }
@@ -44,16 +65,18 @@ export function isRateLimitError(error: any): boolean {
     message.includes("429") ||
     message.includes("overloaded") ||
     message.includes("resource_exhausted") ||
-    message.includes("quota exceeded")
+    message.includes("quota exceeded") ||
+    message.includes("insufficient_quota")
   );
 }
 
 /**
- * Determine if an error is transient and safe to retry (e.g. 500, 502, 503, 504, network reset).
+ * Determine if an error is transient and safe to retry (e.g. 500, 502, 503, 504, network reset, timeout).
  */
 export function isTransientError(error: any): boolean {
   if (!error) return false;
   if (isRateLimitError(error)) return true;
+  if (error instanceof TimeoutError || error.isTimeout || error.name === "TimeoutError") return true;
 
   const status =
     error.status ||
@@ -62,7 +85,7 @@ export function isTransientError(error: any): boolean {
     error.response?.statusCode ||
     error.cause?.status;
 
-  if (status === 500 || status === 502 || status === 503 || status === 504) return true;
+  if (status === 500 || status === 502 || status === 503 || status === 504 || status === 408) return true;
 
   const message = String(error.message || "").toLowerCase();
   return (
@@ -75,6 +98,31 @@ export function isTransientError(error: any): boolean {
     message.includes("service unavailable") ||
     message.includes("bad gateway")
   );
+}
+
+/**
+ * Wraps a promise with a hard timeout. Rejects with TimeoutError if the promise does not settle within timeoutMs.
+ */
+export function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  operationName: string = "Operation"
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new TimeoutError(`${operationName} timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+
+    promise
+      .then((res) => {
+        clearTimeout(timer);
+        resolve(res);
+      })
+      .catch((err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+  });
 }
 
 /**
@@ -135,12 +183,11 @@ export async function withRateLimitRetry<T>(
         const jitter = Math.random() * 300;
         const waitTime = Math.min(retryAfter ?? delay + jitter, maxDelayMs);
 
+        const safeErrMsg = redactSecrets(error?.message || String(error));
         console.warn(
           `[${operationName}] ${
             isRateLimit ? "Rate limit hit (429/529)" : "Transient error"
-          } on attempt ${attempt}/${maxRetries}. Retrying in ${Math.round(waitTime)}ms... Error: ${
-            error?.message || error
-          }`
+          } on attempt ${attempt}/${maxRetries}. Retrying in ${Math.round(waitTime)}ms... Error: ${safeErrMsg}`
         );
 
         if (onRetry) {
@@ -150,13 +197,87 @@ export async function withRateLimitRetry<T>(
         await new Promise((resolve) => setTimeout(resolve, waitTime));
         delay = Math.min(delay * backoffFactor, maxDelayMs);
       } else {
+        const safeErrMsg = redactSecrets(error?.message || String(error));
         console.error(
-          `[${operationName}] Failed after ${attempt} attempt(s). Error: ${error?.message || error}`
+          `[${operationName}] Failed after ${attempt} attempt(s). Error: ${safeErrMsg}`
         );
         throw error;
       }
     }
   }
+}
+
+export interface FallbackCandidate<M = string, P = string> {
+  model: M;
+  provider?: P;
+}
+
+export interface ModelFallbackOptions<M = string, P = string> {
+  candidates: FallbackCandidate<M, P>[];
+  operationName?: string;
+  retryOptions?: RetryOptions;
+  onFallback?: (
+    failedCandidate: FallbackCandidate<M, P>,
+    error: unknown,
+    nextCandidate: FallbackCandidate<M, P>,
+    index: number
+  ) => void;
+}
+
+/**
+ * Execute an LLM operation with automated fallback across a chain of candidate models/providers.
+ * If candidate N exhausts its retries due to rate limits or transient errors, the system
+ * seamlessly transitions to candidate N+1 until exhaustion.
+ */
+export async function withModelFallback<T, M = string, P = string>(
+  execute: (candidate: FallbackCandidate<M, P>) => Promise<T>,
+  options: ModelFallbackOptions<M, P>
+): Promise<{ result: T; usedCandidate: FallbackCandidate<M, P> }> {
+  const { candidates, operationName = "Model execution", retryOptions, onFallback } = options;
+
+  if (!candidates || candidates.length === 0) {
+    throw new Error(`[${operationName}] No model candidates provided for fallback execution.`);
+  }
+
+  let lastError: unknown;
+
+  for (let i = 0; i < candidates.length; i++) {
+    const candidate = candidates[i];
+    const candidateLabel = `${candidate.provider ? `${candidate.provider}:` : ""}${candidate.model}`;
+
+    try {
+      const result = await withRateLimitRetry(
+        () => execute(candidate),
+        {
+          ...retryOptions,
+          operationName: `${operationName} [${candidateLabel}]`,
+        }
+      );
+      return { result, usedCandidate: candidate };
+    } catch (err: any) {
+      lastError = err;
+      const nextCandidate = candidates[i + 1];
+
+      if (nextCandidate && (isRateLimitError(err) || isTransientError(err) || err?.status === 404 || err?.status === 400 || err?.code === "model_not_found")) {
+        const safeErrMsg = redactSecrets(err?.message || String(err));
+        console.warn(
+          `[${operationName}] Candidate ${candidateLabel} failed (${safeErrMsg}). Falling back to ${
+            nextCandidate.provider ? `${nextCandidate.provider}:` : ""
+          }${nextCandidate.model}...`
+        );
+        if (onFallback) {
+          onFallback(candidate, err, nextCandidate, i);
+        }
+        continue;
+      }
+
+      if (!nextCandidate) {
+        break;
+      }
+    }
+  }
+
+  throw lastError;
 }
 
 /**
