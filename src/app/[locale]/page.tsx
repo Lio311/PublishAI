@@ -2,7 +2,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import UploadZone from "@/components/dashboard/UploadZone";
 import SystemExplainButton from "@/components/dashboard/SystemExplainButton";
 import { FileText, Clock, CheckCircle, ArrowRight, ArrowLeft, ChevronRight, ChevronLeft } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/app/i18n/routing";
 import { db } from "@/services/db";
 import { papers, journals } from "@/services/db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -171,7 +171,7 @@ export default async function Home({
           <h2 className="text-xl font-bold text-slate-900">{t("recentPapers.title")}</h2>
           {allPapers.length > 5 && (
             <Link
-              href={`/${locale}/papers`}
+              href="/papers"
               className="text-xs font-semibold text-sky-600 hover:text-sky-700 flex items-center gap-1 transition-colors"
             >
               <span>{t("recentPapers.viewAll")}</span>
@@ -202,7 +202,7 @@ export default async function Home({
                     <tr key={paper.id} className="hover:bg-sky-50/40 transition-colors group">
                       <td className="px-6 py-4 font-medium text-slate-900 text-left rtl:text-right max-w-xs sm:max-w-md truncate">
                         <Link
-                          href={`/${locale}/papers/${paper.id}`}
+                          href={`/papers/${paper.id}`}
                           className="hover:text-sky-600 transition-colors font-semibold block truncate"
                         >
                           {paper.title}
@@ -217,7 +217,7 @@ export default async function Home({
                       <td className="px-6 py-4 text-slate-500 text-xs">{formatDate(paper.createdAt)}</td>
                       <td className="px-6 py-4 text-right rtl:text-left">
                         <Link
-                          href={`/${locale}/papers/${paper.id}`}
+                          href={`/papers/${paper.id}`}
                           className="inline-flex items-center gap-1 text-xs font-semibold text-sky-600 hover:text-sky-700 hover:bg-sky-50 px-2.5 py-1 rounded-lg transition-colors"
                         >
                           <span>{t("recentPapers.open")}</span>

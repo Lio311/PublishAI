@@ -2,7 +2,7 @@ import { db } from "@/services/db";
 import { papers, journals } from "@/services/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { FileText, Search, ArrowRight, ArrowLeft, UploadCloud, ChevronRight, ChevronLeft } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/app/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { checkIsAdmin } from "@/services/auth-utils";
@@ -111,7 +111,7 @@ export default async function PapersPage({
           </div>
 
           <Link
-            href={`/${locale}`}
+            href="/"
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-sm font-semibold shadow-xs transition-all cursor-pointer self-start sm:self-auto"
           >
             <UploadCloud className="w-4 h-4" />
@@ -152,7 +152,7 @@ export default async function PapersPage({
                   </p>
                 </div>
                 <Link
-                  href={`/${locale}`}
+                  href="/"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-semibold transition-all shadow-xs"
                 >
                   <UploadCloud className="w-3.5 h-3.5" />
@@ -178,7 +178,7 @@ export default async function PapersPage({
                     >
                       <td className="px-6 py-4 font-medium text-slate-900 text-left rtl:text-right max-w-md">
                         <Link
-                          href={`/${locale}/papers/${paper.id}`}
+                          href={`/papers/${paper.id}`}
                           className="hover:text-sky-600 transition-colors font-semibold block truncate"
                         >
                           {paper.title}
@@ -193,7 +193,7 @@ export default async function PapersPage({
                       <td className="px-6 py-4 text-slate-500 text-xs">{formatDate(paper.createdAt)}</td>
                       <td className="px-6 py-4 text-right rtl:text-left">
                         <Link
-                          href={`/${locale}/papers/${paper.id}`}
+                          href={`/papers/${paper.id}`}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-sky-600 hover:text-sky-700 hover:bg-sky-50 transition-colors cursor-pointer"
                         >
                           <span>{t("openWorkspace")}</span>

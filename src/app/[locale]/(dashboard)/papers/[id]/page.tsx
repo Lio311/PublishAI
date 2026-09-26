@@ -121,7 +121,7 @@ export default async function PaperPage({
         {/* Navigation & Breadcrumb Bar */}
         <div className="flex items-center justify-between">
           <Link
-            href={`/${locale}/papers`}
+            href="/papers"
             className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-sky-600 transition-colors group cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4 rtl:rotate-180 transition-transform group-hover:-translate-x-1 rtl:group-hover:translate-x-1" />

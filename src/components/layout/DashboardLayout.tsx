@@ -13,11 +13,15 @@ const emptySubscribe = () => () => {};
 function useIsMobile() {
   return useSyncExternalStore(
     (callback) => {
+      if (typeof window === "undefined" || !window.matchMedia) return () => {};
       const mql = window.matchMedia("(max-width: 767px)");
       mql.addEventListener("change", callback);
       return () => mql.removeEventListener("change", callback);
     },
-    () => window.matchMedia("(max-width: 767px)").matches,
+    () => {
+      if (typeof window === "undefined" || !window.matchMedia) return false;
+      return window.matchMedia("(max-width: 767px)").matches;
+    },
     () => false
   );
 }
