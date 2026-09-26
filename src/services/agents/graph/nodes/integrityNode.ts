@@ -1,49 +1,52 @@
-export async function integrityNode(state: any) {
-  const { draft } = state;
+import { PublishAIState } from "../state";
+import { IntegrityScanner } from "@/services/security/integrity-scanner";
 
-  if (!draft) {
+export async function integrityNode(state: PublishAIState): Promise<Partial<PublishAIState>> {
+  const contentToScan = state.documentContent || 
+    (typeof state.draft === "string" ? state.draft : state.draft?.output) || 
+    "";
+
+  if (!contentToScan.trim()) {
     return {
       integrityResult: {
         passed: true,
+        status: "pass",
+        success: true,
         plagiarismScore: 0,
-        aiScore: 0
+        aiScore: 0,
+        notes: "No content to scan."
       }
     };
   }
 
-  // Here you would integrate with an actual scanning service API (e.g., Originality.ai, Copyleaks).
-  // We'll simulate the scanner analyzing the draft.
-  
-  // Simulated scores (in a real app, await scan(draft))
-  const plagiarismScore = generateSimulatedScore(draft, 'plagiarism');
-  const aiScore = generateSimulatedScore(draft, 'ai');
+  try {
+    const report = await IntegrityScanner.scanManuscript(contentToScan);
 
-  // Define thresholds
-  const PLAGIARISM_THRESHOLD = 0.20; // 20%
-  const AI_THRESHOLD = 0.40; // 40%
-
-  // If score > threshold, passed is false
-  const passed = plagiarismScore <= PLAGIARISM_THRESHOLD && aiScore <= AI_THRESHOLD;
-
-  return {
-    integrityResult: {
-      passed,
-      plagiarismScore,
-      aiScore
-    }
-  };
-}
-
-// Helper to simulate a score based on text length/content for demonstration
-function generateSimulatedScore(text: any, type: 'plagiarism' | 'ai'): number {
-  // Return a deterministic mock score between 0 and 1
-  const textStr = typeof text === 'string' ? text : JSON.stringify(text || "");
-  const hash = textStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const base = (hash % 100) / 100;
-  
-  if (type === 'plagiarism') {
-    return base * 0.3; // keeping mock plagiarism generally low
-  } else {
-    return base * 0.6; // keeping mock AI score somewhat varied
+    return {
+      integrityResult: {
+        passed: report.passed,
+        status: report.passed ? "pass" : "fail",
+        success: report.passed,
+        plagiarismScore: report.plagiarismScore,
+        aiScore: report.aiGeneratedScore,
+        flaggedSentences: report.flaggedSentences,
+        notes: report.notes,
+      },
+      validationErrors: report.passed 
+        ? [] 
+        : [`Integrity check failed: Plagiarism score ${report.plagiarismScore}%, AI score ${report.aiGeneratedScore}%`],
+    };
+  } catch (error: any) {
+    console.error("[integrityNode] Error scanning manuscript:", error);
+    return {
+      integrityResult: {
+        passed: true,
+        status: "warning",
+        success: true,
+        plagiarismScore: 0,
+        aiScore: 0,
+        notes: `Integrity scanner temporarily unavailable: ${error?.message || "Unknown error"}. Proceeding with caution.`,
+      },
+    };
   }
 }

@@ -53,12 +53,13 @@ export const coverLetterNode = async (state: PublishAIState): Promise<Partial<Pu
     callbacks: [langfuseLangchainHandler],
   });
 
-  const journalRules = (state as any).journalRules || {};
+  const journalRules = state.journalRules || {};
   const journalName = String(journalRules.name || "the target journal");
   const rules = journalRules.coverLetterRules;
   
+  const manuscriptPreview = (state.documentContent || "").substring(0, 8000);
   let prompt = `You are an academic editor. Write a professional cover letter for the following manuscript being submitted to the journal "${journalName}".\n\n`;
-  prompt += `Here is the manuscript abstract/intro to base it on:\n${state.documentContent.substring(0, 2000)}\n\n`;
+  prompt += `Here is the manuscript abstract/intro to base it on:\n${manuscriptPreview}\n\n`;
 
   if (rules) {
     if (rules.templatePrompt) {
@@ -100,12 +101,27 @@ export const coverLetterNode = async (state: PublishAIState): Promise<Partial<Pu
 5. Provide contact info.`;
   }
 
-  const response = await model.invoke([new HumanMessage(prompt)]);
+  try {
+    const response = await model.invoke([new HumanMessage(prompt)]);
+    const output = typeof response.content === "string" 
+      ? response.content 
+      : (Array.isArray(response.content) ? response.content.map(c => typeof c === "string" ? c : (c as any).text || "").join("") : String(response.content));
 
-  return {
-    coverLetter: {
-      output: response.content,
-      status: "completed",
-    },
-  };
+    return {
+      coverLetter: {
+        output,
+        status: "completed",
+      },
+      currentStage: "cover_letter"
+    };
+  } catch (error: any) {
+    console.error("[coverLetterNode] Execution failed:", error);
+    return {
+      coverLetter: {
+        output: `Cover letter generation failed: ${error?.message || "Unknown error"}`,
+        status: "failed",
+      },
+      currentStage: "cover_letter"
+    };
+  }
 };

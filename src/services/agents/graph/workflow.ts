@@ -80,10 +80,13 @@ const builder = new StateGraph(PublishAIStateAnnotation)
   .addEdge("coverLetterNode", "updateMemoryNode")
   .addEdge("updateMemoryNode", END);
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-const checkpointer = new PostgresSaver(pool);
+const checkpointer = process.env.DATABASE_URL
+  ? new PostgresSaver(
+      new Pool({
+        connectionString: process.env.DATABASE_URL,
+      })
+    )
+  : new MemorySaver();
 
 export const publishAiGraph = builder.compile({
   checkpointer,

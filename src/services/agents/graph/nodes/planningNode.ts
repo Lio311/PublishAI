@@ -1,27 +1,36 @@
 import { ChatAnthropic } from "@langchain/anthropic";
 import { HumanMessage } from "@langchain/core/messages";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
-import { PublishAIState } from "../state";
+import { PublishAIState, getPreviousStageOutput } from "../state";
 import { queryJournalTrends } from "@/services/ai/graphrag";
 import { db } from "@/services/db";
 import { eq } from "drizzle-orm";
 import { papers } from "@/services/db/schema";
+import { AgentResult } from "../../base-agent";
 
-export const planningNode = async (state: PublishAIState) => {
+export const planningNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
+  const modelName = "claude-3-opus-20240229";
   const model = new ChatAnthropic({
-    modelName: "claude-3-opus-20240229",
+    modelName,
     temperature: 0,
   });
 
-  const clarificationOutput = state.previousStageOutputs.get("clarification")?.output || state.clarification || "No clarification available.";
+  const clarificationOutput = getPreviousStageOutput(state, "clarification")?.output || state.clarification || "No clarification available.";
 
   let trendContext = "";
   if (state.paperId) {
-    const paper = await db.query.papers.findFirst({
-      where: eq(papers.id, parseInt(state.paperId, 10)),
-    });
-    if (paper?.targetJournalId) {
-      trendContext = await queryJournalTrends(paper.targetJournalId, "academic trends");
+    const parsedId = parseInt(state.paperId, 10);
+    if (!isNaN(parsedId)) {
+      try {
+        const paper = await db.query.papers.findFirst({
+          where: eq(papers.id, parsedId),
+        });
+        if (paper?.targetJournalId) {
+          trendContext = await queryJournalTrends(paper.targetJournalId, "academic trends");
+        }
+      } catch (err) {
+        console.warn("[planningNode] Failed to query journal trends:", err);
+      }
     }
   }
 
@@ -31,25 +40,45 @@ ${clarificationOutput}
 
 And the manuscript provided between <manuscript> tags:
 <manuscript>
-${state.documentContent}
+${state.documentContent || "No manuscript content provided."}
 </manuscript>
 
 ${trendContext ? `Relevant Journal Trends from GraphRAG:\n<trends>\n${trendContext}\n</trends>\n` : ""}
 Create a structural revision plan for this paper. Identify weaknesses, required citations, and sections to rewrite.
 `;
 
-  const response = await model.invoke([
-    new HumanMessage(prompt)
-  ], {
-    callbacks: [langfuseLangchainHandler],
-  });
+  try {
+    const response = await model.invoke([
+      new HumanMessage(prompt)
+    ], {
+      callbacks: [langfuseLangchainHandler],
+    });
 
-  const output = response.content as string;
-  const tokensUsed = (response.response_metadata as any)?.usage?.total_tokens ?? 0;
+    const output = typeof response.content === "string" 
+      ? response.content 
+      : (Array.isArray(response.content) ? response.content.map(c => typeof c === "string" ? c : (c as any).text || "").join("") : String(response.content));
+    const tokensUsed = (response.response_metadata as any)?.usage?.total_tokens ?? 0;
 
-  return {
-    plan: output,
-    previousStageOutputs: new Map([["planning", { output, status: "awaiting_approval", tokensUsed }]]),
-    currentStage: "planning"
-  };
+    const result: AgentResult = {
+      stage: "planning",
+      model: modelName,
+      output,
+      status: "awaiting_approval",
+      tokensUsed,
+    };
+
+    return {
+      plan: output,
+      previousStageOutputs: new Map([["planning", result]]),
+      currentStage: "planning"
+    };
+  } catch (error: any) {
+    console.error("[planningNode] Execution failed:", error);
+    const fallbackOutput = `Planning failed: ${error?.message || "Unknown error"}`;
+    return {
+      plan: fallbackOutput,
+      validationErrors: [`Planning failed: ${error?.message || "Unknown error"}`],
+      currentStage: "planning"
+    };
+  }
 };

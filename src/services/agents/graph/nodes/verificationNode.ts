@@ -9,14 +9,29 @@ export const verificationNode = async (state: PublishAIState): Promise<Partial<P
     callbacks: [langfuseLangchainHandler],
   });
 
-  const prompt = `Generate a simulated peer-review report for this final manuscript provided between <manuscript> tags.\n\n<manuscript>\n${state.documentContent}\n</manuscript>`;
+  const prompt = `Generate a simulated peer-review report for this final manuscript provided between <manuscript> tags.\n\n<manuscript>\n${state.documentContent || "No manuscript content provided."}\n</manuscript>`;
 
-  const response = await model.invoke([new HumanMessage(prompt)]);
+  try {
+    const response = await model.invoke([new HumanMessage(prompt)]);
+    const output = typeof response.content === "string" 
+      ? response.content 
+      : (Array.isArray(response.content) ? response.content.map(c => typeof c === "string" ? c : (c as any).text || "").join("") : String(response.content));
 
-  return {
-    verification: {
-      output: response.content,
-      status: "completed",
-    },
-  };
+    return {
+      verification: {
+        output,
+        status: "completed",
+      },
+      currentStage: "verification"
+    };
+  } catch (error: any) {
+    console.error("[verificationNode] Execution failed:", error);
+    return {
+      verification: {
+        output: `Verification report failed: ${error?.message || "Unknown error"}`,
+        status: "failed",
+      },
+      currentStage: "verification"
+    };
+  }
 };
