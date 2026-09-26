@@ -2,8 +2,22 @@
   "Sidebar": {
     "home": "ראשי",
     "myPapers": "המאמרים שלי",
+    "connections": "חיבור לעיתונים",
+    "rules": "חוקי עיתונים",
+    "submissions": "מעקב הגשות וביקורת",
+    "analytics": "ניתוח נתונים",
     "settings": "הגדרות",
-    "logout": "התנתק"
+    "admin": "ניהול מערכת",
+    "learning": "למידת מערכת",
+    "architecture": "ארכיטקטורת מערכת",
+    "flowchart": "תרשים זרימה",
+    "logout": "התנתק",
+    "login": "התחבר",
+    "navigation": "סרגל ניווט ראשי",
+    "closeMenu": "סגור תפריט",
+    "openMenu": "פתח תפריט ניווט",
+    "switchLanguage": "החלף שפה",
+    "skipToContent": "דלג לתוכן המרכזי"
   },
   "Dashboard": {
     "title": "ברוך הבא ל-PublishAI",
@@ -19,7 +33,8 @@
       "success": "הקובץ הועלה בהצלחה!",
       "description": "פורמטים נתמכים: PDF, Word (.docx), Excel (.xlsx), תמונות (.png, .jpg), PowerPoint (.pptx) ועוד. הקבצים ינותחו באופן אוטומטי.",
       "button": "בחר קובץ מהמחשב",
-      "uploading": "מעלה..."
+      "uploading": "מעלה...",
+      "error_uploading": "שגיאה בהעלאת הקובץ. אנא נסה שוב."
     },
     "recentPapers": {
       "title": "מאמרים אחרונים",

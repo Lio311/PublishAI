@@ -1,51 +1,168 @@
-import nodemailer from "nodemailer";
-import { getTransporter } from "./notification-service";
+import {
+  getTransporter,
+  getSenderAddress,
+  getSafeTestMessageUrl,
+  SendEmailResult,
+} from "./notification-service";
+import {
+  renderSubmissionSuccessTemplate,
+  renderSubmissionFailedTemplate,
+  SubmissionSuccessTemplateParams,
+  SubmissionFailedTemplateParams,
+} from "./templates";
 
-export async function sendSubmissionSuccessEmail(userEmail: string, paperTitle: string, postUrl: string) {
-  const subject = `Your paper "${paperTitle}" was successfully submitted`;
-  const html = `
-    <h2>Submission Successful</h2>
-    <p>We're happy to let you know that your paper <strong>${paperTitle}</strong> was successfully submitted to the journal.</p>
-    <p>You can view your submission here: <a href="${postUrl}">${postUrl}</a></p>
-    <p><br>Best regards,<br>The PublishAI Team</p>
-  `;
+export interface SubmissionSuccessOptions {
+  journalName?: string;
+  recipientName?: string;
+  confirmationId?: string;
+  paperId?: string;
+  appName?: string;
+  supportEmail?: string;
+  fromEmail?: string;
+  throwOnError?: boolean;
+}
 
-  const mailer = await getTransporter();
-  const info = await mailer.sendMail({
-    from: '"Publish AI" <noreply@publish-ai.com>',
-    to: userEmail,
-    subject,
-    html,
-  });
+export interface SubmissionFailedOptions {
+  journalName?: string;
+  recipientName?: string;
+  retryUrl?: string;
+  settingsUrl?: string;
+  paperId?: string;
+  appName?: string;
+  supportEmail?: string;
+  fromEmail?: string;
+  throwOnError?: boolean;
+}
 
-  console.log(`[Email Service] Success email sent to ${userEmail}. Message ID: ${info.messageId}`);
-  
-  if (info.messageId && (mailer.transporter.name === 'smtp.ethereal.email' || (mailer.options as any).host === 'smtp.ethereal.email')) {
-    console.log(`[Email Service] Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+/**
+ * Sends a notification email informing the author that their manuscript
+ * was successfully submitted to the target journal.
+ */
+export async function sendSubmissionSuccessEmail(
+  userEmail: string,
+  paperTitle: string,
+  postUrl: string,
+  options?: SubmissionSuccessOptions
+): Promise<SendEmailResult> {
+  try {
+    const mailer = await getTransporter();
+    const from = getSenderAddress(options?.fromEmail);
+
+    const templateParams: SubmissionSuccessTemplateParams = {
+      recipientEmail: userEmail,
+      paperTitle,
+      postUrl,
+      journalName: options?.journalName,
+      recipientName: options?.recipientName,
+      confirmationId: options?.confirmationId,
+      paperId: options?.paperId,
+      appName: options?.appName,
+      supportEmail: options?.supportEmail,
+    };
+
+    const { subject, html, text } = renderSubmissionSuccessTemplate(templateParams);
+
+    const info = await mailer.sendMail({
+      from,
+      to: userEmail,
+      subject,
+      text,
+      html,
+    });
+
+    const previewUrl = getSafeTestMessageUrl(mailer, info);
+
+    console.log(
+      `[Email Service] Success email sent to ${userEmail}. Message ID: ${info?.messageId || "N/A"}`
+    );
+
+    if (previewUrl) {
+      console.log(`[Email Service] Preview URL: ${previewUrl}`);
+    }
+
+    return {
+      success: true,
+      messageId: info?.messageId,
+      previewUrl,
+      ...info,
+    };
+  } catch (error: any) {
+    console.error(`[Email Service] Error sending submission success email to ${userEmail}:`, error);
+
+    if (options?.throwOnError) {
+      throw error;
+    }
+
+    return {
+      success: false,
+      error: error?.message || String(error),
+    };
   }
 }
 
-export async function sendSubmissionFailedEmail(userEmail: string, paperTitle: string, errorMsg: string) {
-  const subject = `Action Required: Submission failed for "${paperTitle}"`;
-  const html = `
-    <h2>Submission Failed</h2>
-    <p>We attempted to submit your paper <strong>${paperTitle}</strong>, but encountered an error.</p>
-    <p>Error details: <code>${errorMsg}</code></p>
-    <p>Please check your journal credentials and connection settings in the system, and try again.</p>
-    <p><br>Best regards,<br>The PublishAI Team</p>
-  `;
+/**
+ * Sends a notification email informing the author that manuscript submission failed,
+ * with error diagnostics and actionable links to settings / retry.
+ */
+export async function sendSubmissionFailedEmail(
+  userEmail: string,
+  paperTitle: string,
+  errorMsg: string,
+  options?: SubmissionFailedOptions
+): Promise<SendEmailResult> {
+  try {
+    const mailer = await getTransporter();
+    const from = getSenderAddress(options?.fromEmail);
 
-  const mailer = await getTransporter();
-  const info = await mailer.sendMail({
-    from: '"Publish AI" <noreply@publish-ai.com>',
-    to: userEmail,
-    subject,
-    html,
-  });
+    const templateParams: SubmissionFailedTemplateParams = {
+      recipientEmail: userEmail,
+      paperTitle,
+      errorMessage: errorMsg,
+      journalName: options?.journalName,
+      recipientName: options?.recipientName,
+      retryUrl: options?.retryUrl,
+      settingsUrl: options?.settingsUrl,
+      paperId: options?.paperId,
+      appName: options?.appName,
+      supportEmail: options?.supportEmail,
+    };
 
-  console.log(`[Email Service] Failed email sent to ${userEmail}. Message ID: ${info.messageId}`);
-  
-  if (info.messageId && (mailer.transporter.name === 'smtp.ethereal.email' || (mailer.options as any).host === 'smtp.ethereal.email')) {
-    console.log(`[Email Service] Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+    const { subject, html, text } = renderSubmissionFailedTemplate(templateParams);
+
+    const info = await mailer.sendMail({
+      from,
+      to: userEmail,
+      subject,
+      text,
+      html,
+    });
+
+    const previewUrl = getSafeTestMessageUrl(mailer, info);
+
+    console.log(
+      `[Email Service] Failed email sent to ${userEmail}. Message ID: ${info?.messageId || "N/A"}`
+    );
+
+    if (previewUrl) {
+      console.log(`[Email Service] Preview URL: ${previewUrl}`);
+    }
+
+    return {
+      success: true,
+      messageId: info?.messageId,
+      previewUrl,
+      ...info,
+    };
+  } catch (error: any) {
+    console.error(`[Email Service] Error sending submission failed email to ${userEmail}:`, error);
+
+    if (options?.throwOnError) {
+      throw error;
+    }
+
+    return {
+      success: false,
+      error: error?.message || String(error),
+    };
   }
 }

@@ -39,6 +39,7 @@ export interface GenerateTextOptions {
   responseFormat?: 'text' | 'json';
   userId?: string;
   useMemory?: boolean;
+  retries?: number;
 }
 
 export interface ChatOptions {
@@ -49,6 +50,7 @@ export interface ChatOptions {
   temperature?: number;
   maxTokens?: number;
   responseFormat?: 'text' | 'json';
+  retries?: number;
 }
 
 export interface AIResponse {
@@ -73,6 +75,7 @@ export interface DraftSectionOptions {
   provider?: AIProvider;
   model?: AIModel;
   apiKey?: string;
+  retries?: number;
 }
 
 export interface RefineWritingOptions {
@@ -85,6 +88,7 @@ export interface RefineWritingOptions {
   apiKey?: string;
   userId?: string;
   journalId?: number;
+  retries?: number;
 }
 
 export interface GenerateAbstractOptions {
@@ -97,6 +101,7 @@ export interface GenerateAbstractOptions {
   provider?: AIProvider;
   model?: AIModel;
   apiKey?: string;
+  retries?: number;
 }
 
 export interface LiteraturePaper {
@@ -114,6 +119,7 @@ export interface SynthesizeLiteratureOptions {
   provider?: AIProvider;
   model?: AIModel;
   apiKey?: string;
+  retries?: number;
 }
 
 export interface PeerReviewCritiqueOptions {
@@ -123,6 +129,7 @@ export interface PeerReviewCritiqueOptions {
   provider?: AIProvider;
   model?: AIModel;
   apiKey?: string;
+  retries?: number;
 }
 
 export interface ReviewResponseOptions {
@@ -132,4 +139,5 @@ export interface ReviewResponseOptions {
   provider?: AIProvider;
   model?: AIModel;
   apiKey?: string;
+  retries?: number;
 }

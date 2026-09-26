@@ -8,6 +8,8 @@ export interface WorkflowResult {
   message?: string;
   stepsCompleted?: string[];
   storageState?: string; // Serialized JSON string of cookies and local storage
+  stateData?: Record<string, unknown>; // Additional metadata/state for pausing/resuming
+  errorLog?: string;
 }
 
 export interface NavigatorConfig {
@@ -16,4 +18,11 @@ export interface NavigatorConfig {
   password: string;
   paperId: string;
   submissionPayload: SubmissionPayload;
+  captchaStrategy?: 'manual' | 'auto';
+  captchaSolution?: string;
+  twoFACode?: string;
+  storageState?: string;
+  resumedSteps?: string[];
+  navigationTimeout?: number;
 }
+

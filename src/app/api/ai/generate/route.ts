@@ -3,6 +3,8 @@ import { generateObject } from "ai";
 import { z } from "zod";
 import { getOpenAIModelInstance, resolveProvider } from "@/services/ai/aiService";
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { auth } from "@/app/auth";
+import { applyRateLimit } from "@/services/rate-limit";
 
 const patchSchema = z.object({
   patches: z.array(
@@ -16,6 +18,10 @@ const patchSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    const session = await auth();
+    const rateLimitResponse = await applyRateLimit(req, "ai", session?.user?.id);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await req.json();
     const { prompt, systemPrompt, model, temperature, maxTokens } = body;
 
@@ -73,4 +79,3 @@ Analyze the prompt and provide the necessary patch operations to fulfill the req
     );
   }
 }
-

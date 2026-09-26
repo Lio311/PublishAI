@@ -1,8 +1,10 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { z } from "zod";
 import { db } from "@/services/db";
-import { scientificEntities, scientificRelationships, entityTypeEnum, relationshipTypeEnum } from "@/services/db/schema";
+import { scientificEntities, scientificRelationships } from "@/services/db/schema";
 import { eq, or, ilike } from "drizzle-orm";
+import { withRateLimitRetry } from "./rateLimiter";
+import { DEFAULT_OPENAI_MINI_MODEL_NAME } from "./provider";
 
 const entitySchema = z.object({
   entities: z.array(z.object({
@@ -19,83 +21,119 @@ const entitySchema = z.object({
   })),
 });
 
-export async function extractAndStoreEntities(text: string, journalId: number) {
-  const model = new ChatOpenAI({
-    modelName: "gpt-4o-mini",
-    temperature: 0,
-  });
+export interface ExtractEntitiesOptions {
+  modelName?: string;
+  maxRetries?: number;
+}
 
-  const structuredModel = model.withStructuredOutput(entitySchema);
+export async function extractAndStoreEntities(
+  text: string,
+  journalId: number,
+  options?: ExtractEntitiesOptions
+) {
+  const modelName = options?.modelName || DEFAULT_OPENAI_MINI_MODEL_NAME;
+  const maxRetries = options?.maxRetries ?? 3;
 
-  const prompt = `Extract scientific entities and their relationships from the following text:\n\n${text}`;
-  
-  const result = await structuredModel.invoke(prompt);
-  
-  // Store entities and relationships
-  const entityMap = new Map<string, string>(); // name to id
-
-  for (const ent of result.entities) {
-    const existing = await db.query.scientificEntities.findFirst({
-      where: eq(scientificEntities.name, ent.name),
+  try {
+    const model = new ChatOpenAI({
+      modelName,
+      temperature: 0,
+      maxRetries,
     });
-    
-    if (existing) {
-      entityMap.set(ent.name, existing.id);
-    } else {
-      const [inserted] = await db.insert(scientificEntities).values({
-        name: ent.name,
-        type: ent.type,
-        description: ent.description,
-      }).returning({ id: scientificEntities.id });
-      
-      entityMap.set(ent.name, inserted.id);
-    }
-  }
 
-  for (const rel of result.relationships) {
-    const sourceId = entityMap.get(rel.sourceEntityName);
-    const targetId = entityMap.get(rel.targetEntityName);
+    const structuredModel = model.withStructuredOutput(entitySchema);
+    const prompt = `Extract scientific entities and their relationships from the following text:\n\n${text}`;
     
-    if (sourceId && targetId) {
-      await db.insert(scientificRelationships).values({
-        sourceEntityId: sourceId,
-        targetEntityId: targetId,
-        relationshipType: rel.relationshipType,
-        evidenceText: rel.evidenceText,
-        confidenceScore: rel.confidenceScore,
-        // paperId could be linked if available, here we might not have it or we use journalId somehow
-      });
+    const result = await withRateLimitRetry(
+      () => structuredModel.invoke(prompt) as Promise<z.infer<typeof entitySchema>>,
+      { operationName: "graphrag:extractEntities", maxRetries }
+    );
+    
+    if (!result || !result.entities) {
+      console.warn("[GraphRAG] No entities extracted from text.");
+      return;
     }
+
+    // Store entities and relationships
+    const entityMap = new Map<string, string>(); // name to id
+
+    for (const ent of result.entities) {
+      try {
+        const existing = await db.query.scientificEntities.findFirst({
+          where: eq(scientificEntities.name, ent.name),
+        });
+        
+        if (existing) {
+          entityMap.set(ent.name, existing.id);
+        } else {
+          const [inserted] = await db.insert(scientificEntities).values({
+            name: ent.name,
+            type: ent.type,
+            description: ent.description,
+          }).returning({ id: scientificEntities.id });
+          
+          if (inserted) {
+            entityMap.set(ent.name, inserted.id);
+          }
+        }
+      } catch (dbErr) {
+        console.warn(`[GraphRAG] Failed to insert or find entity "${ent.name}":`, dbErr);
+      }
+    }
+
+    for (const rel of result.relationships) {
+      try {
+        const sourceId = entityMap.get(rel.sourceEntityName);
+        const targetId = entityMap.get(rel.targetEntityName);
+        
+        if (sourceId && targetId) {
+          await db.insert(scientificRelationships).values({
+            sourceEntityId: sourceId,
+            targetEntityId: targetId,
+            relationshipType: rel.relationshipType,
+            evidenceText: rel.evidenceText,
+            confidenceScore: rel.confidenceScore,
+          });
+        }
+      } catch (relErr) {
+        console.warn(`[GraphRAG] Failed to insert relationship between "${rel.sourceEntityName}" and "${rel.targetEntityName}":`, relErr);
+      }
+    }
+  } catch (error: any) {
+    console.error("[GraphRAG] Extraction pipeline failed:", error);
+    throw new Error(`GraphRAG entity extraction failed: ${error?.message || error}`);
   }
 }
 
 export async function queryJournalTrends(journalId: number, topic: string) {
-  // Mock logic to return trend context based on the GraphRAG
-  const relevantEntities = await db.query.scientificEntities.findMany({
-    where: or(
-      ilike(scientificEntities.name, `%${topic}%`),
-      ilike(scientificEntities.description, `%${topic}%`)
-    ),
-    limit: 5,
-  });
-  
-  if (relevantEntities.length === 0) {
-    return "No significant trends found for this topic.";
+  try {
+    const relevantEntities = await db.query.scientificEntities.findMany({
+      where: or(
+        ilike(scientificEntities.name, `%${topic}%`),
+        ilike(scientificEntities.description, `%${topic}%`)
+      ),
+      limit: 5,
+    });
+    
+    if (!relevantEntities || relevantEntities.length === 0) {
+      return "No significant trends found for this topic.";
+    }
+
+    const entityIds = relevantEntities.map(e => e.id);
+    
+    // Get relationships for these entities
+    const relationships = await db.query.scientificRelationships.findMany({
+      where: (rel, { inArray, or }) => or(
+        inArray(rel.sourceEntityId, entityIds),
+        inArray(rel.targetEntityId, entityIds)
+      ),
+      limit: 10,
+    });
+    
+    return `Found ${relevantEntities.length} entities related to "${topic}". ` + 
+           `These reflect current journal trends emphasizing topics like: ${relevantEntities.map(e => e.name).join(", ")}.`;
+  } catch (error) {
+    console.warn("[GraphRAG] queryJournalTrends failed:", error);
+    return `Unable to retrieve trends for "${topic}".`;
   }
-
-  const entityIds = relevantEntities.map(e => e.id);
-  
-  // Get relationships for these entities
-  const relationships = await db.query.scientificRelationships.findMany({
-    where: (rel, { inArray, or }) => or(
-      inArray(rel.sourceEntityId, entityIds),
-      inArray(rel.targetEntityId, entityIds)
-    ),
-
-    limit: 10,
-  });
-  
-  // Because Drizzle relations might not be defined for source/target in schema.ts, we'll format text manually
-  return `Found ${relevantEntities.length} entities related to "${topic}". ` + 
-         `These reflect current journal trends emphasizing topics like: ${relevantEntities.map(e => e.name).join(", ")}.`;
 }

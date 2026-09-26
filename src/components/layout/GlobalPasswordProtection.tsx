@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { Delete } from 'lucide-react';
 import Image from 'next/image';
 import { useSession, signIn } from 'next-auth/react';
@@ -18,39 +18,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
     const [shake, setShake] = useState(false);
     const { status } = useSession();
 
-    // Mouse parallax effects for background blobs
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-    
-    const springConfig = { damping: 25, stiffness: 120 };
-    const springX = useSpring(mouseX, springConfig);
-    const springY = useSpring(mouseY, springConfig);
-
-    const blob1X = useTransform(springX, v => v * 1.2);
-    const blob1Y = useTransform(springY, v => v * 1.2);
-
-    const blob2X = useTransform(springX, v => v * -0.8);
-    const blob2Y = useTransform(springY, v => v * -0.8);
-
-    const blob3X = useTransform(springX, v => v * 0.5);
-    const blob3Y = useTransform(springY, v => v * 0.5);
-
-     
-  useEffect(() => {
-        const handleGlobalMouseMove = (e: MouseEvent) => {
-            const { clientX, clientY } = e;
-            const moveX = (clientX - window.innerWidth / 2) * 1.2;
-            const moveY = (clientY - window.innerHeight / 2) * 1.2;
-            mouseX.set(moveX);
-            mouseY.set(moveY);
-        };
-
-        window.addEventListener('mousemove', handleGlobalMouseMove);
-        return () => window.removeEventListener('mousemove', handleGlobalMouseMove);
-    }, [mouseX, mouseY]);
-
-     
-  useEffect(() => {
+    useEffect(() => {
         const authTime = localStorage.getItem('publishai_global_auth_time_v2');
         const now = new Date().getTime();
         
@@ -64,7 +32,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
         setIsChecking(false);
     }, []);
 
-    const verifyPin = async (currentPin: string) => {
+    const verifyPin = useCallback(async (currentPin: string) => {
         if (isAuthLoading) return;
         setIsAuthLoading(true);
         
@@ -83,9 +51,9 @@ export default function GlobalPasswordProtection({ children }: { children: React
             }, 400);
         }
         setIsAuthLoading(false);
-    };
+    }, [isAuthLoading]);
 
-    const handleKeyPress = (num: string) => {
+    const handleKeyPress = useCallback((num: string) => {
         if (pin.length < 4 && !isAuthLoading && !pinError) {
             const newPin = pin + num;
             setPin(newPin);
@@ -93,17 +61,46 @@ export default function GlobalPasswordProtection({ children }: { children: React
                 verifyPin(newPin);
             }
         }
-    };
+    }, [pin, isAuthLoading, pinError, verifyPin]);
 
-    const handleDelete = () => {
+    const handleDelete = useCallback(() => {
         if (isAuthLoading || pinError) return;
         setPin(prev => prev.slice(0, -1));
-    };
+    }, [isAuthLoading, pinError]);
+
+    // Physical keyboard listener for PIN input
+    useEffect(() => {
+        if (isAuthenticated || isChecking) return;
+
+        const handlePhysicalKeyDown = (e: KeyboardEvent) => {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            const target = e.target as HTMLElement | null;
+            if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+                return;
+            }
+
+            if (e.key >= '0' && e.key <= '9') {
+                e.preventDefault();
+                handleKeyPress(e.key);
+            } else if (e.key === 'Backspace') {
+                e.preventDefault();
+                handleDelete();
+            }
+        };
+
+        window.addEventListener('keydown', handlePhysicalKeyDown);
+        return () => window.removeEventListener('keydown', handlePhysicalKeyDown);
+    }, [isAuthenticated, isChecking, handleKeyPress, handleDelete]);
 
     if (isChecking) {
         return (
-            <div className="fixed inset-0 z-[100] min-h-screen w-full bg-white/80 flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
+            <div 
+                className="fixed inset-0 z-[100] min-h-screen w-full bg-white/80 flex items-center justify-center"
+                role="status"
+                aria-live="polite"
+            >
+                <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" aria-hidden="true" />
+                <span className="sr-only">טוען...</span>
             </div>
         );
     }
@@ -113,7 +110,18 @@ export default function GlobalPasswordProtection({ children }: { children: React
             <div 
                 className="fixed inset-0 z-[100] min-h-screen w-full bg-transparent flex items-center justify-center overflow-hidden" 
                 dir="ltr"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="pin-security-title"
             >
+                {/* Live region announcing entered digits or error to screen readers */}
+                <div className="sr-only" role="status" aria-live="polite">
+                    {pinError 
+                        ? "קוד שגוי, אנא נסה שוב" 
+                        : pin.length > 0 
+                            ? `הוזנו ${pin.length} מתוך 4 ספרות` 
+                            : "הזן קוד גישה בן 4 ספרות"}
+                </div>
                 
                 <motion.div 
                     initial={{ opacity: 1, y: 0 }}
@@ -122,7 +130,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
                     className="z-10 w-full max-w-md p-8"
                 >
                     <div className="backdrop-blur-2xl bg-white border border-slate-200 rounded-3xl p-10 shadow-xl overflow-hidden relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 to-transparent opacity-50"></div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 to-transparent opacity-50" aria-hidden="true" />
                         
                         <div className="relative z-10 flex flex-col items-center">
                             <motion.div 
@@ -134,7 +142,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                 <Image src="/logo.png" alt="PublishAI Logo" width={224} height={224} className="w-full h-auto object-contain" priority />
                             </motion.div>
                             
-                            <p className="text-slate-600 font-medium text-sm mb-8 tracking-widest text-center w-full block uppercase">אזור מאובטח</p>
+                            <p id="pin-security-title" className="text-slate-600 font-medium text-sm mb-8 tracking-widest text-center w-full block uppercase">אזור מאובטח</p>
 
                             <div className="w-full flex flex-col items-center">
                                 {/* PIN Dots */}
@@ -143,6 +151,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                     transition={{ duration: 0.4 }}
                                     className="flex gap-6 mb-8 mt-2 justify-center"
                                     dir="ltr"
+                                    aria-hidden="true"
                                 >
                                     {[0, 1, 2, 3].map(i => (
                                         <div 
@@ -160,27 +169,33 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
                                         <button
                                             key={num}
+                                            type="button"
+                                            aria-label={num.toString()}
                                             onClick={() => handleKeyPress(num.toString())}
                                             disabled={isAuthLoading}
-                                            className="w-16 h-16 rounded-full bg-slate-50/50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-2xl font-medium text-slate-800 transition-colors active:bg-slate-200 disabled:opacity-50"
+                                            className="w-16 h-16 rounded-full bg-slate-50/50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-2xl font-medium text-slate-800 transition-colors active:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:opacity-50"
                                         >
                                             {num}
                                         </button>
                                     ))}
-                                    <div></div>
+                                    <div aria-hidden="true"></div>
                                     <button
+                                        type="button"
+                                        aria-label="0"
                                         onClick={() => handleKeyPress('0')}
                                         disabled={isAuthLoading}
-                                        className="w-16 h-16 rounded-full bg-slate-50/50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-2xl font-medium text-slate-800 transition-colors active:bg-slate-200 disabled:opacity-50"
+                                        className="w-16 h-16 rounded-full bg-slate-50/50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-2xl font-medium text-slate-800 transition-colors active:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:opacity-50"
                                     >
                                         0
                                     </button>
                                     <button
+                                        type="button"
+                                        aria-label="מחק ספרה אחרונה"
                                         onClick={handleDelete}
                                         disabled={isAuthLoading || pin.length === 0}
-                                        className="w-16 h-16 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors active:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                                        className="w-16 h-16 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors active:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:opacity-30 disabled:hover:bg-transparent"
                                     >
-                                        <Delete className="w-6 h-6" />
+                                        <Delete className="w-6 h-6" aria-hidden="true" />
                                     </button>
                                 </div>
                             </div>
@@ -193,8 +208,13 @@ export default function GlobalPasswordProtection({ children }: { children: React
 
     if (status === 'loading') {
         return (
-            <div className="fixed inset-0 z-[100] min-h-screen w-full bg-white/80 flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
+            <div 
+                className="fixed inset-0 z-[100] min-h-screen w-full bg-white/80 flex items-center justify-center"
+                role="status"
+                aria-live="polite"
+            >
+                <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" aria-hidden="true" />
+                <span className="sr-only">טוען...</span>
             </div>
         );
     }
@@ -204,8 +224,10 @@ export default function GlobalPasswordProtection({ children }: { children: React
             <div 
                 className="fixed inset-0 z-[100] min-h-screen w-full bg-transparent flex items-center justify-center overflow-hidden" 
                 dir="ltr"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="auth-signin-title"
             >
-                
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -213,7 +235,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
                     className="z-10 w-full max-w-md p-8"
                 >
                     <div className="backdrop-blur-2xl bg-white border border-slate-200 rounded-3xl p-10 shadow-xl overflow-hidden relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 to-transparent opacity-50"></div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 to-transparent opacity-50" aria-hidden="true"></div>
                         
                         <div className="relative z-10 flex flex-col items-center">
                             <motion.div 
@@ -225,15 +247,16 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                 <Image src="/logo.png" alt="PublishAI Logo" width={224} height={224} className="w-full h-auto object-contain" priority />
                             </motion.div>
                             
-                            <p className="text-slate-600 font-medium text-sm mb-8 tracking-widest text-center w-full block uppercase">התחברות לחשבון</p>
+                            <p id="auth-signin-title" className="text-slate-600 font-medium text-sm mb-8 tracking-widest text-center w-full block uppercase">התחברות לחשבון</p>
 
                             <div className="w-full flex flex-col items-center gap-4">
                                 <button
+                                    type="button"
                                     onClick={() => signIn('google', { callbackUrl: '/' })}
-                                    className="flex w-full items-center justify-center gap-3 px-6 py-4 rounded-xl font-medium text-slate-700 bg-white border-2 border-slate-200 hover:bg-slate-50 transition-all shadow-sm active:scale-[0.98]"
+                                    className="flex w-full items-center justify-center gap-3 px-6 py-4 rounded-xl font-medium text-slate-700 bg-white border-2 border-slate-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 transition-all shadow-sm active:scale-[0.98]"
                                 >
-                                    <Image src="https://authjs.dev/img/providers/google.svg" alt="Google" width={24} height={24} />
-                                    התחברות
+                                    <Image src="https://authjs.dev/img/providers/google.svg" alt="" width={24} height={24} aria-hidden="true" />
+                                    התחברות באמצעות Google
                                 </button>
                             </div>
                         </div>

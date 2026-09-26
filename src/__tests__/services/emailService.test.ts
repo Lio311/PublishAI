@@ -11,7 +11,12 @@ jest.mock('@/services/db', () => ({
   }
 }));
 
-// Removed pdf-parse mock as it is no longer used
+jest.mock('pdf-parse', () => ({
+  __esModule: true,
+  default: jest.fn().mockResolvedValue({
+    text: 'Reviewer requests major revisions on Section 3.',
+  }),
+}));
 
 describe('emailService - processIncomingReviewEmail', () => {
   afterEach(() => {
@@ -43,6 +48,6 @@ describe('emailService - processIncomingReviewEmail', () => {
 
     const result = await processIncomingReviewEmail(emailData);
     expect(result.submissionId).toBe('123');
-    expect(result.comments).toEqual(['Mock extracted PDF text: Reviewer requests major revisions on Section 3.']);
+    expect(result.comments).toEqual(['Extracted text from review.pdf: Reviewer requests major revisions on Section 3.']);
   });
 });

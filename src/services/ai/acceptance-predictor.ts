@@ -1,6 +1,8 @@
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
+import { withRateLimitRetry } from "./rateLimiter";
+import { DEFAULT_OPENAI_MODEL_NAME } from "./provider";
 
 const PredictionResultSchema = z.object({
   probabilityScore: z.number().describe("The probability score from 0 to 100 for acceptance"),
@@ -12,6 +14,11 @@ const PredictionResultSchema = z.object({
 
 export type PredictionResult = z.infer<typeof PredictionResultSchema>;
 
+export interface PredictAcceptanceOptions {
+  model?: string;
+  maxRetries?: number;
+}
+
 /**
  * Predicts the probability of a paper being accepted to a target journal.
  * Based on:
@@ -22,8 +29,11 @@ export type PredictionResult = z.infer<typeof PredictionResultSchema>;
 export async function predictAcceptance(
   paperDetails: { title: string; abstract: string; keyFindings: string },
   journalDetails: { name: string; field: string; rules: any; requiredSections: any },
-  authorHistory?: string
+  authorHistory?: string,
+  options?: PredictAcceptanceOptions
 ): Promise<PredictionResult> {
+  const modelName = options?.model || DEFAULT_OPENAI_MODEL_NAME;
+
   const prompt = `
     You are an expert scientific editor and reviewer evaluating a manuscript's chance of acceptance to a specific journal.
     
@@ -48,11 +58,23 @@ export async function predictAcceptance(
     Provide a probability score (0-100), reasoning, strengths, weaknesses, and recommendations.
   `;
 
-  const { object } = await generateObject({
-    model: openai("gpt-4o"),
-    schema: PredictionResultSchema,
-    prompt: prompt,
-  });
+  try {
+    const { object } = await withRateLimitRetry(
+      () =>
+        generateObject({
+          model: openai(modelName),
+          schema: PredictionResultSchema,
+          prompt: prompt,
+        }),
+      {
+        operationName: "predictAcceptance",
+        maxRetries: options?.maxRetries ?? 3,
+      }
+    );
 
-  return object;
+    return object;
+  } catch (error: any) {
+    console.error("[predictAcceptance] Failed to generate acceptance prediction:", error);
+    throw new Error(`Acceptance prediction failed: ${error?.message || error}`);
+  }
 }

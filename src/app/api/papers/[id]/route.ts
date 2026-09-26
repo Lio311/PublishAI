@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/services/db";
-import { papers } from "@/services/db/schema";
+import { papers, paperStages } from "@/services/db/schema";
 import { auth } from "@/app/auth";
 import { eq, and } from "drizzle-orm";
 
@@ -30,8 +30,15 @@ export async function GET(
       return NextResponse.json({ error: "Paper not found" }, { status: 404 });
     }
 
+    const stages = await db
+      .select()
+      .from(paperStages)
+      .where(eq(paperStages.paperId, paperId))
+      .orderBy(paperStages.id);
+
     return NextResponse.json({
       paper,
+      stages,
     });
   } catch (error) {
     console.error("[API papers/[id] GET] Error:", error);

@@ -9,8 +9,12 @@ import { toast } from "sonner";
 export default function AlertOverride() {
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const originalAlert = window.alert;
       window.alert = (message?: any) => {
         toast(message?.toString() || "Alert");
+      };
+      return () => {
+        window.alert = originalAlert;
       };
     }
   }, []);

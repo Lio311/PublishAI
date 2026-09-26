@@ -1,10 +1,14 @@
 import { RPASubmissionService } from "../../src/services/rpaSubmissionService";
 import { db } from "../../src/services/db";
 
-// Mock Drizzle ORM's eq function
-jest.mock("drizzle-orm", () => ({
-  eq: jest.fn((col, val) => ({ col, val })),
-}));
+// Mock Drizzle ORM's eq function while preserving relations
+jest.mock("drizzle-orm", () => {
+  const actual = jest.requireActual("drizzle-orm");
+  return {
+    ...actual,
+    eq: jest.fn((col: any, val: any) => ({ col, val })),
+  };
+});
 
 // Mock the DB methods
 const mockWhere = jest.fn();

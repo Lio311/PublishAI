@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { getSafeDb } from "@/services/api/db-helper";
+import { applyRateLimit } from "@/services/rate-limit";
 
 export async function POST(req: Request) {
   try {
+    const rateLimitResponse = await applyRateLimit(req, "auth");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await req.json();
     const { email, name, institution, field } = body;
 

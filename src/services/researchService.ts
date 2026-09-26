@@ -21,11 +21,11 @@ export class ResearchService {
    * @returns Promise resolving to an array of ArticleReference objects.
    */
   async fetchReferenceContent(urlsOrDois: string[]): Promise<ArticleReference[]> {
-    console.log(`[ResearchService] Fetching content for ${urlsOrDois.length} references...`);
-    
     if (!urlsOrDois || !Array.isArray(urlsOrDois)) {
       return [];
     }
+
+    console.log(`[ResearchService] Fetching content for ${urlsOrDois.length} references...`);
 
     const references: ArticleReference[] = [];
 

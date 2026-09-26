@@ -2,8 +2,22 @@
   "Sidebar": {
     "home": "Home",
     "myPapers": "My Papers",
+    "connections": "Journal Connections",
+    "rules": "Journal Rules",
+    "submissions": "Submissions & Reviews",
+    "analytics": "Analytics",
     "settings": "Settings",
-    "logout": "Logout"
+    "admin": "Admin Dashboard",
+    "learning": "AI Learning",
+    "architecture": "System Architecture",
+    "flowchart": "System Flowchart",
+    "logout": "Logout",
+    "login": "Login",
+    "navigation": "Main Navigation",
+    "closeMenu": "Close menu",
+    "openMenu": "Open navigation menu",
+    "switchLanguage": "Switch language",
+    "skipToContent": "Skip to main content"
   },
   "Dashboard": {
     "title": "Welcome to PublishAI",
@@ -19,7 +33,8 @@
       "success": "File uploaded successfully!",
       "description": "Supported formats: PDF, Word (.docx), Excel (.xlsx), Images (.png, .jpg), PowerPoint (.pptx) and more. Files will be analyzed automatically.",
       "button": "Or select file",
-      "uploading": "Uploading..."
+      "uploading": "Uploading...",
+      "error_uploading": "Failed to upload file. Please try again."
     },
     "recentPapers": {
       "title": "Recent Papers",
