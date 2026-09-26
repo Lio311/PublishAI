@@ -22,7 +22,7 @@ export function createLiteratureMcpServer() {
       tools: [
         {
           name: "search_literature",
-          description: "Search PubMed and Crossref for literature based on a query.",
+          description: "Search PubMed, Crossref, and Semantic Scholar for literature based on a query.",
           inputSchema: {
             type: "object",
             properties: {
@@ -91,7 +91,7 @@ export function createLiteratureMcpServer() {
       }
 
       try {
-        const result = await crossrefClient.getByDoi(doi);
+        const result = await literatureService.getByDoi(doi);
         return {
           content: [
             {

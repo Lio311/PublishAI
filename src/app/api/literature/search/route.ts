@@ -41,8 +41,13 @@ export async function GET(request: Request) {
     }
   }
   if (sourcesStr) {
-    const splitSources = sourcesStr.split(',').map(s => s.trim().toLowerCase());
-    // Filter and sanitize, strictly ignoring arXiv
+    let splitSources = sourcesStr.split(',').map(s => s.trim().toLowerCase());
+    // Explicit arXiv replacement: If arXiv is requested, replace with PubMed and Semantic Scholar
+    if (splitSources.includes('arxiv')) {
+      splitSources = splitSources.filter(s => s !== 'arxiv');
+      if (!splitSources.includes('pubmed')) splitSources.push('pubmed');
+      if (!splitSources.includes('semanticscholar')) splitSources.push('semanticscholar');
+    }
     options.sources = splitSources.filter(s => s === 'pubmed' || s === 'crossref' || s === 'semanticscholar');
   }
 

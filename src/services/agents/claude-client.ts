@@ -1,8 +1,12 @@
 import Anthropic from "@anthropic-ai/sdk";
 
+const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+if (!anthropicApiKey && process.env.NODE_ENV === "production") {
+  console.warn("[claude-client] ANTHROPIC_API_KEY is not configured in production.");
+}
+
 export const claude = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || "dummy-key-for-initialization",
-  dangerouslyAllowBrowser: true,
+  apiKey: anthropicApiKey || "placeholder-key-for-dev",
 });
 
 export type ClaudeModel =

@@ -19,7 +19,14 @@ export default function CitationSearch() {
     try {
       const res = await fetch(`/api/literature/search?q=${encodeURIComponent(query)}`);
       if (!res.ok) {
-        throw new Error('Failed to fetch results');
+        const errorData = await res.json().catch(() => null);
+        if (res.status === 429) {
+          throw new Error(`Rate limit exceeded (${errorData?.source || 'API'}). Please wait ${errorData?.retryAfter || 5}s before searching again.`);
+        }
+        if (res.status === 504) {
+          throw new Error('Search request timed out. Please try a more specific search term.');
+        }
+        throw new Error(errorData?.error || 'Failed to fetch literature search results');
       }
       const data = await res.json();
       setResults(data);
@@ -38,7 +45,7 @@ export default function CitationSearch() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search PubMed & Crossref..."
+          placeholder="Search PubMed, Crossref & Semantic Scholar..."
           className="flex-1 p-2 border rounded-md"
         />
         <button
@@ -55,7 +62,7 @@ export default function CitationSearch() {
       {results && (
         <div>
           <p className="mb-2 text-sm text-gray-600">
-            Found {results.total} results (PubMed: {results.sources.pubmed}, Crossref: {results.sources.crossref})
+            Found {results.total} results (PubMed: {results.sources?.pubmed ?? 0}, Crossref: {results.sources?.crossref ?? 0}{results.sources?.semanticscholar !== undefined ? `, Semantic Scholar: ${results.sources.semanticscholar}` : ''})
           </p>
           <ul className="space-y-4 mt-4">
             {results.items.map((item: any, index: number) => (

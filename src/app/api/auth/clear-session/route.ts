@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { applyRateLimit } from '@/services/rate-limit';
+import { getSafeRedirectUrl } from '@/services/security/redirect';
 
 export async function GET(request: Request) {
   try {
@@ -11,8 +12,11 @@ export async function GET(request: Request) {
     const allCookies = cookieStore.getAll();
 
     const searchParams = new URL(request.url).searchParams;
-    const redirectParam = searchParams.get("callbackUrl") || searchParams.get("redirect") || "/he";
-    const safeRedirect = redirectParam.startsWith("/") && !redirectParam.startsWith("//") ? redirectParam : "/he";
+    const redirectParam = searchParams.get("callbackUrl") || searchParams.get("redirect");
+    const safeRedirect = getSafeRedirectUrl(redirectParam, {
+      baseUrl: request.url,
+      fallbackUrl: "/he",
+    });
 
     const url = new URL(safeRedirect, request.url);
     const response = NextResponse.redirect(url);

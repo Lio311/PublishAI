@@ -5,6 +5,7 @@ import Google from "next-auth/providers/google"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import { db } from "@/services/db"
 import { accounts, sessions, users, verificationTokens } from "@/services/db/schema"
+import { getSafeRedirectUrl } from "@/services/security/redirect"
 
 const authSecret =
   process.env.AUTH_SECRET ||
@@ -109,9 +110,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async redirect({ url, baseUrl }) {
       try {
-        if (url.startsWith("/")) return `${baseUrl}${url}`;
-        if (new URL(url).origin === baseUrl) return url;
-        return baseUrl;
+        const safeUrl = getSafeRedirectUrl(url, {
+          baseUrl,
+          fallbackUrl: baseUrl,
+        });
+        if (safeUrl.startsWith("/")) {
+          return `${baseUrl}${safeUrl}`;
+        }
+        return safeUrl;
       } catch (error) {
         console.error("[NextAuth] Error in redirect callback:", error);
         return baseUrl;

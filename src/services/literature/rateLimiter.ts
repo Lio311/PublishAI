@@ -97,7 +97,9 @@ export class LiteratureRateLimiter {
       this.queues.set(key, []);
       this.inFlight.set(key, 0);
       this.lastRequestTime.set(key, 0);
-      this.pausedUntil.set(key, 0);
+      if (!this.pausedUntil.has(key)) {
+        this.pausedUntil.set(key, 0);
+      }
     }
 
     const queue = this.queues.get(key)!;

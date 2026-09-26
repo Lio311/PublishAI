@@ -35,7 +35,11 @@ function getCryptoProvider(): any {
 }
 
 function getStripeInstance(): Stripe {
-  return new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_dummy_key", {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey && process.env.NODE_ENV === "production") {
+    throw new Error("STRIPE_SECRET_KEY environment variable is required in production.");
+  }
+  return new Stripe(secretKey || "sk_test_dummy_key", {
     apiVersion: "2025-02-24.acacia" as any,
   });
 }

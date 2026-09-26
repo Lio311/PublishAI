@@ -69,8 +69,8 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     he: "מסגרת לאבטחת AI. בודקת ומוודאת את התוצרים כדי למנוע הזיות (Hallucinations), תשובות 'רובוטיות', או יצירת קוד זדוני."
   },
   "MCP": {
-    en: "Model Context Protocol. Standardizes how AI agents securely access external tools like PubMed and ArXiv databases.",
-    he: "פרוטוקול גישה למודלים. מספק תקן מאובטח שדרכו סוכני ה-AI מתקשרים עם כלים חיצונים כמו מאגרי PubMed ו-ArXiv."
+    en: "Model Context Protocol. Standardizes how AI agents securely access external tools like PubMed and Semantic Scholar databases.",
+    he: "פרוטוקול גישה למודלים. מספק תקן מאובטח שדרכו סוכני ה-AI מתקשרים עם כלים חיצונים כמו מאגרי PubMed ו-Semantic Scholar."
   },
   "Vision AI": {
     en: "Multimodal AI capability used to extract data points, trends, and axes from charts, graphs, and visual figures in the paper.",
@@ -257,8 +257,8 @@ const ARCHITECTURE_STEPS = [
     id: 4, phase: 1,
     title: { en: "4. Knowledge Agent", he: "4. סוכן ידע וספרות" },
     description: { 
-      en: "Connects to PubMed/ArXiv via Model Context Protocol (MCP) to retrieve external literature and cross-domain analogies using GraphRAG.",
-      he: "מתחבר למאגרי מידע חיצוניים (PubMed/ArXiv) בעזרת פרוטוקול MCP, ושולף ספרות מקצועית ואנלוגיות חוצי-תחומים באמצעות GraphRAG."
+      en: "Connects to PubMed/Semantic Scholar via Model Context Protocol (MCP) to retrieve external literature and cross-domain analogies using GraphRAG.",
+      he: "מתחבר למאגרי מידע חיצוניים (PubMed/Semantic Scholar) בעזרת פרוטוקול MCP, ושולף ספרות מקצועית ואנלוגיות חוצי-תחומים באמצעות GraphRAG."
     },
     prompt: { 
       en: "SYSTEM: You are an Expert Literature Researcher equipped with Semantic Scholar & PubMed MCP tools.\nTASK:\n1. Generate optimized Boolean search queries combining core concepts from the manuscript.\n2. Retrieve the top 50 most relevant papers published in the last 3 years.\n3. Use GraphRAG to extract key findings and methodologies.\n4. Identify missing foundational citations in the current draft.\nOUTPUT: A synthesized Literature Matrix (JSON) mapping claims in the text to retrieved DOIs.", 

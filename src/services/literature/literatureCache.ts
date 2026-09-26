@@ -24,7 +24,7 @@ export class InMemoryLruCache {
   private maxCapacity: number;
 
   constructor(maxCapacity: number = 500) {
-    this.maxCapacity = Math.max(10, maxCapacity);
+    this.maxCapacity = Math.max(1, maxCapacity);
   }
 
   get<T>(key: string): T | null {

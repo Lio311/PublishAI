@@ -535,7 +535,9 @@ Ensure scientific accuracy, preserve author citations and specific numbers/metri
     try {
       const learnedRules = await getApplicableRules(options.userId, options.journalId);
       if (learnedRules && learnedRules.length > 0) {
-        const rulesText = learnedRules.map((r: any) => `- ${r.ruleText || r.rule || r}`).join("\n");
+        const rulesText = Array.isArray(learnedRules)
+          ? learnedRules.map((r: any) => `- ${r.ruleText || r.rule || r}`).join("\n")
+          : String(learnedRules);
         promptParts.push(wrapPromptContext("learned_preferences", rulesText, "Learned author preferences"));
       }
     } catch (e) {
