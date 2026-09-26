@@ -2,16 +2,18 @@
  * Literature Service Error Classes
  */
 
+export type LiteratureErrorSource = 'pubmed' | 'crossref' | 'semanticscholar' | 'literature_service';
+
 export class LiteratureApiError extends Error {
   readonly statusCode?: number;
-  readonly source: 'pubmed' | 'crossref' | 'literature_service';
+  readonly source: LiteratureErrorSource;
   readonly details?: unknown;
 
   constructor(
     message: string,
     options: {
       statusCode?: number;
-      source: 'pubmed' | 'crossref' | 'literature_service';
+      source: LiteratureErrorSource;
       details?: unknown;
     }
   ) {
@@ -28,7 +30,7 @@ export class RateLimitError extends LiteratureApiError {
   readonly retryAfterSeconds?: number;
 
   constructor(
-    source: 'pubmed' | 'crossref',
+    source: LiteratureErrorSource,
     message: string = 'API rate limit exceeded (HTTP 429)',
     retryAfterSeconds?: number
   ) {
@@ -44,7 +46,7 @@ export class TimeoutError extends LiteratureApiError {
 
   constructor(
     message: string,
-    source: 'pubmed' | 'crossref' | 'literature_service' = 'literature_service',
+    source: LiteratureErrorSource = 'literature_service',
     timeoutMs?: number,
     details?: unknown
   ) {
@@ -59,7 +61,7 @@ export class RemoteServerError extends LiteratureApiError {
   constructor(
     message: string,
     statusCode: number,
-    source: 'pubmed' | 'crossref',
+    source: LiteratureErrorSource,
     details?: unknown
   ) {
     super(message, { statusCode, source, details });
@@ -71,7 +73,7 @@ export class RemoteServerError extends LiteratureApiError {
 export class NotFoundError extends LiteratureApiError {
   constructor(
     message: string,
-    source: 'pubmed' | 'crossref'
+    source: LiteratureErrorSource
   ) {
     super(message, { statusCode: 404, source });
     this.name = 'NotFoundError';

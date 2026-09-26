@@ -2,10 +2,11 @@
  * HTTP Utilities for Literature Services
  * 
  * Provides robust fetch execution with configurable timeouts, abort signal coordination,
- * and retry mechanisms with exponential backoff for transient server errors and rate limits.
+ * external API rate limit handling (Retry-After parsing, proactive pacing), and exponential backoff.
  */
 
-import { LiteratureApiError, RateLimitError, RemoteServerError, TimeoutError } from './errors';
+import { LiteratureErrorSource, LiteratureApiError, RateLimitError, RemoteServerError, TimeoutError } from './errors';
+import { literatureRateLimiter } from './rateLimiter';
 
 export interface FetchWithRetryOptions extends RequestInit {
   timeoutMs?: number;
@@ -13,10 +14,35 @@ export interface FetchWithRetryOptions extends RequestInit {
   backoffMs?: number;
   maxBackoffMs?: number;
   retryOnStatus?: number[];
-  source?: 'pubmed' | 'crossref' | 'literature_service';
+  source?: LiteratureErrorSource;
+  /** Max seconds from Retry-After header that we are willing to wait synchronously inside retries */
+  maxRetryAfterWaitSeconds?: number;
 }
 
 const DEFAULT_TIMEOUT_MS = 10000; // 10 seconds default for scientific APIs
+
+/**
+ * Parses the HTTP Retry-After header (either integer seconds or HTTP-date string)
+ */
+export function parseRetryAfter(header: string | null | undefined): number | undefined {
+  if (!header) return undefined;
+  const trimmed = header.trim();
+
+  // 1. Integer seconds (e.g. "5", "120")
+  if (/^\d+$/.test(trimmed)) {
+    const parsed = parseInt(trimmed, 10);
+    return !isNaN(parsed) && parsed >= 0 ? parsed : undefined;
+  }
+
+  // 2. HTTP-Date (e.g. "Wed, 21 Oct 2026 07:28:00 GMT")
+  const parsedDate = Date.parse(trimmed);
+  if (!isNaN(parsedDate)) {
+    const diffSec = Math.ceil((parsedDate - Date.now()) / 1000);
+    return Math.max(1, diffSec);
+  }
+
+  return undefined;
+}
 
 export async function fetchWithRetryAndTimeout(
   url: string,
@@ -30,9 +56,10 @@ export async function fetchWithRetryAndTimeout(
     timeoutMs = (envTimeout && !isNaN(envTimeout)) ? envTimeout : DEFAULT_TIMEOUT_MS,
     retries = 2,
     backoffMs = 500,
-    maxBackoffMs = 3000,
-    retryOnStatus = [429, 502, 503, 504],
+    maxBackoffMs = 4000,
+    retryOnStatus = [408, 429, 500, 502, 503, 504],
     source = 'literature_service',
+    maxRetryAfterWaitSeconds = 12,
     signal: userSignal,
     ...fetchInit
   } = options;
@@ -50,6 +77,7 @@ export async function fetchWithRetryAndTimeout(
         timedOut = true;
         controller.abort(new TimeoutError(`Request to ${url} timed out after ${timeoutMs}ms`, source, timeoutMs));
       }, timeoutMs);
+      timeoutId.unref?.();
     }
 
     const onUserAbort = () => {
@@ -70,21 +98,38 @@ export async function fetchWithRetryAndTimeout(
         signal: controller.signal,
       });
 
-      // Check for retriable HTTP status codes
-      if (retryOnStatus.includes(response.status) && attempt <= retries) {
-        let delay = Math.min(maxBackoffMs, backoffMs * Math.pow(2, attempt - 1) + Math.random() * 100);
+      // Handle 429 Rate Limiting
+      if (response.status === 429) {
+        const retryAfterSeconds = parseRetryAfter(response.headers.get('retry-after'));
+        const pauseDurationMs = (retryAfterSeconds ?? 2) * 1000;
 
-        // Respect 429 Retry-After header if present
-        if (response.status === 429) {
-          const retryAfterHeader = response.headers.get('retry-after');
-          if (retryAfterHeader) {
-            const parsedSeconds = parseInt(retryAfterHeader, 10);
-            if (!isNaN(parsedSeconds) && parsedSeconds > 0 && parsedSeconds <= 10) {
-              delay = parsedSeconds * 1000;
-            }
-          }
+        // Inform domain rate limiter to pause further requests
+        if (source !== 'literature_service') {
+          literatureRateLimiter.pause(source, pauseDurationMs);
         }
 
+        // Retry if within retry budget and retry-after is reasonable
+        const canWaitRetryAfter = retryAfterSeconds === undefined || retryAfterSeconds <= maxRetryAfterWaitSeconds;
+        if (attempt <= retries && canWaitRetryAfter) {
+          const delay = retryAfterSeconds !== undefined
+            ? retryAfterSeconds * 1000
+            : Math.min(maxBackoffMs, backoffMs * Math.pow(2, attempt - 1) + Math.random() * 200);
+
+          console.warn(`[${source}] Received HTTP 429 from ${url}. Retrying attempt ${attempt}/${retries} after ${Math.round(delay)}ms (Retry-After: ${retryAfterSeconds ?? 'none'})...`);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+
+        throw new RateLimitError(
+          source,
+          `${source} API rate limit exceeded (HTTP 429)${retryAfterSeconds ? `. Retry after ${retryAfterSeconds}s` : ''}`,
+          retryAfterSeconds
+        );
+      }
+
+      // Check for retriable HTTP status codes (transient 5xx, 408)
+      if (retryOnStatus.includes(response.status) && attempt <= retries) {
+        const delay = Math.min(maxBackoffMs, backoffMs * Math.pow(2, attempt - 1) + Math.random() * 100);
         console.warn(`[${source}] Received HTTP ${response.status} from ${url}. Retrying attempt ${attempt}/${retries} after ${Math.round(delay)}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
         continue;
@@ -92,17 +137,12 @@ export async function fetchWithRetryAndTimeout(
 
       // If response is not ok and retries are exhausted:
       if (!response.ok) {
-        if (response.status === 429) {
-          let retryAfter: number | undefined;
-          const retryAfterHeader = response.headers.get('retry-after');
-          if (retryAfterHeader) {
-            const parsed = parseInt(retryAfterHeader, 10);
-            if (!isNaN(parsed)) retryAfter = parsed;
-          }
-          throw new RateLimitError(
-            source === 'pubmed' || source === 'crossref' ? source : 'crossref',
-            `${source} API rate limit exceeded (HTTP 429)`,
-            retryAfter
+        // HTTP 408 or 504 are timeout errors
+        if (response.status === 408 || response.status === 504) {
+          throw new TimeoutError(
+            `${source} API request timed out (HTTP ${response.status} ${response.statusText})`,
+            source,
+            timeoutMs
           );
         }
 
@@ -110,8 +150,27 @@ export async function fetchWithRetryAndTimeout(
           throw new RemoteServerError(
             `${source} API remote server error: HTTP ${response.status} ${response.statusText}`,
             response.status,
-            source === 'pubmed' || source === 'crossref' ? source : 'crossref'
+            source
           );
+        }
+
+        if (response.status === 403 || response.status === 400) {
+          // Some APIs (like NCBI) return 400 or 403 when rate limit is exceeded with error body
+          try {
+            const errorClone = response.clone();
+            const text = await errorClone.text();
+            if (text.toLowerCase().includes('rate limit') || text.toLowerCase().includes('too many requests')) {
+              if (source !== 'literature_service') {
+                literatureRateLimiter.pause(source, 3000);
+              }
+              throw new RateLimitError(
+                source,
+                `${source} API rate limit exceeded (HTTP ${response.status}): ${text.slice(0, 150)}`
+              );
+            }
+          } catch (peekErr: any) {
+            if (peekErr instanceof RateLimitError) throw peekErr;
+          }
         }
       }
 
@@ -122,8 +181,21 @@ export async function fetchWithRetryAndTimeout(
         throw userSignal.reason || err;
       }
 
+      // If already a categorized LiteratureApiError, rethrow
+      if (err instanceof RateLimitError || err instanceof TimeoutError || err instanceof RemoteServerError) {
+        throw err;
+      }
+
       // Handle timeout
-      if (timedOut || err?.name === 'TimeoutError' || (err instanceof TimeoutError)) {
+      const isTimeout =
+        timedOut ||
+        err?.name === 'TimeoutError' ||
+        err?.name === 'AbortError' && timedOut ||
+        err?.code === 'ETIMEDOUT' ||
+        err?.code === 'UND_ERR_CONNECT_TIMEOUT' ||
+        err?.message?.toLowerCase().includes('timed out');
+
+      if (isTimeout) {
         if (attempt <= retries) {
           const delay = Math.min(maxBackoffMs, backoffMs * Math.pow(2, attempt - 1));
           console.warn(`[${source}] Request to ${url} timed out. Retrying attempt ${attempt}/${retries} after ${Math.round(delay)}ms...`);
@@ -133,11 +205,10 @@ export async function fetchWithRetryAndTimeout(
         throw new TimeoutError(`Request to ${url} timed out after ${timeoutMs}ms`, source, timeoutMs, err);
       }
 
-      // Handle network errors (connection dropped, DNS lookup failed, etc.)
+      // Handle network errors (connection dropped, DNS lookup failed, fetch failed)
       const isNetworkError =
         err?.name === 'TypeError' ||
         err?.code === 'ECONNRESET' ||
-        err?.code === 'ETIMEDOUT' ||
         err?.code === 'ECONNREFUSED' ||
         err?.message?.includes('fetch failed');
 

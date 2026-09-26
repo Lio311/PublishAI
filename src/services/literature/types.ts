@@ -4,6 +4,8 @@
 
 export type CitationStyle = 'apa' | 'mla' | 'chicago' | 'harvard' | 'bibtex';
 
+export type LiteratureSource = 'pubmed' | 'crossref' | 'semanticscholar';
+
 export interface Author {
   firstName?: string;
   lastName?: string;
@@ -13,7 +15,7 @@ export interface Author {
 export interface LiteratureItem {
   id: string;
   externalId: string;
-  source: 'pubmed' | 'crossref';
+  source: LiteratureSource;
   title: string;
   authors: Author[];
   journal?: string;
@@ -33,7 +35,7 @@ export interface LiteratureSearchOptions {
   offset?: number;
   yearFrom?: number;
   yearTo?: number;
-  useDummy?: boolean;
+  sources?: LiteratureSource[];
   timeoutMs?: number;
   signal?: AbortSignal;
   skipCache?: boolean;
@@ -49,16 +51,19 @@ export interface LiteratureSearchResult {
   sources: {
     pubmed: number;
     crossref: number;
+    semanticscholar?: number;
   };
   errors?: {
     pubmed?: string;
     crossref?: string;
+    semanticscholar?: string;
   };
   cached?: boolean;
 }
 
 export interface ClientOptions {
   baseUrl?: string;
+  apiKey?: string;
   defaultTimeoutMs?: number;
   retries?: number;
   cache?: any; // LiteratureCache

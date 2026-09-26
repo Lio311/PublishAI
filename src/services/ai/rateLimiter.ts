@@ -28,8 +28,8 @@ export class TimeoutError extends Error {
 function redactSecrets(msg: string): string {
   if (!msg) return "";
   return msg
-    .replace(/\b(sk-[a-zA-Z0-9]{20,})\b/g, "[REDACTED_OPENAI_KEY]")
-    .replace(/\b(sk-ant-[a-zA-Z0-9_-]{20,})\b/g, "[REDACTED_ANTHROPIC_KEY]")
+    .replace(/\b(sk-ant-[a-zA-Z0-9_-]{15,})\b/g, "[REDACTED_ANTHROPIC_KEY]")
+    .replace(/\b(sk-[a-zA-Z0-9_-]{20,})\b/g, "[REDACTED_OPENAI_KEY]")
     .replace(/\b(Bearer\s+)[a-zA-Z0-9._-]{20,}\b/gi, "$1[REDACTED_TOKEN]");
 }
 

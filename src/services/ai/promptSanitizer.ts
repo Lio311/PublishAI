@@ -40,8 +40,8 @@ const INJECTION_HEURISTIC_PATTERNS = [
 export function redactApiKeys(text: string): string {
   if (!text || typeof text !== "string") return "";
   return text
-    .replace(/\b(sk-[a-zA-Z0-9]{20,})\b/g, "[REDACTED_OPENAI_KEY]")
-    .replace(/\b(sk-ant-[a-zA-Z0-9_-]{20,})\b/g, "[REDACTED_ANTHROPIC_KEY]")
+    .replace(/\b(sk-ant-[a-zA-Z0-9_-]{15,})\b/g, "[REDACTED_ANTHROPIC_KEY]")
+    .replace(/\b(sk-[a-zA-Z0-9_-]{20,})\b/g, "[REDACTED_OPENAI_KEY]")
     .replace(/\b(Bearer\s+)[a-zA-Z0-9._-]{20,}\b/gi, "$1[REDACTED_TOKEN]")
     .replace(/api[_-]?key=([a-zA-Z0-9._-]{10,})/gi, "apiKey=[REDACTED]");
 }

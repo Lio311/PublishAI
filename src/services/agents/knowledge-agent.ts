@@ -21,7 +21,7 @@ export class KnowledgeAgent extends BaseAgent {
       tokensUsed += resp.tokensUsed;
       const literature = await gatherLiterature(resp.text);
       context.references = literature.combined;
-      resultText = `Literature gathered for keywords: ${resp.text}. Found articles from PubMed, Semantic Scholar, and arXiv.`;
+      resultText = `Literature gathered for keywords: ${resp.text}. Found articles from PubMed and Semantic Scholar.`;
     } catch(e) {
       console.error(e);
     }
