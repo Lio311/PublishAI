@@ -12,8 +12,8 @@ const MetadataSchema = z.object({
   keywords: z.array(z.string()),
   authors: z.array(z.object({
     name: z.string(),
-    email: z.string().optional(),
-    affiliation: z.string().optional()
+    email: z.string().default(""),
+    affiliation: z.string().default("")
   })),
   articleType: z.string().default("Research Article"),
 });
@@ -55,7 +55,11 @@ export class MetadataExtractor {
       content: doc?.content || "Content missing",
       abstract: extractedData?.abstract || "Abstract not found", 
       keywords: extractedData?.keywords || ["Research"],
-      authors: extractedData?.authors || [
+      authors: extractedData?.authors?.map(a => ({
+        name: a.name,
+        email: a.email || "",
+        affiliation: a.affiliation || ""
+      })) || [
         { name: "Current User", email: "user@example.com", affiliation: "University" }
       ],
       articleType: extractedData?.articleType || "Research Article",
