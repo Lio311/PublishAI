@@ -10,6 +10,9 @@ import { checkIsAdmin } from "@/services/auth-utils";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Download, FileText, Calendar, Building2, ExternalLink } from "lucide-react";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import SubmissionProgressBar from "@/components/submission/SubmissionProgressBar";
+import { submissions } from "@/services/db/schema";
+import { desc } from "drizzle-orm";
 
 export default async function PaperPage({
   params
@@ -48,7 +51,16 @@ export default async function PaperPage({
       )
     );
 
+  
+  const [latestSubmission] = await db
+    .select({ status: submissions.status })
+    .from(submissions)
+    .where(eq(submissions.paperId, paperId))
+    .orderBy(desc(submissions.createdAt))
+    .limit(1);
+    
   if (!paperRecord) return notFound();
+
 
   const formatDate = (date: Date | null) => {
     if (!date) return "";
@@ -172,6 +184,10 @@ export default async function PaperPage({
         </div>
 
         {/* Paper Tabs & Interactive Workspaces */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 mb-6 shadow-xs">
+           <h3 className="text-lg font-semibold mb-4 text-slate-800">{isHe ? "התקדמות ההגשה" : "Submission Progress"}</h3>
+           <SubmissionProgressBar currentStatus={latestSubmission?.status || "draft"} />
+        </div>
         <ErrorBoundary name="Paper Workspace">
           <PaperTabs paperId={paperRecord.id} initialStatus={paperRecord.status || "pending"} />
         </ErrorBoundary>

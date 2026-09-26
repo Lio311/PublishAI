@@ -351,6 +351,9 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <FlowArrow isHe={isHe} label={{ en: 'Raw text', he: 'טקסט' }} />
                 <NodeCard type="infra" icon={FileText} isHe={isHe} titleEn="Metadata" titleHe="מטא-דאטה" descEn="Extract Authors, Keywords, Abstract" descHe="חילוץ מחברים, מילות מפתח, תקציר" techs={['Claude 3.7', 'Zod']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
+                <FlowArrow isHe={isHe} label={{ en: 'Enrich', he: 'העשרה' }} />
+                <NodeCard type="agent" icon={Database} isHe={isHe} titleEn="JCR & Predict" titleHe="ניבוי וחיזוי" descEn="Fetch JCR metrics & Predict Acceptance %" descHe="הבאת מדדי כתב עת וניבוי אחוזי קבלה" techs={['JCR API', 'GPT-4o']} />
+                <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} label={{ en: 'JSON', he: 'JSON' }} />
                 <NodeCard type="db" icon={Database} isHe={isHe} titleEn="Database" titleHe="מסד נתונים" descEn="Save initial record. Return ID." descHe="שמירת רשומה. החזרת מזהה." techs={['Drizzle ORM', 'Neon Postgres']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
@@ -382,7 +385,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="agent" icon={FileText} isHe={isHe} titleEn="Planning" titleHe="סוכן תכנון" descEn="GraphRAG -> Journal Trends -> DAG Plan" descHe="מושך טרנדים מ-GraphRAG ובונה תוכנית" techs={['GraphRAG', 'pgvector']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
-                <NodeCard type="agent" icon={Search} isHe={isHe} titleEn="Knowledge" titleHe="סוכן ידע" descEn="arXiv / PubMed searches for literature." descHe="שאיבת ספרות מ-PubMed ו-arXiv." techs={['MCP', 'PubMed API', 'arXiv API']} />
+                <NodeCard type="agent" icon={Search} isHe={isHe} titleEn="Knowledge" titleHe="סוכן ידע" descEn="PubMed searches for literature." descHe="שאיבת ספרות מ-PubMed." techs={['MCP', 'PubMed API']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="agent" icon={MessageSquare} isHe={isHe} titleEn="SciReview" titleHe="עימות סוקרים" descEn="Harsh (Claude) + Analyst (GPT-4o) + Optimist" descHe="ביקורת רב-מודלית (Claude, GPT-4o, Gemini)" techs={['GPT-4o-mini', 'Gemini 1.5 Pro']} />
@@ -426,6 +429,9 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="agent" icon={Download} isHe={isHe} titleEn="Compile & Reinject" titleHe="הידור ושחזור" descEn="Compile manuscript & restore Mendeley CSL" descHe="הידור ושחזור ציטוטי Mendeley במסמך" techs={['DOCX', 'Mendeley CSL']} />
+                <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
+                <FlowArrow isHe={isHe} />
+                <NodeCard type="agent" icon={Database} isHe={isHe} titleEn="Post-Predict" titleHe="ניבוי חוזר" descEn="Predict Acceptance % after AI rewrite" descHe="ניבוי אחוזי קבלה לאחר שכתוב המערכת" techs={['GPT-4o']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="infra" icon={FileText} isHe={isHe} titleEn="Export PDF/DOCX" titleHe="ייצוא קבצים" descEn="Generate formatted PDF & Word documents" descHe="יצירת קבצי PDF ו-Word מעוצבים" techs={['PDF Parser', 'DOCX']} />

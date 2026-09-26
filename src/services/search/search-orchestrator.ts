@@ -1,15 +1,13 @@
 import { searchPubMed } from "./pubmed-client";
 import { searchSemanticScholar } from "./semantic-scholar-client";
-import { searchArxiv } from "./arxiv-client";
 
 export async function gatherLiterature(query: string) {
-  const [pubmedResults, scholarResults, arxivResults] = await Promise.all([
+  const [pubmedResults, scholarResults] = await Promise.all([
     searchPubMed(query).catch(e => { console.error(e); return []; }),
-    searchSemanticScholar(query).catch(e => { console.error(e); return []; }),
-    searchArxiv(query).catch(e => { console.error(e); return []; })
+    searchSemanticScholar(query).catch(e => { console.error(e); return []; })
   ]);
 
-  const allResults = [...pubmedResults, ...scholarResults, ...arxivResults];
+  const allResults = [...pubmedResults, ...scholarResults];
   const combined: any[] = [];
   const seenDois = new Set<string>();
   const seenTitles = new Set<string>();
@@ -34,7 +32,6 @@ export async function gatherLiterature(query: string) {
   return {
     pubmedResults,
     scholarResults,
-    arxivResults,
     combined
   };
 }

@@ -2,14 +2,13 @@ import { ChatOpenAI } from "@langchain/openai";
 import { SystemMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
 import { PublishAIState } from "../state";
-import { arxivTool } from "../../../ai/tools/arxivTool";
 import { pubmedTool } from "../../../ai/tools/pubmedTool";
 
 export const knowledgeNode = async (state: PublishAIState) => {
   const model = new ChatOpenAI({
     modelName: "gpt-4o",
     temperature: 0,
-  }).bindTools([arxivTool, pubmedTool]);
+  }).bindTools([pubmedTool]);
 
   const docContent = state.documentContent || state.clarification || "";
   const messages = [
@@ -25,10 +24,7 @@ export const knowledgeNode = async (state: PublishAIState) => {
   
   if (response.tool_calls && response.tool_calls.length > 0) {
     for (const toolCall of response.tool_calls) {
-      if (toolCall.name === "arxiv_search") {
-        const result = await arxivTool.invoke(toolCall);
-        knowledgeContext += `\n\n[arXiv] ${toolCall.args.query}:\n${result}`;
-      } else if (toolCall.name === "pubmed_search") {
+      if (toolCall.name === "pubmed_search") {
         const result = await pubmedTool.invoke(toolCall);
         knowledgeContext += `\n\n[PubMed] ${toolCall.args.query}:\n${result}`;
       }

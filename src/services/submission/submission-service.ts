@@ -10,8 +10,52 @@ import { EditorialManagerAdapter } from "./adapters/editorial-manager-adapter";
 import { SubmissionPayload, SubmissionResult } from "./connection-types";
 
 export class SubmissionService {
+
+  /**
+   * Validates the submission for technical issues before sending.
+   */
+  static async validateSubmission(submissionId: number): Promise<{ valid: boolean; errors: string[] }> {
+    const submission = await db.query.submissions.findFirst({
+      where: eq(submissions.id, submissionId),
+      with: { connection: true }
+    });
+    if (!submission) throw new Error("Submission not found");
+
+    const errors: string[] = [];
+
+    // Technical validation 1: Authors mismatch/missing info
+    if (!submission.submittedAuthors || !Array.isArray(submission.submittedAuthors) || submission.submittedAuthors.length === 0) {
+      errors.push("No authors provided.");
+    } else {
+      submission.submittedAuthors.forEach((author: any, index: number) => {
+        if (!author.email) errors.push(`Author ${index + 1} is missing an email address.`);
+        if (!author.affiliation) errors.push(`Author ${index + 1} is missing an institutional affiliation.`);
+      });
+    }
+
+    // Technical validation 2: Title and abstract
+    if (!submission.submittedTitle || submission.submittedTitle.trim() === "") {
+      errors.push("Missing manuscript title.");
+    }
+    if (!submission.submittedAbstract || submission.submittedAbstract.trim() === "") {
+      errors.push("Missing abstract.");
+    }
+
+    // Technical validation 3: Required statements
+    if (!submission.conflictOfInterestStatement) {
+      errors.push("Missing Conflict of Interest statement.");
+    }
+    if (!submission.fundingDeclaration) {
+      // Assuming false means no funding, but we might want a string statement. We check if it's explicitly set.
+      // For boolean, it defaults to false, so maybe we skip strict boolean check here unless required.
+    }
+
+    return { valid: errors.length === 0, errors };
+  }
+
   /**
    * Executes a submission based on the database record.
+ based on the database record.
    * Can be called by the background worker.
    */
   static async executeSubmission(submissionId: number): Promise<SubmissionResult> {
@@ -33,8 +77,15 @@ export class SubmissionService {
       throw new Error(`Connection for submission ${submissionId} not found`);
     }
 
+
     try {
+      const validation = await this.validateSubmission(submissionId);
+      if (!validation.valid) {
+        throw new Error("Technical Validation Failed: " + validation.errors.join("; "));
+      }
+
       await this.log(submissionId, "info", "Starting submission process", { platform: conn.platform });
+
       
       const payload: SubmissionPayload = {
         title: submission.submittedTitle || "Untitled",
