@@ -4,8 +4,11 @@ import { auth } from "@/app/auth";
 import { db } from "@/services/db";
 import { papers } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from "@/services/security/rateLimit";
 
 export async function POST(req: NextRequest) {
+  const rl = checkRateLimit(req, RATE_LIMITS.agentRun);
+  if (!rl.allowed) return rateLimitResponse(rl.resetMs);
   try {
     const session = await auth();
     if (!session?.user?.id) {
