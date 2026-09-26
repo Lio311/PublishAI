@@ -312,7 +312,31 @@
     "none": "ללא",
     "default": "ברירת מחדל",
     "unknown": "לא ידוע",
-    "instructionsForAuthors": "הוראות למחברים"
+    "instructionsForAuthors": "הוראות למחברים",
+    "addButton": "הוספת עיתון",
+    "modalTitle": "הוסף עיתון חדש",
+    "nameLabel": "שם העיתון *",
+    "namePlaceholder": "לדוגמה: Science",
+    "fetchingDetails": "מושך נתונים אוטומטית...",
+    "saving": "שומר...",
+    "saveButton": "שמור עיתון",
+    "createSuccess": "העיתון נוסף בהצלחה",
+    "createFailed": "נכשל בהוספת העיתון"
+  },
+  "Literature": {
+    "title": "חיפוש ציטוטים ומקורות",
+    "placeholder": "חיפוש ב-PubMed, Crossref ו-Semantic Scholar...",
+    "search": "חיפוש",
+    "searching": "מחפש...",
+    "foundResults": "נמצאו {total} תוצאות",
+    "sourcesBreakdown": "PubMed: {pubmed}, Crossref: {crossref}",
+    "semanticScholarSource": ", Semantic Scholar: {count}",
+    "noResults": "לא נמצאו תוצאות עבור החיפוש.",
+    "rateLimit": "חריגה ממגבלת בקשות ({source}). אנא המתן {retryAfter} שניות לפני חיפוש נוסף.",
+    "timeout": "בקשת החיפוש חרגה ממגבלת הזמן. נסה מונח חיפוש ממוקד יותר.",
+    "fetchFailed": "נכשל באחזור תוצאות החיפוש",
+    "errorOccurred": "אירעה שגיאה בעת ביצוע החיפוש",
+    "clear": "נקה"
   },
   "Connections": {
     "title": "חיבור לעיתונים",

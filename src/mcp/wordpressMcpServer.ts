@@ -228,7 +228,7 @@ export function createWordpressMcpServer(context?: McpServerContext) {
       return formatMcpError(
         `Tool not found: '${request.params.name}'. Supported tools: 'create_wp_draft', 'test_wp_connection'.`
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       return formatMcpError(error, "Failed to execute WordPress tool");
     }
   });

@@ -207,7 +207,7 @@ export function createOjsMcpServer(context?: McpServerContext) {
       return formatMcpError(
         `Tool not found: '${request.params.name}'. Supported tools: 'create_ojs_submission', 'test_ojs_connection'.`
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       return formatMcpError(error, "Failed to execute OJS tool");
     }
   });

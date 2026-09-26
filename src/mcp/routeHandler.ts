@@ -103,8 +103,9 @@ export function createMcpRouteHandler(factory: McpServerFactory, serverName: str
       await transport.handlePostMessage(body);
 
       return new Response("Accepted", { status: 202 });
-    } catch (error: any) {
-      return Response.json({ error: error.message || "Internal error processing message" }, { status: 500 });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "Internal error processing message";
+      return Response.json({ error: msg }, { status: 500 });
     }
   }
 

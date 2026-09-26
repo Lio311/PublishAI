@@ -4,7 +4,7 @@ import { JSONRPCMessage, JSONRPCMessageSchema } from "@modelcontextprotocol/sdk/
 export class NextSseTransport implements Transport {
   onclose?: () => void;
   onerror?: (error: Error) => void;
-  onmessage?: <T extends JSONRPCMessage>(message: T, extra?: any) => void;
+  onmessage?: <T extends JSONRPCMessage>(message: T, extra?: unknown) => void;
 
   sessionId: string;
   userId?: string;
@@ -48,7 +48,7 @@ export class NextSseTransport implements Transport {
     this.onclose?.();
   }
 
-  async handlePostMessage(body: any) {
+  async handlePostMessage(body: unknown) {
     this.lastActiveAt = Date.now();
     try {
       const parsedMessage = JSONRPCMessageSchema.parse(body);

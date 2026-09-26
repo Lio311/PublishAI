@@ -86,7 +86,7 @@ export function createLiteratureMcpServer(context?: McpServerContext) {
         const results = await literatureService.search(query, {
           limit,
           offset,
-          sources: sources as any,
+          sources: sources as ("pubmed" | "crossref" | "semanticscholar")[],
         });
 
         return formatMcpSuccess(results);
@@ -107,7 +107,7 @@ export function createLiteratureMcpServer(context?: McpServerContext) {
       return formatMcpError(
         `Tool not found: '${request.params.name}'. Supported tools: 'search_literature', 'get_citation_by_doi'.`
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       return formatMcpError(error, "Failed to execute literature tool");
     }
   });

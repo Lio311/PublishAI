@@ -312,7 +312,31 @@
     "none": "None",
     "default": "Default",
     "unknown": "Unknown",
-    "instructionsForAuthors": "Instructions for Authors"
+    "instructionsForAuthors": "Instructions for Authors",
+    "addButton": "Add Journal",
+    "modalTitle": "Add New Journal",
+    "nameLabel": "Journal Name *",
+    "namePlaceholder": "e.g. Science",
+    "fetchingDetails": "Fetching journal details automatically...",
+    "saving": "Saving...",
+    "saveButton": "Save Journal",
+    "createSuccess": "Journal added successfully",
+    "createFailed": "Failed to add journal"
+  },
+  "Literature": {
+    "title": "Citation Search",
+    "placeholder": "Search PubMed, Crossref & Semantic Scholar...",
+    "search": "Search",
+    "searching": "Searching...",
+    "foundResults": "Found {total} results",
+    "sourcesBreakdown": "PubMed: {pubmed}, Crossref: {crossref}",
+    "semanticScholarSource": ", Semantic Scholar: {count}",
+    "noResults": "No results found for your search.",
+    "rateLimit": "Rate limit exceeded ({source}). Please wait {retryAfter}s before searching again.",
+    "timeout": "Search request timed out. Please try a more specific search term.",
+    "fetchFailed": "Failed to fetch literature search results",
+    "errorOccurred": "An error occurred while searching",
+    "clear": "Clear"
   },
   "Connections": {
     "title": "Journal Connections",

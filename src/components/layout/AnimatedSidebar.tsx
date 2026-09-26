@@ -8,9 +8,14 @@ import { useTranslations, useLocale } from "next-intl";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { FileText, Home, Settings, LogOut, LogIn, Globe, Book, Link as LinkIcon, Send, Share2, Brain, X, Workflow, BarChart3 } from "lucide-react";
 
+export interface SidebarProps {
+  isAdmin?: boolean;
+  onClose?: () => void;
+}
+
 const emptySubscribe = () => () => {};
 
-export default function AnimatedSidebar({ isAdmin = false, onClose }: { isAdmin?: boolean; onClose?: () => void }) {
+export default function AnimatedSidebar({ isAdmin = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const t = useTranslations("Sidebar");
   const locale = useLocale();
@@ -20,11 +25,15 @@ export default function AnimatedSidebar({ isAdmin = false, onClose }: { isAdmin?
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
+  const isEffectiveAdmin = isAdmin || (session?.user as { role?: string })?.role === "admin";
+
   const toggleLanguage = useCallback(() => {
     const nextLocale = locale === 'he' ? 'en' : 'he';
     // next-intl router automatically handles injecting the new locale
     router.replace(pathname, { locale: nextLocale });
   }, [locale, router, pathname]);
+
+  const cleanPath = pathname ? pathname.replace(/\/$/, "") || "/" : "/";
 
   const menuItems = useMemo(() => {
     const items = [
@@ -37,7 +46,7 @@ export default function AnimatedSidebar({ isAdmin = false, onClose }: { isAdmin?
       { name: t("settings"), icon: Settings, href: `/settings` },
     ];
 
-    if (isAdmin) {
+    if (isEffectiveAdmin) {
       items.push({ name: t("admin"), icon: Globe, href: `/admin` });
       items.push({ name: t("learning"), icon: Brain, href: `/learning` });
       
@@ -47,13 +56,16 @@ export default function AnimatedSidebar({ isAdmin = false, onClose }: { isAdmin?
     }
 
     return items;
-  }, [t, isAdmin]);
+  }, [t, isEffectiveAdmin]);
 
   const activeItem = useMemo(() => {
-    return [...menuItems].sort((a, b) => b.href.length - a.href.length).find(
-      item => item.href === '/' ? pathname === '/' : (pathname === item.href || pathname.startsWith(`${item.href}/`))
-    );
-  }, [menuItems, pathname]);
+    return [...menuItems].sort((a, b) => b.href.length - a.href.length).find(item => {
+      if (item.href === "/") {
+        return cleanPath === "/";
+      }
+      return cleanPath === item.href || cleanPath.startsWith(`${item.href}/`);
+    });
+  }, [menuItems, cleanPath]);
 
   return (
     <aside 
@@ -68,7 +80,7 @@ export default function AnimatedSidebar({ isAdmin = false, onClose }: { isAdmin?
           type="button"
           onClick={onClose}
           aria-label={t("closeMenu")}
-          className="md:hidden absolute top-4 end-4 p-2 bg-slate-100 rounded-lg text-slate-600 hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 transition-colors z-50"
+          className="md:hidden absolute top-4 end-4 min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 bg-slate-100 rounded-xl text-slate-600 hover:bg-slate-200 active:bg-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 transition-colors z-50 cursor-pointer"
         >
           <X size={20} aria-hidden="true" />
         </button>
@@ -95,7 +107,7 @@ export default function AnimatedSidebar({ isAdmin = false, onClose }: { isAdmin?
         
         <motion.nav 
           aria-label={t("navigation")}
-          className="flex-1 overflow-y-auto scrollbar-hide min-h-0"
+          className="flex-1 overflow-y-auto overscroll-contain touch-pan-y scrollbar-hide min-h-0"
           onMouseLeave={() => setHoveredIndex(null)}
         >
           <ul role="list" className="space-y-0.5 lg:space-y-1">
@@ -113,8 +125,8 @@ export default function AnimatedSidebar({ isAdmin = false, onClose }: { isAdmin?
                     href={item.href}
                     onClick={onClose}
                     aria-current={isActive ? "page" : undefined}
-                    className={`relative flex items-center justify-between px-4 py-2.5 rounded-2xl font-medium transition-colors duration-300 z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
-                      isActive ? "text-sky-800" : "text-slate-500 hover:text-slate-800"
+                    className={`group relative flex items-center justify-between px-4 py-2.5 rounded-2xl font-medium transition-colors duration-300 z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
+                      isActive ? "text-sky-800 font-semibold" : "text-slate-500 hover:text-slate-800"
                     }`}
                   >
                     <div className="flex items-center gap-3.5">
