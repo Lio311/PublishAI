@@ -5,6 +5,7 @@ import { Book, ExternalLink, FileText, Quote, List, Mail, CheckCircle, XCircle, 
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { checkIsAdmin } from "@/services/auth-utils";
 import AddJournalButton from "@/components/journals/AddJournalButton";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 type JournalWithRelations = {
   journal: typeof journals.$inferSelect;
@@ -37,39 +38,39 @@ async function getJournalsWithRelations(): Promise<JournalWithRelations[]> {
   return enriched;
 }
 
-function DataSourceBadge({ source, isHe }: { source: string | null; isHe: boolean }) {
+function DataSourceBadge({ source, verifiedLabel, aiLabel }: { source: string | null; verifiedLabel: string; aiLabel: string }) {
   if (source === "official-website") {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
         <Shield className="w-3 h-3" />
-        {isHe ? 'מאומת' : 'Verified'}
+        {verifiedLabel}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
       <Sparkles className="w-3 h-3" />
-      {isHe ? 'AI' : 'AI-generated'}
+      {aiLabel}
     </span>
   );
 }
 
-function CoverLetterStatus({ rules, isHe }: { rules: JournalWithRelations['coverLetterRules']; isHe: boolean }) {
+function CoverLetterStatus({ rules, requiredLabel, optionalLabel, unknownLabel }: { rules: JournalWithRelations['coverLetterRules']; requiredLabel: string; optionalLabel: string; unknownLabel: string }) {
   if (!rules) {
-    return <span className="text-slate-400">{isHe ? 'לא ידוע' : 'Unknown'}</span>;
+    return <span className="text-slate-400">{unknownLabel}</span>;
   }
   if (rules.required) {
     return (
       <span className="inline-flex items-center gap-1 text-red-600 font-medium">
         <CheckCircle className="w-3.5 h-3.5" />
-        {isHe ? 'חובה' : 'Required'}
+        {requiredLabel}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center gap-1 text-slate-500">
       <XCircle className="w-3.5 h-3.5" />
-      {isHe ? 'אופציונלי' : 'Optional'}
+      {optionalLabel}
     </span>
   );
 }
@@ -84,9 +85,10 @@ const IN_TEXT_FORMAT_LABELS: Record<string, { en: string; he: string }> = {
 export default async function JournalsPage({ params }: { params: Promise<{ locale: string }> | { locale: string } }) {
   const resolvedParams = await params;
   const locale = resolvedParams.locale;
+  setRequestLocale(locale);
   const allJournals = await getJournalsWithRelations();
   const isAdmin = await checkIsAdmin();
-
+  const t = await getTranslations("Journals");
   const isHe = locale === 'he';
 
   return (
@@ -94,8 +96,8 @@ export default async function JournalsPage({ params }: { params: Promise<{ local
       <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">{isHe ? 'חוקי עיתונים' : 'Journal Rules'}</h1>
-          <p className="text-slate-500 mt-1">{isHe ? 'ניהול חוקי עיצוב והגשה לעיתוני יעד שונים.' : 'Manage formatting and submission rules for target journals.'}</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">{t("title")}</h1>
+          <p className="text-slate-500 mt-1">{t("subtitle")}</p>
         </div>
         <AddJournalButton />
       </div>
@@ -115,7 +117,7 @@ export default async function JournalsPage({ params }: { params: Promise<{ local
                     <p className="text-sm text-slate-500">{journal.field}</p>
                   </div>
                 </div>
-                <DataSourceBadge source={journal.dataSource} isHe={isHe} />
+                <DataSourceBadge source={journal.dataSource} verifiedLabel={t("verified")} aiLabel={t("aiGenerated")} />
               </div>
             </div>
 
@@ -128,11 +130,11 @@ export default async function JournalsPage({ params }: { params: Promise<{ local
                   <div className="flex items-center gap-1.5 mb-2">
                     <Quote className="w-4 h-4 text-slate-400" />
                     <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      {isHe ? 'ציטוט' : 'Citation'}
+                      {t("citation")}
                     </span>
                   </div>
                   <p className="text-sm font-medium text-slate-800">
-                    {citationRules?.styleName || journal.citationStyle || (isHe ? 'ברירת מחדל' : 'Default')}
+                    {citationRules?.styleName || journal.citationStyle || t("default")}
                   </p>
                   {citationRules && (
                     <p className="text-xs text-slate-500 mt-1">
@@ -147,17 +149,17 @@ export default async function JournalsPage({ params }: { params: Promise<{ local
                   <div className="flex items-center gap-1.5 mb-2">
                     <FileText className="w-4 h-4 text-slate-400" />
                     <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      {isHe ? 'תקציר' : 'Abstract'}
+                      {t("abstract")}
                     </span>
                   </div>
                   <p className="text-sm font-medium text-slate-800">
-                    {abstractRules?.defaultWordLimit || journal.abstractLimit || '—'} {isHe ? 'מילים' : 'words'}
+                    {abstractRules?.defaultWordLimit || journal.abstractLimit || '—'} {t("words")}
                   </p>
                   {abstractRules && (
                     <p className="text-xs text-slate-500 mt-1">
                       {abstractRules.abstractType === 'structured' 
-                        ? (isHe ? 'מובנה' : 'Structured')
-                        : (isHe ? 'לא מובנה' : 'Unstructured')}
+                        ? t("structured")
+                        : t("unstructured")}
                       {abstractRules.label !== 'Abstract' && ` · "${abstractRules.label}"`}
                     </p>
                   )}
@@ -170,7 +172,7 @@ export default async function JournalsPage({ params }: { params: Promise<{ local
                   <div className="flex items-center gap-1.5 mb-2">
                     <List className="w-4 h-4 text-slate-400" />
                     <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      {isHe ? 'סוגי מאמרים' : 'Article Types'}
+                      {t("articleTypes")}
                     </span>
                   </div>
                   <div className="space-y-1">
@@ -180,14 +182,14 @@ export default async function JournalsPage({ params }: { params: Promise<{ local
                           {at.isPrimary && '★ '}{at.typeName}
                         </span>
                         <span className="text-xs text-slate-500 tabular-nums">
-                          {at.wordLimit ? `${at.wordLimit.toLocaleString()} ${isHe ? 'מ' : 'w'}` : (isHe ? 'ללא מגבלה' : 'No limit')}
-                          {at.displayItemsLimit && ` · ${at.displayItemsLimit} ${isHe ? 'איורים' : 'figs'}`}
-                          {at.referencesLimit && ` · ${at.referencesLimit} ${isHe ? 'מקורות' : 'refs'}`}
+                          {at.wordLimit ? `${at.wordLimit.toLocaleString()} ${isHe ? 'מ' : 'w'}` : t("noLimit")}
+                          {at.displayItemsLimit && ` · ${at.displayItemsLimit} ${t("figs")}`}
+                          {at.referencesLimit && ` · ${at.referencesLimit} ${t("refs")}`}
                         </span>
                       </div>
                     ))}
                     {articleTypes.length > 4 && (
-                      <p className="text-xs text-slate-400">+{articleTypes.length - 4} {isHe ? 'נוספים' : 'more'}</p>
+                      <p className="text-xs text-slate-400">+{articleTypes.length - 4} {t("more")}</p>
                     )}
                   </div>
                 </div>
@@ -198,18 +200,18 @@ export default async function JournalsPage({ params }: { params: Promise<{ local
                 <div className="flex items-center gap-1.5">
                   <Mail className="w-4 h-4 text-slate-400" />
                   <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    {isHe ? 'מכתב נלווה' : 'Cover Letter'}
+                    {t("coverLetter")}
                   </span>
                 </div>
-                <CoverLetterStatus rules={coverLetterRules} isHe={isHe} />
+                <CoverLetterStatus rules={coverLetterRules} requiredLabel={t("required")} optionalLabel={t("optional")} unknownLabel={t("unknown")} />
               </div>
 
               {/* Fallback: basic data if no enrichment */}
               {articleTypes.length === 0 && (
                 <div className="space-y-2 text-sm text-slate-700">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">{isHe ? 'מגבלת מילים:' : 'Word Limit:'}</span>
-                    <span className="font-medium">{journal.wordLimit || (isHe ? 'ללא' : 'None')}</span>
+                    <span className="text-slate-500">{t("wordLimit")}</span>
+                    <span className="font-medium">{journal.wordLimit || t("none")}</span>
                   </div>
                 </div>
               )}
@@ -224,7 +226,7 @@ export default async function JournalsPage({ params }: { params: Promise<{ local
                   rel="noreferrer"
                   className="text-sky-500 hover:text-sky-600 text-sm font-medium flex items-center gap-1"
                 >
-                  {isHe ? 'הוראות למחברים' : 'Instructions for Authors'}
+                  {t("instructionsForAuthors")}
                   <ExternalLink className="w-4 h-4" />
                 </a>
               </div>

@@ -6,9 +6,11 @@ import {
   getSenderAddress,
   sendAwaitingApprovalEmail,
   sendWeeklyDigestEmail,
+  sendGenericNotificationEmail,
   sendEmail,
   verifyTransport,
   isTransientError,
+  isEmailConfigured,
 } from "../../services/email/notification-service";
 import {
   sendSubmissionSuccessEmail,
@@ -638,6 +640,195 @@ describe("Email Sending Services & Error Handling", () => {
       const result = await verifyTransport(mailer);
       expect(result.success).toBe(false);
       expect(result.error).toContain("Authentication failed");
+    });
+  });
+
+  describe("sendGenericNotificationEmail", () => {
+    it("successfully sends generic notification email", async () => {
+      const mockSendMail = jest.fn().mockResolvedValue({ messageId: "msg-gen-1" });
+      setTransporter({ sendMail: mockSendMail } as any);
+
+      const result = await sendGenericNotificationEmail(
+        "user@example.com",
+        "Pipeline Update",
+        "All steps finished successfully.",
+        {
+          recipientName: "Dr. Marie",
+          actionUrl: "https://publish-ai.com/review",
+          actionText: "Open Review",
+          details: {
+            "Run ID": "run-99",
+            Status: "Success",
+          },
+        }
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.messageId).toBe("msg-gen-1");
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "user@example.com",
+          subject: "Pipeline Update",
+          text: expect.stringContaining("All steps finished successfully."),
+          html: expect.stringContaining("Run ID"),
+        })
+      );
+    });
+
+    it("handles error gracefully in sendGenericNotificationEmail", async () => {
+      const mockSendMail = jest.fn().mockRejectedValue(new Error("Generic delivery error"));
+      setTransporter({ sendMail: mockSendMail } as any);
+
+      const result = await sendGenericNotificationEmail(
+        "user@example.com",
+        "Pipeline Update",
+        "Failed"
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Generic delivery error");
+    });
+  });
+
+  describe("isEmailConfigured", () => {
+    it("returns true when any valid provider environment variable is present", () => {
+      process.env.SMTP_HOST = "smtp.mail.com";
+      expect(isEmailConfigured()).toBe(true);
+      delete process.env.SMTP_HOST;
+
+      process.env.RESEND_API_KEY = "re_123";
+      expect(isEmailConfigured()).toBe(true);
+      delete process.env.RESEND_API_KEY;
+
+      process.env.SENDGRID_API_KEY = "SG.123";
+      expect(isEmailConfigured()).toBe(true);
+      delete process.env.SENDGRID_API_KEY;
+
+      process.env.POSTMARK_API_KEY = "pm-token";
+      expect(isEmailConfigured()).toBe(true);
+      delete process.env.POSTMARK_API_KEY;
+
+      process.env.SMTP_URL = "smtp://user:pass@smtp.host:587";
+      expect(isEmailConfigured()).toBe(true);
+      delete process.env.SMTP_URL;
+    });
+
+    it("returns false when no provider environment variables are present", () => {
+      delete process.env.SMTP_HOST;
+      delete process.env.SMTP_URL;
+      delete process.env.EMAIL_SERVER;
+      delete process.env.RESEND_API_KEY;
+      delete process.env.SENDGRID_API_KEY;
+      delete process.env.POSTMARK_API_KEY;
+      delete process.env.POSTMARK_SERVER_TOKEN;
+      delete process.env.EMAIL_DRIVER;
+
+      expect(isEmailConfigured()).toBe(false);
+    });
+  });
+
+  describe("Multi-provider transport configuration", () => {
+    it("configures SMTP from SMTP_URL / EMAIL_SERVER connection string", async () => {
+      process.env.SMTP_URL = "smtp://testuser:testpass@mail.domain.com:587";
+      const createTransportSpy = jest.spyOn(nodemailer, "createTransport");
+
+      await getTransporter();
+
+      expect(createTransportSpy).toHaveBeenCalledWith(
+        "smtp://testuser:testpass@mail.domain.com:587",
+        expect.objectContaining({
+          connectionTimeout: 15000,
+        })
+      );
+      delete process.env.SMTP_URL;
+    });
+
+    it("configures SendGrid SMTP when SENDGRID_API_KEY is present", async () => {
+      delete process.env.SMTP_HOST;
+      delete process.env.RESEND_API_KEY;
+      process.env.SENDGRID_API_KEY = "SG.test_key_123";
+      const createTransportSpy = jest.spyOn(nodemailer, "createTransport");
+
+      await getTransporter();
+
+      expect(createTransportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          host: "smtp.sendgrid.net",
+          port: 465,
+          secure: true,
+          auth: {
+            user: "apikey",
+            pass: "SG.test_key_123",
+          },
+        })
+      );
+      delete process.env.SENDGRID_API_KEY;
+    });
+
+    it("configures Postmark SMTP when POSTMARK_API_KEY is present", async () => {
+      delete process.env.SMTP_HOST;
+      delete process.env.RESEND_API_KEY;
+      delete process.env.SENDGRID_API_KEY;
+      process.env.POSTMARK_API_KEY = "pm_token_456";
+      const createTransportSpy = jest.spyOn(nodemailer, "createTransport");
+
+      await getTransporter();
+
+      expect(createTransportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          host: "smtp.postmarkapp.com",
+          port: 587,
+          secure: false,
+          auth: {
+            user: "pm_token_456",
+            pass: "pm_token_456",
+          },
+        })
+      );
+      delete process.env.POSTMARK_API_KEY;
+    });
+
+    it("throws an error in production if no email transport credentials are configured", async () => {
+      delete process.env.SMTP_HOST;
+      delete process.env.SMTP_URL;
+      delete process.env.EMAIL_SERVER;
+      delete process.env.RESEND_API_KEY;
+      delete process.env.SENDGRID_API_KEY;
+      delete process.env.POSTMARK_API_KEY;
+      delete process.env.POSTMARK_SERVER_TOKEN;
+      delete process.env.EMAIL_DRIVER;
+      Object.defineProperty(process.env, "NODE_ENV", {
+        value: "production",
+        configurable: true,
+        writable: true,
+      });
+
+      await expect(getTransporter()).rejects.toThrow("Production email transport is not configured");
+    });
+  });
+
+  describe("Validation of recipient and content in sendEmail", () => {
+    it("returns error when recipient 'to' is empty", async () => {
+      const result = await sendEmail({
+        to: "",
+        subject: "No recipient",
+        text: "Sample text",
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Email recipient missing");
+    });
+
+    it("returns error when both html and text are missing or blank", async () => {
+      const result = await sendEmail({
+        to: "user@example.com",
+        subject: "Empty body",
+        text: "   ",
+        html: "",
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Email content missing");
     });
   });
 });

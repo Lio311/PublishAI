@@ -2,10 +2,12 @@ import nodemailer from "nodemailer";
 import {
   renderAwaitingApprovalTemplate,
   renderWeeklyDigestTemplate,
+  renderGenericNotificationTemplate,
   htmlToPlainText,
   plainTextToHtml,
   AwaitingApprovalTemplateParams,
   WeeklyDigestTemplateParams,
+  GenericNotificationTemplateParams,
 } from "./templates";
 
 /**
@@ -45,6 +47,7 @@ export interface SendEmailOptions {
   attachments?: AttachmentOption[];
   throwOnError?: boolean;
   maxRetries?: number;
+  timeoutMs?: number;
 }
 
 export interface AwaitingApprovalEmailOptions {
@@ -71,15 +74,45 @@ export interface WeeklyDigestEmailOptions {
   maxRetries?: number;
 }
 
+export interface GenericNotificationEmailOptions {
+  recipientName?: string;
+  actionUrl?: string;
+  actionText?: string;
+  details?: Record<string, string>;
+  appName?: string;
+  supportEmail?: string;
+  fromEmail?: string;
+  throwOnError?: boolean;
+  maxRetries?: number;
+}
+
+/**
+ * Checks whether live email transport credentials are configured in the environment.
+ */
+export function isEmailConfigured(): boolean {
+  return Boolean(
+    process.env.SMTP_URL ||
+    process.env.EMAIL_SERVER ||
+    process.env.SMTP_HOST ||
+    process.env.RESEND_API_KEY ||
+    process.env.SENDGRID_API_KEY ||
+    process.env.POSTMARK_API_KEY ||
+    process.env.POSTMARK_SERVER_TOKEN ||
+    process.env.EMAIL_DRIVER === "json"
+  );
+}
+
 /**
  * Resolves the sender email address from environment variables or defaults.
- * Prioritizes customFrom, SMTP_FROM, EMAIL_FROM, RESEND_FROM, then standard app default.
+ * Prioritizes customFrom, SMTP_FROM, EMAIL_FROM, RESEND_FROM, SENDGRID_FROM, POSTMARK_FROM, then standard app default.
  */
 export function getSenderAddress(customFrom?: string): string {
   if (customFrom) return customFrom;
   if (process.env.SMTP_FROM) return process.env.SMTP_FROM;
   if (process.env.EMAIL_FROM) return process.env.EMAIL_FROM;
   if (process.env.RESEND_FROM) return process.env.RESEND_FROM;
+  if (process.env.SENDGRID_FROM) return process.env.SENDGRID_FROM;
+  if (process.env.POSTMARK_FROM) return process.env.POSTMARK_FROM;
   const appName = process.env.NEXT_PUBLIC_APP_NAME || "Publish AI";
   return `"${appName}" <noreply@publish-ai.com>`;
 }
@@ -138,6 +171,8 @@ export function isTransientError(error: any): boolean {
     "ENOTFOUND",
     "EAI_AGAIN",
     "ESOCKETTIMEDOUT",
+    "ETLSCONTIMEDOUT",
+    "EDNS",
     "EPIPE",
   ];
   if (transientCodes.includes(code)) {
@@ -161,7 +196,14 @@ export function isTransientError(error: any): boolean {
     msg.includes("rate limit") ||
     msg.includes("too many requests") ||
     msg.includes("temporary failure") ||
-    msg.includes("try again later")
+    msg.includes("try again later") ||
+    msg.includes("connection closed") ||
+    msg.includes("greeting never received") ||
+    msg.includes("socket closed") ||
+    msg.includes("broken pipe") ||
+    msg.includes("server busy") ||
+    msg.includes("service unavailable") ||
+    msg.includes("network error")
   ) {
     return true;
   }
@@ -205,6 +247,23 @@ export async function getTransporter(): Promise<nodemailer.Transporter> {
   }
 
   transporterInitPromise = (async () => {
+    // 0. SMTP Connection String (EMAIL_SERVER / SMTP_URL)
+    const smtpUrl = process.env.SMTP_URL || process.env.EMAIL_SERVER;
+    if (smtpUrl) {
+      try {
+        const mailer = nodemailer.createTransport(smtpUrl, {
+          connectionTimeout: 15000,
+          greetingTimeout: 10000,
+          socketTimeout: 30000,
+        });
+        transporter = mailer;
+        return transporter;
+      } catch (err: any) {
+        console.error("[Email Service] Failed to initialize SMTP URL transport:", err);
+        throw err;
+      }
+    }
+
     // 1. Standard SMTP Transport
     if (process.env.SMTP_HOST) {
       try {
@@ -262,18 +321,65 @@ export async function getTransporter(): Promise<nodemailer.Transporter> {
       }
     }
 
-    // 3. Production Warning: Neither SMTP nor Resend configured
-    if (process.env.NODE_ENV === "production") {
-      console.error(
-        "[Email Service] CRITICAL WARNING: Neither SMTP_HOST nor RESEND_API_KEY is configured in production! Emails will not be delivered to recipients."
-      );
-      transporter = nodemailer.createTransport({
-        jsonTransport: true,
-      });
-      return transporter;
+    // 3. SendGrid Transport
+    if (process.env.SENDGRID_API_KEY) {
+      try {
+        const mailer = nodemailer.createTransport({
+          host: "smtp.sendgrid.net",
+          port: 465,
+          secure: true,
+          auth: {
+            user: "apikey",
+            pass: process.env.SENDGRID_API_KEY,
+          },
+          connectionTimeout: 15000,
+          greetingTimeout: 10000,
+          socketTimeout: 30000,
+        });
+
+        console.log("[Email Service] Initialized SendGrid SMTP transport.");
+        transporter = mailer;
+        return transporter;
+      } catch (err: any) {
+        console.error("[Email Service] Failed to initialize SendGrid transport:", err);
+        throw err;
+      }
     }
 
-    // 4. Development & Test Environment fallback (Ethereal or JSON)
+    // 4. Postmark Transport
+    const postmarkKey = process.env.POSTMARK_API_KEY || process.env.POSTMARK_SERVER_TOKEN;
+    if (postmarkKey) {
+      try {
+        const mailer = nodemailer.createTransport({
+          host: "smtp.postmarkapp.com",
+          port: 587,
+          secure: false,
+          auth: {
+            user: postmarkKey,
+            pass: postmarkKey,
+          },
+          connectionTimeout: 15000,
+          greetingTimeout: 10000,
+          socketTimeout: 30000,
+        });
+
+        console.log("[Email Service] Initialized Postmark SMTP transport.");
+        transporter = mailer;
+        return transporter;
+      } catch (err: any) {
+        console.error("[Email Service] Failed to initialize Postmark transport:", err);
+        throw err;
+      }
+    }
+
+    // 5. Production Warning / Error: Require live configuration in production
+    if (process.env.NODE_ENV === "production" && process.env.EMAIL_DRIVER !== "json") {
+      throw new Error(
+        "[Email Service] Production email transport is not configured. Configure SMTP_HOST, SMTP_URL, RESEND_API_KEY, SENDGRID_API_KEY, or POSTMARK_API_KEY to enable live email delivery."
+      );
+    }
+
+    // 6. Development & Test Environment fallback (Ethereal or JSON)
     if (process.env.EMAIL_DRIVER === "json") {
       transporter = nodemailer.createTransport({ jsonTransport: true });
       return transporter;
@@ -318,14 +424,42 @@ export async function getTransporter(): Promise<nodemailer.Transporter> {
  * transient error retry handling, and preview URL resolution.
  */
 export async function sendEmail(options: SendEmailOptions): Promise<SendEmailResult> {
+  // Validate recipient
+  const recipients = Array.isArray(options.to) ? options.to.filter(Boolean) : [options.to].filter(Boolean);
+  if (recipients.length === 0) {
+    const errorMsg = "Email recipient missing: 'to' field must contain at least one valid address";
+    console.error(`[Email Service] ${errorMsg}`);
+    if (options.throwOnError) {
+      throw new Error(errorMsg);
+    }
+    return {
+      success: false,
+      error: errorMsg,
+      isTransient: false,
+    };
+  }
+
   const from = getSenderAddress(options.from);
   let html = options.html;
   let text = options.text;
 
-  // Guarantee both HTML and Text fallbacks are always present
-  if (html && !text) {
+  // Validate and guarantee both HTML and Text fallbacks are always present
+  if ((!html || !html.trim()) && (!text || !text.trim())) {
+    const errorMsg = "Email content missing: at least one of 'html' or 'text' must be provided";
+    console.error(`[Email Service] ${errorMsg}`);
+    if (options.throwOnError) {
+      throw new Error(errorMsg);
+    }
+    return {
+      success: false,
+      error: errorMsg,
+      isTransient: false,
+    };
+  }
+
+  if (html && (!text || !text.trim())) {
     text = htmlToPlainText(html);
-  } else if (text && !html) {
+  } else if (text && (!html || !html.trim())) {
     html = plainTextToHtml(text, options.subject);
   }
 
@@ -351,7 +485,24 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
         attachments: options.attachments,
       };
 
-      const info = await mailer.sendMail(mailOptions);
+      const sendPromise = mailer.sendMail(mailOptions);
+      const timeoutMs = options.timeoutMs || 30000;
+
+      const info = await Promise.race([
+        sendPromise,
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () =>
+              reject(
+                Object.assign(new Error(`Email dispatch timed out after ${timeoutMs}ms`), {
+                  code: "ETIMEDOUT",
+                })
+              ),
+            timeoutMs
+          )
+        ),
+      ]);
+
       const previewUrl = getSafeTestMessageUrl(mailer, info);
 
       if (previewUrl) {
@@ -509,3 +660,60 @@ export async function sendWeeklyDigestEmail(
     };
   }
 }
+
+/**
+ * Sends a generic system notification email using the generic notification template.
+ */
+export async function sendGenericNotificationEmail(
+  userEmail: string,
+  title: string,
+  message: string,
+  options?: GenericNotificationEmailOptions
+): Promise<SendEmailResult> {
+  try {
+    const templateParams: GenericNotificationTemplateParams = {
+      recipientEmail: userEmail,
+      title,
+      message,
+      recipientName: options?.recipientName,
+      actionUrl: options?.actionUrl,
+      actionText: options?.actionText,
+      details: options?.details,
+      appName: options?.appName,
+      supportEmail: options?.supportEmail,
+    };
+
+    const { subject, html, text } = renderGenericNotificationTemplate(templateParams);
+
+    const result = await sendEmail({
+      to: userEmail,
+      subject,
+      html,
+      text,
+      from: options?.fromEmail,
+      throwOnError: options?.throwOnError,
+      maxRetries: options?.maxRetries,
+    });
+
+    if (result.success) {
+      console.log(
+        `[Email Service] Generic notification email sent to ${userEmail}. Message ID: ${result.messageId || "N/A"}`
+      );
+    }
+
+    return result;
+  } catch (error: any) {
+    console.error(`[Email Service] Error sending generic notification email to ${userEmail}:`, error);
+
+    if (options?.throwOnError) {
+      throw error;
+    }
+
+    return {
+      success: false,
+      error: error?.message || String(error),
+      isTransient: isTransientError(error),
+    };
+  }
+}
+

@@ -5,18 +5,21 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Brain, User, Book, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { checkIsAdmin } from "@/services/auth-utils";
 import { redirect } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export const dynamic = 'force-dynamic';
 
 export default async function AILearningPage({ params }: { params: Promise<{ locale: string }> | { locale: string } }) {
   const resolvedParams = await params;
   const locale = resolvedParams.locale;
+  setRequestLocale(locale);
   
   const isAdmin = await checkIsAdmin();
   if (!isAdmin) {
     redirect(`/${locale}`);
   }
   
+  const t = await getTranslations("Learning");
   const isHe = locale === "he";
 
   // Fetch all learning rules (Ideally with joins for user email and journal name)
@@ -36,32 +39,29 @@ export default async function AILearningPage({ params }: { params: Promise<{ loc
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
             <Brain className="w-8 h-8 text-indigo-500" />
-            {isHe ? "למידת המערכת (AI Learning)" : "AI Learning & Telemetry"}
+            {t("title")}
           </h1>
         </div>
 
         <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-3xl">
-          {isHe 
-            ? "עמוד זה מציג את הכללים והתובנות שהמערכת למדה מתוך הבקשות שלכם ומהערות סוקרים של כתבי עת. כללים המוגדרים כ-Actionable מוזרקים אוטומטית למודלי השפה בעת יצירת טקסט חדש כדי למנוע טעויות דומות בעתיד."
-            : "This page displays the rules and insights the system has learned from user rewrite requests and journal reviewer comments. Rules marked as Actionable are automatically injected into the LLM during text generation to prevent similar errors in the future."
-          }
+          {t("subtitle")}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
-            <div className="text-sm text-slate-500 font-medium mb-1">{isHe ? "סך הכל כללים" : "Total Learnings"}</div>
+            <div className="text-sm text-slate-500 font-medium mb-1">{t("stats.totalLearnings")}</div>
             <div className="text-3xl font-bold text-indigo-600">{allFeedback.length}</div>
           </div>
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
-            <div className="text-sm text-slate-500 font-medium mb-1">{isHe ? "כללים פעילים" : "Actionable Rules"}</div>
+            <div className="text-sm text-slate-500 font-medium mb-1">{t("stats.actionableRules")}</div>
             <div className="text-3xl font-bold text-green-600">{allFeedback.filter(f => f.feedback.isActionable).length}</div>
           </div>
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
-            <div className="text-sm text-slate-500 font-medium mb-1">{isHe ? "תובנות ממשתמשים" : "User Insights"}</div>
+            <div className="text-sm text-slate-500 font-medium mb-1">{t("stats.userInsights")}</div>
             <div className="text-3xl font-bold text-blue-600">{allFeedback.filter(f => f.feedback.sourceType === 'user_rewrite').length}</div>
           </div>
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
-            <div className="text-sm text-slate-500 font-medium mb-1">{isHe ? "תובנות מסוקרים" : "Reviewer Insights"}</div>
+            <div className="text-sm text-slate-500 font-medium mb-1">{t("stats.reviewerInsights")}</div>
             <div className="text-3xl font-bold text-purple-600">{allFeedback.filter(f => f.feedback.sourceType === 'reviewer_feedback').length}</div>
           </div>
         </div>
@@ -71,7 +71,7 @@ export default async function AILearningPage({ params }: { params: Promise<{ loc
             <div className="text-center py-12 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
               <Brain className="w-12 h-12 text-slate-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-slate-600 dark:text-slate-400">
-                {isHe ? "אין עדיין תובנות במערכת" : "No learning data available yet"}
+                {t("empty")}
               </h3>
             </div>
           ) : (
@@ -87,8 +87,8 @@ export default async function AILearningPage({ params }: { params: Promise<{ loc
                         : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
                     }`}>
                       {feedback.sourceType === 'user_rewrite' 
-                        ? (isHe ? 'הערת משתמש' : 'User Request') 
-                        : (isHe ? 'הערת סוקר' : 'Reviewer Feedback')
+                        ? t("userRequest") 
+                        : t("reviewerFeedback")
                       }
                     </span>
                   </div>
@@ -116,7 +116,7 @@ export default async function AILearningPage({ params }: { params: Promise<{ loc
                 <div className="flex-1 space-y-4">
                   <div>
                     <div className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-                      {isHe ? "קטגוריית הבעיה" : "Issue Category"}
+                      {t("issueCategory")}
                     </div>
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium">
                       <AlertCircle className="w-4 h-4" />
@@ -127,7 +127,7 @@ export default async function AILearningPage({ params }: { params: Promise<{ loc
                   {feedback.productInsight && (
                     <div>
                       <div className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-                        {isHe ? "תובנת מוצר (טלמטריה)" : "Product Insight"}
+                        {t("productInsight")}
                       </div>
                       <p className="text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800/80">
                         {feedback.productInsight}
@@ -138,14 +138,14 @@ export default async function AILearningPage({ params }: { params: Promise<{ loc
                   {feedback.ruleText && (
                     <div>
                       <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-                        {isHe ? "כלל אופרטיבי (Prompt Injection)" : "Actionable Rule"}
+                        {t("actionableRule")}
                         {feedback.isActionable ? (
                           <span className="text-green-600 flex items-center gap-1 text-xs lowercase ml-2">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> active
+                            <CheckCircle2 className="w-3.5 h-3.5" /> {t("active")}
                           </span>
                         ) : (
                           <span className="text-slate-400 flex items-center gap-1 text-xs lowercase ml-2">
-                            <XCircle className="w-3.5 h-3.5" /> inactive
+                            <XCircle className="w-3.5 h-3.5" /> {t("inactive")}
                           </span>
                         )}
                       </div>

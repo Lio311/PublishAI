@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { motion, useMotionValue, useTransform, useSpring, useReducedMotion } from 'framer-motion';
+
+const emptySubscribe = () => () => {};
 
 export default function DynamicBackground() {
     const shouldReduceMotion = useReducedMotion();
-    const [mounted, setMounted] = useState(false);
+    const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
     // Mouse parallax effects for background blobs
     const mouseX = useMotionValue(0);
@@ -27,8 +29,6 @@ export default function DynamicBackground() {
     const rafId = useRef<number | null>(null);
 
     useEffect(() => {
-        setMounted(true);
-
         if (shouldReduceMotion) return;
 
         // Skip mouse tracking on devices with no fine pointer (e.g., pure touchscreens/mobile)

@@ -3,7 +3,7 @@ import { papers, journals } from "@/services/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { FileText, Search, ArrowRight, ArrowLeft, UploadCloud, ChevronRight, ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { checkIsAdmin } from "@/services/auth-utils";
 import { auth } from "@/app/auth";
@@ -16,6 +16,7 @@ export default async function PapersPage({
 }) {
   const resolvedParams = await params;
   const locale = resolvedParams.locale;
+  setRequestLocale(locale);
   const isAdmin = await checkIsAdmin();
   const isHe = locale === "he";
 
@@ -24,7 +25,7 @@ export default async function PapersPage({
     redirect("/api/auth/signin");
   }
 
-  const t = await getTranslations("Dashboard");
+  const t = await getTranslations("Papers");
 
   // Fetch all papers
   const allPapers = await db
@@ -60,14 +61,14 @@ export default async function PapersPage({
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
-            <span>{t("recentPapers.status.in_progress")}</span>
+            <span>{t("status.in_progress")}</span>
           </span>
         );
       case "awaiting_approval":
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-amber-500" />
-            <span>{t("recentPapers.status.awaiting_approval")}</span>
+            <span>{t("status.awaiting_approval")}</span>
           </span>
         );
       case "completed":
@@ -75,20 +76,20 @@ export default async function PapersPage({
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>{t("recentPapers.status.completed")}</span>
+            <span>{t("status.completed")}</span>
           </span>
         );
       case "failed":
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-rose-500" />
-            <span>{t("recentPapers.status.failed")}</span>
+            <span>{t("status.failed")}</span>
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-            {t("recentPapers.status.unknown")}
+            {t("status.unknown")}
           </span>
         );
     }
@@ -102,12 +103,10 @@ export default async function PapersPage({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-              {isHe ? "המאמרים שלי" : "My Papers"}
+              {t("title")}
             </h1>
             <p className="text-slate-500 mt-1 text-sm">
-              {isHe
-                ? "נהל, ערוך ועקוב אחר תהליך השיפוט והשיפור של כל מאמריך."
-                : "Manage, review, and track the autonomous publication pipeline for all your manuscripts."}
+              {t("subtitle")}
             </p>
           </div>
 
@@ -116,7 +115,7 @@ export default async function PapersPage({
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-sm font-semibold shadow-xs transition-all cursor-pointer self-start sm:self-auto"
           >
             <UploadCloud className="w-4 h-4" />
-            <span>{isHe ? "העלאת מאמר חדש" : "Upload New Paper"}</span>
+            <span>{t("uploadNew")}</span>
           </Link>
         </div>
 
@@ -128,7 +127,7 @@ export default async function PapersPage({
               />
               <input
                 type="text"
-                placeholder={isHe ? "חיפוש לפי כותרת או כתב עת..." : "Search papers by title or journal..."}
+                placeholder={t("searchPlaceholder")}
                 className={`w-full ${
                   isHe ? "pr-10 pl-4" : "pl-10 pr-4"
                 } py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all`}
@@ -136,7 +135,7 @@ export default async function PapersPage({
             </div>
 
             <div className="text-xs text-slate-500 font-medium">
-              <span>{allPapers.length} {isHe ? "מאמרים בסך הכל" : "papers total"}</span>
+              <span>{allPapers.length} {t("totalCount")}</span>
             </div>
           </div>
 
@@ -147,11 +146,9 @@ export default async function PapersPage({
                   <FileText className="w-7 h-7" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-base font-semibold text-slate-800">{t("recentPapers.empty")}</p>
+                  <p className="text-base font-semibold text-slate-800">{t("empty")}</p>
                   <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                    {isHe
-                      ? "העלה קובץ PDF ראשון כדי להתחיל בניתוח נתונים, דיון מומחים וסבבי שיפוט אוטונומיים."
-                      : "Upload your first PDF to launch autonomous multi-agent review, data validation, and journal compliance checks."}
+                    {t("emptyDescription")}
                   </p>
                 </div>
                 <Link
@@ -159,18 +156,18 @@ export default async function PapersPage({
                   className="inline-flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-semibold transition-all shadow-xs"
                 >
                   <UploadCloud className="w-3.5 h-3.5" />
-                  <span>{isHe ? "העלה מאמר עכשיו" : "Upload Manuscript"}</span>
+                  <span>{t("uploadNow")}</span>
                 </Link>
               </div>
             ) : (
               <table className="w-full text-sm text-center">
                 <thead className="bg-slate-50/80 text-slate-500 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider">
                   <tr>
-                    <th className="px-6 py-3.5 text-left rtl:text-right">{t("recentPapers.headers.name")}</th>
-                    <th className="px-6 py-3.5">{t("recentPapers.headers.journal")}</th>
-                    <th className="px-6 py-3.5">{t("recentPapers.headers.status")}</th>
-                    <th className="px-6 py-3.5">{t("recentPapers.headers.date")}</th>
-                    <th className="px-6 py-3.5 text-right rtl:text-left">{isHe ? "פעולות" : "Actions"}</th>
+                    <th className="px-6 py-3.5 text-left rtl:text-right">{t("headers.name")}</th>
+                    <th className="px-6 py-3.5">{t("headers.journal")}</th>
+                    <th className="px-6 py-3.5">{t("headers.status")}</th>
+                    <th className="px-6 py-3.5">{t("headers.date")}</th>
+                    <th className="px-6 py-3.5 text-right rtl:text-left">{t("headers.actions")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -189,7 +186,7 @@ export default async function PapersPage({
                       </td>
                       <td className="px-6 py-4 text-slate-600">
                         {paper.journalName || (
-                          <span className="text-slate-400 italic text-xs">{t("recentPapers.notConfigured")}</span>
+                          <span className="text-slate-400 italic text-xs">{t("notConfigured")}</span>
                         )}
                       </td>
                       <td className="px-6 py-4">{getStatusBadge(paper.status)}</td>
@@ -199,7 +196,7 @@ export default async function PapersPage({
                           href={`/${locale}/papers/${paper.id}`}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-sky-600 hover:text-sky-700 hover:bg-sky-50 transition-colors cursor-pointer"
                         >
-                          <span>{isHe ? "פתח סביבה" : "Open"}</span>
+                          <span>{t("openWorkspace")}</span>
                           <NavArrow className="w-3.5 h-3.5 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-transform" />
                         </Link>
                       </td>

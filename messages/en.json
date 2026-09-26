@@ -18,7 +18,8 @@
     "openMenu": "Open navigation menu",
     "switchLanguage": "Switch language",
     "skipToContent": "Skip to main content",
-    "sidebar": "Sidebar"
+    "sidebar": "Sidebar",
+    "userProfile": "User profile"
   },
   "Dashboard": {
     "title": "Welcome to PublishAI",
@@ -174,7 +175,15 @@
     "loginSubtitle": "Authentication is securely handled via Google",
     "registerTitle": "Create an account",
     "registerSubtitle": "Registration is securely handled via Google",
-    "continueGoogle": "Continue with Google"
+    "continueGoogle": "Continue with Google",
+    "signInTitle": "Account Sign In",
+    "signInWithGoogle": "Sign in with Google",
+    "secureArea": "Secure Area",
+    "enterPin": "Enter 4-digit PIN",
+    "invalidPin": "Incorrect PIN, please try again",
+    "digitsEntered": "{count} of 4 digits entered",
+    "deleteDigit": "Delete last digit",
+    "loading": "Loading..."
   },
   "Footer": {
     "systemName": "PublishAI",
@@ -183,7 +192,9 @@
     "architecture": "Architecture",
     "flowchart": "Flowchart",
     "privacy": "Privacy Policy",
-    "terms": "Terms of Service"
+    "terms": "Terms of Service",
+    "footerAriaLabel": "Site Footer",
+    "footerNavAriaLabel": "Footer Links"
   },
   "common": {
     "note": "Important Note:",
@@ -241,6 +252,15 @@
       "completed": "Completed",
       "failed": "Failed",
       "unknown": "Unknown"
+    },
+    "empty": "No papers found",
+    "notConfigured": "Not configured",
+    "headers": {
+      "name": "Name",
+      "journal": "Target Journal",
+      "status": "Status",
+      "date": "Date",
+      "actions": "Actions"
     }
   },
   "Admin": {
@@ -346,5 +366,30 @@
     "bad": "Bad (-1)",
     "skip": "Skip",
     "reviewing": "Reviewing {current} of {total} recent evaluations"
+  },
+  "Submissions": {
+    "title": "Submissions Tracker",
+    "reviewsTab": "Reviewer Rebuttal & Responses",
+    "backToSubmissions": "Back to Submissions"
+  },
+  "Analytics": {
+    "title": "GraphRAG Analytics Dashboard",
+    "subtitle": "Insights from your knowledge graph",
+    "errorLoading": "Error loading data",
+    "empty": "No data yet. Process a paper to populate the knowledge graph.",
+    "totalEntities": "Total Entities",
+    "totalRelationships": "Total Relationships",
+    "mostCommonEntity": "Most Common Entity Type",
+    "mostCommonRelationship": "Most Common Relationship",
+    "entityDistribution": "Entity Distribution",
+    "relationshipDistribution": "Relationship Distribution",
+    "networkGraph": "Network Graph",
+    "topEntities": "Top Connected Entities",
+    "headers": {
+      "number": "#",
+      "name": "Name",
+      "type": "Type",
+      "connections": "Connections"
+    }
   }
 }

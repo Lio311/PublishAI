@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { AlertOctagon, RefreshCw, Home } from "lucide-react";
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function GlobalError({
   error,
@@ -13,6 +13,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   const locale = useLocale();
+  const t = useTranslations("Errors");
   const isHe = locale === "he";
 
   useEffect(() => {
@@ -31,12 +32,10 @@ export default function GlobalError({
 
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-slate-800">
-            {isHe ? "אירעה שגיאה בלתי צפויה" : "Something went wrong"}
+            {t("somethingWentWrong")}
           </h2>
           <p className="text-sm text-slate-500 leading-relaxed">
-            {isHe
-              ? "המערכת נתקלה בבעיה בעיבוד הבקשה שלך. אנא נסה לרענן את העמוד."
-              : "An unexpected error occurred while processing your request. Please try refreshing."}
+            {t("unexpectedDesc")}
           </p>
           {error?.message && (
             <p className="text-xs font-mono text-red-600 bg-red-50 p-3 rounded-xl border border-red-100 break-words mt-3 text-left">
@@ -51,7 +50,7 @@ export default function GlobalError({
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl transition-all shadow-xs cursor-pointer"
           >
             <RefreshCw className="w-4 h-4" />
-            <span>{isHe ? "נסה שוב" : "Try Again"}</span>
+            <span>{t("tryAgain")}</span>
           </button>
 
           <Link
@@ -59,7 +58,7 @@ export default function GlobalError({
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-all cursor-pointer"
           >
             <Home className="w-4 h-4" />
-            <span>{isHe ? "חזרה לדף הבית" : "Dashboard"}</span>
+            <span>{t("home")}</span>
           </Link>
         </div>
       </div>

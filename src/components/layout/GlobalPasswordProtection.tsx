@@ -22,19 +22,28 @@ export default function GlobalPasswordProtection({ children }: { children: React
     const { status } = useSession();
 
     const pinRef = useRef(pin);
-    pinRef.current = pin;
-
     const isAuthLoadingRef = useRef(isAuthLoading);
-    isAuthLoadingRef.current = isAuthLoading;
-
     const pinErrorRef = useRef(pinError);
-    pinErrorRef.current = pinError;
-
+    const isMountedRef = useRef(true);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Clean up timers on unmount
     useEffect(() => {
+        pinRef.current = pin;
+    }, [pin]);
+
+    useEffect(() => {
+        isAuthLoadingRef.current = isAuthLoading;
+    }, [isAuthLoading]);
+
+    useEffect(() => {
+        pinErrorRef.current = pinError;
+    }, [pinError]);
+
+    // Track mounted status and clean up timers on unmount
+    useEffect(() => {
+        isMountedRef.current = true;
         return () => {
+            isMountedRef.current = false;
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
             }
@@ -58,21 +67,29 @@ export default function GlobalPasswordProtection({ children }: { children: React
     const verifyPin = useCallback(async (currentPin: string) => {
         if (isAuthLoadingRef.current) return;
         setIsAuthLoading(true);
+        isAuthLoadingRef.current = true;
         
         await new Promise(resolve => setTimeout(resolve, 400));
+        if (!isMountedRef.current) return;
         
         if (currentPin === (process.env.NEXT_PUBLIC_SITE_PIN || '2580')) {
             localStorage.setItem('publishai_global_auth_time_v2', new Date().getTime().toString());
             setIsAuthenticated(true);
             setIsAuthLoading(false);
+            isAuthLoadingRef.current = false;
         } else {
             setPinError(true);
+            pinErrorRef.current = true;
             setShake(true);
             timeoutRef.current = setTimeout(() => {
+                if (!isMountedRef.current) return;
                 setShake(false);
+                pinRef.current = '';
                 setPin('');
                 setPinError(false);
+                pinErrorRef.current = false;
                 setIsAuthLoading(false);
+                isAuthLoadingRef.current = false;
             }, 400);
         }
     }, []);
@@ -80,6 +97,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
     const handleKeyPress = useCallback((num: string) => {
         if (pinRef.current.length < 4 && !isAuthLoadingRef.current && !pinErrorRef.current) {
             const newPin = pinRef.current + num;
+            pinRef.current = newPin;
             setPin(newPin);
             if (newPin.length === 4) {
                 verifyPin(newPin);
@@ -88,8 +106,10 @@ export default function GlobalPasswordProtection({ children }: { children: React
     }, [verifyPin]);
 
     const handleDelete = useCallback(() => {
-        if (isAuthLoadingRef.current || pinErrorRef.current) return;
-        setPin(prev => prev.slice(0, -1));
+        if (isAuthLoadingRef.current || pinErrorRef.current || pinRef.current.length === 0) return;
+        const newPin = pinRef.current.slice(0, -1);
+        pinRef.current = newPin;
+        setPin(newPin);
     }, []);
 
     // Physical keyboard listener for PIN input
@@ -132,7 +152,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
     if (!isAuthenticated) {
         return (
             <div 
-                className="fixed inset-0 z-[100] min-h-screen w-full bg-transparent flex items-center justify-center overflow-hidden" 
+                className="fixed inset-0 z-[100] min-h-[100dvh] w-full bg-transparent flex items-center justify-center overflow-y-auto p-4 sm:p-6" 
                 dir={locale === 'he' ? 'rtl' : 'ltr'}
                 role="dialog"
                 aria-modal="true"
@@ -151,9 +171,9 @@ export default function GlobalPasswordProtection({ children }: { children: React
                     initial={{ opacity: 1, y: 0 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className="z-10 w-full max-w-md p-8"
+                    className="z-10 w-full max-w-md my-auto py-4"
                 >
-                    <div className="backdrop-blur-2xl bg-white border border-slate-200 rounded-3xl p-10 shadow-xl overflow-hidden relative">
+                    <div className="backdrop-blur-2xl bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl overflow-hidden relative">
                         <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 to-transparent opacity-50" aria-hidden="true" />
                         
                         <div className="relative z-10 flex flex-col items-center">
@@ -161,26 +181,26 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                 initial={{ scale: 1, opacity: 1 }}
                                 animate={{ scale: 1, opacity: 1 }}
                                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                                className="w-56 h-auto flex items-center justify-center mb-6"
+                                className="w-44 sm:w-56 h-auto flex items-center justify-center mb-4 sm:mb-6"
                             >
                                 <Image src="/logo.png" alt="PublishAI Logo" width={224} height={224} className="w-full h-auto object-contain" priority />
                             </motion.div>
                             
-                            <p id="pin-security-title" className="text-slate-600 font-medium text-sm mb-8 tracking-widest text-center w-full block uppercase">{t("secureArea")}</p>
+                            <p id="pin-security-title" className="text-slate-600 font-medium text-xs sm:text-sm mb-6 sm:mb-8 tracking-widest text-center w-full block uppercase">{t("secureArea")}</p>
 
                             <div className="w-full flex flex-col items-center">
                                 {/* PIN Dots */}
                                 <motion.div 
                                     animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
                                     transition={{ duration: 0.4 }}
-                                    className="flex gap-6 mb-8 mt-2 justify-center"
+                                    className="flex gap-4 sm:gap-6 mb-6 sm:mb-8 mt-1 justify-center"
                                     dir="ltr"
                                     aria-hidden="true"
                                 >
                                     {[0, 1, 2, 3].map(i => (
                                         <div 
                                             key={i} 
-                                            className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${
+                                            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border-2 transition-all duration-200 ${
                                                 pinError ? 'border-red-400 bg-red-400' :
                                                 i < pin.length ? 'border-slate-800 bg-slate-800' : 'border-slate-300 bg-transparent'
                                             }`} 
@@ -189,7 +209,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                 </motion.div>
 
                                 {/* Keypad */}
-                                <div className="grid grid-cols-3 gap-x-8 gap-y-6 w-full max-w-[280px]" dir="ltr">
+                                <div className="grid grid-cols-3 gap-x-4 sm:gap-x-6 md:gap-x-8 gap-y-3 sm:gap-y-5 md:gap-y-6 w-full max-w-[280px] place-items-center" dir="ltr">
                                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
                                         <button
                                             key={num}
@@ -197,7 +217,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                             aria-label={num.toString()}
                                             onClick={() => handleKeyPress(num.toString())}
                                             disabled={isAuthLoading}
-                                            className="w-16 h-16 rounded-full bg-slate-50/50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-2xl font-medium text-slate-800 transition-colors active:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                                            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-50/50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-xl sm:text-2xl font-medium text-slate-800 transition-colors active:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:opacity-50"
                                         >
                                             {num}
                                         </button>
@@ -208,7 +228,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                         aria-label="0"
                                         onClick={() => handleKeyPress('0')}
                                         disabled={isAuthLoading}
-                                        className="w-16 h-16 rounded-full bg-slate-50/50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-2xl font-medium text-slate-800 transition-colors active:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-50/50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-xl sm:text-2xl font-medium text-slate-800 transition-colors active:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:opacity-50"
                                     >
                                         0
                                     </button>
@@ -218,9 +238,9 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                         title={t("deleteDigit")}
                                         onClick={handleDelete}
                                         disabled={isAuthLoading || pin.length === 0}
-                                        className="w-16 h-16 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors active:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:opacity-30 disabled:hover:bg-transparent"
+                                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors active:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:opacity-30 disabled:hover:bg-transparent"
                                     >
-                                        <Delete className="w-6 h-6" aria-hidden="true" />
+                                        <Delete className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
                                     </button>
                                 </div>
                             </div>
@@ -247,7 +267,7 @@ export default function GlobalPasswordProtection({ children }: { children: React
     if (status === 'unauthenticated' && !isPublicRoute) {
         return (
             <div 
-                className="fixed inset-0 z-[100] min-h-screen w-full bg-transparent flex items-center justify-center overflow-hidden" 
+                className="fixed inset-0 z-[100] min-h-[100dvh] w-full bg-transparent flex items-center justify-center overflow-y-auto p-4 sm:p-6" 
                 dir={locale === 'he' ? 'rtl' : 'ltr'}
                 role="dialog"
                 aria-modal="true"
@@ -257,9 +277,9 @@ export default function GlobalPasswordProtection({ children }: { children: React
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className="z-10 w-full max-w-md p-8"
+                    className="z-10 w-full max-w-md my-auto py-4"
                 >
-                    <div className="backdrop-blur-2xl bg-white border border-slate-200 rounded-3xl p-10 shadow-xl overflow-hidden relative">
+                    <div className="backdrop-blur-2xl bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl overflow-hidden relative">
                         <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 to-transparent opacity-50" aria-hidden="true"></div>
                         
                         <div className="relative z-10 flex flex-col items-center">
@@ -267,18 +287,18 @@ export default function GlobalPasswordProtection({ children }: { children: React
                                 initial={{ scale: 0.8, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
                                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                                className="w-56 h-auto flex items-center justify-center mb-6"
+                                className="w-44 sm:w-56 h-auto flex items-center justify-center mb-4 sm:mb-6"
                             >
                                 <Image src="/logo.png" alt="PublishAI Logo" width={224} height={224} className="w-full h-auto object-contain" priority />
                             </motion.div>
                             
-                            <p id="auth-signin-title" className="text-slate-600 font-medium text-sm mb-8 tracking-widest text-center w-full block uppercase">{t("signInTitle")}</p>
+                            <p id="auth-signin-title" className="text-slate-600 font-medium text-xs sm:text-sm mb-6 sm:mb-8 tracking-widest text-center w-full block uppercase">{t("signInTitle")}</p>
 
                             <div className="w-full flex flex-col items-center gap-4">
                                 <button
                                     type="button"
                                     onClick={() => signIn('google', { callbackUrl: pathname || '/' })}
-                                    className="flex w-full items-center justify-center gap-3 px-6 py-4 rounded-xl font-medium text-slate-700 bg-white border-2 border-slate-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 transition-all shadow-xs active:scale-[0.98]"
+                                    className="flex w-full items-center justify-center gap-3 px-5 sm:px-6 py-3.5 sm:py-4 rounded-xl font-medium text-slate-700 bg-white border-2 border-slate-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 transition-all shadow-xs active:scale-[0.98]"
                                 >
                                     <svg className="h-5 w-5 shrink-0" aria-hidden="true" viewBox="0 0 24 24">
                                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>

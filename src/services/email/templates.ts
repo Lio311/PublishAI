@@ -131,6 +131,16 @@ export function htmlToPlainText(html: string): string {
   text = text.replace(/<br\s*\/?>/gi, '\n');
   text = text.replace(/<hr\s*\/?>/gi, '\n---\n');
 
+  // Convert table elements to formatted rows & columns
+  text = text.replace(/<\/tr>/gi, '\n');
+  text = text.replace(/<\/td>/gi, '  ');
+  text = text.replace(/<\/th>/gi, '  ');
+  text = text.replace(/<tr[^>]*>/gi, '');
+  text = text.replace(/<td[^>]*>/gi, '');
+  text = text.replace(/<th[^>]*>/gi, '');
+  text = text.replace(/<table[^>]*>/gi, '\n');
+  text = text.replace(/<\/table>/gi, '\n');
+
   // Strip all other remaining HTML tags
   text = text.replace(/<[^>]+>/g, '');
 
@@ -389,13 +399,17 @@ export function renderSubmissionSuccessTemplate(params: SubmissionSuccessTemplat
     </p>
   `;
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'http://localhost:3000';
+  const actionUrl = params.postUrl || (params.paperId ? `${baseUrl}/papers/${params.paperId}` : undefined);
+  const actionText = params.postUrl ? 'View Submission on Journal Portal' : (params.paperId ? 'View Paper in Dashboard' : undefined);
+
   const html = renderBaseLayout(bodyHtml, {
     title: subject,
     previewText: `Your paper "${params.paperTitle}" was submitted successfully.`,
     appName,
     supportEmail: params.supportEmail,
-    actionUrl: params.postUrl || undefined,
-    actionText: params.postUrl ? 'View Submission on Journal Portal' : undefined,
+    actionUrl,
+    actionText,
   });
 
   const text = [
@@ -408,7 +422,9 @@ export function renderSubmissionSuccessTemplate(params: SubmissionSuccessTemplat
     ``,
     params.postUrl
       ? `View your submission here:\n${params.postUrl}`
-      : `Track your submission status in your ${appName} dashboard.`,
+      : (params.paperId
+        ? `View your submission here:\n${baseUrl}/papers/${params.paperId}`
+        : `Track your submission status in your ${appName} dashboard.`),
     ``,
     `Best regards,`,
     `The ${appName} Team`,

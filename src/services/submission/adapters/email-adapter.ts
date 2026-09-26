@@ -1,4 +1,4 @@
-import { getTransporter, plainTextToHtml, verifyTransport } from '@/services/email';
+import { sendEmail, getSenderAddress, plainTextToHtml, verifyTransport } from '@/services/email';
 import { ConnectionTestResult, SubmissionPayload, SubmissionResult } from '../connection-types';
 
 /**
@@ -25,17 +25,16 @@ export class EmailAdapter {
     if (!emailRegex.test(this.editorEmail)) {
       return { success: false, message: 'Invalid editor email address format' };
     }
-    if (!emailRegex.test(this.authorEmail)) {
+    if (this.authorEmail && !emailRegex.test(this.authorEmail)) {
       return { success: false, message: 'Invalid author email address format' };
     }
     try {
-      const transporter = await getTransporter();
-      const check = await verifyTransport(transporter);
-      if (!check.success && process.env.NODE_ENV === 'production') {
-        return { success: false, message: `Email transport check failed: ${check.error}` };
+      const check = await verifyTransport();
+      if (!check.success) {
+        return { success: false, message: `Email transport verification failed: ${check.error}` };
       }
-    } catch {
-      // Graceful fallback for test/dev environments without active network connections
+    } catch (err: any) {
+      return { success: false, message: `Email transport connection error: ${err?.message || String(err)}` };
     }
     return { success: true, message: 'Email submission configured successfully' };
   }
@@ -46,8 +45,6 @@ export class EmailAdapter {
    */
   async submit(payload: SubmissionPayload): Promise<SubmissionResult> {
     try {
-      const transporter = await getTransporter();
-
       const confirmationId = `EMAIL-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
 
       const authorList = payload.authors
@@ -76,8 +73,14 @@ export class EmailAdapter {
 
       const htmlBody = plainTextToHtml(textBody, `Manuscript Submission: ${payload.title}`);
 
-      await transporter.sendMail({
-        from: `"${this.authorName}" <${this.authorEmail}>`,
+      // When sending to an external journal editor, the authenticated SMTP sender must be used
+      // as the 'from' address to avoid SPF/DKIM/DMARC failures, while setting 'replyTo' to the author.
+      const senderAddress = getSenderAddress();
+      const authorReplyTo = this.authorEmail ? `"${this.authorName}" <${this.authorEmail}>` : undefined;
+
+      const result = await sendEmail({
+        from: senderAddress,
+        replyTo: authorReplyTo,
         to: this.editorEmail,
         subject: `Manuscript Submission: ${payload.title}`,
         text: textBody,
@@ -89,6 +92,13 @@ export class EmailAdapter {
         })),
       });
 
+      if (!result.success) {
+        return {
+          success: false,
+          error: `Email submission failed: ${result.error}`,
+        };
+      }
+
       return {
         success: true,
         confirmationId,
@@ -96,8 +106,9 @@ export class EmailAdapter {
     } catch (error: any) {
       return {
         success: false,
-        error: `Email submission failed: ${error.message}`,
+        error: `Email submission failed: ${error?.message || String(error)}`,
       };
     }
   }
 }
+

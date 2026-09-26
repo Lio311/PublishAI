@@ -20,10 +20,12 @@ export class ConnectionTester {
     username: string,
     password?: string
   ): Promise<ConnectionTestResult> {
-    try {
-      this.validateUrl(siteUrl);
-    } catch (err: any) {
-      return { success: false, message: err.message };
+    if (platform !== "email") {
+      try {
+        this.validateUrl(siteUrl);
+      } catch (err: any) {
+        return { success: false, message: err.message };
+      }
     }
 
     if (platform === "wordpress") {

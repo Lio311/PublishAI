@@ -10,7 +10,7 @@ export default function AlertOverride() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const originalAlert = window.alert;
-      window.alert = (message?: any) => {
+      window.alert = (message?: unknown) => {
         let displayMessage = "Alert";
         if (typeof message === "string") {
           displayMessage = message;

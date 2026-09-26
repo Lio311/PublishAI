@@ -1,32 +1,30 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, useCallback, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, usePathname, useRouter } from "@/app/i18n/routing";
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { FileText, Home, Settings, LogOut, LogIn, Globe, Book, Link as LinkIcon, Send, Share2, Brain, X, Workflow, BarChart3, User } from "lucide-react";
+import { FileText, Home, Settings, LogOut, LogIn, Globe, Book, Link as LinkIcon, Send, Share2, Brain, X, Workflow, BarChart3 } from "lucide-react";
+
+const emptySubscribe = () => () => {};
 
 export default function AnimatedSidebar({ isAdmin = false, onClose }: { isAdmin?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
   const t = useTranslations("Sidebar");
   const locale = useLocale();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const toggleLanguage = () => {
+  const toggleLanguage = useCallback(() => {
     const nextLocale = locale === 'he' ? 'en' : 'he';
     // next-intl router automatically handles injecting the new locale
     router.replace(pathname, { locale: nextLocale });
-  };
+  }, [locale, router, pathname]);
 
   const menuItems = useMemo(() => {
     const items = [
@@ -164,15 +162,20 @@ export default function AnimatedSidebar({ isAdmin = false, onClose }: { isAdmin?
       </div>
 
       {/* Bottom Section */}
-      <div className="p-4 pb-6 md:pb-4 lg:px-6 lg:py-4 relative z-10 shrink-0">
+      <div className="p-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:pb-4 lg:px-6 lg:py-4 relative z-10 shrink-0">
         <div className="p-1.5 bg-slate-100/50 rounded-2xl border border-slate-200/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] backdrop-blur-md space-y-1">
           {/* Authenticated User State */}
-          {mounted && session?.user && (
-            <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/70 border border-slate-200/60 shadow-xs mb-1">
+          {mounted && status === "authenticated" && session?.user && (
+            <div 
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/70 border border-slate-200/60 shadow-xs mb-1"
+              aria-label={t("userProfile")}
+            >
               {session.user.image ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img 
                   src={session.user.image} 
                   alt={session.user.name || "User avatar"} 
+                  referrerPolicy="no-referrer"
                   className="w-7 h-7 rounded-full object-cover border border-slate-200 shrink-0" 
                 />
               ) : (
@@ -197,8 +200,8 @@ export default function AnimatedSidebar({ isAdmin = false, onClose }: { isAdmin?
           <button 
             type="button"
             onClick={toggleLanguage}
-            aria-label={t("switchLanguage")}
-            title={t("switchLanguage")}
+            aria-label={`${t("switchLanguage")}: ${locale === 'he' ? 'English' : 'עברית'}`}
+            title={`${t("switchLanguage")}: ${locale === 'he' ? 'English' : 'עברית'}`}
             className="flex w-full items-center justify-between px-4 py-2 rounded-xl font-medium text-slate-600 hover:bg-white hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 transition-all duration-300 group"
           >
             <div className="flex items-center gap-3">
@@ -211,7 +214,11 @@ export default function AnimatedSidebar({ isAdmin = false, onClose }: { isAdmin?
           
           <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent mx-2 my-1" aria-hidden="true" />
           
-          {mounted && session ? (
+          {!mounted || status === "loading" ? (
+            <div className="flex w-full items-center justify-center py-2.5 px-4 rounded-xl" aria-hidden="true">
+              <div className="w-4 h-4 border-2 border-slate-300 border-t-sky-500 rounded-full animate-spin" />
+            </div>
+          ) : session ? (
             <button 
               type="button"
               onClick={() => signOut()} 

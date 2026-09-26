@@ -18,7 +18,8 @@
     "openMenu": "פתח תפריט ניווט",
     "switchLanguage": "החלף שפה",
     "skipToContent": "דלג לתוכן המרכזי",
-    "sidebar": "סרגל צד"
+    "sidebar": "סרגל צד",
+    "userProfile": "פרופיל משתמש"
   },
   "Dashboard": {
     "title": "ברוך הבא ל-PublishAI",
@@ -174,7 +175,15 @@
     "loginSubtitle": "ההתחברות מתבצעת באופן מאובטח דרך חשבון גוגל",
     "registerTitle": "יצירת משתמש חדש",
     "registerSubtitle": "ההרשמה מתבצעת באופן מאובטח דרך חשבון גוגל",
-    "continueGoogle": "התחברות עם Google"
+    "continueGoogle": "התחברות עם Google",
+    "signInTitle": "התחברות לחשבון",
+    "signInWithGoogle": "התחברות באמצעות Google",
+    "secureArea": "אזור מאובטח",
+    "enterPin": "הזן קוד גישה בן 4 ספרות",
+    "invalidPin": "קוד שגוי, אנא נסה שוב",
+    "digitsEntered": "הוזנו {count} מתוך 4 ספרות",
+    "deleteDigit": "מחק ספרה אחרונה",
+    "loading": "טוען..."
   },
   "Footer": {
     "systemName": "PublishAI",
@@ -183,7 +192,9 @@
     "architecture": "ארכיטקטורה",
     "flowchart": "תרשים זרימה",
     "privacy": "מדיניות פרטיות",
-    "terms": "תנאי שימוש"
+    "terms": "תנאי שימוש",
+    "footerAriaLabel": "תחתית העמוד",
+    "footerNavAriaLabel": "קישורי תחתית"
   },
   "common": {
     "note": "הערה חשובה:",
@@ -241,6 +252,15 @@
       "completed": "הושלם",
       "failed": "נכשל",
       "unknown": "לא ידוע"
+    },
+    "empty": "לא נמצאו מאמרים",
+    "notConfigured": "טרם הוגדר",
+    "headers": {
+      "name": "שם המאמר",
+      "journal": "כתב עת יעד",
+      "status": "סטטוס",
+      "date": "תאריך יצירה",
+      "actions": "פעולות"
     }
   },
   "Admin": {
@@ -346,5 +366,30 @@
     "bad": "טעון שיפור (-1)",
     "skip": "דלג",
     "reviewing": "סוקר {current} מתוך {total} הערכות אחרונות"
+  },
+  "Submissions": {
+    "title": "לוח הגשות",
+    "reviewsTab": "מענה לביקורת עמיתים",
+    "backToSubmissions": "חזרה ללוח ההגשות"
+  },
+  "Analytics": {
+    "title": "לוח ניתוח GraphRAG",
+    "subtitle": "תובנות מגרף הידע שלך",
+    "errorLoading": "שגיאה בטעינת נתונים",
+    "empty": "אין נתונים עדיין. עבד מאמר כדי לאכלס את גרף הידע.",
+    "totalEntities": "סך הכל ישויות",
+    "totalRelationships": "סך הכל קשרים",
+    "mostCommonEntity": "סוג ישות נפוץ ביותר",
+    "mostCommonRelationship": "קשר נפוץ ביותר",
+    "entityDistribution": "התפלגות ישויות",
+    "relationshipDistribution": "התפלגות קשרים",
+    "networkGraph": "גרף קשרים",
+    "topEntities": "הישויות המקושרות ביותר",
+    "headers": {
+      "number": "#",
+      "name": "שם",
+      "type": "סוג",
+      "connections": "קשרים"
+    }
   }
 }

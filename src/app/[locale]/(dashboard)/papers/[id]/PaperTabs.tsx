@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import PaperProcessingUI from "@/components/papers/PaperProcessingUI";
 import { DataUploadSection } from "@/components/sandbox/DataUploadSection";
 import { AnalysisStatus } from "@/components/sandbox/AnalysisStatus";
@@ -39,43 +40,44 @@ interface TabDefinition {
 
 export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
   const [activeTab, setActiveTab] = useState("Editor");
+  const t = useTranslations("Papers");
 
   const tabs: TabDefinition[] = [
     {
       id: "Editor",
-      label: "Editor",
+      label: t("tabs.editor"),
       icon: Edit3,
-      description: "Rich text editing with AI track changes",
+      description: t("tabs.editorDesc"),
     },
     {
       id: "Processing",
-      label: "Processing",
+      label: t("tabs.processing"),
       icon: Sparkles,
-      description: "Pipeline status & publication workflow",
+      description: t("tabs.processingDesc"),
     },
     {
       id: "Data Sandbox",
-      label: "Data Sandbox",
+      label: t("tabs.dataSandbox"),
       icon: Database,
-      description: "Statistical analysis & data verification",
+      description: t("tabs.dataSandboxDesc"),
     },
     {
       id: "Knowledge Graph",
-      label: "Knowledge Graph",
+      label: t("tabs.knowledgeGraph"),
       icon: Network,
-      description: "Entity relationships & logic validation",
+      description: t("tabs.knowledgeGraphDesc"),
     },
     {
       id: "AI Debate",
-      label: "AI Debate",
+      label: t("tabs.aiDebate"),
       icon: Users,
-      description: "Autonomous peer review & cross-examination",
+      description: t("tabs.aiDebateDesc"),
     },
     {
       id: "Vision AI",
-      label: "Vision AI",
+      label: t("tabs.visionAi"),
       icon: Eye,
-      description: "Figure extraction & visual artifact checks",
+      description: t("tabs.visionAiDesc"),
     },
   ];
 

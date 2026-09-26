@@ -1,20 +1,25 @@
 'use client';
 
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
   const locale = useLocale();
+  const t = useTranslations("Auth");
+  const isHe = locale === "he";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+    <div
+      className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8"
+      dir={isHe ? "rtl" : "ltr"}
+    >
       <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-md">
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-            {locale === 'he' ? 'התחברות למערכת' : 'Sign in to your account'}
+            {t("loginTitle")}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            {locale === 'he' ? 'ההתחברות מתבצעת באופן מאובטח דרך חשבון גוגל' : 'Authentication is securely handled via Google'}
+            {t("loginSubtitle")}
           </p>
         </div>
         
@@ -30,7 +35,7 @@ export default function LoginPage() {
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               <path d="M1 1h22v22H1z" fill="none" />
             </svg>
-            {locale === 'he' ? 'התחברות עם Google' : 'Continue with Google'}
+            {t("continueGoogle")}
           </button>
         </div>
       </div>
