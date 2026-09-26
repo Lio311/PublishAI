@@ -44,6 +44,49 @@ export function parseRetryAfter(header: string | null | undefined): number | und
   return undefined;
 }
 
+/**
+ * Parses rate limit reset headers from various external academic APIs:
+ * - standard 'retry-after'
+ * - 'ratelimit-reset' / 'x-ratelimit-reset' (seconds or future unix timestamp)
+ * - 'x-rate-limit-interval' (e.g. '1s', '60s')
+ */
+export function parseRateLimitReset(headers: Headers): number | undefined {
+  // 1. Standard Retry-After
+  const retryAfter = parseRetryAfter(headers.get('retry-after'));
+  if (retryAfter !== undefined) return retryAfter;
+
+  // 2. RateLimit-Reset / X-RateLimit-Reset
+  const resetHeader = headers.get('ratelimit-reset') || headers.get('x-ratelimit-reset');
+  if (resetHeader) {
+    const val = parseFloat(resetHeader.trim());
+    if (!isNaN(val) && val > 0) {
+      if (val > 1000000000) {
+        // Unix timestamp in seconds (or milliseconds if > 1e11)
+        const nowSec = Date.now() / 1000;
+        const targetSec = val > 1e11 ? val / 1000 : val;
+        const diff = Math.ceil(targetSec - nowSec);
+        return Math.max(1, diff);
+      }
+      return Math.max(1, Math.ceil(val));
+    }
+  }
+
+  // 3. X-Rate-Limit-Interval (CrossRef specific header: e.g. "1s", "10s", "1m")
+  const intervalHeader = headers.get('x-rate-limit-interval');
+  if (intervalHeader) {
+    const match = intervalHeader.trim().match(/^(\d+(?:\.\d+)?)\s*(s|m|ms)?$/i);
+    if (match) {
+      const num = parseFloat(match[1]);
+      const unit = (match[2] || 's').toLowerCase();
+      if (unit === 's') return Math.max(1, Math.ceil(num));
+      if (unit === 'm') return Math.max(1, Math.ceil(num * 60));
+      if (unit === 'ms') return Math.max(1, Math.ceil(num / 1000));
+    }
+  }
+
+  return undefined;
+}
+
 export async function fetchWithRetryAndTimeout(
   url: string,
   options: FetchWithRetryOptions = {}
@@ -100,10 +143,10 @@ export async function fetchWithRetryAndTimeout(
 
       // Handle 429 Rate Limiting
       if (response.status === 429) {
-        const retryAfterSeconds = parseRetryAfter(response.headers.get('retry-after'));
+        const retryAfterSeconds = parseRateLimitReset(response.headers);
         const pauseDurationMs = (retryAfterSeconds ?? 2) * 1000;
 
-        // Inform domain rate limiter to pause further requests
+        // Inform domain rate limiter to pause further outgoing requests
         if (source !== 'literature_service') {
           literatureRateLimiter.pause(source, pauseDurationMs);
         }
@@ -162,6 +205,12 @@ export async function fetchWithRetryAndTimeout(
             if (text.toLowerCase().includes('rate limit') || text.toLowerCase().includes('too many requests')) {
               if (source !== 'literature_service') {
                 literatureRateLimiter.pause(source, 3000);
+              }
+              if (attempt <= retries) {
+                const delay = Math.min(maxBackoffMs, backoffMs * Math.pow(2, attempt - 1) + 500);
+                console.warn(`[${source}] Received HTTP ${response.status} (rate limited) from ${url}. Retrying attempt ${attempt}/${retries} after ${Math.round(delay)}ms...`);
+                await new Promise((resolve) => setTimeout(resolve, delay));
+                continue;
               }
               throw new RateLimitError(
                 source,

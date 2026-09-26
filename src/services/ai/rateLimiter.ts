@@ -4,6 +4,8 @@
  * model fallbacks, timeouts, and concurrency throttling with exponential backoff and jitter.
  */
 
+import { redactApiKeys } from "./promptSanitizer";
+
 export interface RetryOptions {
   maxRetries?: number;
   initialDelayMs?: number;
@@ -26,11 +28,7 @@ export class TimeoutError extends Error {
  * Redact potential API keys (OpenAI sk-..., Anthropic sk-ant-..., Bearer tokens) from logged messages.
  */
 function redactSecrets(msg: string): string {
-  if (!msg) return "";
-  return msg
-    .replace(/\b(sk-ant-[a-zA-Z0-9_-]{15,})\b/g, "[REDACTED_ANTHROPIC_KEY]")
-    .replace(/\b(sk-[a-zA-Z0-9_-]{20,})\b/g, "[REDACTED_OPENAI_KEY]")
-    .replace(/\b(Bearer\s+)[a-zA-Z0-9._-]{20,}\b/gi, "$1[REDACTED_TOKEN]");
+  return redactApiKeys(msg);
 }
 
 /**
@@ -44,29 +42,34 @@ export function isRateLimitError(error: any): boolean {
     error.statusCode ||
     error.response?.status ||
     error.response?.statusCode ||
-    error.cause?.status;
+    error.cause?.status ||
+    error.cause?.statusCode;
 
   if (status === 429 || status === 529) return true;
 
+  const code = error.code || error.cause?.code;
   if (
     error.name === "RateLimitError" ||
     error.type === "rate_limit_error" ||
-    error.code === "rate_limit_exceeded" ||
-    error.code === "insufficient_quota"
+    code === "rate_limit_exceeded" ||
+    code === "insufficient_quota"
   ) {
     return true;
   }
 
   const message = String(error.message || "").toLowerCase();
+  const causeMessage = String(error.cause?.message || "").toLowerCase();
+  const fullMessage = `${message} ${causeMessage}`;
+
   return (
-    message.includes("rate limit") ||
-    message.includes("ratelimit") ||
-    message.includes("too many requests") ||
-    message.includes("429") ||
-    message.includes("overloaded") ||
-    message.includes("resource_exhausted") ||
-    message.includes("quota exceeded") ||
-    message.includes("insufficient_quota")
+    fullMessage.includes("rate limit") ||
+    fullMessage.includes("ratelimit") ||
+    fullMessage.includes("too many requests") ||
+    fullMessage.includes("429") ||
+    fullMessage.includes("overloaded") ||
+    fullMessage.includes("resource_exhausted") ||
+    fullMessage.includes("quota exceeded") ||
+    fullMessage.includes("insufficient_quota")
   );
 }
 
@@ -83,20 +86,35 @@ export function isTransientError(error: any): boolean {
     error.statusCode ||
     error.response?.status ||
     error.response?.statusCode ||
-    error.cause?.status;
+    error.cause?.status ||
+    error.cause?.statusCode;
 
   if (status === 500 || status === 502 || status === 503 || status === 504 || status === 408) return true;
 
+  const code = String(error.code || error.cause?.code || "").toUpperCase();
+  if (
+    code === "ECONNRESET" ||
+    code === "ETIMEDOUT" ||
+    code === "ECONNREFUSED" ||
+    code === "ENOTFOUND" ||
+    code === "EAI_AGAIN"
+  ) {
+    return true;
+  }
+
   const message = String(error.message || "").toLowerCase();
+  const causeMessage = String(error.cause?.message || "").toLowerCase();
+  const fullMessage = `${message} ${causeMessage}`;
+
   return (
-    message.includes("fetch failed") ||
-    message.includes("network error") ||
-    message.includes("econnreset") ||
-    message.includes("etimedout") ||
-    message.includes("socket hang up") ||
-    message.includes("timeout") ||
-    message.includes("service unavailable") ||
-    message.includes("bad gateway")
+    fullMessage.includes("fetch failed") ||
+    fullMessage.includes("network error") ||
+    fullMessage.includes("econnreset") ||
+    fullMessage.includes("etimedout") ||
+    fullMessage.includes("socket hang up") ||
+    fullMessage.includes("timeout") ||
+    fullMessage.includes("service unavailable") ||
+    fullMessage.includes("bad gateway")
   );
 }
 

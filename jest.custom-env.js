@@ -9,6 +9,10 @@ class CustomEnvironment extends JSDOMEnvironment {
       this.global.Headers = Headers;
       this.global.Request = Request;
       this.global.Response = Response;
+      if (typeof AbortController !== 'undefined') {
+        this.global.AbortController = AbortController;
+        this.global.AbortSignal = AbortSignal;
+      }
     }
     if (typeof ReadableStream !== 'undefined') {
       this.global.ReadableStream = ReadableStream;

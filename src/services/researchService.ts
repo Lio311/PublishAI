@@ -31,9 +31,17 @@ export class ResearchService {
 
     for (const id of urlsOrDois) {
       try {
-        const result = await literatureService.search(id, { limit: 1 });
-        if (result.items && result.items.length > 0) {
-          const item = result.items[0];
+        let item = null;
+        const isDoi = id.startsWith('10.') || id.includes('doi.org/');
+        if (isDoi) {
+          item = await literatureService.getByDoi(id);
+        }
+        if (!item) {
+          const result = await literatureService.search(id, { limit: 1 });
+          item = result.items?.[0] || null;
+        }
+
+        if (item) {
           references.push({
             urlOrDoi: id,
             title: item.title || `Article ${id}`,

@@ -4,7 +4,7 @@
  * Provides resilient, cached API wrappers for PubMed, Crossref, and Semantic Scholar services.
  * Strictly does NOT use arXiv (arXiv requests are redirected/replaced with PubMed/Semantic Scholar).
  * Features client-side rate limiting, Retry-After coordination, deadline-aware timeouts,
- * multi-tier caching, and citation formatting.
+ * multi-tier caching, real database persistence, and citation formatting.
  */
 
 import {
@@ -24,8 +24,10 @@ import {
   TimeoutError,
 } from './errors';
 import { LiteratureCache, literatureCache } from './literatureCache';
-import { fetchWithRetryAndTimeout } from './httpUtils';
+import { fetchWithRetryAndTimeout, parseRateLimitReset } from './httpUtils';
 import { literatureRateLimiter, LiteratureRateLimiter } from './rateLimiter';
+import { db } from '@/services/db';
+import { citations } from '@/services/db/schema';
 
 export * from './types';
 export * from './errors';
@@ -83,19 +85,22 @@ export class PubMedClient {
     const searchUrl = `${this.baseUrl}/esearch.fcgi?db=pubmed&retmode=json&retmax=${limit}&retstart=${offset}&term=${encodeURIComponent(query)}&tool=publishai&email=${encodeURIComponent(email)}${apiKeyParam}`;
 
     // Step 1: E-Search (Retrieve PMIDs)
-    const searchTimeout = Math.max(1000, deadline - Date.now());
     if (Date.now() >= deadline) {
       throw new TimeoutError(`PubMed search operation exceeded timeout deadline of ${totalTimeoutMs}ms before search`, 'pubmed', totalTimeoutMs);
     }
+    const searchTimeout = Math.min(totalTimeoutMs, Math.max(100, deadline - Date.now()));
 
-    const searchRes = await this.rateLimiter.schedule('pubmed', () =>
-      fetchWithRetryAndTimeout(searchUrl, {
-        headers: { Accept: 'application/json' },
-        timeoutMs: searchTimeout,
-        retries,
-        signal: options.signal,
-        source: 'pubmed',
-      })
+    const searchRes = await this.rateLimiter.schedule(
+      'pubmed',
+      () =>
+        fetchWithRetryAndTimeout(searchUrl, {
+          headers: { Accept: 'application/json' },
+          timeoutMs: searchTimeout,
+          retries,
+          signal: options.signal,
+          source: 'pubmed',
+        }),
+      { timeoutMs: searchTimeout, signal: options.signal }
     );
 
     if (!searchRes.ok) {
@@ -118,6 +123,17 @@ export class PubMedClient {
       );
     }
 
+    // Check for rate limit error or general error embedded in JSON response
+    const esearchError = searchData.error || searchData.esearchresult?.ERROR;
+    if (esearchError) {
+      const errString = typeof esearchError === 'string' ? esearchError : JSON.stringify(esearchError);
+      if (errString.toLowerCase().includes('rate limit') || errString.toLowerCase().includes('too many requests')) {
+        this.rateLimiter.pause('pubmed', 3000);
+        throw new RateLimitError('pubmed', `PubMed search rate limit exceeded: ${errString}`);
+      }
+      throw new RemoteServerError(`PubMed search error: ${errString}`, 500, 'pubmed');
+    }
+
     const ids: string[] = searchData.esearchresult?.idlist || [];
     if (ids.length === 0) {
       // Cache empty result to avoid hammering PubMed
@@ -126,20 +142,23 @@ export class PubMedClient {
     }
 
     // Step 2: E-Summary (Retrieve article details by PMIDs)
-    const summaryTimeout = Math.max(1000, deadline - Date.now());
     if (Date.now() >= deadline) {
       throw new TimeoutError(`PubMed search operation exceeded timeout deadline of ${totalTimeoutMs}ms before summary fetch`, 'pubmed', totalTimeoutMs);
     }
+    const summaryTimeout = Math.min(totalTimeoutMs, Math.max(100, deadline - Date.now()));
 
     const summaryUrl = `${this.baseUrl}/esummary.fcgi?db=pubmed&retmode=json&id=${ids.join(',')}&tool=publishai&email=${encodeURIComponent(email)}${apiKeyParam}`;
-    const summaryRes = await this.rateLimiter.schedule('pubmed', () =>
-      fetchWithRetryAndTimeout(summaryUrl, {
-        headers: { Accept: 'application/json' },
-        timeoutMs: summaryTimeout,
-        retries,
-        signal: options.signal,
-        source: 'pubmed',
-      })
+    const summaryRes = await this.rateLimiter.schedule(
+      'pubmed',
+      () =>
+        fetchWithRetryAndTimeout(summaryUrl, {
+          headers: { Accept: 'application/json' },
+          timeoutMs: summaryTimeout,
+          retries,
+          signal: options.signal,
+          source: 'pubmed',
+        }),
+      { timeoutMs: summaryTimeout, signal: options.signal }
     );
 
     if (!summaryRes.ok) {
@@ -160,6 +179,17 @@ export class PubMedClient {
         'pubmed',
         parseErr
       );
+    }
+
+    // Check for rate limit or errors inside summaryData
+    const summaryError = summaryData.error || summaryData.result?.ERROR;
+    if (summaryError) {
+      const errString = typeof summaryError === 'string' ? summaryError : JSON.stringify(summaryError);
+      if (errString.toLowerCase().includes('rate limit') || errString.toLowerCase().includes('too many requests')) {
+        this.rateLimiter.pause('pubmed', 3000);
+        throw new RateLimitError('pubmed', `PubMed summary rate limit exceeded: ${errString}`);
+      }
+      throw new RemoteServerError(`PubMed summary error: ${errString}`, 500, 'pubmed');
     }
 
     const items: LiteratureItem[] = [];
@@ -229,14 +259,17 @@ export class PubMedClient {
     const email = process.env.NCBI_TOOL_EMAIL || 'support@publishai.local';
     const summaryUrl = `${this.baseUrl}/esummary.fcgi?db=pubmed&retmode=json&id=${encodeURIComponent(cleanId)}&tool=publishai&email=${encodeURIComponent(email)}${apiKeyParam}`;
 
-    const res = await this.rateLimiter.schedule('pubmed', () =>
-      fetchWithRetryAndTimeout(summaryUrl, {
-        headers: { Accept: 'application/json' },
-        timeoutMs,
-        retries,
-        signal: options.signal,
-        source: 'pubmed',
-      })
+    const res = await this.rateLimiter.schedule(
+      'pubmed',
+      () =>
+        fetchWithRetryAndTimeout(summaryUrl, {
+          headers: { Accept: 'application/json' },
+          timeoutMs,
+          retries,
+          signal: options.signal,
+          source: 'pubmed',
+        }),
+      { timeoutMs, signal: options.signal }
     );
 
     if (res.status === 404) {
@@ -261,6 +294,17 @@ export class PubMedClient {
         'pubmed',
         parseErr
       );
+    }
+
+    // Check for rate limit error or general error embedded in JSON response
+    const lookupError = summaryData.error || summaryData.result?.ERROR;
+    if (lookupError) {
+      const errString = typeof lookupError === 'string' ? lookupError : JSON.stringify(lookupError);
+      if (errString.toLowerCase().includes('rate limit') || errString.toLowerCase().includes('too many requests')) {
+        this.rateLimiter.pause('pubmed', 3000);
+        throw new RateLimitError('pubmed', `PubMed lookup rate limit exceeded: ${errString}`);
+      }
+      throw new RemoteServerError(`PubMed lookup error: ${errString}`, 500, 'pubmed');
     }
 
     const item = summaryData.result?.[cleanId];
@@ -318,7 +362,7 @@ export class CrossrefClient {
   }
 
   /**
-   * Search Crossref metadata registry with caching, timeout, and retry support.
+   * Search Crossref metadata registry with polite pool routing, caching, timeout, and retry support.
    */
   async search(query: string, options: LiteratureSearchOptions = {}): Promise<LiteratureItem[]> {
     const limit = Math.max(1, Math.min(options.limit || 5, 50));
@@ -337,7 +381,8 @@ export class CrossrefClient {
     const retries = options.retries ?? this.defaultRetries;
     const mailto = process.env.CROSSREF_MAILTO || 'support@publishai.local';
 
-    const url = `${this.baseUrl}/works?query=${encodeURIComponent(query)}&rows=${limit}&offset=${offset}`;
+    // Append mailto param to guarantee polite pool routing on CrossRef edge
+    const url = `${this.baseUrl}/works?query=${encodeURIComponent(query)}&rows=${limit}&offset=${offset}&mailto=${encodeURIComponent(mailto)}`;
     const headers: Record<string, string> = {
       Accept: 'application/json',
       'User-Agent': `PublishAI/0.1.0 (mailto:${mailto})`,
@@ -347,14 +392,17 @@ export class CrossrefClient {
       headers['Crossref-Plus-API-Token'] = `Bearer ${process.env.CROSSREF_PLUS_API_TOKEN}`;
     }
 
-    const res = await this.rateLimiter.schedule('crossref', () =>
-      fetchWithRetryAndTimeout(url, {
-        headers,
-        timeoutMs,
-        retries,
-        signal: options.signal,
-        source: 'crossref',
-      })
+    const res = await this.rateLimiter.schedule(
+      'crossref',
+      () =>
+        fetchWithRetryAndTimeout(url, {
+          headers,
+          timeoutMs,
+          retries,
+          signal: options.signal,
+          source: 'crossref',
+        }),
+      { timeoutMs, signal: options.signal }
     );
 
     if (!res.ok) {
@@ -442,7 +490,7 @@ export class CrossrefClient {
     const retries = options.retries ?? this.defaultRetries;
     const mailto = process.env.CROSSREF_MAILTO || 'support@publishai.local';
 
-    const url = `${this.baseUrl}/works/${encodeURIComponent(cleanDoi)}`;
+    const url = `${this.baseUrl}/works/${encodeURIComponent(cleanDoi)}?mailto=${encodeURIComponent(mailto)}`;
     const headers: Record<string, string> = {
       Accept: 'application/json',
       'User-Agent': `PublishAI/0.1.0 (mailto:${mailto})`,
@@ -452,14 +500,17 @@ export class CrossrefClient {
       headers['Crossref-Plus-API-Token'] = `Bearer ${process.env.CROSSREF_PLUS_API_TOKEN}`;
     }
 
-    const res = await this.rateLimiter.schedule('crossref', () =>
-      fetchWithRetryAndTimeout(url, {
-        headers,
-        timeoutMs,
-        retries,
-        signal: options.signal,
-        source: 'crossref',
-      })
+    const res = await this.rateLimiter.schedule(
+      'crossref',
+      () =>
+        fetchWithRetryAndTimeout(url, {
+          headers,
+          timeoutMs,
+          retries,
+          signal: options.signal,
+          source: 'crossref',
+        }),
+      { timeoutMs, signal: options.signal }
     );
 
     if (res.status === 404) {
@@ -569,14 +620,17 @@ export class SemanticScholarClient {
       headers['x-api-key'] = process.env.SEMANTIC_SCHOLAR_API_KEY;
     }
 
-    const res = await this.rateLimiter.schedule('semanticscholar', () =>
-      fetchWithRetryAndTimeout(url, {
-        headers,
-        timeoutMs,
-        retries,
-        signal: options.signal,
-        source: 'semanticscholar',
-      })
+    const res = await this.rateLimiter.schedule(
+      'semanticscholar',
+      () =>
+        fetchWithRetryAndTimeout(url, {
+          headers,
+          timeoutMs,
+          retries,
+          signal: options.signal,
+          source: 'semanticscholar',
+        }),
+      { timeoutMs, signal: options.signal }
     );
 
     if (!res.ok) {
@@ -597,6 +651,12 @@ export class SemanticScholarClient {
         'semanticscholar',
         parseErr
       );
+    }
+
+    // Check for rate limit in response body
+    if (data.message && (data.message.toLowerCase().includes('too many requests') || data.message.toLowerCase().includes('rate limit'))) {
+      this.rateLimiter.pause('semanticscholar', 2000);
+      throw new RateLimitError('semanticscholar', `Semantic Scholar search rate limit: ${data.message}`);
     }
 
     const items = data.data || [];
@@ -641,7 +701,7 @@ export class SemanticScholarClient {
   }
 
   /**
-   * Fetch single work details directly by Semantic Scholar ID or identifier (e.g. DOI, CorpusId).
+   * Fetch single work details directly by Semantic Scholar ID or identifier (e.g. DOI, CorpusId, ARXIV:id).
    */
   async getById(id: string, options: LiteratureSearchOptions = {}): Promise<LiteratureItem | null> {
     const cleanId = id.trim().replace(/^semanticscholar-/i, '');
@@ -670,14 +730,17 @@ export class SemanticScholarClient {
       headers['x-api-key'] = process.env.SEMANTIC_SCHOLAR_API_KEY;
     }
 
-    const res = await this.rateLimiter.schedule('semanticscholar', () =>
-      fetchWithRetryAndTimeout(url, {
-        headers,
-        timeoutMs,
-        retries,
-        signal: options.signal,
-        source: 'semanticscholar',
-      })
+    const res = await this.rateLimiter.schedule(
+      'semanticscholar',
+      () =>
+        fetchWithRetryAndTimeout(url, {
+          headers,
+          timeoutMs,
+          retries,
+          signal: options.signal,
+          source: 'semanticscholar',
+        }),
+      { timeoutMs, signal: options.signal }
     );
 
     if (res.status === 404) {
@@ -702,6 +765,12 @@ export class SemanticScholarClient {
         'semanticscholar',
         parseErr
       );
+    }
+
+    // Check for rate limit in response body
+    if (paper.message && (paper.message.toLowerCase().includes('too many requests') || paper.message.toLowerCase().includes('rate limit'))) {
+      this.rateLimiter.pause('semanticscholar', 2000);
+      throw new RateLimitError('semanticscholar', `Semantic Scholar lookup rate limit: ${paper.message}`);
     }
 
     if (!paper || !paper.paperId) return null;
@@ -737,12 +806,12 @@ export class SemanticScholarClient {
 /**
  * Unified Literature & Citation Service
  * Coordinates PubMed, Crossref, and Semantic Scholar with concurrent deduplicated search,
- * rate limit defense, multi-tier caching, and citation export.
+ * rate limit defense, multi-tier caching, real database persistence, and citation export.
  */
 export class LiteratureService {
-  private pubmed: PubMedClient;
-  private crossref: CrossrefClient;
-  private semanticScholar: SemanticScholarClient;
+  readonly pubmed: PubMedClient;
+  readonly crossref: CrossrefClient;
+  readonly semanticScholar: SemanticScholarClient;
   private cache: LiteratureCache;
 
   constructor(
@@ -783,97 +852,133 @@ export class LiteratureService {
       if (!requestedSources.includes('semanticscholar')) requestedSources.push('semanticscholar');
     }
 
-    // Execute concurrently with Promise.allSettled for fault isolation
-    const searchPromises: Promise<{ source: LiteratureSource; items: LiteratureItem[] }>[] = [];
+    // Overall search timeout coordination
+    const totalTimeoutMs = options.timeoutMs ?? 10000;
+    const searchAbortController = new AbortController();
+    let timeoutTimer: NodeJS.Timeout | null = null;
 
-    if (requestedSources.includes('pubmed')) {
-      searchPromises.push(
-        this.pubmed.search(query, options).then(items => ({ source: 'pubmed' as const, items }))
-      );
-    }
-    if (requestedSources.includes('crossref')) {
-      searchPromises.push(
-        this.crossref.search(query, options).then(items => ({ source: 'crossref' as const, items }))
-      );
-    }
-    if (requestedSources.includes('semanticscholar')) {
-      searchPromises.push(
-        this.semanticScholar.search(query, options).then(items => ({ source: 'semanticscholar' as const, items }))
-      );
+    if (totalTimeoutMs > 0) {
+      timeoutTimer = setTimeout(() => {
+        searchAbortController.abort(new TimeoutError(`Unified literature search timed out after ${totalTimeoutMs}ms`, 'literature_service', totalTimeoutMs));
+      }, totalTimeoutMs);
+      timeoutTimer.unref?.();
     }
 
-    const settledResults = await Promise.allSettled(searchPromises);
-
-    const sourceCounts = {
-      pubmed: 0,
-      crossref: 0,
-      semanticscholar: 0,
+    const onUserAbort = () => {
+      searchAbortController.abort(options.signal?.reason);
     };
-    const errors: Record<string, string> = {};
-    const allItems: LiteratureItem[] = [];
 
-    settledResults.forEach((res, index) => {
-      if (res.status === 'fulfilled') {
-        const { source, items } = res.value;
-        sourceCounts[source] = items.length;
-        allItems.push(...items);
-      } else {
-        const errorReason = res.reason?.message || 'External search failed';
-        // Map index back to source
-        const src = requestedSources[index] || 'unknown';
-        errors[src] = errorReason;
-        console.warn(`[LiteratureService] Error searching ${src}:`, res.reason);
+    if (options.signal) {
+      if (options.signal.aborted) {
+        if (timeoutTimer) clearTimeout(timeoutTimer);
+        throw options.signal.reason || new Error('Aborted');
       }
-    });
+      options.signal.addEventListener('abort', onUserAbort, { once: true });
+    }
 
-    // If all failed and throwOnError is requested, throw combined error
-    const allFailed = settledResults.every(r => r.status === 'rejected');
-    if (allFailed && options.throwOnError) {
-      throw new LiteratureApiError(
-        `All literature search sources failed: ${JSON.stringify(errors)}`,
-        {
-          source: 'literature_service',
-          details: errors,
+    const coordinatedOptions: LiteratureSearchOptions = {
+      ...options,
+      timeoutMs: totalTimeoutMs,
+      signal: searchAbortController.signal,
+    };
+
+    try {
+      // Execute concurrently with Promise.allSettled for fault isolation
+      const searchPromises: Promise<{ source: LiteratureSource; items: LiteratureItem[] }>[] = [];
+
+      if (requestedSources.includes('pubmed')) {
+        searchPromises.push(
+          this.pubmed.search(query, coordinatedOptions).then(items => ({ source: 'pubmed' as const, items }))
+        );
+      }
+      if (requestedSources.includes('crossref')) {
+        searchPromises.push(
+          this.crossref.search(query, coordinatedOptions).then(items => ({ source: 'crossref' as const, items }))
+        );
+      }
+      if (requestedSources.includes('semanticscholar')) {
+        searchPromises.push(
+          this.semanticScholar.search(query, coordinatedOptions).then(items => ({ source: 'semanticscholar' as const, items }))
+        );
+      }
+
+      const settledResults = await Promise.allSettled(searchPromises);
+
+      const sourceCounts = {
+        pubmed: 0,
+        crossref: 0,
+        semanticscholar: 0,
+      };
+      const errors: Record<string, string> = {};
+      const allItems: LiteratureItem[] = [];
+
+      settledResults.forEach((res, index) => {
+        if (res.status === 'fulfilled') {
+          const { source, items } = res.value;
+          sourceCounts[source] = items.length;
+          allItems.push(...items);
+        } else {
+          const errorReason = res.reason?.message || 'External search failed';
+          const src = requestedSources[index] || 'unknown';
+          errors[src] = errorReason;
+          console.warn(`[LiteratureService] Error searching ${src}:`, res.reason);
         }
-      );
-    }
+      });
 
-    // Deduplicate by DOI and normalized title
-    const combined: LiteratureItem[] = [];
-    const seenDois = new Set<string>();
-    const seenTitles = new Set<string>();
-
-    for (const item of allItems) {
-      const normalizedTitle = item.title.toLowerCase().replace(/[^a-z0-9]/g, '');
-      let duplicate = false;
-
-      if (item.doi && seenDois.has(item.doi.toLowerCase())) {
-        duplicate = true;
-      } else if (normalizedTitle && seenTitles.has(normalizedTitle)) {
-        duplicate = true;
+      // If all failed and throwOnError is requested, throw combined error
+      const allFailed = settledResults.length > 0 && settledResults.every(r => r.status === 'rejected');
+      if (allFailed && options.throwOnError) {
+        throw new LiteratureApiError(
+          `All literature search sources failed: ${JSON.stringify(errors)}`,
+          {
+            source: 'literature_service',
+            details: errors,
+          }
+        );
       }
 
-      if (!duplicate) {
-        if (item.doi) seenDois.add(item.doi.toLowerCase());
-        if (normalizedTitle) seenTitles.add(normalizedTitle);
-        combined.push(item);
+      // Deduplicate by DOI and normalized title
+      const combined: LiteratureItem[] = [];
+      const seenDois = new Set<string>();
+      const seenTitles = new Set<string>();
+
+      for (const item of allItems) {
+        const normalizedTitle = item.title.toLowerCase().replace(/[^a-z0-9]/g, '');
+        let duplicate = false;
+
+        if (item.doi && seenDois.has(item.doi.toLowerCase())) {
+          duplicate = true;
+        } else if (normalizedTitle && seenTitles.has(normalizedTitle)) {
+          duplicate = true;
+        }
+
+        if (!duplicate) {
+          if (item.doi) seenDois.add(item.doi.toLowerCase());
+          if (normalizedTitle) seenTitles.add(normalizedTitle);
+          combined.push(item);
+        }
+      }
+
+      const result: LiteratureSearchResult = {
+        query,
+        total: combined.length,
+        items: combined,
+        sources: sourceCounts,
+        ...(Object.keys(errors).length > 0 ? { errors } : {}),
+      };
+
+      // Cache results if at least one source succeeded or if items were found
+      if (combined.length > 0 || !allFailed) {
+        await this.cache.set(cacheKey, result, options.cacheTtl);
+      }
+
+      return result;
+    } finally {
+      if (timeoutTimer) clearTimeout(timeoutTimer);
+      if (options.signal) {
+        options.signal.removeEventListener('abort', onUserAbort);
       }
     }
-
-    const result: LiteratureSearchResult = {
-      query,
-      total: combined.length,
-      items: combined,
-      sources: sourceCounts,
-      ...(Object.keys(errors).length > 0 ? { errors } : {}),
-    };
-
-    // Cache results if at least one source succeeded or if items were found
-    if (combined.length > 0 || !allFailed) {
-      await this.cache.set(cacheKey, result, options.cacheTtl);
-    }
-
-    return result;
   }
 
   /**
@@ -895,7 +1000,7 @@ export class LiteratureService {
    * If an arXiv ID is provided, it is replaced and queried via Semantic Scholar (ARXIV:{id}).
    */
   async getById(id: string, source: LiteratureSource | 'arxiv', options: LiteratureSearchOptions = {}): Promise<LiteratureItem | null> {
-    if (source === 'arxiv') {
+    if (source === 'arxiv' || id.toLowerCase().startsWith('arxiv:')) {
       console.warn(`[LiteratureService] Direct arXiv query for ${id} redirected to Semantic Scholar.`);
       const cleanArxiv = id.replace(/^arxiv:/i, '');
       return this.semanticScholar.getById(`ARXIV:${cleanArxiv}`, options);
@@ -969,10 +1074,11 @@ export class LiteratureService {
   /**
    * Convert LiteratureItem to BibTeX entry.
    */
-  private toBibTeX(item: LiteratureItem): string {
-    const key = (item.authors[0]?.lastName || 'ref') + (item.year || 'unknown');
+  toBibTeX(item: LiteratureItem): string {
+    const key = (item.authors?.[0]?.lastName || 'ref').toLowerCase().replace(/[^a-z0-9]/g, '') + (item.year || 'unknown');
+    const authors = (item.authors || []).map(a => a.name).join(' and ') || 'Unknown';
     return `@article{${key},
-  author = {${item.authors.map(a => a.name).join(' and ')}},
+  author = {${authors}},
   title = {${item.title}},
   journal = {${item.journal || 'Unknown Journal'}},
   year = {${item.year || ''}},
@@ -982,13 +1088,56 @@ export class LiteratureService {
   }
 
   /**
-   * Database persistence hook.
+   * Database persistence: saves literature citation into the real database schema.
    */
-  async saveCitation(_paperId: string, _citation: LiteratureItem): Promise<{ status: string; message: string }> {
-    return {
-      status: 'pending_schema',
-      message: 'Blocked on final database schema for citations. Persistence will be hooked upon migration.',
-    };
+  async saveCitation(
+    paperId: number | string,
+    citation: LiteratureItem,
+    options?: { documentId?: string; citationKey?: string }
+  ): Promise<{ status: 'saved' | 'error'; id?: string; message: string }> {
+    try {
+      const parsedPaperId = typeof paperId === 'number'
+        ? paperId
+        : parseInt(String(paperId), 10);
+
+      const authorsStr = Array.isArray(citation.authors)
+        ? citation.authors.map(a => a.name).join(', ')
+        : 'Unknown Author';
+
+      const key = options?.citationKey || `${(citation.authors?.[0]?.lastName || 'ref').toLowerCase().replace(/[^a-z0-9]/g, '')}${citation.year || new Date().getFullYear()}`;
+
+      const [inserted] = await db.insert(citations).values({
+        paperId: !isNaN(parsedPaperId) ? parsedPaperId : undefined,
+        documentId: options?.documentId,
+        citationKey: key,
+        title: citation.title || 'Untitled',
+        authors: authorsStr,
+        journal: citation.journal,
+        year: citation.year,
+        volume: citation.volume,
+        issue: citation.issue,
+        pages: citation.pages,
+        doi: citation.doi,
+        pmid: citation.source === 'pubmed' ? citation.externalId : undefined,
+        url: citation.url,
+        source: citation.source,
+        bibtex: this.toBibTeX(citation),
+        abstract: citation.abstract,
+        rawMetadata: citation as any,
+      }).returning();
+
+      return {
+        status: 'saved',
+        id: inserted?.id,
+        message: 'Citation saved successfully to database.',
+      };
+    } catch (err: any) {
+      console.error('[LiteratureService] Failed to persist citation to database:', err);
+      return {
+        status: 'error',
+        message: `Failed to persist citation: ${err.message}`,
+      };
+    }
   }
 }
 

@@ -32,6 +32,7 @@ export interface ExtractEntitiesOptions {
   fallbackModels?: string[];
   maxRetries?: number;
   timeoutMs?: number;
+  apiKey?: string;
 }
 
 export async function extractAndStoreEntities(
@@ -39,6 +40,11 @@ export async function extractAndStoreEntities(
   journalId: number,
   options?: ExtractEntitiesOptions
 ) {
+  if (!text || typeof text !== "string" || text.trim().length === 0) {
+    console.warn("[GraphRAG] Empty or invalid text provided for entity extraction.");
+    return;
+  }
+
   const primaryModel = options?.modelName || DEFAULT_OPENAI_MINI_MODEL_NAME;
   const fallbackCandidates = options?.fallbackModels?.length
     ? options.fallbackModels
@@ -47,6 +53,7 @@ export async function extractAndStoreEntities(
   const uniqueCandidates = Array.from(new Set(fallbackCandidates)).map((m) => ({ model: m }));
   const maxRetries = options?.maxRetries ?? 2;
   const timeoutMs = options?.timeoutMs ?? 30000;
+  const apiKey = options?.apiKey || process.env.OPENAI_API_KEY;
 
   try {
     const prompt = `
@@ -62,6 +69,7 @@ ${wrapPromptContext("scientific_text", text, "Scientific text for knowledge grap
       async (candidate) => {
         const model = new ChatOpenAI({
           modelName: candidate.model,
+          openAIApiKey: apiKey,
           temperature: 0,
           maxRetries: 1,
         });
@@ -148,7 +156,7 @@ ${wrapPromptContext("scientific_text", text, "Scientific text for knowledge grap
 }
 
 export async function queryJournalTrends(journalId: number, topic: string) {
-  if (!topic || typeof topic !== "string") {
+  if (!topic || typeof topic !== "string" || topic.trim().length === 0) {
     return "No topic provided.";
   }
 
@@ -156,13 +164,17 @@ export async function queryJournalTrends(journalId: number, topic: string) {
   const safeTopic = topic.replace(/[%_\\]/g, "\\$&").trim().slice(0, 100);
 
   try {
-    const relevantEntities = await db.query.scientificEntities.findMany({
-      where: or(
-        ilike(scientificEntities.name, `%${safeTopic}%`),
-        ilike(scientificEntities.description, `%${safeTopic}%`)
-      ),
-      limit: 5,
-    });
+    const relevantEntities = await withTimeout(
+      db.query.scientificEntities.findMany({
+        where: or(
+          ilike(scientificEntities.name, `%${safeTopic}%`),
+          ilike(scientificEntities.description, `%${safeTopic}%`)
+        ),
+        limit: 5,
+      }),
+      5000,
+      "queryJournalTrends:scientificEntities"
+    );
 
     if (!relevantEntities || relevantEntities.length === 0) {
       return "No significant trends found for this topic.";
@@ -171,14 +183,18 @@ export async function queryJournalTrends(journalId: number, topic: string) {
     const entityIds = relevantEntities.map((e) => e.id);
 
     // Get relationships for these entities
-    const relationships = await db.query.scientificRelationships.findMany({
-      where: (rel, { inArray, or }) =>
-        or(
-          inArray(rel.sourceEntityId, entityIds),
-          inArray(rel.targetEntityId, entityIds)
-        ),
-      limit: 10,
-    });
+    const relationships = await withTimeout(
+      db.query.scientificRelationships.findMany({
+        where: (rel, { inArray, or }) =>
+          or(
+            inArray(rel.sourceEntityId, entityIds),
+            inArray(rel.targetEntityId, entityIds)
+          ),
+        limit: 10,
+      }),
+      5000,
+      "queryJournalTrends:scientificRelationships"
+    );
 
     return (
       `Found ${relevantEntities.length} entities related to "${sanitizePromptInput(topic)}". ` +

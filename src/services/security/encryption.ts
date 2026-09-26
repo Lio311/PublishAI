@@ -10,9 +10,13 @@ const HEX_REGEX = /^[0-9a-fA-F]+$/;
  * Expects a 32-byte hex string (64 characters).
  */
 function getKey(): Buffer {
-  const keyHex = process.env.MASTER_ENCRYPTION_KEY?.trim();
+  let keyHex = process.env.MASTER_ENCRYPTION_KEY?.trim();
   if (!keyHex) {
-    throw new Error("MASTER_ENCRYPTION_KEY environment variable is not set.");
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("MASTER_ENCRYPTION_KEY environment variable is not set.");
+    }
+    // Safe deterministic fallback for development/test only
+    keyHex = "d2e41ec3436bfa89a0c347d0a2fa108b81c73683cbd10dcaca7ffe07e4989de4";
   }
   if (keyHex.length !== 64 || !HEX_REGEX.test(keyHex)) {
     throw new Error("MASTER_ENCRYPTION_KEY must be exactly 32 bytes (64 hex characters).");
@@ -108,3 +112,49 @@ export function decrypt(encryptedString: string): string {
     throw new Error("Decryption failed. The data may have been tampered with or the encryption key is incorrect.");
   }
 }
+
+/**
+ * Safely decrypts a value if it is encrypted. If not encrypted or if decryption fails,
+ * returns the fallback string or empty string.
+ */
+export function safeDecrypt(encryptedString: unknown, fallback = ""): string {
+  if (typeof encryptedString !== "string" || !encryptedString) {
+    return fallback;
+  }
+  if (!isEncrypted(encryptedString)) {
+    return encryptedString;
+  }
+  try {
+    return decrypt(encryptedString);
+  } catch {
+    return fallback;
+  }
+}
+
+/**
+ * Masks a secret string (e.g. API key, token, or password) for safe logging or UI preview.
+ * Example: 'sk-1234567890abcdef' -> 'sk-1...cdef'
+ */
+export function maskSecret(secret: unknown): string {
+  if (typeof secret !== "string" || !secret) {
+    return "";
+  }
+  const len = secret.length;
+  if (len <= 6) {
+    return "******";
+  }
+  const prefix = secret.slice(0, 4);
+  const suffix = secret.slice(-4);
+  return `${prefix}...${suffix}`;
+}
+
+/**
+ * Encrypts an API token or credential string.
+ */
+export const encryptToken = encrypt;
+
+/**
+ * Decrypts an API token or credential string.
+ */
+export const decryptToken = decrypt;
+

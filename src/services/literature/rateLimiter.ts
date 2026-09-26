@@ -11,6 +11,7 @@
  */
 
 import { LiteratureSource } from './types';
+import { TimeoutError } from './errors';
 
 export interface DomainPacerConfig {
   minIntervalMs: number;
@@ -18,11 +19,19 @@ export interface DomainPacerConfig {
   maxQueueSize?: number;
 }
 
+export interface ScheduleOptions {
+  timeoutMs?: number;
+  signal?: AbortSignal;
+}
+
 interface QueuedTask<T> {
   fn: () => Promise<T>;
   resolve: (value: T | PromiseLike<T>) => void;
   reject: (reason?: any) => void;
   enqueuedAt: number;
+  timerId?: NodeJS.Timeout | null;
+  abortListener?: (() => void) | null;
+  signal?: AbortSignal;
 }
 
 export class LiteratureRateLimiter {
@@ -31,6 +40,8 @@ export class LiteratureRateLimiter {
   private inFlight: Map<string, number> = new Map();
   private lastRequestTime: Map<string, number> = new Map();
   private pausedUntil: Map<string, number> = new Map();
+  private resumeTimers: Map<string, NodeJS.Timeout> = new Map();
+  private pacingTimers: Map<string, NodeJS.Timeout> = new Map();
   private processing: Map<string, boolean> = new Map();
 
   constructor() {
@@ -64,15 +75,23 @@ export class LiteratureRateLimiter {
   }
 
   /**
-   * Schedule a request through the rate limiter.
+   * Schedule a request through the rate limiter with queue timeout and abort signal protection.
    */
-  async schedule<T>(source: LiteratureSource | 'literature_service', fn: () => Promise<T>): Promise<T> {
+  async schedule<T>(
+    source: LiteratureSource | 'literature_service',
+    fn: () => Promise<T>,
+    options?: ScheduleOptions
+  ): Promise<T> {
     const key = source;
     const config = this.configs.get(key) || {
       minIntervalMs: 100,
       maxConcurrent: 3,
       maxQueueSize: 200,
     };
+
+    if (options?.signal?.aborted) {
+      throw options.signal.reason || new Error('Aborted');
+    }
 
     if (!this.queues.has(key)) {
       this.queues.set(key, []);
@@ -89,15 +108,52 @@ export class LiteratureRateLimiter {
     }
 
     return new Promise<T>((resolve, reject) => {
-      queue.push({
+      const task: QueuedTask<T> = {
         fn,
         resolve,
         reject,
         enqueuedAt: Date.now(),
-      });
+        signal: options?.signal,
+      };
 
+      // Set up queue timeout if specified
+      if (options?.timeoutMs && options.timeoutMs > 0) {
+        task.timerId = setTimeout(() => {
+          this.removeQueuedTask(key, task);
+          reject(new TimeoutError(`Request to ${key} timed out after ${options.timeoutMs}ms while queued in rate limiter`, key, options.timeoutMs));
+        }, options.timeoutMs);
+        task.timerId.unref?.();
+      }
+
+      // Set up abort listener while queued
+      if (options?.signal) {
+        task.abortListener = () => {
+          this.removeQueuedTask(key, task);
+          reject(options.signal?.reason || new Error('Aborted'));
+        };
+        options.signal.addEventListener('abort', task.abortListener, { once: true });
+      }
+
+      queue.push(task);
       this.processQueue(key);
     });
+  }
+
+  private removeQueuedTask(key: string, task: QueuedTask<any>): void {
+    const queue = this.queues.get(key);
+    if (!queue) return;
+    const idx = queue.indexOf(task);
+    if (idx !== -1) {
+      queue.splice(idx, 1);
+    }
+    if (task.timerId) {
+      clearTimeout(task.timerId);
+      task.timerId = null;
+    }
+    if (task.abortListener && task.signal) {
+      task.signal.removeEventListener('abort', task.abortListener);
+      task.abortListener = null;
+    }
   }
 
   /**
@@ -110,10 +166,18 @@ export class LiteratureRateLimiter {
     this.pausedUntil.set(source, newPaused);
     console.warn(`[LiteratureRateLimiter] Source "${source}" paused for ${Math.round(durationMs)}ms (until ${new Date(newPaused).toISOString()})`);
 
-    // Schedule queue resume
-    setTimeout(() => {
+    // Clear previous resume timer if any
+    const existingTimer = this.resumeTimers.get(source);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+    }
+
+    const timer = setTimeout(() => {
+      this.resumeTimers.delete(source);
       this.processQueue(source);
-    }, durationMs + 10).unref?.();
+    }, Math.max(10, newPaused - Date.now() + 10));
+    timer.unref?.();
+    this.resumeTimers.set(source, timer);
   }
 
   /**
@@ -153,9 +217,14 @@ export class LiteratureRateLimiter {
         const now = Date.now();
         if (now < pauseExpiry) {
           const waitTime = pauseExpiry - now;
-          setTimeout(() => {
-            this.processQueue(key);
-          }, waitTime + 5).unref?.();
+          if (!this.resumeTimers.has(key)) {
+            const timer = setTimeout(() => {
+              this.resumeTimers.delete(key);
+              this.processQueue(key);
+            }, waitTime + 5);
+            timer.unref?.();
+            this.resumeTimers.set(key, timer);
+          }
           break;
         }
 
@@ -164,14 +233,35 @@ export class LiteratureRateLimiter {
         const elapsedSinceLast = now - lastTime;
         if (elapsedSinceLast < config.minIntervalMs) {
           const waitTime = config.minIntervalMs - elapsedSinceLast;
-          setTimeout(() => {
-            this.processQueue(key);
-          }, waitTime).unref?.();
+          if (!this.pacingTimers.has(key)) {
+            const timer = setTimeout(() => {
+              this.pacingTimers.delete(key);
+              this.processQueue(key);
+            }, waitTime);
+            timer.unref?.();
+            this.pacingTimers.set(key, timer);
+          }
           break;
         }
 
         const task = queue.shift();
         if (!task) break;
+
+        // Cleanup queue waiting listeners
+        if (task.timerId) {
+          clearTimeout(task.timerId);
+          task.timerId = null;
+        }
+        if (task.abortListener && task.signal) {
+          task.signal.removeEventListener('abort', task.abortListener);
+          task.abortListener = null;
+        }
+
+        // If signal aborted just before dispatch, abort without executing
+        if (task.signal?.aborted) {
+          task.reject(task.signal.reason || new Error('Aborted'));
+          continue;
+        }
 
         this.inFlight.set(key, (this.inFlight.get(key) || 0) + 1);
         this.lastRequestTime.set(key, Date.now());
@@ -191,15 +281,27 @@ export class LiteratureRateLimiter {
   }
 
   /**
-   * Clear all queues and pauses (useful in tests).
+   * Clear all queues, timers, and pauses (useful in tests).
    */
   reset(): void {
     for (const queue of this.queues.values()) {
       for (const task of queue) {
+        if (task.timerId) clearTimeout(task.timerId);
+        if (task.abortListener && task.signal) {
+          task.signal.removeEventListener('abort', task.abortListener);
+        }
         task.reject(new Error('Rate limiter reset'));
       }
       queue.length = 0;
     }
+    for (const timer of this.resumeTimers.values()) {
+      clearTimeout(timer);
+    }
+    for (const timer of this.pacingTimers.values()) {
+      clearTimeout(timer);
+    }
+    this.resumeTimers.clear();
+    this.pacingTimers.clear();
     this.inFlight.clear();
     this.lastRequestTime.clear();
     this.pausedUntil.clear();

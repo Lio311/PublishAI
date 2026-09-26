@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { openai, createOpenAI } from "@ai-sdk/openai";
 import { withModelFallback, withTimeout, mapConcurrent } from "./rateLimiter";
 import { DEFAULT_OPENAI_MODEL_NAME, DEFAULT_OPENAI_MINI_MODEL_NAME, DEFAULT_OPENAI_EMBEDDING_MODEL_NAME } from "./provider";
 import { generateSafeEmbedding, searchDocumentChunks } from "./vectorSearch";
@@ -25,6 +25,7 @@ export interface DebateServiceOptions {
   concurrency?: number;
   maxRetries?: number;
   timeoutMs?: number;
+  apiKey?: string;
 }
 
 export class MultiAgentDebateService {
@@ -46,15 +47,28 @@ export class MultiAgentDebateService {
     options?: DebateServiceOptions
   ): Promise<DebateState> {
     const state: DebateState = { ...initialState };
+
+    if (!state.findings || typeof state.findings !== "string" || state.findings.trim().length === 0) {
+      throw new Error("Debate pipeline requires non-empty user findings.");
+    }
+
+    if (!state.papers || state.papers.length === 0) {
+      state.turns = [];
+      state.synthesis = "No benchmark papers provided for debate.";
+      return state;
+    }
+
     const modelName = options?.model || this.defaultModel;
     const embeddingModelName = options?.embeddingModel || this.defaultEmbeddingModel;
     const concurrency = options?.concurrency ?? 3;
     const maxRetries = options?.maxRetries ?? 2;
     const timeoutMs = options?.timeoutMs ?? 30000;
+    const modelProvider = options?.apiKey ? createOpenAI({ apiKey: options.apiKey }) : openai;
 
-    const agentModelCandidates = options?.fallbackModels?.length
-      ? options.fallbackModels.map((m) => ({ model: m }))
-      : [{ model: modelName }, { model: DEFAULT_OPENAI_MINI_MODEL_NAME }];
+    const candidateModels = options?.fallbackModels?.length
+      ? options.fallbackModels
+      : Array.from(new Set([modelName, DEFAULT_OPENAI_MINI_MODEL_NAME]));
+    const agentModelCandidates = candidateModels.map((m) => ({ model: m }));
 
     try {
       // 1. Generate embedding for user findings with timeout and fallback models.
@@ -65,6 +79,7 @@ export class MultiAgentDebateService {
           modelName: embeddingModelName,
           maxRetries,
           timeoutMs: 8000,
+          apiKey: options?.apiKey,
         });
         embedding = embedResult?.embedding ?? null;
       } catch (embedError: any) {
@@ -132,7 +147,7 @@ Based strictly on this context and your conclusions, provide a 2-paragraph criti
               async (candidate) => {
                 return withTimeout(
                   generateText({
-                    model: openai(candidate.model),
+                    model: modelProvider(candidate.model),
                     prompt,
                   }),
                   timeoutMs,
@@ -184,7 +199,7 @@ Draft a 500-word Discussion section integrating these perspectives. Highlight ar
           async (candidate) => {
             return withTimeout(
               generateText({
-                model: openai(candidate.model),
+                model: modelProvider(candidate.model),
                 prompt: synthesisPrompt,
               }),
               timeoutMs,

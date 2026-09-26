@@ -5,7 +5,13 @@ import Anthropic from "@anthropic-ai/sdk";
 import { langfuse } from "@/lib/langfuse";
 import { memoryClient } from "@/lib/mem0";
 import { getApplicableRules, extractUserRewriteFeedback } from "@/services/learningService";
-import { withRateLimitRetry, withModelFallback, withTimeout } from "./rateLimiter";
+import {
+  withRateLimitRetry,
+  withModelFallback,
+  withTimeout,
+  isRateLimitError,
+  isTransientError,
+} from "./rateLimiter";
 import {
   DEFAULT_OPENAI_MODEL_NAME,
   DEFAULT_ANTHROPIC_MODEL_NAME,
@@ -382,50 +388,68 @@ export async function chatLLM(options: ChatOptions): Promise<AIResponse> {
 }
 
 /**
- * Stream text generation with prompt injection protection and error boundary.
+ * Stream text generation with prompt injection protection, error boundaries,
+ * and automated model fallback if stream initiation hits rate limits or transient errors.
  */
 export async function streamLLMText(options: GenerateTextOptions) {
-  const provider = resolveProvider(options.provider, options.model);
+  const primaryProvider = resolveProvider(options.provider, options.model);
+  const primaryModel =
+    (options.model as string) ||
+    (primaryProvider === "anthropic" ? DEFAULT_ANTHROPIC_MODEL : DEFAULT_OPENAI_MODEL);
+
+  const candidateList: ModelCandidate[] = options.fallbackModels?.length
+    ? [
+        { model: primaryModel, provider: primaryProvider },
+        ...options.fallbackModels.map((m) => ({
+          model: m as string,
+          provider: resolveProvider(undefined, m),
+        })),
+      ]
+    : getModelFallbackChain(primaryModel, primaryProvider);
+
   const sanitizedPrompt = sanitizePromptInput(options.prompt);
   const systemPrompt = options.systemPrompt
     ? `${options.systemPrompt}\n\n${SYSTEM_PROMPT_GUARDRAILS}`
     : SYSTEM_PROMPT_GUARDRAILS;
 
-  if (provider === "anthropic") {
-    const client = getAnthropicClient(options.apiKey);
-    const model = (options.model as string) || DEFAULT_ANTHROPIC_MODEL;
+  let lastError: any;
 
+  for (const candidate of candidateList) {
     try {
-      return client.messages.stream({
-        model,
-        max_tokens: options.maxTokens || 4096,
-        temperature: options.temperature,
-        system: systemPrompt,
-        messages: [{ role: "user", content: sanitizedPrompt }],
-      });
+      if (candidate.provider === "anthropic") {
+        const client = getAnthropicClient(options.apiKey);
+        return await client.messages.stream({
+          model: candidate.model,
+          max_tokens: options.maxTokens || 4096,
+          temperature: options.temperature,
+          system: systemPrompt,
+          messages: [{ role: "user", content: sanitizedPrompt }],
+        });
+      } else {
+        const modelInstance = getOpenAIModelInstance(candidate.model, options.apiKey);
+        return streamText({
+          model: modelInstance,
+          prompt: sanitizedPrompt,
+          system: systemPrompt,
+          temperature: options.temperature,
+        });
+      }
     } catch (error: any) {
+      lastError = error;
       const safeErrMsg = redactApiKeys(error?.message || String(error));
-      console.error(`[streamLLMText] Anthropic stream initiation failed:`, safeErrMsg);
-      throw new Error(`Anthropic stream initiation failed: ${safeErrMsg}`);
+      console.warn(
+        `[streamLLMText] Stream candidate ${candidate.provider ? `${candidate.provider}:` : ""}${candidate.model} failed (${safeErrMsg}). Falling back...`
+      );
+
+      if (!isRateLimitError(error) && !isTransientError(error)) {
+        throw error;
+      }
     }
   }
 
-  // OpenAI streaming
-  const modelName = (options.model as string) || DEFAULT_OPENAI_MODEL;
-  const modelInstance = getOpenAIModelInstance(modelName, options.apiKey);
-
-  try {
-    return streamText({
-      model: modelInstance,
-      prompt: sanitizedPrompt,
-      system: systemPrompt,
-      temperature: options.temperature,
-    });
-  } catch (error: any) {
-    const safeErrMsg = redactApiKeys(error?.message || String(error));
-    console.error(`[streamLLMText] OpenAI stream initiation failed:`, safeErrMsg);
-    throw new Error(`OpenAI stream initiation failed: ${safeErrMsg}`);
-  }
+  const safeErrMsg = redactApiKeys(lastError?.message || String(lastError));
+  console.error(`[streamLLMText] Stream initiation failed across all candidates:`, safeErrMsg);
+  throw new Error(`Stream initiation failed: ${safeErrMsg}`);
 }
 
 // ============================================================================
@@ -507,6 +531,18 @@ Ensure scientific accuracy, preserve author citations and specific numbers/metri
     promptParts.push(wrapPromptContext("stylistic_guidelines", options.guidelines, "Stylistic constraints"));
   }
 
+  if (options.userId && options.journalId) {
+    try {
+      const learnedRules = await getApplicableRules(options.userId, options.journalId);
+      if (learnedRules && learnedRules.length > 0) {
+        const rulesText = learnedRules.map((r: any) => `- ${r.ruleText || r.rule || r}`).join("\n");
+        promptParts.push(wrapPromptContext("learned_preferences", rulesText, "Learned author preferences"));
+      }
+    } catch (e) {
+      console.warn("[refineAcademicWriting] Learning rules retrieval skipped:", redactApiKeys(String(e)));
+    }
+  }
+
   promptParts.push("\nProvide the refined academic text below:");
 
   return callLLM({
@@ -516,6 +552,8 @@ Ensure scientific accuracy, preserve author citations and specific numbers/metri
     model: options.model,
     fallbackModels: options.fallbackModels,
     apiKey: options.apiKey,
+    userId: options.userId,
+    useMemory: Boolean(options.userId),
     temperature: 0.2,
     retries: options.retries,
     timeoutMs: options.timeoutMs,

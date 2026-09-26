@@ -35,8 +35,9 @@ export async function GET() {
   }
 
   // Indicate whether each key is configured via env vars (never expose the actual key)
+  const { openaiApiKey: _o, anthropicApiKey: _a, ...safeSettings } = settings;
   return NextResponse.json({
-    ...settings,
+    ...safeSettings,
     name: user?.name,
     email: user?.email,
     openaiConfigured: !!process.env.OPENAI_API_KEY,

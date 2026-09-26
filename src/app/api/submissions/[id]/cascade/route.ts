@@ -4,6 +4,7 @@ import { submissions, papers, journalConnections } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/app/auth";
 import { checkRateLimit } from "@/services/rate-limit";
+import { encrypt } from "@/services/security/encryption";
 
 export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
@@ -107,8 +108,8 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
           journalId: isNaN(nextJournalId) ? null : nextJournalId,
           platform: 'email',
           siteUrl: 'http://example.com',
-          encryptedUsername: 'dummy',
-          encryptedPassword: 'dummy',
+          encryptedUsername: encrypt('cascade_system'),
+          encryptedPassword: encrypt(''),
         }).returning();
         connection = newConn;
       }

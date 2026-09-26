@@ -4,7 +4,7 @@
  */
 
 import { embed } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { openai, createOpenAI } from "@ai-sdk/openai";
 import { db } from "@/services/db";
 import { sql } from "drizzle-orm";
 import { withRateLimitRetry, withTimeout } from "./rateLimiter";
@@ -17,6 +17,7 @@ export interface GenerateEmbeddingOptions {
   maxRetries?: number;
   timeoutMs?: number;
   maxTextLength?: number;
+  apiKey?: string;
 }
 
 export interface RetrievedChunk {
@@ -60,6 +61,7 @@ export async function generateSafeEmbedding(
 
   const maxRetries = options.maxRetries ?? 2;
   const timeoutMs = options.timeoutMs ?? 8000;
+  const embeddingProvider = options.apiKey ? createOpenAI({ apiKey: options.apiKey }) : openai;
 
   for (let i = 0; i < candidateModels.length; i++) {
     const model = candidateModels[i];
@@ -68,7 +70,7 @@ export async function generateSafeEmbedding(
         withRateLimitRetry(
           () =>
             embed({
-              model: openai.embedding(model),
+              model: embeddingProvider.embedding(model),
               value: sanitizedText,
             }),
           { operationName: `generateSafeEmbedding(${model})`, maxRetries }
@@ -77,7 +79,12 @@ export async function generateSafeEmbedding(
         `Embedding generation with ${model}`
       );
 
-      if (result?.embedding && Array.isArray(result.embedding) && result.embedding.length > 0) {
+      if (
+        result?.embedding &&
+        Array.isArray(result.embedding) &&
+        result.embedding.length > 0 &&
+        typeof result.embedding[0] === "number"
+      ) {
         return { embedding: result.embedding, modelUsed: model };
       }
     } catch (err: any) {

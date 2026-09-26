@@ -17,8 +17,10 @@ export const SYSTEM_PROMPT_GUARDRAILS = `
  */
 const INJECTION_CONTROL_TOKENS = [
   /<\|(?:im_start|im_end|endoftext|system|assistant|user)\|>/gi,
+  /<\|(?:start_header_id|end_header_id|eot_id)\|>/gi,
+  /<turn_(?:start|end)>/gi,
   /\[SYSTEM(?:_PROMPT)?\]/gi,
-  /\[INST\][\s\S]*?\[\/INST\]/gi,
+  /\[\/?INST\]/gi,
   /<<SYS>>[\s\S]*?<<\/SYS>>/gi,
 ];
 
@@ -26,12 +28,12 @@ const INJECTION_CONTROL_TOKENS = [
  * Suspicious prompt injection heuristic patterns.
  */
 const INJECTION_HEURISTIC_PATTERNS = [
-  /ignore\s+(?:all\s+)?(?:previous|prior|above)\s+instructions/i,
-  /disregard\s+(?:all\s+)?(?:previous|prior|above)\s+instructions/i,
+  /(?:ignore|disregard|forget)\s+(?:all\s+)?(?:previous|prior|above)\s+instructions/i,
   /you\s+are\s+now\s+(?:DAN|jailbreak|unfiltered|an?\s+unrestricted)/i,
   /(?:system\s+prompt|developer\s+mode|hidden\s+instruction)\s*[:=]/i,
   /repeat\s+(?:the\s+)?(?:text|words|instructions)\s+above/i,
   /reveal\s+(?:your\s+)?(?:initial|system)\s+(?:prompt|instructions)/i,
+  /bypass\s+(?:safety|guardrails|rules|filters)/i,
 ];
 
 /**
@@ -42,8 +44,11 @@ export function redactApiKeys(text: string): string {
   return text
     .replace(/\b(sk-ant-[a-zA-Z0-9_-]{15,})\b/g, "[REDACTED_ANTHROPIC_KEY]")
     .replace(/\b(sk-[a-zA-Z0-9_-]{20,})\b/g, "[REDACTED_OPENAI_KEY]")
+    .replace(/\b(AIza[0-9A-Za-z-_]{30,45})\b/g, "[REDACTED_GOOGLE_KEY]")
+    .replace(/\b(ghp_[a-zA-Z0-9]{36})\b/g, "[REDACTED_GITHUB_TOKEN]")
+    .replace(/\b(hf_[a-zA-Z0-9]{34,})\b/g, "[REDACTED_HUGGINGFACE_KEY]")
     .replace(/\b(Bearer\s+)[a-zA-Z0-9._-]{20,}\b/gi, "$1[REDACTED_TOKEN]")
-    .replace(/api[_-]?key=([a-zA-Z0-9._-]{10,})/gi, "apiKey=[REDACTED]");
+    .replace(/(?:api[_-]?key|key)=([a-zA-Z0-9._-]{10,})/gi, "apiKey=[REDACTED]");
 }
 
 /**
@@ -56,11 +61,12 @@ export function isPromptInjection(input: string): boolean {
 
 /**
  * Escapes closing and opening tags within content to prevent delimiter break-out attacks.
+ * Handles whitespace inside tag delimiters (e.g. </ tag >).
  */
 export function escapeDelimiterTags(content: string, tag: string): string {
   if (!content || typeof content !== "string") return "";
-  const closeRegex = new RegExp(`</${tag}>`, "gi");
-  const openRegex = new RegExp(`<${tag}(\\s[^>]*)?>`, "gi");
+  const closeRegex = new RegExp(`</\\s*${tag}\\s*>`, "gi");
+  const openRegex = new RegExp(`<\\s*${tag}(\\s[^>]*)?>`, "gi");
   return content
     .replace(closeRegex, `[/${tag}_escaped]`)
     .replace(openRegex, `[${tag}_escaped]`);

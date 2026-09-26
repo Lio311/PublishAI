@@ -1,5 +1,5 @@
 import { generateObject } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { openai, createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 import { withModelFallback, withTimeout } from "./rateLimiter";
 import { DEFAULT_OPENAI_MODEL_NAME, DEFAULT_OPENAI_MINI_MODEL_NAME } from "./provider";
@@ -25,6 +25,7 @@ export interface PredictAcceptanceOptions {
   fallbackModels?: string[];
   maxRetries?: number;
   timeoutMs?: number;
+  apiKey?: string;
 }
 
 /**
@@ -43,6 +44,10 @@ export async function predictAcceptance(
   authorHistory?: string,
   options?: PredictAcceptanceOptions
 ): Promise<PredictionResult> {
+  if (!paperDetails?.title && !paperDetails?.abstract && !paperDetails?.keyFindings) {
+    throw new Error("Invalid paper details: title, abstract, or keyFindings must be provided.");
+  }
+
   const primaryModel = options?.model || DEFAULT_OPENAI_MODEL_NAME;
   const fallbackCandidates = options?.fallbackModels?.length
     ? options.fallbackModels
@@ -51,6 +56,7 @@ export async function predictAcceptance(
   const uniqueCandidates = Array.from(new Set(fallbackCandidates)).map((m) => ({ model: m }));
   const maxRetries = options?.maxRetries ?? 2;
   const timeoutMs = options?.timeoutMs ?? 30000;
+  const modelProvider = options?.apiKey ? createOpenAI({ apiKey: options.apiKey }) : openai;
 
   // Sanitize and isolate untrusted manuscript contents within XML delimiters
   const manuscriptContent = `
@@ -92,7 +98,7 @@ Provide a probability score (0-100), reasoning, strengths, weaknesses, and recom
       async (candidate) => {
         return withTimeout(
           generateObject({
-            model: openai(candidate.model),
+            model: modelProvider(candidate.model),
             schema: PredictionResultSchema,
             prompt,
           }),
