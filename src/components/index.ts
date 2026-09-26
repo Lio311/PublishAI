@@ -3,6 +3,8 @@ export type { DashboardProps, ManuscriptItem } from "./Dashboard";
 
 export { default as DocumentEditor } from "./DocumentEditor";
 export type { DocumentEditorProps, DocumentSection } from "./DocumentEditor";
+export { default as RichDocumentEditor } from "./RichDocumentEditor";
+export { default as AITiptapEditor } from "./Editor/AITiptapEditor";
 
 export { default as SubmissionDashboard } from "./SubmissionDashboard";
 export type {
@@ -34,3 +36,22 @@ export { ConnectionForm } from "./submission/ConnectionForm";
 export { SecurityBriefing } from "./submission/SecurityBriefing";
 export { CaptchaSolver } from "./submission/CaptchaSolver";
 export { default as SubmissionProgressBar } from "./submission/SubmissionProgressBar";
+
+export { NetworkGraph, NetworkGraphSkeleton } from "./analytics";
+export type { NetworkNode, NetworkEdge } from "./analytics";
+
+export {
+  EntityHighlighter,
+  KnowledgeGraphViewer,
+  KnowledgeGraphViewerSkeleton,
+  LogicConsistencyReport,
+  LogicConsistencyReportSkeleton,
+} from "./graph";
+export type {
+  HighlightEntity,
+  EntityHighlighterProps,
+  KnowledgeGraphNode,
+  KnowledgeGraphLink,
+  KnowledgeGraphData,
+  LogicConsistencyReportProps,
+} from "./graph";
