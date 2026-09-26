@@ -20,7 +20,13 @@ export async function GET(req: Request) {
           return NextResponse.json({
             authenticated: true,
             user: {
-              ...dbUser,
+              id: dbUser.id,
+              name: dbUser.name || "Academic Researcher",
+              email: dbUser.email,
+              image: dbUser.image || null,
+              emailVerified: dbUser.emailVerified || null,
+              role: "researcher",
+              credits: dbUser.credits ?? 3,
               isMock: false,
             },
           });
@@ -70,26 +76,50 @@ export async function PATCH(req: Request) {
     const rateLimitResponse = await applyRateLimit(req, "write", session.user.id);
     if (rateLimitResponse) return rateLimitResponse;
 
-    const body = await req.json();
+    let body: any;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Invalid request payload" }, { status: 400 });
+    }
+
     const db = await getSafeDb();
 
     if (db) {
       try {
         const { users } = await import("@/services/db/schema");
         const { eq } = await import("drizzle-orm");
+
+        const updateData: { name?: string; image?: string } = {};
+        if (typeof body.name === "string") {
+          updateData.name = body.name.trim().slice(0, 100);
+        }
+        if (typeof body.image === "string") {
+          updateData.image = body.image.trim().slice(0, 1000);
+        }
+
         const [updatedUser] = await db
           .update(users)
-          .set({
-            name: body.name,
-            image: body.image,
-          })
+          .set(updateData)
           .where(eq(users.id, session.user.id))
           .returning();
 
         if (updatedUser) {
           return NextResponse.json({
             success: true,
-            user: updatedUser,
+            user: {
+              id: updatedUser.id,
+              name: updatedUser.name,
+              email: updatedUser.email,
+              image: updatedUser.image,
+              credits: updatedUser.credits ?? 3,
+              role: "researcher",
+              isMock: false,
+            },
           });
         }
       } catch (dbErr) {
@@ -97,7 +127,7 @@ export async function PATCH(req: Request) {
       }
     }
 
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "User update failed or database unavailable" }, { status: 500 });
   } catch (error) {
     console.error("[API auth/me PATCH] Error:", error);
     return NextResponse.json({ error: "Failed to update profile" }, { status: 500 });

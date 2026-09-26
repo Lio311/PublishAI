@@ -6,8 +6,13 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import { db } from "@/services/db"
 import { accounts, sessions, users, verificationTokens } from "@/services/db/schema"
 
+const authSecret =
+  process.env.AUTH_SECRET ||
+  process.env.NEXTAUTH_SECRET ||
+  (process.env.NODE_ENV === "production" ? undefined : "dev-fallback-secret-pub-ai-not-for-production");
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  secret: process.env.AUTH_SECRET || "dummy_secret_for_testing_purposes_only_123",
+  secret: authSecret,
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,
@@ -16,44 +21,102 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   }),
   providers: [
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID || "missing-google-id",
-      clientSecret: process.env.AUTH_GOOGLE_SECRET || "missing-google-secret",
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
     GitHub({
-      clientId: process.env.AUTH_GITHUB_ID || "mock-github-client-id",
-      clientSecret: process.env.AUTH_GITHUB_SECRET || "mock-github-client-secret",
+      clientId: process.env.AUTH_GITHUB_ID,
+      clientSecret: process.env.AUTH_GITHUB_SECRET,
     }),
     Credentials({
       name: "Credentials",
       credentials: {
         username: { label: "Username", type: "text", placeholder: "admin" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // TODO: Implement actual credential verification logic. Hardcoded secrets have been removed.
-        throw new Error("Credential login is currently disabled for security reasons.");
-      }
-    })
+        try {
+          if (!credentials?.username || !credentials?.password) {
+            return null;
+          }
+          // Credential login is disabled unless secure verification is implemented
+          return null;
+        } catch (error) {
+          console.error("[NextAuth] Authorize error:", error);
+          return null;
+        }
+      },
+    }),
   ],
-  debug: true,
+  debug: process.env.NODE_ENV === "development",
   session: {
     strategy: "jwt",
   },
   pages: {
-    signIn: '/',
+    signIn: "/",
   },
   callbacks: {
-    jwt({ token, user }) {
-      if (user) { // User is available during sign-in
-        token.id = user.id
+    async jwt({ token, user }) {
+      try {
+        if (user) {
+          token.id = user.id;
+          if (user.role) {
+            token.role = user.role;
+          }
+          if (user.credits !== undefined) {
+            token.credits = user.credits;
+          }
+        }
+        if (!token.id && token.sub) {
+          token.id = token.sub;
+        }
+        return token;
+      } catch (error) {
+        console.error("[NextAuth] Error in jwt callback:", error);
+        return token;
       }
-      return token
     },
-    session({ session, token }) {
-      if (session.user && token.id) {
-        session.user.id = token.id as string;
+    async session({ session, token }) {
+      try {
+        if (session.user) {
+          session.user.id = (token.id as string) || (token.sub as string) || "";
+          if (token.role) {
+            session.user.role = token.role as string;
+          }
+          if (typeof token.credits === "number") {
+            session.user.credits = token.credits;
+          }
+        }
+        return session;
+      } catch (error) {
+        console.error("[NextAuth] Error in session callback:", error);
+        return session;
       }
-      return session
+    },
+    async signIn({ user, account }) {
+      try {
+        if (account?.provider === "google" || account?.provider === "github") {
+          if (!user?.email) {
+            console.error(`[NextAuth] Sign-in rejected: missing email for ${account.provider}`);
+            return false;
+          }
+        }
+        return true;
+      } catch (error) {
+        console.error("[NextAuth] Error in signIn callback:", error);
+        return false;
+      }
+    },
+    async redirect({ url, baseUrl }) {
+      try {
+        if (url.startsWith("/")) return `${baseUrl}${url}`;
+        if (new URL(url).origin === baseUrl) return url;
+        return baseUrl;
+      } catch (error) {
+        console.error("[NextAuth] Error in redirect callback:", error);
+        return baseUrl;
+      }
     },
   },
 })
+

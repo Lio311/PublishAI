@@ -397,3 +397,5 @@ export const processResubmission = inngest.createFunction(
 );
 
 export { processPaperRejected } from "./functions/cascade";
+export { processIncomingEmailReview } from "./functions/emailReview";
+export { processStripeWebhook } from "./functions/stripeWebhook";

@@ -36,8 +36,16 @@ import {
   paperUploadedSchema,
   submissionProcessSchema,
   paperPreflightSchema,
+  emailReviewReceivedSchema,
+  stripeEventReceivedSchema,
 } from "@/inngest/events";
-import { processPaper, processResubmission, sendWeeklyDigest } from "@/inngest/functions";
+import {
+  processPaper,
+  processResubmission,
+  sendWeeklyDigest,
+  processIncomingEmailReview,
+  processStripeWebhook,
+} from "@/inngest/functions";
 import { processSubmission } from "@/inngest/functions/submission";
 import { processPaperRejected } from "@/inngest/functions/cascade";
 import { ingestDocument } from "@/inngest/functions/ingestDocument";
@@ -80,6 +88,27 @@ describe("Inngest Event Schemas & Functions Audit", () => {
         datasets: [{ url: "https://example.com/data.csv", filename: "data.csv" }],
       };
       const parsed = paperPreflightSchema.safeParse(valid);
+      expect(parsed.success).toBe(true);
+    });
+
+    it("validates email/review-received event data", () => {
+      const valid = {
+        sender: "editor@nature.com",
+        recipient: "author@test.com",
+        subject: "Review report",
+        body: "Please see the comments",
+      };
+      const parsed = emailReviewReceivedSchema.safeParse(valid);
+      expect(parsed.success).toBe(true);
+    });
+
+    it("validates stripe/event-received event data", () => {
+      const valid = {
+        id: "evt_test_123",
+        type: "checkout.session.completed",
+        data: { customer: "cus_123" },
+      };
+      const parsed = stripeEventReceivedSchema.safeParse(valid);
       expect(parsed.success).toBe(true);
     });
 
@@ -199,6 +228,28 @@ describe("Inngest Event Schemas & Functions Audit", () => {
         key: "event.data.paperId",
         limit: 1,
       });
+    });
+
+    it("processIncomingEmailReview has concurrency and idempotency configured", () => {
+      const opts = (processIncomingEmailReview as any).opts;
+      expect(opts.id).toBe("process-incoming-email-review");
+      expect(opts.concurrency).toEqual({
+        key: "event.data.sender",
+        limit: 2,
+      });
+      expect(opts.idempotency).toBe("event.data.id");
+      expect(opts.retries).toBe(2);
+    });
+
+    it("processStripeWebhook has singleton per-event concurrency and idempotency configured", () => {
+      const opts = (processStripeWebhook as any).opts;
+      expect(opts.id).toBe("process-stripe-webhook");
+      expect(opts.concurrency).toEqual({
+        key: "event.data.id",
+        limit: 1,
+      });
+      expect(opts.idempotency).toBe("event.data.id");
+      expect(opts.retries).toBe(3);
     });
   });
 });

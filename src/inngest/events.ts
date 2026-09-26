@@ -152,6 +152,31 @@ export const qaFiguresAnalyzedEvent = eventType("qa.figures.analyzed", {
   schema: qaFiguresAnalyzedSchema,
 });
 
+// 13. Email review received webhook event
+export const emailReviewReceivedSchema = z.object({
+  id: z.string().optional(),
+  sender: z.string(),
+  recipient: z.string().optional(),
+  subject: z.string(),
+  body: z.string(),
+  attachments: z.array(z.any()).optional(),
+  timestamp: z.number().optional(),
+});
+export const emailReviewReceivedEvent = eventType("email/review-received", {
+  schema: emailReviewReceivedSchema,
+});
+
+// 14. Stripe webhook event
+export const stripeEventReceivedSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  data: z.record(z.string(), z.any()),
+  created: z.number().optional(),
+});
+export const stripeEventReceivedEvent = eventType("stripe/event-received", {
+  schema: stripeEventReceivedSchema,
+});
+
 export type PaperUploadedData = z.infer<typeof paperUploadedSchema>;
 export type PaperReviewerCommentsReceivedData = z.infer<
   typeof paperReviewerCommentsReceivedSchema
@@ -172,3 +197,5 @@ export type Submission2FaSolvedData = z.infer<typeof submission2FaSolvedSchema>;
 export type DatasetUploadedData = z.infer<typeof datasetUploadedSchema>;
 export type DocumentUploadedData = z.infer<typeof documentUploadedSchema>;
 export type QaFiguresAnalyzedData = z.infer<typeof qaFiguresAnalyzedSchema>;
+export type EmailReviewReceivedData = z.infer<typeof emailReviewReceivedSchema>;
+export type StripeEventReceivedData = z.infer<typeof stripeEventReceivedSchema>;
