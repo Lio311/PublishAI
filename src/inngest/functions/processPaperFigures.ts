@@ -22,7 +22,7 @@ export const processPaperFigures = inngest.createFunction(
   },
   async ({ event, step }) => {
     const { paperId } = event.data;
-    let { paperVersionId, documentUrl } = event.data;
+    const { paperVersionId, documentUrl } = event.data;
 
     // Resolve paper, documentUrl, and paperVersionId if not directly provided in event
     const paperInfo = await step.run("resolve-paper-context", async () => {

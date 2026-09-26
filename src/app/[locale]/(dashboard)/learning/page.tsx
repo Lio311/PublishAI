@@ -155,7 +155,7 @@ export default async function AILearningPage({ params }: { params: Promise<{ loc
                           : 'bg-slate-50 border-slate-100 dark:bg-slate-800/50 dark:border-slate-800 text-slate-600 dark:text-slate-400'
                       }`}>
                         <span className="font-mono text-sm leading-relaxed">
-                          "{feedback.ruleText}"
+                          &quot;{feedback.ruleText}&quot;
                         </span>
                       </div>
                     </div>

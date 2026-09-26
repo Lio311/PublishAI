@@ -53,10 +53,10 @@ export default function RejectStateHandler({
           Submission Rejected
         </h2>
         <p className="mt-2 text-red-700">
-          Unfortunately, your submission <span className="font-semibold italic">"{paperTitle}"</span> has been rejected by <span className="font-semibold">{originalJournal}</span>. 
+          Unfortunately, your submission <span className="font-semibold italic">&quot;{paperTitle}&quot;</span> has been rejected by <span className="font-semibold">{originalJournal}</span>. 
         </p>
         <p className="mt-1 text-red-700 text-sm">
-          Don't be discouraged. We've analyzed the feedback and found several high-quality alternative journals that are a strong match for your research.
+          Don&apos;t be discouraged. We&apos;ve analyzed the feedback and found several high-quality alternative journals that are a strong match for your research.
         </p>
       </div>
 
