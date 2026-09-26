@@ -6,10 +6,11 @@ import { predictAcceptance } from "@/services/ai/acceptance-predictor";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const paperId = parseInt(params.id);
+    const { id } = await context.params;
+    const paperId = parseInt(id);
     
     const paper = await db.query.papers.findFirst({
       where: eq(papers.id, paperId),
