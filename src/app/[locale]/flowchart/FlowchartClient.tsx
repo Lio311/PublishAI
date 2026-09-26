@@ -408,7 +408,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
                 <NodeCard type="logic" icon={ShieldCheck} isHe={isHe} titleEn="Guardrails AI" titleHe="בדיקת בטיחות" descEn="Validate: no PII leakage, no hallucinations" descHe="ולידציה: ללא PII, טון אקדמי, ללא הזיות" techs={['Guardrails AI']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} reverse={true} />
-                <NodeCard type="agent" icon={Code} isHe={isHe} titleEn="Execution" titleHe="סוכן ביצוע" descEn="Applies line-by-line diff. Generates JSON patch." descHe="מחיל שינויים סעיף-אחר-סעיף ומייצר Diff." techs={['Claude 3.7 Sonnet']} />
+                <NodeCard type="agent" icon={Code} isHe={isHe} titleEn="Execution" titleHe="סוכן ביצוע" descEn="Generates summary of changes via E2B Sandbox" descHe="מייצר סיכום שינויים והרצת סקריפט" techs={['Claude 3 Opus']} />
                 
                 <SideDropArrow isRightSide={isHe} />
                 <VerticalFlowArrow isHe={isHe} length="h-16 lg:hidden" />
@@ -416,7 +416,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
 
               {/* Row 3 - LTR */}
               <div className="mt-0 lg:mt-12 flex flex-col lg:flex-row justify-between items-center w-full relative z-10">
-                <NodeCard type="logic" icon={Shield} isHe={isHe} titleEn="IntegrityScanner" titleHe="סורק תקינות" descEn="Plagiarism score + AI-generation detection" descHe="בדיקת ציון פלגיאט + זיהוי כתיבת AI" techs={['Claude 3.7']} />
+                <NodeCard type="logic" icon={Shield} isHe={isHe} titleEn="IntegrityScanner" titleHe="סורק תקינות" descEn="Plagiarism score + AI-generation detection" descHe="בדיקת ציון פלגיאט + זיהוי כתיבת AI" techs={['GPT-4o']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
                 <NodeCard type="agent" icon={CheckCircle} isHe={isHe} titleEn="QaAgent" titleHe="סוכן QA" descEn="Final consistency, formatting, grammar check" descHe="בדיקת עקביות סופית, עיצוב ודקדוק" techs={['Claude 3.7']} />
