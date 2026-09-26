@@ -19,7 +19,6 @@ export async function GET() {
   });
 
   if (!settings) {
-    // Return default settings
     settings = {
       id: 0,
       userId: session.user.id,
@@ -30,12 +29,20 @@ export async function GET() {
       weeklyDigest: true,
       publicProfile: true,
       dataCollectionForAi: false,
-      openaiApiKey: "",
-      anthropicApiKey: "",
+      openaiApiKey: null,
+      anthropicApiKey: null,
     };
   }
 
-  return NextResponse.json({ ...settings, name: user?.name, email: user?.email });
+  // Indicate whether each key is configured via env vars (never expose the actual key)
+  return NextResponse.json({
+    ...settings,
+    name: user?.name,
+    email: user?.email,
+    openaiConfigured: !!process.env.OPENAI_API_KEY,
+    anthropicConfigured: !!process.env.ANTHROPIC_API_KEY,
+    googleConfigured: !!process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+  });
 }
 
 export async function PUT(request: Request) {
@@ -64,10 +71,9 @@ export async function PUT(request: Request) {
     weeklyDigest,
     publicProfile,
     dataCollectionForAi,
-    openaiApiKey,
-    anthropicApiKey,
   } = body;
 
+  // API keys are managed via server environment variables — not stored per user
   const updateData = {
     academicRole,
     language,
@@ -76,8 +82,6 @@ export async function PUT(request: Request) {
     weeklyDigest,
     publicProfile,
     dataCollectionForAi,
-    openaiApiKey,
-    anthropicApiKey,
   };
 
   if (existingSettings) {

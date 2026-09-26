@@ -40,7 +40,9 @@ export default function UploadZone() {
           const analyzeRes = await fetch("/api/data/analyze", { method: "POST", body: analyzeData });
           if (analyzeRes.ok) {
             const result = await analyzeRes.json();
-            sessionStorage.setItem("pendingDataSchema", JSON.stringify(result.columns));
+            if (typeof window !== "undefined") {
+              sessionStorage.setItem("pendingDataSchema", JSON.stringify(result.columns));
+            }
           }
         } catch (e) {
           console.error("Failed to analyze dataset:", e);
@@ -113,24 +115,40 @@ export default function UploadZone() {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isUploading || uploadSuccess) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      fileInputRef.current?.click();
+    }
+  };
+
   return (
     <div
+      role="button"
+      tabIndex={isUploading || uploadSuccess ? -1 : 0}
+      aria-label={t("dragTitle")}
       onClick={handleClickZone}
+      onKeyDown={handleKeyDown}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
-      className={`border-2 border-dashed rounded-[2rem] p-12 flex flex-col items-center justify-center text-center transition-all duration-300 relative overflow-hidden cursor-pointer
+      className={`border-2 border-dashed rounded-[2rem] p-12 flex flex-col items-center justify-center text-center transition-all duration-300 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 cursor-pointer
         ${isDragging ? "border-sky-500 bg-sky-50/50" : "border-slate-300/50 bg-white/40 backdrop-blur-xl hover:bg-white/60 hover:border-blue-400/50 shadow-[0_8px_32px_rgba(0,0,0,0.02)]"}
         ${isUploading ? "opacity-75 cursor-not-allowed" : ""}
       `}
     >
-      <div className={`p-4 rounded-full mb-4 ${uploadSuccess ? 'bg-green-100' : 'bg-sky-100'}`}>
+      <div 
+        className={`p-4 rounded-full mb-4 ${uploadSuccess ? 'bg-green-100' : 'bg-sky-100'}`}
+        role="status"
+        aria-live="polite"
+      >
         {isUploading ? (
-          <Loader2 className="w-8 h-8 text-sky-500 animate-spin" />
+          <Loader2 className="w-8 h-8 text-sky-500 animate-spin" aria-label={t("uploading")} />
         ) : uploadSuccess ? (
-          <CheckCircle className="w-8 h-8 text-green-600" />
+          <CheckCircle className="w-8 h-8 text-green-600" aria-label={t("success")} />
         ) : (
-          <UploadCloud className="w-8 h-8 text-sky-500" />
+          <UploadCloud className="w-8 h-8 text-sky-500" aria-hidden="true" />
         )}
       </div>
       
@@ -149,6 +167,8 @@ export default function UploadZone() {
           ref={fileInputRef}
           type="file" 
           multiple
+          accept=".pdf,.docx,.csv,.xlsx,.png,.jpg,.jpeg,.pptx"
+          aria-label={t("button")}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
           disabled={isUploading || uploadSuccess}
           onChange={(e) => {
@@ -160,6 +180,8 @@ export default function UploadZone() {
         />
         <button 
           type="button"
+          tabIndex={-1}
+          aria-hidden="true"
           disabled={isUploading || uploadSuccess}
           className="bg-gradient-to-r from-blue-400 via-sky-400 to-sky-300 hover:from-sky-500 hover:via-sky-500 hover:to-sky-400 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 pointer-events-none"
         >
