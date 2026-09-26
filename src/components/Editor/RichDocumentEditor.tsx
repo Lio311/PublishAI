@@ -54,6 +54,8 @@ export interface DocumentEditorProps {
   onSubmitToJournal?: () => void;
 }
 
+export type RichDocumentEditorProps = DocumentEditorProps;
+
 const JOURNAL_RULES: Record<string, { maxWords: number; maxAbstract: number; citationStyle: string }> = {
   "Nature Biotechnology": { maxWords: 8000, maxAbstract: 250, citationStyle: "Nature Numbered" },
   "Cell Systems": { maxWords: 7500, maxAbstract: 150, citationStyle: "Cell (Author-Date)" },

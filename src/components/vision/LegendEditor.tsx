@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 interface LegendEditorProps {
   figureId: string;
@@ -12,20 +13,43 @@ interface LegendEditorProps {
 export default function LegendEditor({ figureId, originalLegend, suggestedLegend, onClose }: LegendEditorProps) {
   const [currentLegend, setCurrentLegend] = useState(originalLegend);
   const [isSaving, setIsSaving] = useState(false);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Synchronize state if originalLegend changes externally
+  useEffect(() => {
+    setCurrentLegend(originalLegend);
+  }, [originalLegend]);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await fetch(`/api/figures/${figureId}/legend`, {
+      const res = await fetch(`/api/figures/${figureId}/legend`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ legend: currentLegend }),
       });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Save failed (${res.status})`);
+      }
+
+      toast.success("Legend updated successfully");
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to save legend", error);
+      toast.error(error.message || "Failed to save legend");
     } finally {
-      setIsSaving(false);
+      if (isMountedRef.current) {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -38,8 +62,9 @@ export default function LegendEditor({ figureId, originalLegend, suggestedLegend
         </div>
         {suggestedLegend && (
           <button 
+            type="button"
             onClick={() => setCurrentLegend(suggestedLegend)}
-            className="text-xs text-purple-600 text-left hover:underline mt-1"
+            className="text-xs text-purple-600 text-left hover:underline mt-1 cursor-pointer"
           >
             Use suggestion
           </button>
@@ -58,16 +83,18 @@ export default function LegendEditor({ figureId, originalLegend, suggestedLegend
 
       <div className="flex gap-2 justify-end">
         <button 
+          type="button"
           onClick={onClose}
           disabled={isSaving}
-          className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+          className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded cursor-pointer disabled:opacity-50"
         >
           Cancel
         </button>
         <button 
+          type="button"
           onClick={handleSave}
           disabled={isSaving}
-          className="px-3 py-1 text-sm bg-sky-500 text-white rounded hover:bg-sky-600 disabled:opacity-50"
+          className="px-3 py-1 text-sm bg-sky-500 text-white rounded hover:bg-sky-600 disabled:opacity-50 cursor-pointer"
         >
           {isSaving ? "Saving..." : "Save Legend"}
         </button>

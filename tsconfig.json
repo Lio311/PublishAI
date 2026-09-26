@@ -20,7 +20,9 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/components/editor": ["./src/components/Editor"],
+      "@/components/editor/*": ["./src/components/Editor/*"]
     }
   },
   "include": [

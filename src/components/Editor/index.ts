@@ -1,8 +1,8 @@
 export { default as RichDocumentEditor } from "./RichDocumentEditor";
-export * from "./RichDocumentEditor";
+export type { DocumentEditorProps as RichDocumentEditorProps } from "./RichDocumentEditor";
 
 export { default as DocumentEditor } from "./DocumentEditor";
-export * from "./DocumentEditor";
+export type { DocumentEditorProps, DocumentSection } from "./DocumentEditor";
 
 export { default as AITiptapEditor } from "./AITiptapEditor";
 export * from "./AITiptapEditor";
