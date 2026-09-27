@@ -20,6 +20,11 @@ import {
   ArrowRight,
   RotateCcw,
   Pause,
+  BarChart2,
+  TrendingUp,
+  Users,
+  Brain,
+  Code,
 } from "lucide-react";
 
 interface FlowStep {
@@ -48,6 +53,28 @@ const FLOW_STEPS: FlowStep[] = [
   },
   {
     id: 1,
+    icon: BarChart2,
+    titleKey: "steps.data_vision.title",
+    descKey: "steps.data_vision.desc",
+    color: "text-indigo-700",
+    bgColor: "bg-indigo-50",
+    borderColor: "border-indigo-300",
+    glowColor: "shadow-indigo-200/60",
+    model: "Python/E2B",
+  },
+  {
+    id: 2,
+    icon: TrendingUp,
+    titleKey: "steps.predict_pre.title",
+    descKey: "steps.predict_pre.desc",
+    color: "text-fuchsia-700",
+    bgColor: "bg-fuchsia-50",
+    borderColor: "border-fuchsia-300",
+    glowColor: "shadow-fuchsia-200/60",
+    model: "GPT-4o",
+  },
+  {
+    id: 3,
     icon: MessageSquareText,
     titleKey: "steps.clarification.title",
     descKey: "steps.clarification.desc",
@@ -55,10 +82,10 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-sky-50",
     borderColor: "border-sky-300",
     glowColor: "shadow-sky-200/60",
-    model: "Sonnet",
+    model: "Claude 3.7",
   },
   {
-    id: 2,
+    id: 4,
     icon: ClipboardList,
     titleKey: "steps.planning.title",
     descKey: "steps.planning.desc",
@@ -66,10 +93,10 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-violet-50",
     borderColor: "border-violet-300",
     glowColor: "shadow-violet-200/60",
-    model: "Opus",
+    model: "GraphRAG",
   },
   {
-    id: 3,
+    id: 5,
     icon: BookOpen,
     titleKey: "steps.knowledge.title",
     descKey: "steps.knowledge.desc",
@@ -77,43 +104,54 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-amber-50",
     borderColor: "border-amber-300",
     glowColor: "shadow-amber-200/60",
-    model: "Sonnet",
+    model: "Claude 3.7 + MCP",
   },
   {
-    id: 4,
-    icon: Microscope,
-    titleKey: "steps.review.title",
-    descKey: "steps.review.desc",
+    id: 6,
+    icon: Users,
+    titleKey: "steps.sci_review.title",
+    descKey: "steps.sci_review.desc",
     color: "text-rose-700",
     bgColor: "bg-rose-50",
     borderColor: "border-rose-300",
     glowColor: "shadow-rose-200/60",
-    model: "Opus",
+    model: "Multi-Agent",
   },
   {
-    id: 5,
+    id: 7,
+    icon: Brain,
+    titleKey: "steps.area_chair.title",
+    descKey: "steps.area_chair.desc",
+    color: "text-purple-700",
+    bgColor: "bg-purple-50",
+    borderColor: "border-purple-300",
+    glowColor: "shadow-purple-200/60",
+    model: "o1-preview",
+  },
+  {
+    id: 8,
     icon: PenTool,
-    titleKey: "steps.writing.title",
-    descKey: "steps.writing.desc",
+    titleKey: "steps.writer.title",
+    descKey: "steps.writer.desc",
     color: "text-emerald-700",
     bgColor: "bg-emerald-50",
     borderColor: "border-emerald-300",
     glowColor: "shadow-emerald-200/60",
-    model: "Opus",
+    model: "Claude 3.7 + Mem0",
   },
   {
-    id: 6,
-    icon: Play,
+    id: 9,
+    icon: Code,
     titleKey: "steps.execution.title",
     descKey: "steps.execution.desc",
-    color: "text-sky-600",
-    bgColor: "bg-sky-50",
+    color: "text-blue-700",
+    bgColor: "bg-blue-50",
     borderColor: "border-blue-300",
-    glowColor: "shadow-sky-200/60",
-    model: "Opus",
+    glowColor: "shadow-blue-200/60",
+    model: "E2B Sandbox",
   },
   {
-    id: 7,
+    id: 10,
     icon: ShieldCheck,
     titleKey: "steps.qa.title",
     descKey: "steps.qa.desc",
@@ -121,10 +159,10 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-teal-50",
     borderColor: "border-teal-300",
     glowColor: "shadow-teal-200/60",
-    model: "Sonnet",
+    model: "Claude 3.7",
   },
   {
-    id: 8,
+    id: 11,
     icon: FileCheck,
     titleKey: "steps.verification.title",
     descKey: "steps.verification.desc",
@@ -132,21 +170,21 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-orange-50",
     borderColor: "border-orange-300",
     glowColor: "shadow-orange-200/60",
-    model: "Sonnet",
+    model: "Claude 3.7",
   },
   {
-    id: 9,
+    id: 12,
     icon: Package,
-    titleKey: "steps.compilation.title",
-    descKey: "steps.compilation.desc",
+    titleKey: "steps.compile.title",
+    descKey: "steps.compile.desc",
     color: "text-green-700",
     bgColor: "bg-green-50",
     borderColor: "border-green-300",
     glowColor: "shadow-green-200/60",
-    model: "Sonnet",
+    model: "DOCX / CSL",
   },
   {
-    id: 10,
+    id: 13,
     icon: Download,
     titleKey: "steps.export.title",
     descKey: "steps.export.desc",
@@ -450,13 +488,13 @@ export default function SystemFlowModal({
           <div className="flex items-start justify-between relative z-10">
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-sky-800/10 rounded-lg backdrop-blur-sm">
-                  <Workflow className="w-6 h-6 text-sky-800" />
+                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                  <Workflow className="w-6 h-6 text-white" />
                 </div>
-                <h2 id="system-flow-title" className="text-2xl font-bold text-sky-800 tracking-tight">{t("title")}</h2>
+                <h2 id="system-flow-title" className="text-2xl font-bold text-white tracking-tight">{t("title")}</h2>
               </div>
-              <div className="mt-2 text-blue-800 text-sm max-w-lg leading-relaxed opacity-90">
-                <p id="system-flow-subtitle" className="text-blue-800 text-sm mt-0.5">{t("subtitle")}</p>
+              <div className="mt-2 text-white/90 text-sm max-w-lg leading-relaxed">
+                <p id="system-flow-subtitle" className="text-white text-sm mt-0.5">{t("subtitle")}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -465,40 +503,40 @@ export default function SystemFlowModal({
                 <button
                   type="button"
                   onClick={handlePauseResume}
-                  className="p-2.5 hover:bg-sky-800/10 rounded-xl transition-all duration-200 group cursor-pointer"
+                  className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 group cursor-pointer"
                   title={isPaused ? (isRtl ? "המשך הפעלה" : "Resume") : (isRtl ? "השהה" : "Pause")}
                   aria-label={isPaused ? (isRtl ? "המשך הפעלה" : "Resume flow") : (isRtl ? "השהה תהליך" : "Pause flow")}
                 >
                   {isPaused ? (
-                    <Play className="w-5 h-5 text-blue-800 group-hover:text-sky-800 transition-colors" />
+                    <Play className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
                   ) : (
-                    <Pause className="w-5 h-5 text-blue-800 group-hover:text-sky-800 transition-colors" />
+                    <Pause className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
                   )}
                 </button>
               )}
               <button
                 type="button"
                 onClick={handleReplay}
-                className="p-2.5 hover:bg-sky-800/10 rounded-xl transition-all duration-200 group cursor-pointer"
+                className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 group cursor-pointer"
                 title={t("replay")}
                 aria-label={t("replay")}
               >
-                <RotateCcw className="w-5 h-5 text-blue-800 group-hover:text-sky-800 transition-colors group-hover:rotate-[-360deg] duration-500" />
+                <RotateCcw className="w-5 h-5 text-white/80 group-hover:text-white transition-colors group-hover:rotate-[-360deg] duration-500" />
               </button>
               <button
                 type="button"
                 onClick={handleClose}
-                className="p-2.5 hover:bg-sky-800/10 rounded-xl transition-all duration-200 group cursor-pointer"
+                className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 group cursor-pointer"
                 aria-label={isRtl ? "סגור חלון" : "Close dialog"}
               >
-                <X className="w-5 h-5 text-blue-800 group-hover:text-sky-800 transition-colors" />
+                <X className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
               </button>
             </div>
           </div>
 
           {/* Progress bar */}
           <div
-            className="mt-4 h-1.5 bg-sky-800/10 rounded-full overflow-hidden"
+            className="mt-4 h-1.5 bg-white/20 rounded-full overflow-hidden"
             role="progressbar"
             aria-valuenow={Math.round(progressPercent)}
             aria-valuemin={0}
@@ -506,7 +544,7 @@ export default function SystemFlowModal({
             aria-label={isRtl ? "התקדמות תהליך" : "Flow progress"}
           >
             <div
-              className="h-full bg-sky-800/60 rounded-full transition-all duration-700 ease-out"
+              className="h-full bg-white rounded-full transition-all duration-700 ease-out"
               style={{
                 width: `${Math.min(progressPercent, 100)}%`,
               }}
@@ -514,8 +552,8 @@ export default function SystemFlowModal({
           </div>
 
           {/* Step counter */}
-          <div className="mt-2 flex items-center justify-between text-xs text-blue-800">
-            <div className="text-blue-800 text-sm font-medium">
+          <div className="mt-2 flex items-center justify-between text-xs text-white/90">
+            <div className="text-white text-sm font-medium">
               <span>
                 {currentStepIndex >= 0
                   ? (isRtl 
@@ -527,7 +565,7 @@ export default function SystemFlowModal({
               </span>
             </div>
             {isPaused && (
-              <span className="flex items-center gap-1 text-sky-800 font-bold animate-pulse">
+              <span className="flex items-center gap-1 text-white font-bold animate-pulse">
                 {t("paused")}
               </span>
             )}
