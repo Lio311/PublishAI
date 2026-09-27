@@ -76,60 +76,60 @@
     "processCompleteDesc": "Your paper has passed all stages and is now ready.",
     "steps": {
       "upload": {
-        "title": "Upload Paper",
-        "desc": "Upload your raw manuscript directly to the system. The system scans and parses the content."
+        "title": "Upload Manuscript",
+        "desc": "The system securely receives your manuscript, extracts the text, graphs, and tables, and creates a smart digital workspace ready for scientific analysis."
       },
       "data_vision": {
-        "title": "Data & Vision Validation",
-        "desc": "Rigorous statistical validation between Excel data and graph displays using advanced computational tools."
+        "title": "Data & Graphs Validation",
+        "desc": "We cross-check your raw data (e.g., from Excel) against the graphs and tables in your manuscript to ensure there are no statistical errors that could delay publication."
       },
       "predict_pre": {
         "title": "Acceptance Predictor",
-        "desc": "Checks journal metrics and analyzes the initial acceptance probability against academic standards."
+        "desc": "The system compares your study against the standards of leading medical journals, providing an initial estimate of your manuscript's chances of acceptance."
       },
       "clarification": {
-        "title": "Clarification Agent",
-        "desc": "Extracts editorial goals and journal constraints to build a focused research strategy."
+        "title": "Clarification & Ping-Pong",
+        "desc": "The system will ask you focused questions about your research goals and key messages. This quick ping-pong ensures the editing aligns perfectly with your clinical perspective."
       },
       "planning": {
-        "title": "Planning Agent",
-        "desc": "Draws trends from GraphRAG and builds a detailed architectural work plan for all paper sections."
+        "title": "Structural Planning",
+        "desc": "A specialized agent scans your manuscript and builds a detailed work plan. It identifies paragraphs that need strengthening and arguments that require more solid medical evidence."
       },
       "knowledge": {
-        "title": "Knowledge & Reference Agent",
-        "desc": "Actively searches for sources and supporting literature in real-time via PubMed to verify citations."
+        "title": "Literature Enrichment",
+        "desc": "The system connects in real-time to academic databases like PubMed to verify your citations and search for recent studies that can strengthen your clinical arguments."
       },
       "sci_review": {
-        "title": "SciReview Debate",
-        "desc": "A simulated peer review consisting of multiple agents debating the paper's research limitations."
+        "title": "Simulated Peer Review",
+        "desc": "The system simulates a committee of rigorous scientific reviewers who critically read your paper. They identify potential weaknesses in your methodology, exactly as journal editors would."
       },
       "area_chair": {
-        "title": "Area Chair (o1)",
-        "desc": "Synthesizes the reviewers' debate conclusions into a deep, actionable, and clear action plan."
+        "title": "Editorial Decision Making",
+        "desc": "We summarize all the feedback from the simulated peer review and formulate a clear action plan: what needs to be fixed, added, or rephrased to make your paper flawless."
       },
       "writer": {
-        "title": "Writing & Personalization",
-        "desc": "Iterative rewriting of text to high scientific standards, while pulling your style preferences from Mem0."
+        "title": "Academic Writing & Personalization",
+        "desc": "Your manuscript undergoes professional rewriting to meet the highest standards of academic medical English, while preserving your personal voice as a researcher."
       },
       "execution": {
-        "title": "Execution Agent",
-        "desc": "Implements all recommended corrections into the document in a secure sandbox, creating a full changelog."
+        "title": "Implementing Corrections",
+        "desc": "The system applies all the improvements directly into your document. Every change is clearly marked (Track Changes) so you can review what was altered and approve or reject each edit."
       },
       "qa": {
-        "title": "QA Agent",
-        "desc": "Strict consistency, formatting, and grammar check to ensure no errors remain before submission."
+        "title": "Final Quality Control",
+        "desc": "A final, rigorous scan ensures consistency in medical terminology, checks that all links and figure references are intact, and guarantees there are no hidden grammatical errors."
       },
       "verification": {
-        "title": "Verification & Cover Letter",
-        "desc": "Fully verifies adherence to journal guidelines and drafts a persuasive cover letter to the Editor-in-Chief."
+        "title": "Journal Formatting & Cover Letter",
+        "desc": "We ensure your manuscript meets all the technical requirements of your target journal and draft a formal, persuasive Cover Letter highlighting your study's clinical significance."
       },
       "compile": {
-        "title": "Compile & Reinject",
-        "desc": "Final compilation of all paper components into a ready file, restoring Mendeley citations accurately."
+        "title": "Compilation & Restoration",
+        "desc": "After all edits are made, the system packages your manuscript back into a final, clean file, carefully preserving all your original citations (e.g., Mendeley) and page layouts."
       },
       "export": {
-        "title": "Export & Publish",
-        "desc": "Journey complete! You can now download the full submission package (final file, tracked changes, cover letter)."
+        "title": "Ready for Submission",
+        "desc": "The process is complete! You can now download your full submission package—including the final manuscript, a tracked-changes version, and your cover letter—ready for the journal."
       }
     }
   },
