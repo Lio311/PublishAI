@@ -41,18 +41,18 @@ describe("RecommendationService", () => {
     (db.query.papers.findFirst as jest.Mock).mockResolvedValue(mockPaper);
 
     const mockJournals = [
-      { id: 10, name: "Current Journal", field: "Biology" }, // Should be filtered out
       { id: 11, name: "Alt Journal 1", field: "Physics" },
       { id: 12, name: "Alt Journal 2", field: null },
     ];
     
-    // We need to mock db.select().from() to resolve to mockJournals
-    const mockFrom = jest.fn().mockResolvedValue(mockJournals);
+    const mockLimit = jest.fn().mockResolvedValue(mockJournals);
+    const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
+    const mockFrom = jest.fn().mockReturnValue({ where: mockWhere, limit: mockLimit });
     (db.select as jest.Mock).mockReturnValue({ from: mockFrom });
 
     // Ensure db.update(...).set(...).where(...) chain is mockable
-    const mockWhere = jest.fn().mockResolvedValue([]);
-    const mockSet = jest.fn().mockReturnValue({ where: mockWhere });
+    const updateMockWhere = jest.fn().mockResolvedValue([]);
+    const mockSet = jest.fn().mockReturnValue({ where: updateMockWhere });
     (db.update as jest.Mock).mockReturnValue({ set: mockSet });
 
     const alternatives = await RecommendationService.recommendAlternatives(1);
@@ -66,6 +66,6 @@ describe("RecommendationService", () => {
 
     expect(db.update).toHaveBeenCalled();
     expect(mockSet).toHaveBeenCalledWith({ suggestedJournals: alternatives });
-    expect(mockWhere).toHaveBeenCalled();
+    expect(updateMockWhere).toHaveBeenCalled();
   });
 });

@@ -7,6 +7,7 @@ if (!anthropicApiKey && process.env.NODE_ENV === "production") {
 
 export const claude = new Anthropic({
   apiKey: anthropicApiKey || "placeholder-key-for-dev",
+  dangerouslyAllowBrowser: process.env.NODE_ENV === "test",
 });
 
 export type ClaudeModel =

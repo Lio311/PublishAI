@@ -1,5 +1,18 @@
 import { articleGeneratorService, GenerationInput } from '../../src/services/articleGeneratorService';
 
+jest.mock('ai', () => ({
+  generateObject: jest.fn().mockResolvedValue({
+    object: {
+      title: 'Synthesized Research Findings: A Comprehensive Study',
+      abstract: 'Test abstract',
+      introduction: 'Test intro',
+      methodology: 'Test method',
+      results: 'P-value < 0.05 and 2 graphs',
+      conclusion: 'Test conclusion',
+      references: ['Author A (2023). Ref 1.']
+    }
+  })
+}));
 describe('ArticleGeneratorService', () => {
   it('should successfully generate an article', async () => {
     const input: GenerationInput = {

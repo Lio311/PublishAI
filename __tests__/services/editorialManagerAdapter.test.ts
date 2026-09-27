@@ -3,6 +3,7 @@ import { db } from "../../src/services/db";
 
 // Mock Drizzle ORM
 jest.mock("drizzle-orm", () => ({
+  ...jest.requireActual("drizzle-orm"),
   eq: jest.fn((col, val) => ({ col, val })),
 }));
 

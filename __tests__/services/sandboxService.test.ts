@@ -1,5 +1,20 @@
 import { sandboxService } from '../../src/services/sandboxService';
 
+jest.mock('@e2b/code-interpreter', () => {
+  return {
+    Sandbox: {
+      create: jest.fn().mockResolvedValue({
+        files: { write: jest.fn() },
+        runCode: jest.fn().mockResolvedValue({
+          results: [{ png: 'base64plot1' }],
+          logs: { stdout: ['positive correlation'], stderr: [] },
+          error: null
+        }),
+        kill: jest.fn()
+      })
+    }
+  };
+});
 describe('SandboxService', () => {
   it('should successfully execute data science task with valid inputs', async () => {
     const result = await sandboxService.executeDataScienceTask('print("hello")', 'col1,col2\n1,2');
