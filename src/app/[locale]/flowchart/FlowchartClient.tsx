@@ -304,7 +304,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
           </div>
         </div>
 
-        <div className="max-w-[1300px] mx-auto px-4 md:px-8 flex flex-col items-center">
+        <div className="max-w-[1500px] mx-auto px-4 md:px-8 flex flex-col items-center">
 
           
           {/* ══════════════════════════════════
@@ -342,7 +342,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             <div className="w-full p-4 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-t-xl">
               <h2 className="text-xl font-bold">{isHe ? 'שלב 1: קליטת המסמך והנתונים' : 'Phase 1: User Initiation & Data Ingestion'}</h2>
             </div>
-            <div className="p-6 md:p-10 flex flex-col items-center w-full relative">
+            <div className="py-6 px-2 md:py-10 md:px-2 lg:px-2 xl:px-4 flex flex-col items-center w-full relative">
               <div className="flex flex-col lg:flex-row justify-between items-center w-full">
                 <NodeCard type="user" icon={User} isHe={isHe} titleEn="User UI" titleHe="ממשק משתמש" descEn="Upload Draft Manuscript & Target Journal" descHe="העלאת טיוטת מאמר וכתב עת יעד" techs={['Next.js 16', 'Tailwind CSS', 'Vercel Blob']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
