@@ -109,7 +109,7 @@ function TechBadge({ name }: { name: string }) {
 
 function DataLabel({ label, isHe }: { label: { en: string; he: string }; isHe: boolean }) {
   return (
-    <div className="absolute bottom-[calc(50%+4px)] left-1/2 -translate-x-1/2 text-[9.5px] font-mono bg-white/90 text-slate-600 px-1.5 py-0.5 rounded border border-slate-300 whitespace-nowrap shadow-sm z-20">
+    <div className="absolute bottom-[calc(50%+10px)] left-1/2 -translate-x-1/2 text-[9.5px] font-mono bg-white/90 text-slate-600 px-1.5 py-0.5 rounded border border-slate-300 whitespace-nowrap shadow-sm z-20">
       {isHe ? label.he : label.en}
     </div>
   );
@@ -120,7 +120,7 @@ function FlowArrow({ isHe, reverse = false, label }: { isHe: boolean; reverse?: 
   const pointsLeft = (isHe && !reverse) || (!isHe && reverse);
   
   return (
-    <div className="hidden lg:flex flex-1 items-center justify-center min-w-[15px] relative z-0 shrink">
+    <div className="hidden lg:flex flex-1 items-center justify-center min-w-[60px] relative z-0 shrink">
       <div className="w-full h-[3px] bg-slate-400 relative">
         {pointsLeft ? (
           <div className="absolute left-0 top-1/2 -translate-y-1/2 border-r-[10px] border-r-slate-400 border-y-[6px] border-y-transparent -translate-x-[1px]"></div>
@@ -214,7 +214,7 @@ function OrDivider({ isHe, labelEn = 'OR', labelHe = 'או (נתיב חלופי)
 
 function SplitFork({ isHe, yesLabel, noLabel }: { isHe: boolean, yesLabel: string, noLabel: string }) {
   return (
-    <div className="flex flex-col items-center w-full my-0 relative z-0">
+    <div className="flex flex-col items-center min-w-max w-full gap-4 lg:gap-8 my-0 relative z-0">
       <div className="h-4 w-[3px] bg-slate-400"></div>
       <div className="flex w-full max-w-[320px] relative">
         <div className="absolute top-0 left-[25%] right-[25%] h-[3px] bg-slate-400"></div>
@@ -241,7 +241,7 @@ function SplitFork({ isHe, yesLabel, noLabel }: { isHe: boolean, yesLabel: strin
 
 function MergeFork() {
   return (
-    <div className="flex flex-col items-center w-full my-0 relative z-0">
+    <div className="flex flex-col items-center min-w-max w-full gap-4 lg:gap-8 my-0 relative z-0">
       <div className="flex w-full max-w-[320px] relative">
         <div className="absolute bottom-0 left-[25%] right-[25%] h-[3px] bg-slate-400"></div>
         <div className="flex-1 flex flex-col items-center">
@@ -314,8 +314,8 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             <div className="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-t-xl">
               <h2 className="text-xl font-bold">{isHe ? 'שלב 0: ידע ארגוני, ארגז חול וניתוח חזותי' : 'Phase 0: GraphRAG, Sandbox & Vision'}</h2>
             </div>
-            <div className="p-6 md:p-10 flex flex-col items-center w-full relative">
-              <div className="flex flex-col lg:flex-row justify-between items-center w-full">
+            <div className="p-6 md:p-10 flex flex-col items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative">
+              <div className="flex flex-col lg:flex-row justify-between items-center min-w-max w-full gap-4 lg:gap-8">
                 <NodeCard type="user" icon={Database} isHe={isHe} titleEn="Data Upload" titleHe="העלאת נתונים" descEn="Upload raw datasets & Figures" descHe="העלאת קובצי נתונים ואיורים" techs={['Next.js 16', 'ExcelJS', 'Sharp']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
@@ -342,8 +342,8 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             <div className="w-full p-4 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-t-xl">
               <h2 className="text-xl font-bold">{isHe ? 'שלב 1: קליטת המסמך והנתונים' : 'Phase 1: User Initiation & Data Ingestion'}</h2>
             </div>
-            <div className="p-6 md:p-10 flex flex-col items-center w-full relative">
-              <div className="flex flex-col lg:flex-row justify-between items-center w-full">
+            <div className="p-6 md:p-10 flex flex-col items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative">
+              <div className="flex flex-col lg:flex-row justify-between items-center min-w-max w-full gap-4 lg:gap-8">
                 <NodeCard type="user" icon={User} isHe={isHe} titleEn="User UI" titleHe="ממשק משתמש" descEn="Upload Draft Manuscript & Target Journal" descHe="העלאת טיוטת מאמר וכתב עת יעד" techs={['Next.js 16', 'Tailwind CSS', 'Vercel Blob']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} label={{ en: 'File', he: 'קובץ' }} />
@@ -374,9 +374,9 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
               <h2 className="text-xl font-bold">{isHe ? 'שלב 2: צינור הסוכנים (AgentOrchestrator)' : 'Phase 2: The AI Agents Pipeline'}</h2>
             </div>
             
-            <div className="p-6 md:p-10 flex flex-col items-center w-full relative">
+            <div className="p-6 md:p-10 flex flex-col items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative">
               {/* Row 1 */}
-              <div className="flex flex-col lg:flex-row justify-between items-center w-full relative z-10">
+              <div className="flex flex-col lg:flex-row justify-between items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative z-10">
                 <NodeCard type="agent" icon={Bot} isHe={isHe} titleEn="Orchestrator" titleHe="מנצח הסוכנים" descEn="Instantiates Context. Routes through 10 agents." descHe="מנווט ברצף דרך סוכנים מומחים." techs={['LangGraph', 'Langfuse', 'Vercel AI SDK']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
@@ -396,7 +396,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
               </div>
 
               {/* Row 2 - RTL mapped logically via flex-row-reverse on desktop */}
-              <div className={`mt-0 lg:mt-12 flex flex-col items-center w-full relative justify-between z-10 lg:flex-row-reverse`}>
+              <div className={`mt-0 lg:mt-12 flex flex-col items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative justify-between z-10 lg:flex-row-reverse`}>
                 <NodeCard type="agent" icon={Layers} isHe={isHe} titleEn="Area Chair (o1)" titleHe="סוכן-על (o1)" descEn="Synthesizes debate into concrete action plan" descHe="מסנתז דיבייט לתוכנית פעולה עמוקה" techs={['o1-preview']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} reverse={true} label={{en: 'Plan', he: 'תוכנית'}} />
@@ -416,7 +416,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
               </div>
 
               {/* Row 3 - LTR */}
-              <div className="mt-0 lg:mt-12 flex flex-col lg:flex-row justify-between items-center w-full relative z-10">
+              <div className="mt-0 lg:mt-12 flex flex-col lg:flex-row justify-between items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative z-10">
                 <NodeCard type="logic" icon={Shield} isHe={isHe} titleEn="IntegrityScanner" titleHe="סורק תקינות" descEn="Plagiarism score + AI-generation detection" descHe="בדיקת ציון פלגיאט + זיהוי כתיבת AI" techs={['GPT-4o']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
@@ -433,7 +433,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
               </div>
 
               {/* Row 4 - RTL */}
-              <div className={`mt-0 lg:mt-12 flex flex-col items-center w-full relative justify-between z-10 lg:flex-row-reverse`}>
+              <div className={`mt-0 lg:mt-12 flex flex-col items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative justify-between z-10 lg:flex-row-reverse`}>
                 <NodeCard type="agent" icon={Download} isHe={isHe} titleEn="Compile & Reinject" titleHe="הידור ושחזור" descEn="Compile manuscript & restore Mendeley CSL" descHe="הידור ושחזור ציטוטי Mendeley במסמך" techs={['DOCX', 'Mendeley CSL']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} reverse={true} />
@@ -458,7 +458,7 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             <div className="w-full p-4 bg-gradient-to-r from-rose-500 to-rose-700 text-white rounded-t-xl">
               <h2 className="text-xl font-bold">{isHe ? 'שלב 3: אישור, הרשאות ושער הגשה' : 'Phase 3: Approval, Permissions & Submission Gateway'}</h2>
             </div>
-            <div className="p-6 md:p-10 flex flex-col items-center w-full relative z-10">
+            <div className="p-6 md:p-10 flex flex-col items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative z-10">
               
               <NodeCard type="user" icon={User} isHe={isHe} titleEn="Approve" titleHe="אישור והגשה" descEn="User reviews final paper and clicks 'Approve & Submit'" descHe="המשתמש סוקר את המאמר ולוחץ 'אשר והגש'" techs={['Next.js 16', 'Tiptap', 'NextAuth.js']} />
               
@@ -583,8 +583,8 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             <div className="w-full p-4 bg-gradient-to-r from-amber-500 to-amber-700 text-white rounded-t-xl">
               <h2 className="text-xl font-bold">{isHe ? 'שלב 5: פינג-פונג ביקורת עמיתים (Resubmission)' : 'Phase 5: Peer Review Ping-Pong (Resubmission)'}</h2>
             </div>
-            <div className="p-6 md:p-10 flex flex-col items-center w-full relative z-10">
-              <div className="flex flex-col lg:flex-row justify-between items-center w-full relative">
+            <div className="p-6 md:p-10 flex flex-col items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative z-10">
+              <div className="flex flex-col lg:flex-row justify-between items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative">
                 <NodeCard type="user" icon={User} isHe={isHe} titleEn="Rebuttal UI" titleHe="ממשק משתמש" descEn="User pastes Reviewer Comments" descHe="המשתמש מדביק את הערות הסוקרים" techs={['Next.js 16', 'RebuttalPanel']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
@@ -611,8 +611,8 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             <div className="w-full p-4 bg-gradient-to-r from-emerald-600 to-emerald-800 text-white rounded-t-xl">
               <h2 className="text-xl font-bold">{isHe ? 'שלב 6: מפל כתבי עת (טיפול בדחייה)' : 'Phase 6: Journal Cascade'}</h2>
             </div>
-            <div className="p-6 md:p-10 flex flex-col items-center w-full relative z-10">
-              <div className="flex flex-col lg:flex-row justify-between items-center w-full relative">
+            <div className="p-6 md:p-10 flex flex-col items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative z-10">
+              <div className="flex flex-col lg:flex-row justify-between items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative">
                 <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Queue" titleHe="תור" descEn="Event: 'paperRejected'" descHe="אירוע: 'מאמר נדחה'" techs={['Inngest']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
@@ -640,8 +640,8 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             <div className="w-full p-4 bg-gradient-to-r from-pink-500 to-pink-700 text-white rounded-t-xl">
               <h2 className="text-xl font-bold">{isHe ? 'שלב 7: הפצה ולמידת חיזוק (RLHF & CMS)' : 'Phase 7: Dissemination & RLHF Analytics'}</h2>
             </div>
-            <div className="p-6 md:p-10 flex flex-col items-center w-full relative z-10">
-              <div className="flex flex-col lg:flex-row justify-between items-center w-full relative">
+            <div className="p-6 md:p-10 flex flex-col items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative z-10">
+              <div className="flex flex-col lg:flex-row justify-between items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative">
                 <NodeCard type="infra" icon={Globe} isHe={isHe} titleEn="CMS Publish" titleHe="פרסום באתר" descEn="Auto-publish to Lab's WordPress" descHe="פרסום אוטומטי באתר המעבדה" techs={['MCP', 'WordPress API']} />
                 <VerticalFlowArrow isHe={isHe} length="h-10 lg:hidden" />
                 <FlowArrow isHe={isHe} />
@@ -665,8 +665,8 @@ export default function FlowchartClient({ isAdmin }: { isAdmin: boolean }) {
             <div className="w-full p-4 bg-gradient-to-r from-slate-600 to-slate-800 text-white rounded-t-xl">
               <h2 className="text-xl font-bold">{isHe ? 'משימות רקע תקופתיות (Cron)' : 'Scheduled Background Tasks (Cron)'}</h2>
             </div>
-            <div className="p-6 md:p-10 flex flex-col items-center w-full relative z-10">
-              <div className="flex flex-col lg:flex-row justify-center items-center w-full relative gap-8 lg:gap-16">
+            <div className="p-6 md:p-10 flex flex-col items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative z-10">
+              <div className="flex flex-col lg:flex-row justify-center items-center min-w-max w-full gap-4 lg:gap-8 overflow-x-auto relative gap-8 lg:gap-16">
                 <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="Citation Sync" titleHe="סנכרון ציטוטים" descEn="cron: '0 0 * * *' (Midnight) — Isolated Error Boundaries & Retries" descHe="עדכון מ-Semantic Scholar (חצות) — גבולות שגיאה מבודדים וניסיונות חוזרים (Isolated Error Boundaries & Retries)" techs={['Inngest', 'Semantic Scholar']} />
                 
                 <NodeCard type="queue" icon={Zap} isHe={isHe} titleEn="RLHF Dataset" titleHe="איסוף נתוני RLHF" descEn="cron: '0 0 * * 0' (Sundays) — Isolated Error Boundaries & Retries" descHe="איסוף נתוני אימון (ראשון) — גבולות שגיאה מבודדים וניסיונות חוזרים (Isolated Error Boundaries & Retries)" techs={['Inngest', 'Neon Postgres']} />
