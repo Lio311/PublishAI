@@ -7,7 +7,6 @@ import { users, papers } from "@/services/db/schema";
 import { desc, eq, count, sql } from "drizzle-orm";
 import DashboardCharts from "@/components/admin/DashboardCharts";
 import UsersList from "@/components/admin/UsersList";
-import RLHFAnalytics from "@/components/rlhf/AnalyticsDashboard";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export default async function AdminDashboardPage({
@@ -240,10 +239,6 @@ export default async function AdminDashboardPage({
           </div>
         </div>
         
-        {/* RLHF Analytics */}
-        <div className="mb-8">
-          <RLHFAnalytics />
-        </div>
       </div>
     </DashboardLayout>
   );
