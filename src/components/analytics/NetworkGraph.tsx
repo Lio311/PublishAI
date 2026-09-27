@@ -337,7 +337,7 @@ function NetworkGraphInternal() {
 
   return (
     <div
-      className="w-full h-[500px] bg-slate-900 border border-slate-800 rounded-xl overflow-hidden relative shadow-sm"
+      className="w-full h-[500px] bg-white border border-slate-200 rounded-xl overflow-hidden relative shadow-sm"
       ref={containerRef}
       role="region"
       aria-label={isHe ? 'תרשים רשת מושגים מדעיים' : 'Scientific concept network graph'}
@@ -377,7 +377,7 @@ function NetworkGraphInternal() {
         </desc>
 
         {/* Draw Edges */}
-        <g stroke="#475569" strokeOpacity={0.6} aria-hidden="true">
+        <g stroke="#94a3b8" strokeOpacity={0.6} aria-hidden="true">
           {edgesRef.current.map((edge, i) => (
             <line
               key={`edge-${i}`}
@@ -388,8 +388,8 @@ function NetworkGraphInternal() {
               strokeWidth={Math.max(1, (edge.confidenceScore || 0.5) * 2.5)}
               stroke={
                 selectedNode && (edge.source === selectedNode.id || edge.target === selectedNode.id)
-                  ? '#38bdf8'
-                  : '#475569'
+                  ? '#0ea5e9'
+                  : '#94a3b8'
               }
               opacity={
                 selectedNode
@@ -429,7 +429,7 @@ function NetworkGraphInternal() {
                 <circle
                   r={isSelected ? 18 : 15}
                   fill="none"
-                  stroke={isSelected ? '#38bdf8' : '#ffffff'}
+                  stroke={isSelected ? '#0ea5e9' : '#ffffff'}
                   strokeWidth={isSelected ? 3 : 0}
                   className="transition-all group-focus:stroke-2 group-focus:stroke-amber-400"
                 />
@@ -447,8 +447,8 @@ function NetworkGraphInternal() {
                   dy={22}
                   textAnchor="middle"
                   fontSize={10}
-                  fill="#f1f5f9"
-                  stroke="#0f172a"
+                  fill="#0f172a"
+                  stroke="#ffffff"
                   strokeWidth={3}
                   paintOrder="stroke"
                   className="pointer-events-none font-medium select-none"
@@ -464,13 +464,13 @@ function NetworkGraphInternal() {
       {/* Selected Node Details Card */}
       {selectedNode && (
         <div
-          className={`absolute bottom-4 ${isHe ? 'right-4' : 'left-4'} max-w-xs bg-slate-800/95 backdrop-blur-md p-3.5 rounded-xl border border-slate-700 text-white shadow-lg text-xs space-y-1.5 z-10`}
+          className={`absolute bottom-4 ${isHe ? 'right-4' : 'left-4'} max-w-xs bg-white/95 backdrop-blur-md p-3.5 rounded-xl border border-slate-200 text-slate-800 shadow-lg text-xs space-y-1.5 z-10`}
           role="region"
           aria-live="polite"
           aria-label={isHe ? 'פרטי ישות נבחרת' : 'Selected entity details'}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="font-bold text-sm text-slate-100">{selectedNode.name}</span>
+            <span className="font-bold text-sm text-slate-900">{selectedNode.name}</span>
             <span
               className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-white capitalize"
               style={{ backgroundColor: TYPE_COLORS[selectedNode.type] || '#64748b' }}
@@ -479,14 +479,14 @@ function NetworkGraphInternal() {
             </span>
           </div>
           {selectedNode.description && (
-            <p className="text-slate-300 leading-relaxed text-[11px]">
+            <p className="text-slate-600 leading-relaxed text-[11px]">
               {selectedNode.description}
             </p>
           )}
           <button
             type="button"
             onClick={() => setSelectedNode(null)}
-            className="text-[10px] text-slate-400 hover:text-white underline cursor-pointer pt-1"
+            className="text-[10px] text-slate-500 hover:text-slate-900 underline cursor-pointer pt-1"
           >
             {isHe ? 'סגור פרטים' : 'Dismiss'}
           </button>
@@ -495,10 +495,10 @@ function NetworkGraphInternal() {
 
       {/* Legend */}
       <div
-        className={`absolute top-4 ${isHe ? 'right-4' : 'left-4'} bg-slate-800/90 backdrop-blur-md p-3 rounded-lg border border-slate-700 shadow-sm text-xs`}
+        className={`absolute top-4 ${isHe ? 'right-4' : 'left-4'} bg-white/90 backdrop-blur-md p-3 rounded-lg border border-slate-200 shadow-sm text-xs`}
         aria-label={isHe ? 'מקרא סוגי ישויות' : 'Entity type legend'}
       >
-        <div className="font-semibold mb-2 text-slate-200">
+        <div className="font-semibold mb-2 text-slate-800">
           {isHe ? 'סוגי ישויות' : 'Entity Types'}
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
@@ -509,7 +509,7 @@ function NetworkGraphInternal() {
                 style={{ backgroundColor: TYPE_COLORS[type] || '#94a3b8' }}
                 aria-hidden="true"
               />
-              <span className="capitalize text-slate-300 text-[11px]">{type}</span>
+              <span className="capitalize text-slate-600 text-[11px]">{type}</span>
             </div>
           ))}
         </div>
