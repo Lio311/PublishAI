@@ -268,14 +268,14 @@ export default function AnalyticsDashboard() {
 
             <ErrorBoundary name="EntityDistributionChart">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                   <Pie
                     data={data.entityDistribution}
                     cx="50%"
                     cy="50%"
-                    labelLine={false}
+                    labelLine={true}
                     label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                    outerRadius={100}
+                    outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -287,7 +287,7 @@ export default function AnalyticsDashboard() {
                     ))}
                   </Pie>
                   <RechartsTooltip />
-                  <Legend />
+                  <Legend wrapperStyle={{ paddingTop: '20px' }} />
                 </PieChart>
               </ResponsiveContainer>
             </ErrorBoundary>
@@ -330,7 +330,7 @@ export default function AnalyticsDashboard() {
                 <BarChart
                   layout="vertical"
                   data={data.relationshipDistribution}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  margin={{ top: 20, right: 30, left: 60, bottom: 5 }}
                 >
                   <defs>
                     <linearGradient id="colorBar" x1="0" y1="0" x2="1" y2="0">
