@@ -47,7 +47,7 @@ export async function POST(req: Request) {
           .values({
             email: cleanEmail,
             name: cleanName,
-            credits: 3,
+            credits: 0,
           })
           .returning();
 
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
               id: newUser.id,
               name: newUser.name,
               email: newUser.email,
-              credits: newUser.credits ?? 3,
+              credits: newUser.credits ?? 0,
               institution: cleanInstitution,
               field: cleanField,
               role: "researcher",
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
       email: cleanEmail,
       institution: cleanInstitution,
       field: cleanField,
-      credits: 3,
+      credits: 0,
       role: "researcher",
       createdAt: new Date().toISOString(),
       isMock: true,

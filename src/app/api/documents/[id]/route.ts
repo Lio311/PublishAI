@@ -3,6 +3,20 @@ import { db } from "@/services/db";
 import { documents } from "@/services/db/schema";
 import { auth } from "@/app/auth";
 import { eq, and } from "drizzle-orm";
+import { z } from "zod";
+
+const patchDocSchema = z.object({
+  title: z.string().optional(),
+  abstract: z.string().optional(),
+  content: z.string().optional(),
+  status: z.string().optional(),
+  targetJournalId: z.union([z.string(), z.number()]).nullable().optional(),
+  paperId: z.union([z.string(), z.number()]).nullable().optional(),
+  fileUrl: z.string().nullable().optional(),
+  fileType: z.string().nullable().optional(),
+  metadata: z.any().optional(),
+  wordCount: z.union([z.string(), z.number()]).optional(),
+});
 
 export async function GET(
   req: NextRequest,
@@ -45,7 +59,12 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const body = await req.json();
+    let body;
+    try {
+      body = patchDocSchema.parse(await req.json());
+    } catch (error) {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
 
     const updateData: any = { updatedAt: new Date() };
     if (body.title !== undefined) updateData.title = body.title;

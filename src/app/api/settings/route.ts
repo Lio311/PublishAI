@@ -3,6 +3,18 @@ import { db } from "@/services/db";
 import { userSettings, users } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { z } from "zod";
+
+const putSettingsSchema = z.object({
+  name: z.string().optional(),
+  academicRole: z.string().nullable().optional(),
+  language: z.string().optional(),
+  emailNotifications: z.boolean().optional(),
+  browserNotifications: z.boolean().optional(),
+  weeklyDigest: z.boolean().optional(),
+  publicProfile: z.boolean().optional(),
+  dataCollectionForAi: z.boolean().optional(),
+});
 
 export async function GET() {
   const session = await auth();
@@ -52,7 +64,12 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
+  let body;
+  try {
+    body = putSettingsSchema.parse(await request.json());
+  } catch (error) {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
 
   // Update user name if provided
   if (body.name) {
