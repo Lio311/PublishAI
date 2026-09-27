@@ -55,7 +55,7 @@
     "next": "16.3.5",
     "next-auth": "^5.0.0-beta.32",
     "next-intl": "^4.14.5",
-    "nodemailer": "^8.0.11",
+    "nodemailer": "^9.1.1",
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^1.1.1",
     "pg": "^8.23.0",
@@ -68,7 +68,7 @@
     "sharp": "^0.35.4",
     "sonner": "^2.0.8",
     "stripe": "^22.6.2",
-    "xlsx": "^0.18.5",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -79,7 +79,7 @@
     "@testing-library/react": "^16.3.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^20",
-    "@types/nodemailer": "^8.0.1",
+    "@types/nodemailer": "^8.0.2",
     "@types/pdf-parse": "^1.1.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
