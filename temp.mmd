@@ -1,0 +1,10 @@
+stateDiagram-v2
+    [*] --> DeterminePaperId: Start QA Runner Script
+    DeterminePaperId --> GeneratePayload: Create Paper ID (Env Override or Random)
+    GeneratePayload --> TriggerInngest: Generate 50+ Page Text (~248k chars)
+    TriggerInngest --> DispatchSuccess: Dispatch 'paper/uploaded' Event
+    TriggerInngest --> ErrorHandling: Network or Inngest Failure
+    
+    DispatchSuccess --> [*]
+    ErrorHandling --> HintDevServer: Log Missing Inngest Dev Server
+    HintDevServer --> [*]

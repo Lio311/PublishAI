@@ -9,8 +9,14 @@ import { getSafeRedirectUrl } from "@/services/security/redirect"
 
 const authSecret =
   process.env.AUTH_SECRET ||
-  process.env.NEXTAUTH_SECRET ||
-  (process.env.NODE_ENV === "production" ? undefined : "dev-fallback-secret-pub-ai-not-for-production");
+  process.env.NEXTAUTH_SECRET;
+
+if (!authSecret) {
+  console.error(
+    "[NextAuth] CRITICAL: AUTH_SECRET environment variable is not set. " +
+    "Generate one with: openssl rand -base64 32"
+  );
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: authSecret,

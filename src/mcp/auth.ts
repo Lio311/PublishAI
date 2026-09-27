@@ -44,12 +44,20 @@ export async function authenticateMcpRequest(req: NextRequest): Promise<Authenti
     process.env.AUTH_SECRET ||
     process.env.NEXTAUTH_SECRET;
 
-  if (providedKey && configuredKey && providedKey === configuredKey) {
-    return {
-      authenticated: true,
-      isService: true,
-      userId: "mcp-service-client",
-    };
+  if (providedKey && configuredKey) {
+    // Use timing-safe comparison to prevent timing attacks
+    const keyA = Buffer.from(providedKey);
+    const keyB = Buffer.from(configuredKey);
+    if (keyA.length === keyB.length) {
+      const { timingSafeEqual } = await import("crypto");
+      if (timingSafeEqual(keyA, keyB)) {
+        return {
+          authenticated: true,
+          isService: true,
+          userId: "mcp-service-client",
+        };
+      }
+    }
   }
 
   // 4. In local development only, allow opt-in bypass if explicitly enabled

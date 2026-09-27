@@ -15,8 +15,12 @@ function getKey(): Buffer {
     if (process.env.NODE_ENV === "production") {
       throw new Error("MASTER_ENCRYPTION_KEY environment variable is not set.");
     }
-    // Safe deterministic fallback for development/test only
-    keyHex = "d2e41ec3436bfa89a0c347d0a2fa108b81c73683cbd10dcaca7ffe07e4989de4";
+    // WARNING: This is a dev-only fallback. Never use this key in production.
+    // Generate a real key with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+    console.warn(
+      "[Security] Using development-only encryption key. Set MASTER_ENCRYPTION_KEY for real data protection."
+    );
+    keyHex = "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2";
   }
   if (keyHex.length !== 64 || !HEX_REGEX.test(keyHex)) {
     throw new Error("MASTER_ENCRYPTION_KEY must be exactly 32 bytes (64 hex characters).");

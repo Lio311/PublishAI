@@ -61,7 +61,7 @@ export async function GET(request: Request) {
       const retryAfter = error.retryAfterSeconds || 5;
       return NextResponse.json(
         {
-          error: error.message,
+          error: "Literature search rate limited. Please try again shortly.",
           source: error.source,
           retryAfter,
         },
@@ -77,7 +77,7 @@ export async function GET(request: Request) {
     if (error instanceof TimeoutError) {
       return NextResponse.json(
         {
-          error: error.message,
+          error: "Literature search timed out. Please try again.",
           source: error.source,
         },
         { status: 504 }
@@ -87,13 +87,13 @@ export async function GET(request: Request) {
     if (error instanceof RemoteServerError) {
       return NextResponse.json(
         {
-          error: error.message,
+          error: "A remote literature service is temporarily unavailable.",
           source: error.source,
         },
         { status: 502 }
       );
     }
 
-    return NextResponse.json({ error: error.message || 'Failed to search literature' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to search literature' }, { status: 500 });
   }
 }

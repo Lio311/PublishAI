@@ -74,7 +74,7 @@ Analyze the prompt and provide the necessary patch operations to fulfill the req
   } catch (error: any) {
     console.error("AI Generation Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to generate AI response" },
+      { error: "Failed to generate AI response" },
       { status: 500 }
     );
   }
