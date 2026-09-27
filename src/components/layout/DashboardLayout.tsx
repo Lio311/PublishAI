@@ -6,7 +6,6 @@ import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 
 import Header from "./Header";
 import AnimatedSidebar from "./AnimatedSidebar";
-import Footer from "./Footer";
 
 const emptySubscribe = () => () => {};
 
@@ -203,8 +202,6 @@ export default function DashboardLayout({
           {children}
         </div>
 
-        {/* Global Footer */}
-        <Footer />
       </main>
     </div>
   );

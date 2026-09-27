@@ -75,7 +75,6 @@ describe("Navigation Components Audit", () => {
       expect(layoutExports.Header).toBeDefined();
       expect(layoutExports.Sidebar).toBeDefined();
       expect(layoutExports.AnimatedSidebar).toBeDefined();
-      expect(layoutExports.Footer).toBeDefined();
       expect(layoutExports.DynamicBackground).toBeDefined();
     });
   });
@@ -172,7 +171,7 @@ describe("Navigation Components Audit", () => {
   });
 
   describe("DashboardLayout Integration", () => {
-    it("renders layout with Header, Main with max-w-full, and Footer", () => {
+    it("renders layout with Header, Main with max-w-full, ", () => {
       render(
         <DashboardLayout>
           <div data-testid="page-content">Child Content</div>
