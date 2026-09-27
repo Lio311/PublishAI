@@ -40,7 +40,6 @@ interface FlowStep {
   bgColor: string;
   borderColor: string;
   glowColor: string;
-  model: string;
 }
 
 const FLOW_STEPS: FlowStep[] = [
@@ -53,7 +52,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-slate-50",
     borderColor: "border-slate-300",
     glowColor: "shadow-slate-200/60",
-    model: "",
   },
   {
     id: 1,
@@ -64,7 +62,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-indigo-50",
     borderColor: "border-indigo-300",
     glowColor: "shadow-indigo-200/60",
-    model: "Python/E2B",
   },
   {
     id: 2,
@@ -75,7 +72,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-fuchsia-50",
     borderColor: "border-fuchsia-300",
     glowColor: "shadow-fuchsia-200/60",
-    model: "GPT-4o",
   },
   {
     id: 3,
@@ -86,7 +82,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-sky-50",
     borderColor: "border-sky-300",
     glowColor: "shadow-sky-200/60",
-    model: "Claude 3.7",
   },
   {
     id: 4,
@@ -97,7 +92,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-violet-50",
     borderColor: "border-violet-300",
     glowColor: "shadow-violet-200/60",
-    model: "GraphRAG",
   },
   {
     id: 5,
@@ -108,7 +102,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-amber-50",
     borderColor: "border-amber-300",
     glowColor: "shadow-amber-200/60",
-    model: "Claude 3.7 + MCP",
   },
   {
     id: 6,
@@ -119,7 +112,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-rose-50",
     borderColor: "border-rose-300",
     glowColor: "shadow-rose-200/60",
-    model: "Multi-Agent",
   },
   {
     id: 7,
@@ -130,7 +122,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-purple-50",
     borderColor: "border-purple-300",
     glowColor: "shadow-purple-200/60",
-    model: "o1-preview",
   },
   {
     id: 8,
@@ -141,7 +132,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-emerald-50",
     borderColor: "border-emerald-300",
     glowColor: "shadow-emerald-200/60",
-    model: "Claude 3.7 + Mem0",
   },
   {
     id: 9,
@@ -152,7 +142,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-blue-50",
     borderColor: "border-blue-300",
     glowColor: "shadow-blue-200/60",
-    model: "E2B Sandbox",
   },
   {
     id: 10,
@@ -163,7 +152,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-teal-50",
     borderColor: "border-teal-300",
     glowColor: "shadow-teal-200/60",
-    model: "Claude 3.7",
   },
   {
     id: 11,
@@ -174,7 +162,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-orange-50",
     borderColor: "border-orange-300",
     glowColor: "shadow-orange-200/60",
-    model: "Claude 3.7",
   },
   {
     id: 12,
@@ -185,7 +172,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-green-50",
     borderColor: "border-green-300",
     glowColor: "shadow-green-200/60",
-    model: "DOCX / CSL",
   },
   {
     id: 13,
@@ -196,7 +182,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-slate-50",
     borderColor: "border-slate-300",
     glowColor: "shadow-slate-200/60",
-    model: "",
   },
   {
     id: 14,
@@ -207,7 +192,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-sky-50",
     borderColor: "border-sky-300",
     glowColor: "shadow-sky-200/60",
-    model: "RPA Bot",
   },
   {
     id: 15,
@@ -218,7 +202,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-indigo-50",
     borderColor: "border-indigo-300",
     glowColor: "shadow-indigo-200/60",
-    model: "o1-preview + Opus",
   },
   {
     id: 16,
@@ -229,7 +212,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-rose-50",
     borderColor: "border-rose-300",
     glowColor: "shadow-rose-200/60",
-    model: "Pipeline Reset",
   },
   {
     id: 17,
@@ -240,7 +222,6 @@ const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-amber-50",
     borderColor: "border-amber-300",
     glowColor: "shadow-amber-200/60",
-    model: "Content Agent",
   },
 ];
 
@@ -722,17 +703,6 @@ export default function SystemFlowModal({
                         >
                           {t(step.titleKey)}
                         </h3>
-                        {step.model && (
-                          <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-all duration-300 ${
-                              isCurrent && !isCompleted
-                                ? "bg-white/70 text-slate-700"
-                                : "bg-slate-100 text-slate-500"
-                            }`}
-                          >
-                            {step.model}
-                          </span>
-                        )}
                       </div>
 
                       {/* Description — auto-expands and collapses */}
@@ -765,21 +735,19 @@ export default function SystemFlowModal({
                 {/* Connector Arrow */}
                 {!isLast && (
                   <div
-                    className={`flex justify-center py-2 transition-all duration-500 ${
+                    className={`flex justify-center py-1 transition-all duration-500 ${
                       isCurrentOrPast ? "opacity-100" : "opacity-0"
                     }`}
                   >
                     <div className="flex flex-col items-center">
                       <div
-                        className={`w-0.5 h-5 rounded-full transition-all duration-500 ${
-                          isCompleted
-                            ? "bg-gradient-to-b from-slate-800 to-slate-700"
-                            : "bg-gradient-to-b from-slate-300 to-slate-200"
+                        className={`w-0.5 h-6 transition-all duration-500 ${
+                          isCompleted ? "bg-slate-700" : "bg-slate-300"
                         }`}
                       />
-                      <ArrowRight
-                        className={`w-4 h-4 rotate-90 transition-colors duration-500 ${
-                          isCompleted ? "text-slate-800" : "text-slate-300"
+                      <div 
+                        className={`w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] transition-colors duration-500 ${
+                          isCompleted ? "border-t-slate-700" : "border-t-slate-300"
                         }`}
                       />
                     </div>

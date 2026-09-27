@@ -30,7 +30,6 @@ export type FlowStep = {
   bgColor: string;
   borderColor: string;
   glowColor: string;
-  model: string;
 };
 
 export const FLOW_STEPS: FlowStep[] = [
@@ -43,7 +42,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-slate-50",
     borderColor: "border-slate-300",
     glowColor: "shadow-slate-200/60",
-    model: "",
   },
   {
     id: 1,
@@ -54,7 +52,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-indigo-50",
     borderColor: "border-indigo-300",
     glowColor: "shadow-indigo-200/60",
-    model: "Python/E2B",
   },
   {
     id: 2,
@@ -65,7 +62,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-fuchsia-50",
     borderColor: "border-fuchsia-300",
     glowColor: "shadow-fuchsia-200/60",
-    model: "GPT-4o",
   },
   {
     id: 3,
@@ -76,7 +72,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-sky-50",
     borderColor: "border-sky-300",
     glowColor: "shadow-sky-200/60",
-    model: "Claude 3.7",
   },
   {
     id: 4,
@@ -87,7 +82,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-violet-50",
     borderColor: "border-violet-300",
     glowColor: "shadow-violet-200/60",
-    model: "GraphRAG",
   },
   {
     id: 5,
@@ -98,7 +92,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-amber-50",
     borderColor: "border-amber-300",
     glowColor: "shadow-amber-200/60",
-    model: "Claude 3.7 + MCP",
   },
   {
     id: 6,
@@ -109,7 +102,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-rose-50",
     borderColor: "border-rose-300",
     glowColor: "shadow-rose-200/60",
-    model: "Multi-Agent",
   },
   {
     id: 7,
@@ -120,7 +112,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-purple-50",
     borderColor: "border-purple-300",
     glowColor: "shadow-purple-200/60",
-    model: "o1-preview",
   },
   {
     id: 8,
@@ -131,7 +122,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-emerald-50",
     borderColor: "border-emerald-300",
     glowColor: "shadow-emerald-200/60",
-    model: "Claude 3.7 + Mem0",
   },
   {
     id: 9,
@@ -142,7 +132,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-blue-50",
     borderColor: "border-blue-300",
     glowColor: "shadow-blue-200/60",
-    model: "E2B Sandbox",
   },
   {
     id: 10,
@@ -153,7 +142,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-teal-50",
     borderColor: "border-teal-300",
     glowColor: "shadow-teal-200/60",
-    model: "Claude 3.7",
   },
   {
     id: 11,
@@ -164,7 +152,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-orange-50",
     borderColor: "border-orange-300",
     glowColor: "shadow-orange-200/60",
-    model: "Claude 3.7",
   },
   {
     id: 12,
@@ -175,7 +162,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-green-50",
     borderColor: "border-green-300",
     glowColor: "shadow-green-200/60",
-    model: "DOCX / CSL",
   },
   {
     id: 13,
@@ -186,7 +172,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-slate-50",
     borderColor: "border-slate-300",
     glowColor: "shadow-slate-200/60",
-    model: "",
   },
   {
     id: 14,
@@ -197,7 +182,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-sky-50",
     borderColor: "border-sky-300",
     glowColor: "shadow-sky-200/60",
-    model: "RPA Bot",
   },
   {
     id: 15,
@@ -208,7 +192,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-indigo-50",
     borderColor: "border-indigo-300",
     glowColor: "shadow-indigo-200/60",
-    model: "o1-preview + Opus",
   },
   {
     id: 16,
@@ -219,7 +202,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-rose-50",
     borderColor: "border-rose-300",
     glowColor: "shadow-rose-200/60",
-    model: "Pipeline Reset",
   },
   {
     id: 17,
@@ -230,7 +212,6 @@ export const FLOW_STEPS: FlowStep[] = [
     bgColor: "bg-amber-50",
     borderColor: "border-amber-300",
     glowColor: "shadow-amber-200/60",
-    model: "Content Agent",
   },
 ];
 
