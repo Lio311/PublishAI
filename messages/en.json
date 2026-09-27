@@ -128,8 +128,24 @@
         "desc": "After all edits are made, the system packages your manuscript back into a final, clean file, carefully preserving all your original citations (e.g., Mendeley) and page layouts."
       },
       "export": {
-        "title": "Ready for Submission",
-        "desc": "The process is complete! You can now download your full submission package—including the final manuscript, a tracked-changes version, and your cover letter—ready for the journal."
+        "title": "Download for Review",
+        "desc": "The scientific editing process is complete! You can now download your full submission package for self-review before final submission."
+      },
+      "submission": {
+        "title": "Automated Journal Submission",
+        "desc": "The system takes over the tedious technical submission process. Using smart bots, we automatically fill in all manuscript and author details directly into the journal's portal."
+      },
+      "peer_review": {
+        "title": "Peer Review Revisions (Ping-Pong)",
+        "desc": "Received 'Revise & Resubmit' feedback? The system analyzes the reviewers' comments, revises your manuscript accordingly, and drafts a respectful, evidence-based Rebuttal Letter for every point."
+      },
+      "cascade": {
+        "title": "Journal Cascade Strategy",
+        "desc": "If rejected, the journey doesn't stop. The system immediately reformats your manuscript to meet the guidelines of the next target journal on your list and resubmits it to save you valuable time."
+      },
+      "dissemination": {
+        "title": "Publication & Dissemination",
+        "desc": "Once published, the system helps you create clear abstracts and summaries for conferences and social posts, maximizing your research's visibility to the medical community."
       }
     }
   },
