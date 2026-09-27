@@ -536,13 +536,13 @@ export default function SystemFlowModal({
           <div className="flex items-start justify-between relative z-10">
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                  <Workflow className="w-6 h-6 text-white" />
+                <div className="p-2 bg-black/10 rounded-lg backdrop-blur-sm">
+                  <Workflow className="w-6 h-6 text-slate-900" />
                 </div>
-                <h2 id="system-flow-title" className="text-2xl font-bold text-white tracking-tight">{t("title")}</h2>
+                <h2 id="system-flow-title" className="text-2xl font-bold text-slate-900 tracking-tight">{t("title")}</h2>
               </div>
-              <div className="mt-2 text-white/90 text-sm max-w-lg leading-relaxed">
-                <p id="system-flow-subtitle" className="text-white text-sm mt-0.5">{t("subtitle")}</p>
+              <div className="mt-2 text-slate-800 text-sm max-w-lg leading-relaxed">
+                <p id="system-flow-subtitle" className="text-slate-800 text-sm mt-0.5">{t("subtitle")}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -551,40 +551,40 @@ export default function SystemFlowModal({
                 <button
                   type="button"
                   onClick={handlePauseResume}
-                  className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 group cursor-pointer"
+                  className="p-2.5 hover:bg-black/10 rounded-xl transition-all duration-200 group cursor-pointer"
                   title={isPaused ? (isRtl ? "המשך הפעלה" : "Resume") : (isRtl ? "השהה" : "Pause")}
                   aria-label={isPaused ? (isRtl ? "המשך הפעלה" : "Resume flow") : (isRtl ? "השהה תהליך" : "Pause flow")}
                 >
                   {isPaused ? (
-                    <Play className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
+                    <Play className="w-5 h-5 text-slate-700 group-hover:text-slate-900 transition-colors" />
                   ) : (
-                    <Pause className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
+                    <Pause className="w-5 h-5 text-slate-700 group-hover:text-slate-900 transition-colors" />
                   )}
                 </button>
               )}
               <button
                 type="button"
                 onClick={handleReplay}
-                className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 group cursor-pointer"
+                className="p-2.5 hover:bg-black/10 rounded-xl transition-all duration-200 group cursor-pointer"
                 title={t("replay")}
                 aria-label={t("replay")}
               >
-                <RotateCcw className="w-5 h-5 text-white/80 group-hover:text-white transition-colors group-hover:rotate-[-360deg] duration-500" />
+                <RotateCcw className="w-5 h-5 text-slate-700 group-hover:text-slate-900 transition-colors group-hover:rotate-[-360deg] duration-500" />
               </button>
               <button
                 type="button"
                 onClick={handleClose}
-                className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 group cursor-pointer"
+                className="p-2.5 hover:bg-black/10 rounded-xl transition-all duration-200 group cursor-pointer"
                 aria-label={isRtl ? "סגור חלון" : "Close dialog"}
               >
-                <X className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
+                <X className="w-5 h-5 text-slate-700 group-hover:text-slate-900 transition-colors" />
               </button>
             </div>
           </div>
 
           {/* Progress bar */}
           <div
-            className="mt-4 h-1.5 bg-white/20 rounded-full overflow-hidden"
+            className="mt-4 h-1.5 bg-black/10 rounded-full overflow-hidden"
             role="progressbar"
             aria-valuenow={Math.round(progressPercent)}
             aria-valuemin={0}
@@ -773,13 +773,13 @@ export default function SystemFlowModal({
                       <div
                         className={`w-0.5 h-5 rounded-full transition-all duration-500 ${
                           isCompleted
-                            ? "bg-gradient-to-b from-green-300 to-green-200"
+                            ? "bg-gradient-to-b from-slate-800 to-slate-700"
                             : "bg-gradient-to-b from-slate-300 to-slate-200"
                         }`}
                       />
                       <ArrowRight
                         className={`w-4 h-4 rotate-90 transition-colors duration-500 ${
-                          isCompleted ? "text-green-300" : "text-slate-300"
+                          isCompleted ? "text-slate-800" : "text-slate-300"
                         }`}
                       />
                     </div>
