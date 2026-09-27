@@ -1,3 +1,4 @@
+import { secureLogger } from "@/services/security/logger";
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { db } from "@/services/db";
@@ -65,7 +66,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ file: savedFile }, { status: 201 });
   } catch (error: any) {
-    console.error("Upload error:", error);
+    secureLogger.error("Upload error:", error);
     return NextResponse.json(
       { error: "Failed to upload file" },
       { status: 500 }
