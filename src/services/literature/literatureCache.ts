@@ -2,10 +2,11 @@
  * Multi-tier Cache for Literature Search and Citations
  * 
  * L1: In-Memory LRU Cache with bounded capacity and TTL eviction (prevents memory leaks)
- * L2: Upstash Redis (if configured via UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN)
+ * L2: Upstash Redis (if configured via UPSTASH_REDIS_REST_* or KV_REST_API_*)
  */
 
 import { LiteratureSearchOptions } from './types';
+import { hasUpstashCredentials } from "@/services/cache/upstashEnv";
 
 interface CacheEntry<T> {
   value: T;
@@ -101,7 +102,7 @@ export class LiteratureCache {
 
     this.useRedis =
       options.useRedis !== false &&
-      Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+      hasUpstashCredentials();
   }
 
   /** Redis is optional and loaded on first use, so the module works without the package configured. */

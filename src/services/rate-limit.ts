@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hasUpstashCredentials } from "@/services/cache/upstashEnv";
 
 export type RateLimitTier =
   | "ai"       // 10 req / 1 min (LLM, Agents, Embeddings, heavy AI endpoints)
@@ -77,7 +78,7 @@ const rateLimiters: Partial<Record<RateLimitTier, import("@upstash/ratelimit").R
 let hasLoggedEnvWarning = false;
 
 async function getRateLimiterForTier(tier: RateLimitTier): Promise<import("@upstash/ratelimit").Ratelimit | null> {
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+  if (!hasUpstashCredentials()) {
     if (!hasLoggedEnvWarning && process.env.NODE_ENV !== "test") {
       console.warn("[RateLimit] Upstash Redis credentials not set. Falling back to in-memory rate limiting.");
       hasLoggedEnvWarning = true;

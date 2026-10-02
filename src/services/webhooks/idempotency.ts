@@ -6,6 +6,8 @@
  * Supports Upstash Redis when configured, with an in-memory TTL store fallback.
  */
 
+import { hasUpstashCredentials } from "@/services/cache/upstashEnv";
+
 class InMemoryIdempotencyStore {
   private cache = new Map<string, number>();
   private readonly maxEntries = 5000;
@@ -50,10 +52,7 @@ const memoryStore = new InMemoryIdempotencyStore();
 let upstashRedisClient: import("@upstash/redis").Redis | null = null;
 
 async function getRedisClient() {
-  if (
-    !process.env.UPSTASH_REDIS_REST_URL ||
-    !process.env.UPSTASH_REDIS_REST_TOKEN
-  ) {
+  if (!hasUpstashCredentials()) {
     return null;
   }
 
