@@ -25,29 +25,45 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     en: "Event-driven background job orchestration engine. Handles the long-running, multi-step agent workflows without timeouts.",
     he: "מנוע ניהול תהליכי רקע מבוסס אירועים. מנהל את זרימת העבודה הארוכה והמורכבת של הסוכנים ללא חשש מפסקי זמן (Timeouts)."
   },
-  "Claude 3.7": {
-    en: "Anthropic's language model, excelling in academic writing, nuanced editing, and maintaining a scientific yet human tone.",
-    he: "מודל השפה של Anthropic המצטיין בכתיבה אקדמית, עריכה עדינה ושמירה על טון מדעי ואנושי."
+  "Claude Opus 5.5": {
+    en: "Anthropic's most capable model. Runs the reasoning-heavy stages: planning, scientific review, academic writing, execution, journal matching and the debate's Area Chair.",
+    he: "המודל החזק ביותר של Anthropic. מריץ את השלבים שדורשים הסקה עמוקה: תכנון, ביקורת מדעית, כתיבה אקדמית, ביצוע, התאמת כתבי עת ויו״ר הדיבייט (Area Chair)."
+  },
+  "Claude Sonnet 5.5": {
+    en: "Anthropic's balanced model and the default for most agents: clarification, knowledge, QA, verification, cover letter, compilation, rebuttal and figure analysis.",
+    he: "המודל המאוזן של Anthropic וברירת המחדל לרוב הסוכנים: הבהרה, ידע, QA, אימות, מכתב מקדים, הידור, מענה לסוקרים וניתוח איורים."
+  },
+  "Claude Haiku 4.5": {
+    en: "Anthropic's fastest model, used for quick text manipulations, figure legend improvement, and low-latency background tasks.",
+    he: "המודל המהיר של Anthropic, משמש למניפולציות טקסט קצרות, שיפור כיתובי איורים, ומשימות רקע שדורשות זמן תגובה מיידי."
   },
   "GPT-4o": {
-    en: "OpenAI's flagship fast multimodal model, serving as a dynamic and deeply analytical reviewer in the multi-agent debate.",
-    he: "מודל מהיר של OpenAI המשמש כסוקר דינמי ומעמיק בפאנל הדיבייט (עימות הסוקרים) המרובה-סוכנים."
+    en: "OpenAI's multimodal model. Runs the integrity scan, entity extraction for the knowledge graph, acceptance prediction, and the critical reviewer in the debate.",
+    he: "מודל מולטימודלי של OpenAI. מריץ את סריקת התקינות, חילוץ ישויות לגרף הידע, ניבוי סיכויי קבלה, ואת הסוקר הביקורתי בדיבייט."
   },
-  "OpenAI o1": {
-    en: "OpenAI's advanced reasoning model, taking the role of 'Area Chair' to synthesize complex debate and make final editorial calls.",
-    he: "מודל ההסקה הלוגית של OpenAI, מתפקד כ'סוקר-על' המסנתז את הדיבייט ומקבל את החלטות העריכה הסופיות."
-  },
-  "Gemini 1.5": {
-    en: "Google's LLM with a massive context window, serving as the Optimist Reviewer to find hidden strengths and synergies in the paper.",
-    he: "מודל השפה של Google בעל חלון ההקשר העצום. משמש כסוקר האופטימי לאיתור חוזקות ורעיונות חיוביים נסתרים במאמר.",
+  "Gemini Pro": {
+    en: "Google's model, serving as the Optimist Reviewer in the debate to find hidden strengths and synergies in the paper. Configurable via GOOGLE_MODEL.",
+    he: "המודל של Google, משמש כסוקר האופטימי בדיבייט לאיתור חוזקות ורעיונות חיוביים נסתרים במאמר. ניתן להחלפה דרך GOOGLE_MODEL.",
     prompt: {
       en: "You are a visionary research scientist synthesizing prior literature and exploring novel connections. With your vast context window, analyze the entire manuscript to identify consensus, methodological synergies, hidden strengths, and open research gaps. Find the 'silver lining' in complex data and suggest ways to amplify the paper's novelty and broader impact.",
       he: "אתה חוקר בעל חזון שמסנתז ספרות קודמת וחוקר קשרים חדשניים. בעזרת חלון ההקשר העצום שלך, נתח את המאמר בשלמותו לזיהוי סינרגיות, חוזקות נסתרות ופערים מחקריים. מצא את נקודות האור בנתונים מורכבים והצע דרכים להעצים את החדשנות וההשפעה הרחבה של המאמר כדי שיבלוט בפני העורכים."
     }
   },
+  "OpenAlex": {
+    en: "Open scholarly catalog of journals and works. Supplies real venue evidence (topics, impact, open-access status) for journal matching and the rejection cascade.",
+    he: "קטלוג אקדמי פתוח של כתבי עת ומאמרים. מספק ראיות אמיתיות על כתבי העת (תחומים, השפעה, גישה פתוחה) להתאמת כתבי העת ולמפל לאחר דחייה."
+  },
+  "PubMed & Semantic Scholar": {
+    en: "Literature search APIs the Knowledge agent queries directly to retrieve relevant, recent papers and their identifiers.",
+    he: "ממשקי חיפוש ספרות שסוכן הידע פונה אליהם ישירות כדי לשלוף מאמרים רלוונטיים ועדכניים ואת המזהים שלהם."
+  },
+  "AES-256-GCM": {
+    en: "Authenticated encryption for the journal portal credentials users save; the key lives only in MASTER_ENCRYPTION_KEY.",
+    he: "הצפנה מאומתת לפרטי ההתחברות לפורטלים של כתבי העת שהמשתמשים שומרים. המפתח נשמר רק ב-MASTER_ENCRYPTION_KEY."
+  },
   "pgvector": {
-    en: "PostgreSQL extension for vector similarity search, enabling RAG (Retrieval-Augmented Generation) across the scientific literature database.",
-    he: "הרחבה ל-PostgreSQL המאפשרת חיפוש וקטורי מבוסס דמיון. משמשת לאחזור מידע (RAG) מתוך מאגר הספרות המדעית."
+    en: "PostgreSQL vector extension. Manuscript chunks are embedded and stored during document ingestion; similarity search over them is not wired into the agents yet.",
+    he: "הרחבת וקטורים ל-PostgreSQL. קטעי המאמר מקודדים ונשמרים בזמן קליטת המסמך; חיפוש לפי דמיון עדיין לא מחובר לסוכנים."
   },
   "GraphRAG": {
     en: "Advanced retrieval technique using knowledge graphs to map conceptual relationships, finding cross-domain analogies for novel ideas.",
@@ -65,13 +81,13 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     en: "An open-source LLMOps platform for tracing, evals, and prompt management. Monitors token usage, latency, and agent reasoning.",
     he: "פלטפורמת LLMOps למעקב (Tracing) ואנליזה. מנטרת את כמות הטוקנים, זמני התגובה, ומאפשרת לנתח את הליך ההסקה של הסוכנים בזמן אמת."
   },
-  "Guardrails AI": {
-    en: "An open-source framework ensuring AI safety. Validates outputs to prevent hallucinations, generic AI apologies, and malicious code generation.",
-    he: "מסגרת לאבטחת AI. בודקת ומוודאת את התוצרים כדי למנוע הזיות (Hallucinations), תשובות 'רובוטיות', או יצירת קוד זדוני."
+  "Guardrails": {
+    en: "An LLM validation step (GPT-4o-mini) in the agent workflow plus prompt-injection guardrails in every system prompt, checking outputs for hallucinations, PII and an unscientific tone.",
+    he: "שלב ולידציה מבוסס מודל שפה (GPT-4o-mini) בזרימת הסוכנים, יחד עם הגנות מפני הזרקת פרומפט בכל הנחיית מערכת, הבודקים הזיות, מידע אישי וטון לא מדעי."
   },
   "MCP": {
-    en: "Model Context Protocol. Standardizes how AI agents securely access external tools like PubMed and Semantic Scholar databases, featuring built-in SSRF protection and API key authentication.",
-    he: "פרוטוקול גישה למודלים (MCP). מספק תקן מאובטח שדרכו סוכני ה-AI מתקשרים עם כלים חיצונים כמו מאגרי PubMed ו-Semantic Scholar, הכולל הגנת SSRF מובנית ואימות מבוסס מפתח API."
+    en: "Model Context Protocol endpoints that expose literature search and the OJS/WordPress connectors to external AI clients, protected by API-key authentication and SSRF checks.",
+    he: "נקודות קצה בפרוטוקול MCP החושפות חיפוש ספרות ואת מחברי OJS/WordPress ללקוחות AI חיצוניים, עם אימות מפתח API והגנת SSRF."
   },
   "Vision AI": {
     en: "Multimodal AI capability used to extract data points, trends, and axes from charts, graphs, and visual figures in the paper.",
@@ -85,13 +101,13 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     en: "Reinforcement Learning from Human Feedback. Tracks user corrections to continually align the agents' output with the author's preferences.",
     he: "מערכת למידת חיזוק ממשוב אנושי. מתעדת את התיקונים של המשתמש כדי לשפר ולהתאים את פעולת הסוכנים להעדפות הכותב."
   },
-  "Tiptap & Monaco": {
-    en: "Advanced rich-text and code editors embedded in the UI to allow human-in-the-loop review of the AI's exact text diffs.",
-    he: "עורכי טקסט וקוד מתקדמים המשולבים בממשק המשתמש, המאפשרים למחבר לעבור על התיקונים של ה-AI בצורה נוחה (Diff)."
+  "Tiptap": {
+    en: "Rich-text editor embedded in the paper workspace, with tracked insertions and deletions so the author can review the AI's exact changes.",
+    he: "עורך טקסט עשיר המשולב בסביבת העבודה של המאמר, עם סימון הוספות ומחיקות כדי שהמחבר יוכל לעבור על השינויים המדויקים של ה-AI."
   },
   "Neon Postgres": {
-    en: "Serverless Postgres database that scales instantly, utilizing a resilient Singleton Connection Pool pattern to prevent connection starvation in serverless runtimes. Stores users, papers, reviews, and vector embeddings reliably.",
-    he: "מסד נתונים Serverless מבוסס Postgres הפועל בתבנית מאגר חיבורים אחוד (Singleton Connection Pool) למניעת מיצוי חיבורים בריצת Serverless. שומר את נתוני המשתמשים, המאמרים, הביקורות והוקטורים בצורה אמינה ומהירה."
+    en: "Serverless Postgres reached over HTTP from Vercel functions, so no connection pool can be exhausted. Stores users, papers, reviews, the journal catalog and embeddings; multi-statement writes use batches.",
+    he: "מסד נתונים Serverless מבוסס Postgres שנגיש מפונקציות Vercel דרך HTTP, כך שאין מאגר חיבורים שעלול להתמצות. שומר משתמשים, מאמרים, ביקורות, את קטלוג כתבי העת והוקטורים; כתיבות מרובות פקודות מתבצעות באצוות."
   },
   "react-force-graph-2d": {
     en: "Visualization library rendering the final citation map, showing how the revised paper connects to existing literature.",
@@ -102,20 +118,16 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     he: "נתיבי שרת מובנים המספקים טיפול בטוח בלוגיקת צד-שרת, ייצור קבצי PDF סופיים וניהול התראות."
   },
   "Nodemailer": {
-    en: "Node.js module used to automatically dispatch the finalized manuscript and cover letter directly to the user's email.",
-    he: "רכיב שרת האחראי על שליחת מיילים אוטומטית. שולח את המאמר הסופי ומכתב המקדים ישירות לתיבת המייל של המשתמש."
-  },
-  "Puppeteer": {
-    en: "A Node library which provides a high-level API to control Chrome or Chromium over the DevTools Protocol. Used here as an alternative automation driver.",
-    he: "ספריית Node לשליטה בדפדפן Chrome דרך פרוטוקול DevTools. משמשת כאן כמנוע אוטומציה חלופי."
+    en: "Node.js mailer behind notification emails and the email submission adapter, which sends the manuscript package to journals that accept submissions by email.",
+    he: "רכיב שליחת המיילים של המערכת: התראות למשתמש, ואדפטר ההגשה במייל ששולח את חבילת המאמר לכתבי עת שמקבלים הגשות במייל."
   },
   "Node.js": {
-    en: "JavaScript runtime built on Chrome's V8 JavaScript engine. Executes the RPA bot scripts on the server.",
-    he: "סביבת ריצה ל-JavaScript המאפשרת הרצת סקריפטים של סוכני ה-RPA בשרת."
+    en: "JavaScript runtime that executes the server code, background jobs and the RPA bot scripts.",
+    he: "סביבת ריצה ל-JavaScript שמריצה את קוד השרת, את תהליכי הרקע ואת סקריפטי בוט ה-RPA."
   },
   "Playwright": {
-    en: "End-to-end testing and browser automation library used to scrape journal submission websites.",
-    he: "הספריה שמחליפה את ה-API הרגיל בשלב של גירוד (Scraping) חוקי ההגשה מאתרי המגזינים."
+    en: "Browser automation library that drives journal submission portals. It needs a real Chromium runtime, which Vercel functions do not provide, so portal automation is unavailable on the current deployment.",
+    he: "ספריית אוטומציית דפדפן שמפעילה את פורטלי ההגשה של כתבי העת. היא צריכה דפדפן Chromium אמיתי, שאינו קיים בפונקציות של Vercel, ולכן אוטומציית הפורטלים לא זמינה בפריסה הנוכחית."
   },
   "PDF Parser": {
     en: "Utility for reliably extracting structured text and reviewer comments from uploaded decision letters (R&R) via pdf-parse.",
@@ -134,16 +146,16 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     he: "אחראי על ניהול הזרמת הטקסט בזמן אמת (Streaming) בשלבי הבירור ועימות הסוקרים."
   },
   "LangChain & LangGraph": {
-    en: "Infrastructure for AI agents that handles text chunking and memory chains.",
-    he: "תשתית סוכני ה-AI שדואגת לפיצול הטקסט ולבניית שרשרת זיכרון לסוכנים."
+    en: "LangChain splits documents into chunks for embedding; LangGraph runs the stateful Agent Runner workflow.",
+    he: "LangChain מפצל מסמכים לקטעים לצורך קידוד וקטורי; LangGraph מריץ את זרימת העבודה של הרצת הסוכנים (Agent Runner) עם ניהול מצב."
   },
   "NextAuth.js": {
-    en: "Authentication solution that manages user logins and account security.",
-    he: "פתרון ההזדהות שמנהל את כניסת המשתמשים ואבטחת החשבונות."
+    en: "Auth.js (NextAuth v5) Google sign-in and sessions. There is no open registration endpoint; every API route checks that the caller owns the resource.",
+    he: "Auth.js (NextAuth v5): התחברות עם Google וניהול סשנים. אין נקודת הרשמה פתוחה, וכל נתיב API מוודא שהמשתמש הוא הבעלים של המשאב."
   },
   "Upstash Redis": {
-    en: "System cache, also used to prevent server overload (Rate Limiting) during file uploads.",
-    he: "מערכת ה-Cache של המערכת, משמשת גם כדי למנוע עומס (Rate Limiting) על השרתים בזמן העלאת קבצים."
+    en: "Shared Redis for rate limiting, the literature search cache and webhook idempotency. Each falls back to in-memory storage when Redis is not configured.",
+    he: "Redis משותף להגבלת קצב, למטמון חיפושי הספרות ולמניעת עיבוד כפול של Webhooks. כל אחד מהם חוזר לזיכרון מקומי כש-Redis לא מוגדר."
   },
   "Mammoth & Docx": {
     en: "Tools that parse word files initially and generate styled word files at the end.",
@@ -153,12 +165,8 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     en: "Charting library that generates the statistics and dashboards.",
     he: "ספריית התרשימים שמייצרת את הסטטיסטיקות והדשבורדים בתשתיות המערכת."
   },
-  "WebSockets": {
-    en: "Real-time bi-directional communication protocol used to stream live screenshots and receive instant user interventions during RPA roadblocks.",
-    he: "פרוטוקול תקשורת דו-כיווני בזמן אמת המשמש להזרמת צילומי מסך חיים וקבלת התערבות מיידית מהמשתמש בעת חסימות בתהליך ה-RPA."
-  },
   "Editorial Manager RPA": {
-    en: "Vision AI and Playwright-based browser automation adapter for Editorial Manager.",
+    en: "Vision AI and Playwright-based browser automation adapter for Editorial Manager (needs a browser runtime).",
     he: "אדפטר מבוסס Vision AI ו-Playwright לאוטומציית דפדפן מלאה במערכת Editorial Manager."
   },
   "ScholarOne RPA": {
@@ -169,17 +177,9 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     en: "Playwright-based automation adapter targeting the eJournalPress platform.",
     he: "אדפטר מבוסס Playwright המכוון לאוטומציה בפלטפורמת eJournalPress."
   },
-  "Claude 3.5 Haiku": {
-    en: "Anthropic's fastest model, used for quick text manipulations, figure legend improvement, and low-latency background tasks.",
-    he: "המודל המהיר ביותר של Anthropic, משמש למניפולציות טקסט קצרות, שיפור כיתובי איורים, ומשימות רקע שדורשות זמן תגובה מיידי."
-  },
   "GPT-4o-mini": {
-    en: "Cost-efficient OpenAI model used for fast telemetry, extracting user feedback, and learning rules for the RLHF system.",
-    he: "מודל חסכוני ומהיר של OpenAI המשמש לטלמטריה, חילוץ משוב מהמשתמש, וגזירת חוקים למערכת הלמידה (RLHF)."
-  },
-  "Hugging Face Spaces": {
-    en: "Cloud platform used to deploy reproducible research agents as isolated MCP servers.",
-    he: "פלטפורמת ענן המשמשת לפריסת סוכני מחקר עצמאיים (כשרתי MCP) המאפשרים שחזור מדויק של תוצאות."
+    en: "Cost-efficient OpenAI model used for fast telemetry, the guardrails check, extracting user feedback, and learning rules for the RLHF system.",
+    he: "מודל חסכוני ומהיר של OpenAI המשמש לטלמטריה, לבדיקת ה-Guardrails, לחילוץ משוב מהמשתמש ולגזירת חוקים למערכת הלמידה (RLHF)."
   },
   "next-intl": {
     en: "Internationalization (i18n) library used to support both English and Hebrew interfaces seamlessly.",
@@ -201,17 +201,13 @@ const TOOLS_INFO: Record<string, { en: string, he: string, prompt?: { en: string
     en: "TypeScript-first schema declaration and validation library, ensuring AI outputs exactly match expected JSON structures.",
     he: "ספריית ולידציה המבטיחה שהתשובות שחוזרות ממודלי ה-AI (בפורמט JSON) תואמות בדיוק למבנה הנתונים המצופה."
   },
-  "Jest": {
-    en: "Delightful JavaScript Testing Framework with a focus on simplicity, used for unit testing core agent logic.",
-    he: "סביבת בדיקות (טסטים) ל-JavaScript המשמשת לווידוא הלוגיקה והאמינות של סוכני ה-AI והמערכת."
-  },
   "Rate Limiter": {
-    en: "In-memory sliding window rate limiter designed for API route protection, throttling excessive requests and mitigating abuse per IP without external dependencies.",
-    he: "מגביל קצב בקשות (Rate Limiter) בשיטת חלון מתגלגל בזיכרון להגנה על נתיבי API, מניעת עומסי תעבורה וחסימת שימוש לרעה לפי כתובת IP ללא תלות חיצונית."
+    en: "Sliding-window rate limiting per user and tier (AI, upload, auth, strict) on Upstash Redis, falling back to an in-memory limiter when Redis is not configured.",
+    he: "הגבלת קצב בחלון מתגלגל לכל משתמש ולפי סוג פעולה (AI, העלאה, הזדהות, רגיש) על גבי Upstash Redis, עם מעבר למגביל בזיכרון כש-Redis לא מוגדר."
   },
-  "Environment Validator": {
-    en: "Strict startup configuration validator that verifies required environment variables and database credentials without insecure fallbacks, preventing runtime misconfigurations.",
-    he: "רכיב אימות קונפיגורציה קפדני בעליית המערכת המוודא תקינות משתני סביבה ומחרוזות חיבור למסד הנתונים ללא ערכי ברירת מחדל מדומים (Fallbacks), למניעת כשלים בזמן ריצה."
+  "Site PIN": {
+    en: "A site-wide access code checked by the proxy before any page or API route, set with the server-only SITE_PIN variable.",
+    he: "קוד גישה לכל האתר שנבדק ב-proxy לפני כל עמוד או נתיב API, ומוגדר במשתנה השרת SITE_PIN."
   }
 };
 
@@ -228,8 +224,8 @@ const ARCHITECTURE_STEPS = [
     id: 1, phase: 1,
     title: { en: "1. Document Upload", he: "1. העלאת מסמך" },
     description: { 
-      en: "User uploads manuscript (PDF/Word). Next.js API Routes stream it to Vercel Blob and trigger the Inngest background engine.",
-      he: "המשתמש מעלה את המאמר (PDF/Word). נתיבי ה-API מעבירים את הקובץ לאחסון מאובטח ומזנקים את תהליכי הרקע במנוע של Inngest."
+      en: "User uploads manuscript (PDF/Word). Next.js API Routes store it in private Vercel Blob storage and trigger the Inngest background engine. Before the agents start, an LLM integrity scan (GPT-4o) estimates plagiarism and AI-generated text in the original.",
+      he: "המשתמש מעלה את המאמר (PDF/Word). נתיבי ה-API שומרים אותו באחסון פרטי ב-Vercel Blob ומזנקים את תהליכי הרקע במנוע של Inngest. לפני שהסוכנים מתחילים, סריקת תקינות מבוססת מודל שפה (GPT-4o) מעריכה פלגיאט וטקסט שנוצר ב-AI במקור."
     },
     icon: Upload, tools: ["Next.js 16 UI", "Vercel Blob", "Inngest", "Mammoth & Docx", "PDF Parser", "Upstash Redis", "LangChain & LangGraph", "next-intl", "Tailwind CSS", "Framer Motion", "Sonner"],
     color: "bg-cyan-50 text-cyan-700 border-cyan-200"
@@ -245,7 +241,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are a distinguished Academic Editor-in-Chief.\nTASK: Perform a deep-dive diagnostic analysis of the uploaded manuscript.\n1. Extract the core scientific thesis, research gaps addressed, and methodological approach.\n2. Identify structural deficiencies (e.g., inadequate literature review, missing limitations, weak statistical grounding).\n3. Formulate 5 probing questions for the author to clarify ambiguities before the revision pipeline begins.\nOUTPUT: Strict JSON matching the 'ClarificationReport' schema.", 
       he: "מערכת: אתה עורך אקדמי ראשי בעל שם עולמי.\nמשימה: בצע ניתוח דיאגנוסטי מעמיק של כתב היד.\n1. חלץ את התזה המדעית המרכזית, פערי המחקר, והגישה המתודולוגית.\n2. זהה כשלים מבניים (למשל: סקירת ספרות חסרה, היעדר מגבלות מחקר, ביסוס סטטיסטי חלש).\n3. נסח 5 שאלות חקר מחודדות למחבר לצורך הבהרת עמימויות לפני תחילת השכתוב.\nפלט: JSON קפדני התואם לסכמת ClarificationReport." 
     },
-    icon: Search, tools: ["Claude 3.7", "Vercel AI SDK", "GPT-4o-mini", "Zod"],
+    icon: Search, tools: ["Claude Sonnet 5.5", "GPT-4o", "Vercel AI SDK", "Zod"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
@@ -259,7 +255,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are a Strategic Academic Planner.\nINPUTS: Original manuscript, Author's clarification responses, Target journal guidelines.\nTASK: Construct a comprehensive, phase-by-phase Revision Masterplan.\n1. Map sections requiring total rewrites vs. minor edits.\n2. Pinpoint exact paragraphs needing stronger empirical backing or modern citations.\n3. Define the narrative arc and logical flow improvements.\nOUTPUT: A Directed Acyclic Graph (DAG) of editing tasks to be distributed to specialized sub-agents.", 
       he: "מערכת: אתה אסטרטג תכנון אקדמי.\nקלטים: כתב היד המקורי, תשובות המחבר לבירור, והנחיות כתב העת.\nמשימה: בנה תוכנית-אב מקיפה לשכתוב.\n1. מפה אילו חלקים דורשים שכתוב מלא ואילו רק עריכה קלה.\n2. סמן פסקאות ספציפיות הדורשות ביסוס אמפירי חזק יותר או ציטוטים עדכניים.\n3. תכנן מחדש את הזרימה הלוגית וקשת הנרטיב של המאמר.\nפלט: גרף משימות מכוון (DAG) שיחולק לסוכני-המשנה השונים." 
     },
-    icon: FileText, tools: ["Claude 3.7"],
+    icon: FileText, tools: ["Claude Opus 5.5"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
@@ -273,7 +269,7 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are an Expert Literature Researcher equipped with Semantic Scholar & PubMed MCP tools.\nTASK:\n1. Generate optimized Boolean search queries combining core concepts from the manuscript.\n2. Retrieve the top 50 most relevant papers published in the last 3 years.\n3. Use GraphRAG to extract key findings and methodologies.\n4. Identify missing foundational citations in the current draft.\nOUTPUT: A synthesized Literature Matrix (JSON) mapping claims in the text to retrieved DOIs.", 
       he: "מערכת: אתה חוקר ספרות מומחה המצויד בכלי גישה ל-Semantic Scholar ול-PubMed.\nמשימה:\n1. נסח שאילתות חיפוש בוליאניות אופטימליות המשלבות את מושגי הליבה של המאמר.\n2. שלוף את 50 המאמרים הרלוונטיים ביותר מה-3 שנים האחרונות.\n3. השתמש ב-GraphRAG כדי לחלץ מתודולוגיות וממצאים.\n4. זהה ציטוטי חובה שחסרים בטיוטה הנוכחית.\nפלט: מטריצת ספרות מסונתזת הממפה טענות בטקסט ל-DOIs מתאימים." 
     },
-    icon: Database, tools: ["Claude 3.7", "pgvector", "GraphRAG", "MCP", "LangChain & LangGraph", "Hugging Face Spaces"],
+    icon: Database, tools: ["Claude Sonnet 5.5", "PubMed & Semantic Scholar", "GraphRAG", "pgvector", "LangChain & LangGraph"],
     color: "bg-green-50 text-green-700 border-green-200"
   },
   {
@@ -287,69 +283,69 @@ const ARCHITECTURE_STEPS = [
       en: "SYSTEM: You are a Data Scientist & Visual Analytics Reviewer.\nTASK: Analyze all charts, tables, and statistical claims within the manuscript.\n1. Use Vision AI to evaluate the clarity, accessibility (e.g., colorblind-safe palettes), and correctness of figures.\n2. Extract statistical reporting (p-values, CI, sample sizes) and run consistency checks via the E2B Sandbox.\n3. Flag any discrepancies between the data visualized and the text conclusions.\nOUTPUT: A rigorous Statistical & Visual Audit Report.", 
       he: "מערכת: אתה מדען נתונים ומבקר אנליזה חזותית.\nמשימה: נתח את כל התרשימים, הטבלאות והטענות הסטטיסטיות במאמר.\n1. השתמש ב-Vision AI כדי להעריך את הבהירות, הנגישות, והנכונות של האיורים.\n2. חלץ דיווחים סטטיסטיים וודא עקביות באמצעות הפעלת קוד ב-E2B Sandbox.\n3. התרע על כל פער בין הנתונים המוצגים לבין המסקנות בטקסט.\nפלט: דוח ביקורת סטטיסטית וחזותית קפדני." 
     },
-    icon: BarChart2, tools: ["Claude 3.7", "Claude 3.5 Haiku", "Vision AI", "E2B Sandbox"],
+    icon: BarChart2, tools: ["Claude Sonnet 5.5", "Claude Haiku 4.5", "Vision AI", "E2B Sandbox"],
     color: "bg-orange-50 text-orange-700 border-orange-200"
   },
   {
     id: 6, phase: 1,
     title: { en: "6. Scientific Review Debate", he: "6. עימות סוקרים מדעי (Debate)" },
     description: { 
-      en: "A parallel multi-agent debate (Vercel AI SDK). Harsh Reviewer (Claude), Analytical Reviewer (GPT-4o), and Optimist Reviewer (Gemini) debate the paper's merits.",
-      he: "דיון סוקרים מקביל המדמה ועידה מדעית. סוקר קשוח (Claude), סוקר אנליטי (GPT-4o), וסוקר אופטימי (Gemini) מבקרים את המאמר מזוויות שונות."
+      en: "Runs as a separate background job after the pipeline. Three reviewers on three providers (Critical: GPT-4o, Novelty: Claude Sonnet 5.5, Optimist: Gemini) review the paper independently, then answer each other's positions in a second round. A reviewer that fails is left out; nothing is written in its name.",
+      he: "רץ כתהליך רקע נפרד אחרי הצינור. שלושה סוקרים על שלושה ספקים (ביקורתי: GPT-4o, חדשנות: Claude Sonnet 5.5, אופטימי: Gemini) סוקרים את המאמר באופן עצמאי, ואז מגיבים זה לעמדות של זה בסבב שני. סוקר שנכשל מושמט, ושום דבר לא נכתב בשמו."
     },
-    icon: MessageSquare, tools: ["Claude 3.7", "GPT-4o", "Gemini 1.5", "Vercel AI SDK"],
+    icon: MessageSquare, tools: ["GPT-4o", "Claude Sonnet 5.5", "Gemini Pro", "Vercel AI SDK", "Inngest"],
     color: "bg-blue-50 text-blue-700 border-blue-200"
   },
   {
     id: 7, phase: 1,
     title: { en: "7. Area Chair Meta-Agent", he: "7. סוכן-על (Area Chair)" },
     description: { 
-      en: "Synthesizes the parallel reviews into a final concrete rebuttal and action plan using deep logical reasoning (OpenAI o1).",
-      he: "מסכם את ביקורות מועצת הסוקרים לתוכנית פעולה אחידה (Action Plan) וקובע אילו תיקונים יתבצעו בפועל תוך שימוש בהסקה לוגית עמוקה של OpenAI o1."
+      en: "Weighs the reviewers' final positions, resolves their disagreements, and writes the consolidated decision and prioritized revision plan (Claude Opus 5.5).",
+      he: "שוקל את העמדות הסופיות של הסוקרים, מכריע במחלוקות ביניהם, וכותב החלטה מאוחדת ותוכנית תיקונים מדורגת (Claude Opus 5.5)."
     },
-    icon: Layers, tools: ["OpenAI o1", "RLHF Logs", "Drizzle ORM"],
+    icon: Layers, tools: ["Claude Opus 5.5", "Drizzle ORM"],
     color: "bg-indigo-50 text-indigo-700 border-indigo-200"
   },
   {
     id: 8, phase: 1,
     title: { en: "8. Academic Writing Agent", he: "8. סוכן כתיבה ועריכה" },
     description: { 
-      en: "Rewrites the text in an iterative LangGraph loop. Fetches user preferences via Mem0, validates output with Guardrails AI, and halts for Human-in-the-Loop review. All monitored by Langfuse.",
-      he: "משכתב את הטקסט בלולאה איטרטיבית של LangGraph. שואב העדפות אישיות דרך Mem0, מוודא את בטיחות התוצר עם Guardrails AI, ועוצר לביקורת אנושית (Human-in-the-Loop). מפוקח בזמן אמת ע\"י Langfuse."
+      en: "Rewrites the text to journal standards (Claude Opus 5.5). In the interactive Agent Runner, a LangGraph workflow adds the user's Mem0 preferences and a guardrails check, and pauses for Human-in-the-Loop review. Calls are traced in Langfuse.",
+      he: "משכתב את הטקסט לרמת כתבי העת (Claude Opus 5.5). בהרצת הסוכנים האינטראקטיבית (Agent Runner), זרימת LangGraph מוסיפה את העדפות המשתמש מ-Mem0 ובדיקת Guardrails, ועוצרת לביקורת אנושית (Human-in-the-Loop). הקריאות מתועדות ב-Langfuse."
     },
     prompt: { 
       en: "SYSTEM: You are an Elite Academic Ghostwriter.\nTASK: Execute the rewriting phase based on the Area Chair's directives.\n1. Elevate the prose to match the linguistic standards of Nature/Science.\n2. Eliminate all AI-generated clichés (e.g., 'delve into', 'a tapestry of').\n3. Ensure logical transitions between paragraphs and active, concise phrasing.\n4. Seamlessly integrate the newly retrieved citations into the narrative flow.\nOUTPUT: The revised manuscript section in Markdown.", 
       he: "מערכת: אתה עורך וכותב צללים אקדמי עילית.\nמשימה: בצע את שלב השכתוב בהתאם להנחיות סוכן-העל (Area Chair).\n1. שפר את משלב הכתיבה לרמה של כתבי העת המובילים (Nature/Science).\n2. השמד לחלוטין קלישאות AI (כגון 'חשוב לציין', 'מארג של').\n3. ודא מעברים לוגיים חלקים בין פסקאות, ושימוש בשפה פעילה ותמציתית.\n4. שלב בטבעיות את הציטוטים החדשים שנשלפו לתוך זרימת הטקסט.\nפלט: הטקסט המשוכתב בפורמט Markdown." 
     },
-    icon: Edit3, tools: ["Claude 3.7", "LangGraph", "Mem0", "Guardrails AI", "Langfuse"],
+    icon: Edit3, tools: ["Claude Opus 5.5", "LangGraph", "Mem0", "Guardrails", "GPT-4o-mini", "Langfuse"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
 id: 9, phase: 1,
     title: { en: "9. Execution Agent", he: "9. סוכן ביצוע והטמעה" },
     description: { 
-      en: "Applies the line-by-line Diff changes to the manuscript. Populates the Tiptap/Monaco UI so the user can see exact modifications.",
+      en: "Applies the line-by-line Diff changes to the manuscript. Populates the Tiptap editor so the user can see exact modifications.",
       he: "מיישם את השינויים סעיף-אחר-סעיף על המסמך, ומזין את הממשק החזותי כך שהמשתמש יוכל לראות במדויק מה נמחק ומה התווסף."
     },
     prompt: { 
       en: "SYSTEM: You are the Source Control & Execution Agent.\nTASK:\n1. Compare the original text and the revised text.\n2. Generate a precise Operational Diff (JSON patch).\n3. Inject the changes directly into the Collaborative Tiptap Editor Database.\n4. Compile a concise Changelog for the human author summarizing the exact semantic shifts.",
       he: "מערכת: אתה סוכן ביצוע ובקרת גרסאות.\nמשימה:\n1. השווה בין הטקסט המקורי לטקסט המשוכתב.\n2. צור Diff תפעולי מדויק (בתצורת JSON patch).\n3. הזרק את השינויים ישירות למסד הנתונים של העורך השיתופי (Tiptap).\n4. הפק יומן שינויים (Changelog) תמציתי עבור המחבר המסכם את התמורות הסמנטיות."
     },
-    icon: Save, tools: ["Claude 3.7", "Tiptap & Monaco", "Neon Postgres", "Drizzle ORM"],
+    icon: Save, tools: ["Claude Opus 5.5", "Tiptap", "Neon Postgres", "Drizzle ORM"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
     id: 10, phase: 1,
     title: { en: "10. QA Agent", he: "10. סוכן בקרת איכות (QA)" },
     description: { 
-      en: "Final consistency checks. Scans for plagiarism, reference formatting, and generates the final citation visual map.",
-      he: "בדיקת עקביות סופית. סורק פלגיאט, מוודא תקינות ציטוטים ומייצר את מפת הקשרים החזותית של הספרות המקצועית."
+      en: "Final consistency check of the revised text: formatting, references and grammar, followed by verification against the target journal's guidelines.",
+      he: "בדיקת עקביות סופית של הטקסט המתוקן: עיצוב, ציטוטים ודקדוק, ולאחריה אימות מול ההנחיות של כתב העת היעד."
     },
     prompt: { 
       en: "SYSTEM: You are the Final Quality Assurance (QA) Inspector.\nTASK: Perform a rigorous, multi-pass validation on the finalized manuscript.\n1. Execute plagiarism & similarity detection against major academic databases.\n2. Verify cross-referencing integrity (all figures, tables, and citations mentioned in text exist in the bibliography and vice-versa).\n3. Perform a final grammar, syntax, and typesetting check.\nOUTPUT: A QA Clearance Certificate or a list of critical blocking errors.", 
       he: "מערכת: אתה פקח בקרת האיכות הסופית (QA).\nמשימה: בצע ולידציה רב-שלבית קפדנית על כתב היד המוגמר.\n1. הפעל זיהוי פלגיאט ודמיון אל מול מאגרי מידע אקדמיים מרכזיים.\n2. ודא שלמות של הפניות צולבות (כל התרשימים והציטוטים המוזכרים בטקסט אכן קיימים, והפוך).\n3. בצע בדיקת דקדוק, תחביר ועיצוב טיפוגרפי סופית.\nפלט: תעודת אישור QA או רשימה של שגיאות חוסמות קריטיות." 
     },
-    icon: ShieldCheck, tools: ["react-force-graph-2d", "Claude 3.7", "Jest"],
+    icon: ShieldCheck, tools: ["Claude Sonnet 5.5", "react-force-graph-2d"],
     color: "bg-purple-50 text-purple-700 border-purple-200"
   },
   {
@@ -363,33 +359,33 @@ id: 9, phase: 1,
       en: "SYSTEM: You are the Publishing Executive.\nTASK: Prepare the submission package.\n1. Draft a highly persuasive Cover Letter addressing the specific Editor-in-Chief of the target journal, highlighting the novelty and broad impact of the research.\n2. Ensure all compliance declarations (conflict of interest, funding, data availability) are present.\n3. Format the final output cleanly.\nOUTPUT: Cover Letter text and metadata payload for export.", 
       he: "מערכת: אתה מנהל ההוצאה לאור.\nמשימה: הכן את חבילת ההגשה.\n1. נסח מכתב מקדים (Cover Letter) משכנע הממוען ספציפית לעורך הראשי של כתב העת, תוך הדגשת החדשנות וההשפעה של המחקר.\n2. ודא כי כל הצהרות החובה (ניגוד עניינים, מימון, זמינות נתונים) קיימות.\n3. עצב את התוצר הסופי בצורה נקייה.\nפלט: טקסט המכתב ומטען (Payload) נתונים לייצוא." 
     },
-    icon: Download, tools: ["Claude 3.7", "Next.js API", "Mammoth & Docx", "Nodemailer", "Stripe Billing"],
+    icon: Download, tools: ["Claude Sonnet 5.5", "Next.js API", "Mammoth & Docx", "Stripe Billing"],
     color: "bg-cyan-50 text-cyan-700 border-cyan-200"
   },
   
   // PHASE 2
   {
     id: 12, phase: 2,
-    title: { en: "12. Journal Target Selection", he: "12. בחירת עיתון יעד" },
+    title: { en: "12. Journal Matching", he: "12. התאמת כתב עת" },
     description: { 
-      en: "System maps the journal URL provided by the user and verifies access to scrape submission guidelines.",
-      he: "המערכת ממפה את קישור העיתון שסיפק המשתמש, ומוודאת יכולת גישה לשאיבת הנחיות ההגשה הרשמיות."
+      en: "The Journal Match tab profiles the manuscript, gathers candidate venues from OpenAlex and an editor agent, has parallel evaluator agents score each one, and a chief-editor agent (Claude Opus 5.5) returns the top 3 journals ranked, with reasons. The user can also pick a journal from the catalog.",
+      he: "לשונית התאמת כתבי העת בונה פרופיל של המאמר, אוספת כתבי עת מועמדים מ-OpenAlex ומסוכן עורך, סוכני הערכה מקבילים מדרגים כל מועמד, וסוכן עורך ראשי (Claude Opus 5.5) מחזיר את 3 כתבי העת המתאימים ביותר לפי סדר עדיפות, עם נימוק. אפשר גם לבחור כתב עת מהקטלוג."
     },
-    icon: BookOpen, tools: ["Playwright", "Next.js API"],
+    icon: BookOpen, tools: ["Claude Opus 5.5", "OpenAlex", "Neon Postgres"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {
     id: 13, phase: 2,
     title: { en: "13. Guideline Extraction", he: "13. שליפת חוקים והנחיות" },
     description: { 
-      en: "Agent extracts explicit formatting rules, word limits, citation styles, and mandatory sections into structured JSON.",
-      he: "סוכן AI מנתח את הדף ושולף את כל חוקי העיצוב (מגבלת מילים, סגנון ציטוט, חלקי מאמר חובה) וממיר ל-JSON מובנה."
+      en: "The journal's rules (word limits, citation style, article types, abstract and cover-letter requirements) are loaded as structured data from the journal catalog in the database.",
+      he: "חוקי כתב העת (מגבלות מילים, סגנון ציטוט, סוגי מאמרים, דרישות לתקציר ולמכתב המקדים) נטענים כנתונים מובנים מקטלוג כתבי העת שבמסד הנתונים."
     },
     prompt: {
       en: "SYSTEM: You are a strict Journal Requirements Parsing Engine.\nTASK: Deeply analyze the scraped HTML/text of the target journal's Author Guidelines.\n1. Extract explicit constraints: abstract word limit, main text word limit, reference formatting style (e.g., APA, IEEE), figure resolution rules, and mandatory section order.\n2. Identify implicit requirements (e.g., blind title page, specific declarations).\nOUTPUT: A rigid JournalRules JSON schema mapping every constraint.",
       he: "מערכת: אתה מנוע פענוח קפדני לדרישות כתבי עת.\nמשימה: נתח לעומק את ה-HTML/טקסט שנשאב מעמוד הנחיות המחברים של העיתון.\n1. חלץ אילוצים מפורשים: מגבלת מילים בתקציר ובגוף הטקסט, סגנון ציטוט (APA, IEEE), דרישות רזולוציה לאיורים, וסדר פרקים חובה.\n2. זהה דרישות סמויות (למשל: עמוד כותרת נפרד לביקורת עיוורת, הצהרות ספציפיות).\nפלט: סכמת JSON קשיחה הממפה כל אילוץ."
     },
-    icon: Search, tools: ["Claude 3.7", "Neon Postgres", "Drizzle ORM"],
+    icon: Search, tools: ["Neon Postgres", "Drizzle ORM"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {
@@ -403,7 +399,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are a precision Formatting & Typesetting Agent.\nINPUTS: Final manuscript, JournalRules JSON.\nTASK: Structurally transform the manuscript without altering scientific claims.\n1. Restructure headers to match the journal's hierarchy.\n2. Automatically trim or expand the abstract to fit the exact word boundaries.\n3. Reformat all in-text citations and the bibliography to match the required standard perfectly.\nOUTPUT: The completely reformatted manuscript.",
       he: "מערכת: אתה סוכן עיצוב וטיפוגרפיה מדויק.\nקלטים: כתב היד הסופי, קובץ JSON של הנחיות העיתון.\nמשימה: התמר את כתב היד מבחינה מבנית מבלי לשנות טענות מדעיות.\n1. סדר מחדש את הכותרות כך שיתאימו להיררכיה של העיתון.\n2. קצץ או הרחב אוטומטית את התקציר כך שיעמוד בדיוק במגבלת המילים.\n3. עצב מחדש את כל הציטוטים בגוף הטקסט והביבליוגרפיה לסגנון הנדרש.\nפלט: כתב היד המעוצב במלואו."
     },
-    icon: Scissors, tools: ["Claude 3.7", "Tiptap & Monaco"],
+    icon: Scissors, tools: ["Claude Sonnet 5.5", "Tiptap"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {
@@ -414,10 +410,10 @@ id: 9, phase: 1,
       he: "רשימת תיוג (Checklist) אוטומטית המאמתת לפני ההגשה שאף חוק של העיתון לא הופר (למשל חריגה במילים בתקציר)."
     },
     prompt: {
-      en: "SYSTEM: You are the Pre-Flight Compliance Auditor (Powered by OpenAI o1).\nTASK: Perform zero-tolerance Boolean logic validation on the manuscript against the Journal Rules.\n1. Count abstract words. Does it exceed X? (Fail/Pass)\n2. Check section order. Does Methods come before Results? (Fail/Pass)\n3. Verify blinded manuscript constraints (e.g., no author names in the main PDF).\nOUTPUT: A Submission Readiness Report. If any check fails, trigger a rollback.",
-      he: "מערכת: אתה מבקר תאימות לפני-הגשה (מופעל ע\"י OpenAI o1).\nמשימה: בצע אימות לוגי בוליאני באפס-סובלנות לכתב היד מול חוקי העיתון.\n1. ספור מילים בתקציר. האם חורג מ-X? (עובר/נכשל)\n2. בדוק סדר פרקים. האם שיטות מופיעות לפני תוצאות? (עובר/נכשל)\n3. ודא אילוצי סקירה עיוורת (למשל, אין שמות מחברים ב-PDF המרכזי).\nפלט: דוח מוכנות להגשה. אם בדיקה נכשלת, הפעל חזרה לאחור (Rollback)."
+      en: "SYSTEM: You are the Pre-Flight Compliance Auditor.\nTASK: Perform zero-tolerance Boolean logic validation on the manuscript against the Journal Rules.\n1. Count abstract words. Does it exceed X? (Fail/Pass)\n2. Check section order. Does Methods come before Results? (Fail/Pass)\n3. Verify blinded manuscript constraints (e.g., no author names in the main PDF).\nOUTPUT: A Submission Readiness Report. If any check fails, trigger a rollback.",
+      he: "מערכת: אתה מבקר תאימות לפני-הגשה.\nמשימה: בצע אימות לוגי בוליאני באפס-סובלנות לכתב היד מול חוקי העיתון.\n1. ספור מילים בתקציר. האם חורג מ-X? (עובר/נכשל)\n2. בדוק סדר פרקים. האם שיטות מופיעות לפני תוצאות? (עובר/נכשל)\n3. ודא אילוצי סקירה עיוורת (למשל, אין שמות מחברים ב-PDF המרכזי).\nפלט: דוח מוכנות להגשה. אם בדיקה נכשלת, הפעל חזרה לאחור (Rollback)."
     },
-    icon: ListChecks, tools: ["OpenAI o1"],
+    icon: ListChecks, tools: ["Claude Sonnet 5.5", "E2B Sandbox"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
 
@@ -425,8 +421,8 @@ id: 9, phase: 1,
     id: 16, phase: 2,
     title: { en: "16. RPA Login & Navigation", he: "16. ניווט והתחברות אוטומטית (RPA)" },
     description: { 
-      en: "A real RPA bot powered by Playwright navigates the target journal's portal, executing automated logins using encrypted credentials. When DOM selectors fail, a Vision AI fallback layer analyzes screenshots and identifies page elements visually.",
-      he: "בוט אוטומציה (RPA) אמיתי המופעל על ידי Playwright מנווט אל מערכת ההגשות ומתחבר עצמאית בעזרת פרטי הזדהות מוצפנים. כאשר סלקטורי DOM נכשלים, שכבת Vision AI מנתחת צילומי מסך ומזהה אלמנטים באופן חזותי."
+      en: "A real RPA bot powered by Playwright navigates the target journal's portal, executing automated logins using encrypted credentials. When DOM selectors fail, a Vision AI fallback layer analyzes screenshots and identifies page elements visually. It needs a browser runtime, so it is unavailable on the current Vercel deployment.",
+      he: "בוט אוטומציה (RPA) אמיתי המופעל על ידי Playwright מנווט אל מערכת ההגשות ומתחבר עצמאית בעזרת פרטי הזדהות מוצפנים. כאשר סלקטורי DOM נכשלים, שכבת Vision AI מנתחת צילומי מסך ומזהה אלמנטים באופן חזותי. הבוט צריך סביבת דפדפן, ולכן אינו זמין בפריסה הנוכחית ב-Vercel."
     },
     prompt: { 
       en: "SYSTEM: You are a secure Web Automation Navigation Agent.\nTASK: Access the target journal submission platform.\n1. Safely retrieve encrypted user credentials from the database.\n2. Navigate the headless browser to the journal's login endpoint.\n3. Identify DOM elements for username, password, and submit button.\n4. Execute login, handle cookies, and navigate to the 'New Submission' dashboard.\nOUTPUT: Navigation success state or explicit error for invalid credentials.", 
@@ -446,21 +442,21 @@ id: 9, phase: 1,
       en: "SYSTEM: You are a DOM-parsing and Data-Entry Agent.\nTASK: Fill out the journal's complex multi-page submission form.\n1. Scan the current page for input fields, textareas, and select dropdowns.\n2. Cross-reference the required fields with the manuscript's JSON metadata.\n3. Map and type out all fields automatically (e.g., matching 'Corresponding Author' to the user's profile).\n4. Upload the required files (Manuscript, Cover Letter, Figures) into the correct dropzones.\nOUTPUT: State verification that all mandatory fields are satisfied.", 
       he: "מערכת: אתה סוכן ניתוח DOM והזנת נתונים.\nמשימה: מלא את טופס ההגשה מרובה-הדפים של העיתון.\n1. סרוק את העמוד הנוכחי לאיתור שדות טקסט, תפריטי בחירה ואזורי גרירה.\n2. הצלב את השדות הנדרשים עם המטא-דאטה של המאמר (JSON).\n3. הזן את כל הנתונים הרלוונטיים (לדוגמה, חיבור 'המחבר המייצג' לפרופיל המשתמש).\n4. העלה את הקבצים הנדרשים (קובץ המאמר, מכתב מלווה, איורים) לאזורים הנכונים.\nפלט: אישור סטטוס שכל השדות החובה מולאו כהלכה." 
     },
-    icon: Edit3, tools: ["Playwright", "Claude 3.7", "Vision AI", "Nodemailer"],
+    icon: Edit3, tools: ["Playwright", "Vision AI", "Nodemailer"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {
     id: 18, phase: 2,
     title: { en: "18. Human-in-the-Loop Alert", he: "18. התראת משתמש ואימות אנושי" },
     description: { 
-      en: "If the bot hits a CAPTCHA, 2FA, or an unknown required field, it halts the headless browser, takes a live screenshot, and pings the user's device to intervene manually.",
-      he: "אם הבוט נתקל ב-CAPTCHA, אימות דו-שלבי (2FA) או שדה חובה לא מוכר, הוא עוצר את התהליך, מצלם מסך בלייב ושולח התראה למכשיר של המשתמש להתערבות ידנית."
+      en: "If the bot hits a CAPTCHA or 2FA, it takes a screenshot and the Inngest job pauses (waitForEvent). The user enters the solution in the app, and the job resumes from where it stopped.",
+      he: "אם הבוט נתקל ב-CAPTCHA או באימות דו-שלבי (2FA), הוא מצלם מסך ותהליך ה-Inngest נעצר (waitForEvent). המשתמש מזין את הפתרון באפליקציה, והתהליך ממשיך מהנקודה שבה עצר."
     },
     prompt: { 
-      en: "SYSTEM: You are an Exception Handling & Alert Agent.\nTASK: Monitor the RPA pipeline for roadblocks.\n1. Detect presence of Cloudflare turnstiles, reCAPTCHA, or unexpected modal dialogs.\n2. If detected, pause the Playwright script indefinitely.\n3. Capture the HTML state and a screenshot. Send a WebSocket ping to the frontend Dashboard.\n4. Serve a secure iframe or remote-desktop link so the user can solve the challenge.\nOUTPUT: Resumes the script only when the user clicks 'Verification Complete'.", 
-      he: "מערכת: אתה סוכן טיפול בחריגים והתראות.\nמשימה: נטר את תהליך ה-RPA לאיתור חסימות.\n1. מצא נוכחות של חסמי אבטחה (Cloudflare, reCAPTCHA) או חלונות קופצים בלתי צפויים.\n2. אם זוהתה חסימה, הקפא את הסקריפט באופן מלא.\n3. צלם מסך של המצב הנוכחי ושלח פולס (Ping) ב-WebSocket לדשבורד של המשתמש.\n4. פתח חלון מאובטח (iframe) שמאפשר למשתמש לפתור את האתגר מתוך המערכת שלנו.\nפלט: חידוש הסקריפט יתבצע אך ורק כשהמשתמש מאשר שסיים את ההתערבות הידנית." 
+      en: "SYSTEM: You are an Exception Handling & Alert Agent.\nTASK: Monitor the RPA pipeline for roadblocks.\n1. Detect presence of Cloudflare turnstiles, reCAPTCHA, or unexpected modal dialogs.\n2. If detected, pause the Playwright script indefinitely.\n3. Capture a screenshot and mark the job as paused so the dashboard shows it.\n4. Wait for the user to submit the CAPTCHA or 2FA code from the app.\nOUTPUT: Resumes the script with the user's input.", 
+      he: "מערכת: אתה סוכן טיפול בחריגים והתראות.\nמשימה: נטר את תהליך ה-RPA לאיתור חסימות.\n1. מצא נוכחות של חסמי אבטחה (Cloudflare, reCAPTCHA) או חלונות קופצים בלתי צפויים.\n2. אם זוהתה חסימה, הקפא את הסקריפט באופן מלא.\n3. צלם מסך וסמן את התהליך כמושהה כדי שהדשבורד יציג זאת.\n4. המתן שהמשתמש יזין את קוד ה-CAPTCHA או האימות הדו-שלבי מתוך האפליקציה.\nפלט: חידוש הסקריפט עם הקלט של המשתמש." 
     },
-    icon: ShieldCheck, tools: ["WebSockets", "Vercel AI SDK", "Puppeteer"],
+    icon: ShieldCheck, tools: ["Inngest", "Playwright", "Next.js 16 UI"],
     color: "bg-pink-50 text-pink-700 border-pink-200"
   },
   {
@@ -504,7 +500,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are a Peer Review Analyst.\nTASK: Deconstruct the peer review text into an array of isolated, distinct comments.\n1. Identify when a new point is being raised by a reviewer.\n2. Extract the exact text of the comment.\n3. Classify it as Major Revision (methodological flaws, requires new data) or Minor Revision (typos, clarifications, formatting).\nOUTPUT: A JSON array of 'ReviewComment' objects.", 
       he: "מערכת: אתה מנתח ביקורות עמיתים.\nמשימה: פרק את מכתב הביקורת למערך של הערות בודדות ונפרדות.\n1. זהה מתי הסוקר עובר לנקודה או להערה חדשה.\n2. חלץ את הטקסט המדויק של ההערה.\n3. סווג אותה כ'תיקון מהותי' (כשלים מתודולוגיים, צורך בנתונים חדשים) או 'תיקון משני' (שגיאות כתיב, הבהרות, עיצוב).\nפלט: מערך JSON של אובייקטים מסוג 'ReviewComment'." 
     },
-    icon: GitMerge, tools: ["Claude 3.7", "Vercel AI SDK", "GPT-4o-mini", "Zod"],
+    icon: GitMerge, tools: ["GPT-4o", "Vercel AI SDK", "Zod"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
   {
@@ -518,7 +514,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are an Area Chair directing a revision.\nTASK: Formulate an action plan for every ReviewComment.\n1. For each comment, determine: Does this require altering the manuscript, or just a polite refutation?\n2. If altering the manuscript, pinpoint the exact section (e.g., 'Methods: Data Collection').\n3. Generate a draft response to the reviewer thanking them and explaining how it was addressed.\nOUTPUT: Strategic action items appended to each ReviewComment.", 
       he: "מערכת: אתה סוכן-על (Area Chair) המנחה תהליך R&R.\nמשימה: גבש תוכנית פעולה אסטרטגית עבור כל ReviewComment.\n1. עבור כל הערה, קבע: האם נדרש שינוי בכתב היד, או שניתן להפריך אותה בנימוס מבוסס ספרות?\n2. אם נדרש שינוי, סמן את הפסקה המדויקת במאמר (למשל 'פרק שיטות').\n3. נסח טיוטת תגובה לסוקר המודה לו ומסבירה כיצד ההערה טופלה.\nפלט: סעיפי פעולה אסטרטגיים המוצמדים לכל הערת סוקר." 
     },
-    icon: Search, tools: ["OpenAI o1"],
+    icon: Search, tools: ["Claude Sonnet 5.5"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
   {
@@ -532,7 +528,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are the Targeted Execution Agent.\nTASK: Modify the manuscript exactly according to the Rebuttal Strategy.\n1. Locate the specific paragraphs identified by the Area Chair.\n2. Execute the required rewriting, preserving the surrounding context perfectly.\n3. Output a diff (Track Changes) showing only the newly modified areas so the human author can review them easily.\nOUTPUT: Updated manuscript with localized diffs.", 
       he: "מערכת: אתה סוכן ביצוע ממוקד-מטרה.\nמשימה: שנה את כתב היד בדיוק לפי אסטרטגיית המענה.\n1. אתר את הפסקאות הספציפיות שסומנו על ידי סוכן-העל.\n2. בצע את השכתוב הנדרש, תוך שמירה מושלמת על ההקשר הסובב.\n3. הפק מסמך עם סימוני שינויים (Track Changes) שיציג אך ורק את החלקים שעודכנו כדי שהמחבר יוכל לבחון אותם.\nפלט: כתב היד המעודכן עם סימוני Diff." 
     },
-    icon: Code, tools: ["Claude 3.7"],
+    icon: Code, tools: ["Claude Opus 5.5"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
   {
@@ -546,7 +542,7 @@ id: 9, phase: 1,
       en: "SYSTEM: You are an Academic Letter Generator.\nTASK: Compile the final 'Response to Reviewers' letter.\n1. Use a highly formal, respectful, and appreciative academic tone.\n2. Format the letter as: [Reviewer Comment] followed by [Author Response] and [Action Taken in Manuscript].\n3. Include page/line numbers showing where the changes were made.\nOUTPUT: A perfectly formatted PDF/Docx rebuttal letter ready for submission.", 
       he: "מערכת: אתה מפיק מסמכים אקדמיים.\nמשימה: חבר את המכתב הסופי 'מענה לסוקרים'.\n1. השתמש בטון אקדמי רשמי, מכבד ומלא הוקרה.\n2. ערוך את המכתב במבנה של: [הערת הסוקר] מלווה ב-[תגובת המחברים] ו-[פעולה שבוצעה במאמר].\n3. ציין מספרי עמודים/שורות המראים היכן בוצעו השינויים בפועל.\nפלט: מכתב תגובה מעוצב בפורמט PDF/Docx מוכן להגשה." 
     },
-    icon: FileCheck, tools: ["Next.js API", "Claude 3.7", "Mammoth & Docx"],
+    icon: FileCheck, tools: ["Next.js API", "Claude Sonnet 5.5", "Mammoth & Docx"],
     color: "bg-amber-50 text-amber-700 border-amber-200"
   },
   
@@ -555,20 +551,20 @@ id: 9, phase: 1,
     id: 25, phase: 4,
     title: { en: "Security & Authentication", he: "אבטחה והזדהות" },
     description: { 
-      en: "Global defense-in-depth security layer featuring Web Crypto API CSRF protection, in-memory Sliding Window Rate Limiting, and strict Secrets management without fallbacks to protect manuscripts and accounts.",
-      he: "שכבות אבטחה היקפיות (Defense-in-depth) הכוללות הגנת CSRF מבוססת Web Crypto API, הגבלת קצב בקשות בחלון מתגלגל (Sliding Window Rate Limiting) וניהול סודות קפדני (Secrets management) ללא ערכי ברירת מחדל לא מאובטחים להגנה מלאה על מאמרים וחשבונות."
+      en: "Defense in depth: a site-wide PIN and a single Content-Security-Policy set by the proxy, Auth.js sessions, ownership checks on every API route, CSRF tokens, AES-256-GCM encryption for saved journal credentials, and per-user rate limiting on Upstash Redis.",
+      he: "הגנה בשכבות: קוד PIN לכל האתר ומדיניות CSP אחת שמוגדרת ב-proxy, סשנים של Auth.js, בדיקת בעלות בכל נתיב API, אסימוני CSRF, הצפנת AES-256-GCM לפרטי ההתחברות לכתבי העת, והגבלת קצב לכל משתמש על Upstash Redis."
     },
-    icon: ShieldCheck, tools: ["NextAuth.js", "Upstash Redis", "Neon Postgres", "Rate Limiter", "Environment Validator"],
+    icon: ShieldCheck, tools: ["NextAuth.js", "Site PIN", "AES-256-GCM", "Rate Limiter", "Upstash Redis"],
     color: "bg-slate-100 text-slate-700 border-slate-200"
   },
   {
     id: 26, phase: 4,
     title: { en: "Data Analytics & UI", he: "ממשק משתמש וסטטיסטיקות" },
     description: { 
-      en: "Admin and user dashboards featuring rich visualizations of agent performance and processing history.",
-      he: "מסכי ניהול ומשתמש הכוללים ייצוג חזותי עשיר של ביצועי הסוכנים והיסטוריית העיבוד."
+      en: "Admin and user dashboards featuring rich visualizations of agent performance and processing history, the RLHF feedback dashboard, and MCP endpoints for external AI clients.",
+      he: "מסכי ניהול ומשתמש הכוללים ייצוג חזותי עשיר של ביצועי הסוכנים והיסטוריית העיבוד, לוח המשוב של RLHF, ונקודות קצה של MCP ללקוחות AI חיצוניים."
     },
-    icon: BarChart2, tools: ["Next.js 16 UI", "Recharts", "Neon Postgres", "Drizzle ORM"],
+    icon: BarChart2, tools: ["Next.js 16 UI", "Recharts", "RLHF Logs", "MCP", "Neon Postgres", "Drizzle ORM"],
     color: "bg-slate-100 text-slate-700 border-slate-200"
   }
 ];
