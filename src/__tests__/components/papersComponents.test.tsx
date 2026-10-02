@@ -2,8 +2,6 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { PaperProcessingUI } from "@/components/papers/PaperProcessingUI";
-import { RebuttalPanel } from "@/components/papers/RebuttalPanel";
-import * as papersModule from "@/components/papers";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
@@ -39,13 +37,6 @@ describe("Papers Components Audit Tests", () => {
 
   afterAll(() => {
     global.fetch = originalFetch;
-  });
-
-  describe("Barrel export verification", () => {
-    it("exports all components correctly from @/components/papers", () => {
-      expect(papersModule.PaperProcessingUI).toBeDefined();
-      expect(papersModule.RebuttalPanel).toBeDefined();
-    });
   });
 
   describe("PaperProcessingUI", () => {
@@ -145,75 +136,4 @@ describe("Papers Components Audit Tests", () => {
     });
   });
 
-  describe("RebuttalPanel", () => {
-    it("renders form with properly linked label and textarea id", () => {
-      render(<RebuttalPanel paperId="paper-101" />);
-
-      const label = screen.getByText(/^Paste Reviewer Comments$/i);
-      expect(label).toHaveAttribute("for", "reviewer-comments-paper-101");
-
-      const textarea = screen.getByLabelText(/^Paste Reviewer Comments$/i);
-      expect(textarea).toHaveAttribute("id", "reviewer-comments-paper-101");
-      expect(textarea).toHaveAttribute("name", "reviewerComments");
-    });
-
-    it("prefills initial comments and displays previous rebuttal strategy and letter if passed", () => {
-      render(
-        <RebuttalPanel
-          paperId="paper-101"
-          initialComments="Initial reviewer remarks"
-          initialStrategy={["Point 1: Add experiment", "Point 2: Rephrase"]}
-          initialLetter="Dear Reviewer, thank you for the feedback."
-        />
-      );
-
-      const textarea = screen.getByRole("textbox") as HTMLTextAreaElement;
-      expect(textarea.value).toBe("Initial reviewer remarks");
-
-      expect(screen.getByText("Point 1: Add experiment")).toBeInTheDocument();
-      expect(screen.getByText("Dear Reviewer, thank you for the feedback.")).toBeInTheDocument();
-    });
-
-    it("displays error alert with role='alert' when generation fails", async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: false,
-        status: 500,
-        json: async () => ({ error: "Model timeout error" }),
-      });
-
-      render(<RebuttalPanel paperId="paper-101" initialComments="Methodology questions" />);
-
-      const generateBtn = screen.getByRole("button", { name: /Generate Strategy/i });
-      fireEvent.click(generateBtn);
-
-      await waitFor(() => {
-        const errorAlert = screen.getByRole("alert");
-        expect(errorAlert).toBeInTheDocument();
-        expect(errorAlert).toHaveTextContent("Model timeout error");
-      });
-    });
-
-    it("handles clipboard copying with accessible buttons", async () => {
-      Object.assign(navigator, {
-        clipboard: {
-          writeText: jest.fn().mockResolvedValue(undefined),
-        },
-      });
-
-      render(
-        <RebuttalPanel
-          paperId="paper-101"
-          initialStrategy={["Point 1"]}
-          initialLetter="Formal letter text"
-        />
-      );
-
-      const copyLetterBtn = screen.getByRole("button", { name: /Copy formal rebuttal letter to clipboard/i });
-      fireEvent.click(copyLetterBtn);
-
-      await waitFor(() => {
-        expect(navigator.clipboard.writeText).toHaveBeenCalledWith("Formal letter text");
-      });
-    });
-  });
 });

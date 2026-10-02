@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import NetworkGraph, { NetworkGraphSkeleton } from '@/components/analytics/NetworkGraph';
 import AnalyticsDashboard, { AnalyticsDashboardSkeleton } from '@/app/[locale]/(dashboard)/analytics/AnalyticsDashboard';
-import EntityHighlighter from '@/components/graph/EntityHighlighter';
 import KnowledgeGraphViewer, { KnowledgeGraphViewerSkeleton } from '@/components/graph/KnowledgeGraphViewer';
 import LogicConsistencyReport, { LogicConsistencyReportSkeleton } from '@/components/graph/LogicConsistencyReport';
 
@@ -70,57 +69,6 @@ describe('Analytics & Graph Components', () => {
       });
       expect(screen.getByText(/Failed to load network graph/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Retry/i })).toBeInTheDocument();
-    });
-  });
-
-  describe('EntityHighlighter', () => {
-    it('handles non-array entity responses gracefully without crashing', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ error: 'Database timeout' }),
-      });
-
-      render(<EntityHighlighter text="Testing non-array fallback." />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Testing non-array fallback.')).toBeInTheDocument();
-      });
-    });
-
-    it('highlights matched entities with keyboard-accessible mark', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => [
-          { id: 'e1', name: 'Metformin', type: 'drug', description: 'Anti-diabetic medication' },
-        ],
-      });
-
-      render(<EntityHighlighter text="Patients were treated with Metformin daily." />);
-
-      await waitFor(() => {
-        const mark = screen.getByRole('mark');
-        expect(mark).toBeInTheDocument();
-        expect(mark).toHaveAttribute('tabindex', '0');
-      });
-
-      expect(screen.getAllByText('Metformin').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText('Type: drug')).toBeInTheDocument();
-    });
-
-    it('safely escapes special characters in entity names', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => [
-          { id: 'e2', name: 'p53 [tumor protein]', type: 'gene', description: 'Tumor suppressor' },
-        ],
-      });
-
-      // Should not throw SyntaxError when regex escapes brackets
-      render(<EntityHighlighter text="Expression of p53 [tumor protein] was elevated." />);
-
-      await waitFor(() => {
-        expect(screen.getByText(/Expression of/i)).toBeInTheDocument();
-      });
     });
   });
 

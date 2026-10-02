@@ -11,7 +11,7 @@ import {
   InMemoryLruCache,
   LiteratureCache,
   LiteratureItem,
-} from '@/services/literature';
+} from '@/services/literature/literatureService';
 import { db } from '@/services/db';
 
 // Mock db

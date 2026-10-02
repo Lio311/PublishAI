@@ -1,6 +1,6 @@
 import { inngest } from "@/inngest/client";
 import { cron } from "inngest";
-import { exportDatasetForFineTuning } from "@/services/rlhfService";
+import { storeFineTuningDataset } from "@/services/rlhfService";
 
 export const generateWeeklyFineTuningDataset = inngest.createFunction(
   {
@@ -11,15 +11,7 @@ export const generateWeeklyFineTuningDataset = inngest.createFunction(
     },
   },
   async ({ step }) => {
-    const filePath = await step.run("export-dataset", async () => {
-      try {
-        return await exportDatasetForFineTuning(undefined, "accepted");
-      } catch (error) {
-        console.error("Failed to export dataset for fine-tuning:", error);
-        throw error;
-      }
-    });
-
-    return { success: true, filePath };
+    const dataset = await step.run("export-dataset", () => storeFineTuningDataset("accepted"));
+    return { success: true, ...dataset };
   }
 );

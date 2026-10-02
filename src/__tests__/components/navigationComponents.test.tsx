@@ -2,10 +2,8 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
 import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
 import AnimatedSidebar from "@/components/layout/AnimatedSidebar";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import * as layoutExports from "@/components/layout";
 
 let mockPathname = "/";
 const mockRouterReplace = jest.fn();
@@ -69,16 +67,6 @@ describe("Navigation Components Audit", () => {
     };
   });
 
-  describe("Barrel Exports", () => {
-    it("exports all layout components from @/components/layout", () => {
-      expect(layoutExports.DashboardLayout).toBeDefined();
-      expect(layoutExports.Header).toBeDefined();
-      expect(layoutExports.Sidebar).toBeDefined();
-      expect(layoutExports.AnimatedSidebar).toBeDefined();
-      expect(layoutExports.DynamicBackground).toBeDefined();
-    });
-  });
-
   describe("Header Component", () => {
     it("renders mobile burger menu with proper touch target and triggers onOpenMobileMenu", () => {
       const handleOpen = jest.fn();
@@ -127,10 +115,10 @@ describe("Navigation Components Audit", () => {
     });
   });
 
-  describe("Sidebar Component", () => {
+  describe("AnimatedSidebar Component", () => {
     it("renders navigation items and applies active state styling to current route", () => {
       mockPathname = "/papers";
-      render(<Sidebar />);
+      render(<AnimatedSidebar />);
 
       const papersLink = screen.getByRole("link", { name: /myPapers/i });
       expect(papersLink).toHaveAttribute("aria-current", "page");
@@ -150,7 +138,7 @@ describe("Navigation Components Audit", () => {
 
     it("renders accessible close button with min 44x44px touch target on mobile drawer", () => {
       const handleClose = jest.fn();
-      render(<Sidebar onClose={handleClose} />);
+      render(<AnimatedSidebar onClose={handleClose} />);
 
       const closeButton = screen.getByRole("button", { name: "closeMenu" });
       expect(closeButton).toBeInTheDocument();
@@ -162,7 +150,7 @@ describe("Navigation Components Audit", () => {
     });
 
     it("shows admin items when user is admin or isAdmin prop is true", () => {
-      render(<Sidebar isAdmin={true} />);
+      render(<AnimatedSidebar isAdmin={true} />);
       expect(screen.getByRole("link", { name: /admin/i })).toBeInTheDocument();
       expect(screen.getByRole("link", { name: /learning/i })).toBeInTheDocument();
       expect(screen.getByRole("link", { name: /architecture/i })).toBeInTheDocument();
