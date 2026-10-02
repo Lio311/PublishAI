@@ -81,3 +81,7 @@ build/
 # =========================================
 .e2b/
 test-results/
+
+# local leftovers
+server.log
+*.orig

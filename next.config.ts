@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
+import { getSecurityHeadersArray } from './src/services/security/headers';
 
 const withNextIntl = createNextIntlPlugin('./src/app/i18n/request.ts');
 
@@ -22,50 +23,14 @@ const nextConfig: NextConfig = {
       '@neondatabase/serverless',
     ],
   },
+  // The Content-Security-Policy is set only by src/proxy.ts: sending it from here as well
+  // produced two CSP headers, which browsers enforce together. The remaining security
+  // headers come from the same source and also cover static files the proxy skips.
   async headers() {
     return [
       {
         source: '/:path*',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' blob: data: https:",
-              "font-src 'self' data:",
-              "connect-src 'self' https: wss: blob:",
-              "frame-ancestors 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-            ].join('; '),
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains; preload',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()',
-          },
-        ],
+        headers: getSecurityHeadersArray().filter((h) => h.key !== 'Content-Security-Policy'),
       },
     ];
   },

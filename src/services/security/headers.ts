@@ -38,7 +38,12 @@ export function getSecurityHeaders(
   const isProd =
     options.isProduction ?? process.env.NODE_ENV === "production";
 
-  const csp = options.contentSecurityPolicy || DEFAULT_CONTENT_SECURITY_POLICY;
+  // React's development build needs eval() for debugging; production never does.
+  const csp =
+    options.contentSecurityPolicy ||
+    (isProd
+      ? DEFAULT_CONTENT_SECURITY_POLICY
+      : DEFAULT_CONTENT_SECURITY_POLICY.replace("script-src 'self' 'unsafe-inline'", "script-src 'self' 'unsafe-inline' 'unsafe-eval'"));
 
   const headers: Record<string, string> = {
     "Content-Security-Policy": csp,

@@ -1,6 +1,5 @@
 import { db } from "@/services/db";
 import { journals, journalCitationRules, journalArticleTypes, journalAbstractRules, journalCoverLetterRules } from "@/services/db/schema";
-import { eq } from "drizzle-orm";
 import { Book, ExternalLink, FileText, Quote, List, Mail, CheckCircle, XCircle, Shield, Sparkles } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { checkIsAdmin } from "@/services/auth-utils";
@@ -16,26 +15,32 @@ type JournalWithRelations = {
 };
 
 async function getJournalsWithRelations(): Promise<JournalWithRelations[]> {
-  const allJournals = await db.select().from(journals);
-  
-  const enriched: JournalWithRelations[] = await Promise.all(
-    allJournals.map(async (journal) => {
-      const [citationRule] = await db.select().from(journalCitationRules).where(eq(journalCitationRules.journalId, journal.id));
-      const articleTypesList = await db.select().from(journalArticleTypes).where(eq(journalArticleTypes.journalId, journal.id));
-      const [abstractRule] = await db.select().from(journalAbstractRules).where(eq(journalAbstractRules.journalId, journal.id));
-      const [coverLetterRule] = await db.select().from(journalCoverLetterRules).where(eq(journalCoverLetterRules.journalId, journal.id));
-      
-      return {
-        journal,
-        citationRules: citationRule || null,
-        articleTypes: articleTypesList,
-        abstractRules: abstractRule || null,
-        coverLetterRules: coverLetterRule || null,
-      };
-    })
-  );
-  
-  return enriched;
+  // Five queries in total instead of four per journal.
+  const [allJournals, citationRules, articleTypes, abstractRules, coverLetterRules] = await Promise.all([
+    db.select().from(journals),
+    db.select().from(journalCitationRules),
+    db.select().from(journalArticleTypes),
+    db.select().from(journalAbstractRules),
+    db.select().from(journalCoverLetterRules),
+  ]);
+
+  const byJournal = <T extends { journalId: number }>(rows: T[]) => {
+    const map = new Map<number, T[]>();
+    for (const row of rows) map.set(row.journalId, [...(map.get(row.journalId) ?? []), row]);
+    return map;
+  };
+  const citationMap = byJournal(citationRules);
+  const typesMap = byJournal(articleTypes);
+  const abstractMap = byJournal(abstractRules);
+  const coverMap = byJournal(coverLetterRules);
+
+  return allJournals.map((journal) => ({
+    journal,
+    citationRules: citationMap.get(journal.id)?.[0] ?? null,
+    articleTypes: typesMap.get(journal.id) ?? [],
+    abstractRules: abstractMap.get(journal.id)?.[0] ?? null,
+    coverLetterRules: coverMap.get(journal.id)?.[0] ?? null,
+  }));
 }
 
 function DataSourceBadge({ source, verifiedLabel, aiLabel }: { source: string | null; verifiedLabel: string; aiLabel: string }) {
