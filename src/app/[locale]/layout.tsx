@@ -12,7 +12,9 @@ import { Toaster } from 'sonner';
 import DynamicBackground from '@/components/layout/DynamicBackground';
 import AlertOverride from '@/components/layout/AlertOverride';
 
-const openSans = Open_Sans({ subsets: ["latin", "hebrew"] });
+// The only typeface in the app. Exposed as --font-open-sans so Tailwind's font-sans and
+// font-mono utilities resolve to it as well (see globals.css).
+const openSans = Open_Sans({ subsets: ["latin", "hebrew"], variable: "--font-open-sans", display: "swap" });
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -54,7 +56,7 @@ export default async function RootLayout({
   const dir = locale === 'he' ? 'rtl' : 'ltr';
 
   return (
-    <html lang={locale} dir={dir} translate="no">
+    <html lang={locale} dir={dir} translate="no" className={openSans.variable}>
       <body className={`${openSans.className} bg-transparent min-h-screen text-slate-900`}>
         <DynamicBackground />
         <NextIntlClientProvider locale={locale} messages={messages}>
