@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { z } from "zod";
 import { getOpenAIModelInstance, resolveProvider } from "@/services/ai/aiService";
 import { createAnthropic } from "@ai-sdk/anthropic";
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     if (rateLimitResponse) return rateLimitResponse;
 
     const body = await req.json();
-    const { prompt, systemPrompt, model, temperature, maxTokens } = body;
+    const { prompt, systemPrompt, model, temperature, maxTokens, mode } = body;
 
     if (!prompt) {
       return NextResponse.json(
@@ -52,6 +52,17 @@ export async function POST(req: Request) {
       aiModel = anthropic(model || ANTHROPIC_MODELS.standard) as any;
     } else {
       aiModel = getOpenAIModelInstance(model || OPENAI_MODELS.standard) as any;
+    }
+
+    // "text" mode returns prose (editor co-pilot); the default returns structured edit patches.
+    if (mode === "text") {
+      const { text, usage } = await generateText({
+        model: aiModel as any,
+        prompt,
+        system: systemPrompt || undefined,
+        temperature: temperature ?? 0.3,
+      });
+      return NextResponse.json({ text, provider: providerName, tokensUsed: usage?.totalTokens });
     }
 
     const enhancedSystemPrompt = `${systemPrompt || ""}

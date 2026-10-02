@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/app/i18n/routing";
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
@@ -58,13 +60,14 @@ export interface DocumentEditorProps {
 
 export type RichDocumentEditorProps = DocumentEditorProps;
 
-const JOURNAL_RULES: Record<string, { maxWords: number; maxAbstract: number; citationStyle: string }> = {
-  "Nature Biotechnology": { maxWords: 8000, maxAbstract: 250, citationStyle: "Nature Numbered" },
-  "Cell Systems": { maxWords: 7500, maxAbstract: 150, citationStyle: "Cell (Author-Date)" },
-  "Bioinformatics (Oxford)": { maxWords: 6000, maxAbstract: 250, citationStyle: "Oxford Harvard" },
-  "PLOS Computational Biology": { maxWords: 10000, maxAbstract: 300, citationStyle: "Vancouver" },
-  "Scientific Reports": { maxWords: 8500, maxAbstract: 200, citationStyle: "Nature Numbered" },
-};
+/** Journal fields used for the compliance panel (from GET /api/journals). */
+interface JournalOption {
+  id: number;
+  name: string;
+  wordLimit: number | null;
+  abstractLimit: number | null;
+  citationStyle: string | null;
+}
 
 function parseDocumentSections(htmlOrText: string): DocumentSection[] {
   if (!htmlOrText || !htmlOrText.trim()) {
@@ -139,13 +142,16 @@ export default function RichDocumentEditor({
   documentId = "doc-new",
   paperId,
   initialTitle = "",
-  initialJournal = "Nature Biotechnology",
+  initialJournal = "",
   initialContent = "",
   onSave,
   onExport,
   onSubmitToJournal,
 }: DocumentEditorProps) {
+  const t = useTranslations("PaperTools.editor");
+  const router = useRouter();
   const [currentDocId, setCurrentDocId] = useState(documentId);
+  const [journalOptions, setJournalOptions] = useState<JournalOption[]>([]);
   const [title, setTitle] = useState(initialTitle);
   const [journal, setJournal] = useState(initialJournal);
   const [content, setContent] = useState(initialContent);
@@ -175,6 +181,22 @@ export default function RichDocumentEditor({
   useEffect(() => {
     setCurrentDocId(documentId);
   }, [documentId]);
+
+  // Target journals and their limits come from the journal catalog, not a hardcoded list.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/journals")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((rows: JournalOption[]) => {
+        if (cancelled || !Array.isArray(rows)) return;
+        setJournalOptions(rows);
+        setJournal((current) => current || rows[0]?.name || "");
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const editor = useEditor({
     extensions: [
@@ -229,7 +251,12 @@ export default function RichDocumentEditor({
   const detectedCitations = useMemo(() => extractDocumentCitations(content), [content]);
 
   // Dynamic compliance calculations
-  const journalRule = JOURNAL_RULES[journal] || JOURNAL_RULES["Nature Biotechnology"];
+  const selectedJournal = journalOptions.find((j) => j.name === journal);
+  const journalRule = {
+    maxWords: selectedJournal?.wordLimit ?? null,
+    maxAbstract: selectedJournal?.abstractLimit ?? null,
+    citationStyle: selectedJournal?.citationStyle || null,
+  };
   const abstractSection = sections.find((s) => s.title.toLowerCase().includes("abstract"));
   const abstractWordCount = abstractSection ? abstractSection.wordCount : Math.min(wordCount, 250);
   const hasDataAvailability = useMemo(() => {
@@ -292,7 +319,7 @@ export default function RichDocumentEditor({
         setSaveStatus("saved");
         onSave?.(contentToSave, title);
         if (!isAutosave) {
-          toast.success("Document saved successfully");
+          toast.success(t("saved"));
         }
       }
     } catch (error: any) {
@@ -300,7 +327,7 @@ export default function RichDocumentEditor({
       if (isMountedRef.current) {
         setSaveStatus("unsaved");
         if (!isAutosave) {
-          toast.error(error.message || "Failed to save document");
+          toast.error(error.message || t("saveFailed"));
         }
       }
     }
@@ -347,23 +374,29 @@ export default function RichDocumentEditor({
       const response = await fetch("/api/ai/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, systemPrompt }),
+        body: JSON.stringify({ prompt, systemPrompt, mode: "text" }),
       });
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || "Failed to generate AI response");
+        throw new Error(errData.error || t("aiFailed"));
       }
 
       const data = await response.json();
-      const suggestionHtml = `<div class="border-l-4 border-sky-500 pl-4 py-2 my-4 bg-sky-50/70 rounded-r"><h3>AI Suggestion (${actionType})</h3><p>${data.text || ""}</p></div>`;
+      const escapeHtml = (value: string) =>
+        value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const suggestionBody = String(data.text || "")
+        .split(/\n{2,}/)
+        .map((para) => `<p>${escapeHtml(para.trim())}</p>`)
+        .join("");
+      const suggestionHtml = `<blockquote><h3>${escapeHtml(t("aiSuggestion"))}</h3>${suggestionBody}</blockquote>`;
 
       if (editor) {
         editor.chain().focus().insertContent(suggestionHtml).run();
         const updated = editor.getHTML();
         setContent(updated);
       } else {
-        setContent((prev) => prev + `\n\n### AI Suggestion (${actionType})\n` + data.text);
+        setContent((prev) => prev + suggestionHtml);
       }
       setSaveStatus("unsaved");
       if (actionType === "custom") {
@@ -371,7 +404,7 @@ export default function RichDocumentEditor({
       }
     } catch (error: any) {
       console.error("[RichDocumentEditor] AI error:", error);
-      toast.error(error.message || "Failed to get AI response.");
+      toast.error(error.message || t("aiFailed"));
     } finally {
       if (isMountedRef.current) {
         setIsAiGenerating(false);
@@ -393,11 +426,11 @@ export default function RichDocumentEditor({
           setCitationResults(data.results || []);
         }
       } else {
-        toast.error("Citation search failed");
+        toast.error(t("citationSearchFailed"));
       }
     } catch (err) {
       console.error(err);
-      toast.error("Network error during citation search");
+      toast.error(t("citationSearchFailed"));
     } finally {
       if (isMountedRef.current) {
         setIsSearchingCitations(false);
@@ -410,7 +443,7 @@ export default function RichDocumentEditor({
       editor.chain().focus().insertContent(` [@${citationKey}] `).run();
       setContent(editor.getHTML());
       setSaveStatus("unsaved");
-      toast.success(`Inserted reference [@${citationKey}]`);
+      toast.success(t("citationInserted", { key: citationKey }));
     }
   };
 
@@ -420,7 +453,7 @@ export default function RichDocumentEditor({
       editor.chain().focus().insertContent(statement).run();
       setContent(editor.getHTML());
       setSaveStatus("unsaved");
-      toast.success("Data Availability Statement added");
+      toast.success(t("dataStatementAdded"));
     }
   };
 
@@ -440,39 +473,41 @@ export default function RichDocumentEditor({
                 setTitle(e.target.value);
                 setSaveStatus("unsaved");
               }}
-              aria-label="Document Title"
-              placeholder="Manuscript Title..."
+              aria-label={t("titleLabel")}
+              placeholder={t("titlePlaceholder")}
               className="text-base md:text-lg font-bold text-slate-900 bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-sky-500 rounded px-1 w-full truncate"
             />
             <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
-              <span className="font-medium text-slate-700">Target:</span>
+              <span className="font-medium text-slate-700">{t("target")}</span>
               <select
                 value={journal}
                 onChange={(e) => setJournal(e.target.value)}
-                aria-label="Target Journal"
+                aria-label={t("targetLabel")}
                 className="bg-transparent border border-slate-200 rounded px-1.5 py-0.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-sky-500"
               >
-                <option>Nature Biotechnology</option>
-                <option>Cell Systems</option>
-                <option>Bioinformatics (Oxford)</option>
-                <option>PLOS Computational Biology</option>
-                <option>Scientific Reports</option>
+                {!journal && <option value="">{t("chooseJournal")}</option>}
+                {journal && !journalOptions.some((j) => j.name === journal) && <option value={journal}>{journal}</option>}
+                {journalOptions.map((j) => (
+                  <option key={j.id} value={j.name}>
+                    {j.name}
+                  </option>
+                ))}
               </select>
               <span>•</span>
               <span className="flex items-center gap-1">
                 {saveStatus === "saved" && (
                   <span className="text-emerald-600 flex items-center gap-0.5">
-                    <Check className="w-3 h-3" /> Saved
+                    <Check className="w-3 h-3" /> {t("statusSaved")}
                   </span>
                 )}
                 {saveStatus === "saving" && (
                   <span className="text-sky-600 flex items-center gap-0.5">
-                    <RefreshCw className="w-3 h-3 animate-spin" /> Saving...
+                    <RefreshCw className="w-3 h-3 animate-spin" /> {t("statusSaving")}
                   </span>
                 )}
                 {saveStatus === "unsaved" && (
                   <span className="text-amber-600 flex items-center gap-0.5">
-                    <AlertCircle className="w-3 h-3" /> Unsaved changes
+                    <AlertCircle className="w-3 h-3" /> {t("statusUnsaved")}
                   </span>
                 )}
               </span>
@@ -488,21 +523,28 @@ export default function RichDocumentEditor({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5 text-slate-500" />
-            {saveStatus === "saving" ? "Saving..." : "Save"}
+            {saveStatus === "saving" ? t("statusSaving") : t("save")}
           </button>
           <button
-            onClick={() => onExport?.("docx")}
+            onClick={() => {
+              if (onExport) return onExport("docx");
+              if (/^[0-9a-f-]{36}$/i.test(currentDocId)) {
+                window.location.href = `/api/documents/${currentDocId}/export?format=docx`;
+              } else {
+                toast.info(t("saveBeforeExport"));
+              }
+            }}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
-            Export
+            {t("export")}
           </button>
           <button
-            onClick={onSubmitToJournal}
+            onClick={() => (onSubmitToJournal ? onSubmitToJournal() : router.push("/submissions"))}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-white bg-sky-600 rounded-lg hover:bg-sky-700 transition-colors shadow-xs cursor-pointer"
           >
             <Send className="w-3.5 h-3.5" />
-            Submit Journal
+            {t("submit")}
           </button>
         </div>
       </header>
@@ -514,7 +556,8 @@ export default function RichDocumentEditor({
           className={`p-1.5 rounded transition-colors cursor-pointer ${
             editor?.isActive('bold') ? 'bg-slate-200 text-slate-900 font-bold' : 'hover:bg-slate-100 text-slate-700'
           }`}
-          title="Bold"
+          title={t("toolbar.bold")}
+          aria-label={t("toolbar.bold")}
         >
           <Bold className="w-4 h-4" />
         </button>
@@ -523,7 +566,8 @@ export default function RichDocumentEditor({
           className={`p-1.5 rounded transition-colors cursor-pointer ${
             editor?.isActive('italic') ? 'bg-slate-200 text-slate-900' : 'hover:bg-slate-100 text-slate-700'
           }`}
-          title="Italic"
+          title={t("toolbar.italic")}
+          aria-label={t("toolbar.italic")}
         >
           <Italic className="w-4 h-4" />
         </button>
@@ -533,7 +577,8 @@ export default function RichDocumentEditor({
           className={`p-1.5 rounded transition-colors cursor-pointer ${
             editor?.isActive('heading', { level: 1 }) ? 'bg-slate-200 text-slate-900 font-bold' : 'hover:bg-slate-100 text-slate-700'
           }`}
-          title="Heading 1"
+          title={t("toolbar.h1")}
+          aria-label={t("toolbar.h1")}
         >
           <Heading1 className="w-4 h-4" />
         </button>
@@ -542,7 +587,8 @@ export default function RichDocumentEditor({
           className={`p-1.5 rounded transition-colors cursor-pointer ${
             editor?.isActive('heading', { level: 2 }) ? 'bg-slate-200 text-slate-900 font-bold' : 'hover:bg-slate-100 text-slate-700'
           }`}
-          title="Heading 2"
+          title={t("toolbar.h2")}
+          aria-label={t("toolbar.h2")}
         >
           <Heading2 className="w-4 h-4" />
         </button>
@@ -551,7 +597,8 @@ export default function RichDocumentEditor({
           className={`p-1.5 rounded transition-colors cursor-pointer ${
             editor?.isActive('heading', { level: 3 }) ? 'bg-slate-200 text-slate-900 font-bold' : 'hover:bg-slate-100 text-slate-700'
           }`}
-          title="Heading 3"
+          title={t("toolbar.h3")}
+          aria-label={t("toolbar.h3")}
         >
           <Heading3 className="w-4 h-4" />
         </button>
@@ -561,7 +608,8 @@ export default function RichDocumentEditor({
           className={`p-1.5 rounded transition-colors cursor-pointer ${
             editor?.isActive('bulletList') ? 'bg-slate-200 text-slate-900' : 'hover:bg-slate-100 text-slate-700'
           }`}
-          title="Bullet List"
+          title={t("toolbar.bulletList")}
+          aria-label={t("toolbar.bulletList")}
         >
           <List className="w-4 h-4" />
         </button>
@@ -570,7 +618,8 @@ export default function RichDocumentEditor({
           className={`p-1.5 rounded transition-colors cursor-pointer ${
             editor?.isActive('orderedList') ? 'bg-slate-200 text-slate-900' : 'hover:bg-slate-100 text-slate-700'
           }`}
-          title="Numbered List"
+          title={t("toolbar.orderedList")}
+          aria-label={t("toolbar.orderedList")}
         >
           <ListOrdered className="w-4 h-4" />
         </button>
@@ -579,7 +628,8 @@ export default function RichDocumentEditor({
           className={`p-1.5 rounded transition-colors cursor-pointer ${
             editor?.isActive('blockquote') ? 'bg-slate-200 text-slate-900' : 'hover:bg-slate-100 text-slate-700'
           }`}
-          title="Blockquote"
+          title={t("toolbar.quote")}
+          aria-label={t("toolbar.quote")}
         >
           <Quote className="w-4 h-4" />
         </button>
@@ -588,31 +638,32 @@ export default function RichDocumentEditor({
           className={`p-1.5 rounded transition-colors cursor-pointer ${
             editor?.isActive('codeBlock') ? 'bg-slate-200 text-slate-900' : 'hover:bg-slate-100 text-slate-700'
           }`}
-          title="Code Block"
+          title={t("toolbar.code")}
+          aria-label={t("toolbar.code")}
         >
           <Code className="w-4 h-4" />
         </button>
         <div className="w-px h-4 bg-slate-200 mx-1" />
         <button
           onClick={() => {
-            const key = prompt("Enter citation key (e.g. smith2023):", "ref");
+            const key = prompt(t("citationKeyPrompt"), "ref");
             if (key) handleInsertCitation(key);
           }}
           className="px-2 py-1 bg-sky-50 text-sky-700 hover:bg-sky-100 rounded text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
         >
-          <BookOpen className="w-3.5 h-3.5" /> + Citation
+          <BookOpen className="w-3.5 h-3.5" /> {t("toolbar.citation")}
         </button>
         <button
-          onClick={() => editor?.chain().focus().insertContent("<p><em>[Figure: Add caption and image]</em></p>").run()}
+          onClick={() => editor?.chain().focus().insertContent(`<p><em>[${t("figurePlaceholder")}]</em></p>`).run()}
           className="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-xs font-medium transition-colors cursor-pointer"
         >
-          + Figure
+          {t("toolbar.figure")}
         </button>
         <button
           onClick={() => editor?.chain().focus().insertContent("<code>$$ E = mc^2 $$</code>").run()}
           className="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-xs font-medium transition-colors cursor-pointer"
         >
-          + LaTeX
+          {t("toolbar.latex")}
         </button>
         <div className="w-px h-4 bg-slate-200 mx-1" />
         <button
@@ -621,7 +672,7 @@ export default function RichDocumentEditor({
             editor?.isActive('insertion') ? 'bg-emerald-200 text-emerald-900' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
           }`}
         >
-          Track Insert
+          {t("toolbar.trackInsert")}
         </button>
         <button
           onClick={() => editor?.chain().focus().toggleMark('deletion').run()}
@@ -629,7 +680,7 @@ export default function RichDocumentEditor({
             editor?.isActive('deletion') ? 'bg-rose-200 text-rose-900' : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
           }`}
         >
-          Track Delete
+          {t("toolbar.trackDelete")}
         </button>
       </div>
 
@@ -638,7 +689,7 @@ export default function RichDocumentEditor({
         {/* Left Section Outline */}
         <aside className="w-56 border-r border-slate-200 bg-slate-50/40 p-3 hidden lg:flex flex-col shrink-0 overflow-y-auto">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 px-2 mb-2">
-            Sections
+            {t("sections")}
           </span>
           <div className="space-y-1">
             {sections.map((sec) => (
@@ -661,15 +712,15 @@ export default function RichDocumentEditor({
 
           <div className="mt-auto pt-4 border-t border-slate-200 text-xs text-slate-500 space-y-1 px-2">
             <div className="flex justify-between">
-              <span>Total words:</span>
+              <span>{t("totalWords")}</span>
               <span className="font-semibold text-slate-700">{wordCount.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span>Reading time:</span>
-              <span className="text-slate-700">~{estimatedReadingTime} min</span>
+              <span>{t("readingTime")}</span>
+              <span className="text-slate-700">{t("minutes", { count: estimatedReadingTime })}</span>
             </div>
             <div className="flex justify-between">
-              <span>Characters:</span>
+              <span>{t("characters")}</span>
               <span className="text-slate-700">{characterCount.toLocaleString()}</span>
             </div>
           </div>
@@ -685,13 +736,13 @@ export default function RichDocumentEditor({
                   <div className="absolute inset-0 border-4 border-sky-500 rounded-full border-t-transparent animate-spin"></div>
                   <Sparkles className="absolute inset-0 m-auto w-8 h-8 text-sky-500 animate-pulse" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">AI Agent Pipeline Running</h3>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">{t("pipelineRunning")}</h3>
                 <p className="text-sm text-slate-500 text-center mb-6">
-                  The AI co-authors are analyzing your document, synthesizing research, and drafting structural improvements.
+                  {t("pipelineDescription")}
                 </p>
                 <div className="w-full bg-slate-900 rounded-lg p-3 text-xs font-mono text-emerald-400 truncate shadow-inner">
                   <span className="text-emerald-500 mr-2 font-bold">{'>'}</span>
-                  {pipelineLog || "Initializing LangGraph execution..."}
+                  {pipelineLog || t("pipelineStarting")}
                 </div>
                 <div className="w-full h-1.5 bg-slate-100 rounded-full mt-6 overflow-hidden relative">
                   <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-sky-400 via-indigo-500 to-sky-400 w-full animate-pulse"></div>
@@ -707,7 +758,7 @@ export default function RichDocumentEditor({
                   <div key={idx} className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
                     <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold">Data Validation Warning {warning.textAnchor ? `- ${warning.textAnchor}` : ''}</p>
+                      <p className="font-semibold">{t("dataWarning")} {warning.textAnchor ? `- ${warning.textAnchor}` : ''}</p>
                       <p>{warning.warning || warning.message || (typeof warning === 'string' ? warning : JSON.stringify(warning))}</p>
                     </div>
                   </div>
@@ -730,7 +781,7 @@ export default function RichDocumentEditor({
                     }}
                     className="px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 rounded flex items-center gap-1 cursor-pointer transition-colors"
                   >
-                    <Check className="w-3.5 h-3.5" /> Accept
+                    <Check className="w-3.5 h-3.5" /> {t("accept")}
                   </button>
                   <button
                     onClick={() => {
@@ -742,7 +793,7 @@ export default function RichDocumentEditor({
                     }}
                     className="px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 rounded flex items-center gap-1 cursor-pointer transition-colors"
                   >
-                    <AlertCircle className="w-3.5 h-3.5" /> Reject
+                    <AlertCircle className="w-3.5 h-3.5" /> {t("reject")}
                   </button>
                 </div>
               </BubbleMenu>
@@ -763,7 +814,7 @@ export default function RichDocumentEditor({
                   : "hover:text-slate-900"
               }`}
             >
-              AI Co-Pilot
+              {t("tabCopilot")}
             </button>
             <button
               onClick={() => setRightTab("citations")}
@@ -773,7 +824,7 @@ export default function RichDocumentEditor({
                   : "hover:text-slate-900"
               }`}
             >
-              Citations ({detectedCitations.length})
+              {t("tabCitations", { count: detectedCitations.length })}
             </button>
             <button
               onClick={() => setRightTab("compliance")}
@@ -783,7 +834,7 @@ export default function RichDocumentEditor({
                   : "hover:text-slate-900"
               }`}
             >
-              Compliance
+              {t("tabCompliance")}
             </button>
           </div>
 
@@ -792,7 +843,7 @@ export default function RichDocumentEditor({
             {rightTab === "copilot" && (
               <div className="space-y-3">
                 <AgentRunner 
-                  paperId={currentDocId} 
+                  paperId={paperId ? String(paperId) : undefined}
                   onStatusChange={setPipelineStatus}
                   onLog={setPipelineLog}
                   onResult={(res) => {
@@ -800,12 +851,12 @@ export default function RichDocumentEditor({
                       setDataWarnings(res.dataWarnings);
                     }
                     const text = typeof res === 'string' ? res : JSON.stringify(res, null, 2);
-                    const formattedHtml = `<div class="border-l-4 border-indigo-500 pl-4 py-2 my-4 bg-indigo-50/70 rounded-r"><h3>AI Pipeline Result</h3><pre>${text}</pre></div>`;
+                    const formattedHtml = `<div class="border-l-4 border-indigo-500 pl-4 py-2 my-4 bg-indigo-50/70 rounded-r"><h3>${t("pipelineResult")}</h3><pre>${text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre></div>`;
                     if (editor) {
                       editor.chain().focus().insertContent(formattedHtml).run();
                       setContent(editor.getHTML());
                     } else {
-                      setContent(prev => prev + `\n\n### AI Pipeline Result\n${text}\n`);
+                      setContent(prev => prev + formattedHtml);
                     }
                     setSaveStatus("unsaved");
                   }}
@@ -813,7 +864,7 @@ export default function RichDocumentEditor({
 
                 <div className="space-y-1.5 pt-2 border-t border-slate-200">
                   <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                    Quick AI Actions
+                    {t("quickActions")}
                   </span>
                   <div className="grid grid-cols-1 gap-1.5">
                     <button
@@ -821,21 +872,21 @@ export default function RichDocumentEditor({
                       disabled={isAiGenerating}
                       className="text-left px-3 py-2 bg-white border border-slate-200 rounded-lg hover:border-sky-300 hover:bg-sky-50/50 transition-all font-medium text-slate-700 cursor-pointer disabled:opacity-50"
                     >
-                      ✨ Polish Abstract for Clarity
+                      {t("actionAbstract")}
                     </button>
                     <button
                       onClick={() => handleAiAction("critique")}
                       disabled={isAiGenerating}
                       className="text-left px-3 py-2 bg-white border border-slate-200 rounded-lg hover:border-sky-300 hover:bg-sky-50/50 transition-all font-medium text-slate-700 cursor-pointer disabled:opacity-50"
                     >
-                      🔍 Run Simulated Peer Review
+                      {t("actionCritique")}
                     </button>
                     <button
                       onClick={() => handleAiAction("tone")}
                       disabled={isAiGenerating}
                       className="text-left px-3 py-2 bg-white border border-slate-200 rounded-lg hover:border-sky-300 hover:bg-sky-50/50 transition-all font-medium text-slate-700 cursor-pointer disabled:opacity-50"
                     >
-                      🎯 Verify Academic Tone & Rigor
+                      {t("actionTone")}
                     </button>
                   </div>
                 </div>
@@ -844,7 +895,7 @@ export default function RichDocumentEditor({
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Prompt AI Co-author..."
+                      placeholder={t("promptPlaceholder")}
                       value={aiPrompt}
                       onChange={(e) => setAiPrompt(e.target.value)}
                       onKeyDown={(e) => {
@@ -870,9 +921,9 @@ export default function RichDocumentEditor({
             {rightTab === "citations" && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-slate-700">Document References</span>
+                  <span className="font-semibold text-slate-700">{t("references")}</span>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700">
-                    {detectedCitations.length} Found
+                    {t("found", { count: detectedCitations.length })}
                   </span>
                 </div>
 
@@ -887,17 +938,17 @@ export default function RichDocumentEditor({
                   </div>
                 ) : (
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 text-center text-[11px]">
-                    No references detected in document text.
+                    {t("noReferences")}
                   </div>
                 )}
 
                 {/* Literature Search & Insert */}
                 <div className="pt-2 border-t border-slate-200 space-y-2">
-                  <span className="font-semibold text-slate-700 block">Search & Insert Citations</span>
+                  <span className="font-semibold text-slate-700 block">{t("searchCitations")}</span>
                   <form onSubmit={handleSearchCitations} className="flex gap-1.5">
                     <input
                       type="text"
-                      placeholder="PubMed/Crossref query or DOI..."
+                      placeholder={t("searchPlaceholder")}
                       value={citationQuery}
                       onChange={(e) => setCitationQuery(e.target.value)}
                       className="flex-1 px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-sky-500"
@@ -924,7 +975,7 @@ export default function RichDocumentEditor({
                               onClick={() => handleInsertCitation(item.doi || item.id || `ref_${idx + 1}`)}
                               className="text-sky-600 hover:text-sky-800 font-medium text-[10px] flex items-center gap-0.5 cursor-pointer"
                             >
-                              <Plus className="w-3 h-3" /> Insert
+                              <Plus className="w-3 h-3" /> {t("insert")}
                             </button>
                           </div>
                         </div>
@@ -940,10 +991,10 @@ export default function RichDocumentEditor({
                 <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
                   <div className="flex items-center gap-1.5 font-semibold text-emerald-800">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    Target Journal Guidelines
+                    {t("guidelines")}
                   </div>
                   <p className="text-slate-600 text-[11px] mt-1">
-                    Evaluating manuscript against {journal} submission standards.
+                    {journal ? t("evaluating", { journal }) : t("chooseJournal")}
                   </p>
                 </div>
 
@@ -951,7 +1002,7 @@ export default function RichDocumentEditor({
                   <div className="bg-rose-50 border border-rose-200 rounded-xl p-3">
                     <div className="flex items-center gap-1.5 font-semibold text-rose-800">
                       <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
-                      Dataset Warnings
+                      {t("datasetWarnings")}
                     </div>
                     <ul className="list-disc pl-4 mt-2 space-y-1 text-[11px] text-rose-700">
                       {dataWarnings.map((w, i) => (
@@ -963,35 +1014,35 @@ export default function RichDocumentEditor({
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[11px] py-1 border-b border-slate-200">
-                    <span className="text-slate-600">Abstract Limit (&le; {journalRule.maxAbstract} words)</span>
-                    <span className={`font-medium ${abstractWordCount <= journalRule.maxAbstract ? 'text-emerald-600' : 'text-rose-600'}`}>
-                      {abstractWordCount} / {journalRule.maxAbstract}
+                    <span className="text-slate-600">{t("abstractLimit")}</span>
+                    <span className={`font-medium ${journalRule.maxAbstract === null ? 'text-slate-500' : abstractWordCount <= journalRule.maxAbstract ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      {abstractWordCount} / {journalRule.maxAbstract ?? "—"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] py-1 border-b border-slate-200">
-                    <span className="text-slate-600">Main Word Count Limit</span>
-                    <span className={`font-medium ${wordCount <= journalRule.maxWords ? 'text-emerald-600' : 'text-rose-600'}`}>
-                      {wordCount.toLocaleString()} / {journalRule.maxWords.toLocaleString()}
+                    <span className="text-slate-600">{t("wordLimit")}</span>
+                    <span className={`font-medium ${journalRule.maxWords === null ? 'text-slate-500' : wordCount <= journalRule.maxWords ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      {wordCount.toLocaleString()} / {journalRule.maxWords?.toLocaleString() ?? "—"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] py-1 border-b border-slate-200">
-                    <span className="text-slate-600">Citation Style</span>
-                    <span className="text-slate-700 font-medium">{journalRule.citationStyle}</span>
+                    <span className="text-slate-600">{t("citationStyle")}</span>
+                    <span className="text-slate-700 font-medium">{journalRule.citationStyle ?? "—"}</span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] py-1 border-b border-slate-200">
-                    <span className="text-slate-600">Data Availability Statement</span>
+                    <span className="text-slate-600">{t("dataStatement")}</span>
                     {hasDataAvailability ? (
                       <span className="text-emerald-600 font-medium flex items-center gap-0.5">
-                        <Check className="w-3 h-3" /> Present
+                        <Check className="w-3 h-3" /> {t("present")}
                       </span>
                     ) : (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-amber-600 font-medium">Missing</span>
+                        <span className="text-amber-600 font-medium">{t("missing")}</span>
                         <button
                           onClick={handleInsertDataAvailability}
                           className="px-1.5 py-0.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded text-[10px] font-medium transition-colors cursor-pointer"
                         >
-                          + Add
+                          {t("add")}
                         </button>
                       </div>
                     )}

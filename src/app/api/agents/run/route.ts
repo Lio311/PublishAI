@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { publishAiGraph } from "@/services/agents/graph/workflow";
 import { auth } from "@/app/auth";
-import { db } from "@/services/db";
-import { papers } from "@/services/db/schema";
-import { eq } from "drizzle-orm";
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from "@/services/security/rateLimit";
+import { userOwnsPaper } from "@/services/api/route-auth";
 
 export async function POST(req: NextRequest) {
   const rl = checkRateLimit(req, RATE_LIMITS.agentRun);
@@ -26,15 +24,10 @@ export async function POST(req: NextRequest) {
 
     const userId = session.user.id;
 
-    // Verify paper authorization if paper exists in DB
-    const parsedPaperId = parseInt(paperId, 10);
-    if (!isNaN(parsedPaperId)) {
-      const paper = await db.query.papers.findFirst({
-        where: eq(papers.id, parsedPaperId),
-      });
-      if (paper && paper.userId && paper.userId !== userId) {
-        return NextResponse.json({ error: "Forbidden: You do not own this manuscript" }, { status: 403 });
-      }
+    // The pipeline only runs for the caller's own paper.
+    const parsedPaperId = Number(paperId);
+    if (!(await userOwnsPaper(userId, parsedPaperId))) {
+      return NextResponse.json({ error: "Paper not found" }, { status: 404 });
     }
 
     const config = {
