@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { UploadCloud, CheckCircle2, AlertCircle, FileSpreadsheet } from "lucide-react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { useTranslations } from "next-intl";
 
 export function DataUploadSection({ paperId }: { paperId: number }) {
+  const t = useTranslations("PaperTools.sandbox");
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
@@ -51,16 +53,16 @@ export function DataUploadSection({ paperId }: { paperId: number }) {
       });
 
       if (!res.ok) {
-        throw new Error("Upload failed");
+        throw new Error(t("uploadFailed"));
       }
 
       setMessage({
-        text: `Uploaded "${file.name}" successfully. Python sandbox replication has been queued.`,
+        text: t("uploaded", { name: file.name }),
         type: "success",
       });
     } catch (err: any) {
       setMessage({
-        text: "Error: " + (err.message || "Failed to upload file."),
+        text: err.message || t("uploadFailed"),
         type: "error",
       });
     } finally {
@@ -75,9 +77,9 @@ export function DataUploadSection({ paperId }: { paperId: number }) {
           <FileSpreadsheet className="w-5 h-5" />
         </div>
         <div>
-          <h3 className="text-base font-bold text-slate-900">Upload Raw Dataset for Sandbox Replication</h3>
+          <h3 className="text-base font-bold text-slate-900">{t("uploadTitle")}</h3>
           <p className="text-xs text-slate-500">
-            Attach CSV or Excel data sheets to allow the Python sandbox to independently verify statistical calculations and reconstruct plots
+            {t("uploadDescription")}
           </p>
         </div>
       </div>
@@ -97,12 +99,12 @@ export function DataUploadSection({ paperId }: { paperId: number }) {
           <UploadCloud className="w-6 h-6" />
         </div>
         <p className="text-sm font-semibold text-slate-700 mb-1">
-          Drag and drop your CSV or Excel files here
+          {t("drop")}
         </p>
-        <p className="text-xs text-slate-400 mb-4">Supports .csv, .xlsx, .xls up to 50MB</p>
+        <p className="text-xs text-slate-400 mb-4">{t("formats")}</p>
 
         <label className="inline-flex items-center gap-2 cursor-pointer bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl text-xs font-semibold shadow-xs transition-colors">
-          <span>Browse Dataset</span>
+          <span>{t("browse")}</span>
           <input type="file" className="sr-only" accept=".csv, .xlsx, .xls" onChange={handleChange} />
         </label>
       </div>
@@ -110,7 +112,7 @@ export function DataUploadSection({ paperId }: { paperId: number }) {
       {uploading && (
         <div className="p-4 rounded-xl bg-teal-50 border border-teal-200 flex items-center gap-3 text-teal-900 text-xs font-medium">
           <LoadingSpinner size="xs" color="sky" />
-          <span>Uploading dataset and preparing secure container environment...</span>
+          <span>{t("uploading")}</span>
         </div>
       )}
 

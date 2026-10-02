@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 
 export interface JournalRecommendation {
   id: string;
@@ -6,6 +7,7 @@ export interface JournalRecommendation {
   impactFactor?: number;
   matchScore: number;
   rationale: string;
+  url?: string | null;
 }
 
 export interface RejectStateHandlerProps {
@@ -21,6 +23,7 @@ export default function RejectStateHandler({
   recommendations,
   onReformatRequest,
 }: RejectStateHandlerProps) {
+  const t = useTranslations("PaperTools.rejection");
   const [isReformatting, setIsReformatting] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -50,22 +53,27 @@ export default function RejectStateHandler({
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
-          Submission Rejected
+          {t("title")}
         </h2>
         <p className="mt-2 text-red-700">
-          Unfortunately, your submission <span className="font-semibold italic">&quot;{paperTitle}&quot;</span> has been rejected by <span className="font-semibold">{originalJournal}</span>. 
+          {t.rich("rejectedBy", {
+            title: paperTitle,
+            journal: originalJournal || t("theJournal"),
+            em: (chunks) => <span className="font-semibold italic">{chunks}</span>,
+            strong: (chunks) => <span className="font-semibold">{chunks}</span>,
+          })}
         </p>
         <p className="mt-1 text-red-700 text-sm">
-          Don&apos;t be discouraged. We&apos;ve analyzed the feedback and found several high-quality alternative journals that are a strong match for your research.
+          {t("encouragement")}
         </p>
       </div>
 
       {/* Alternative Journal Recommendations */}
       <div className="space-y-6">
-        <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Recommended Alternative Journals</h3>
+        <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">{t("alternatives")}</h3>
         
         {recommendations.length === 0 ? (
-          <p className="text-gray-500 italic">No recommendations available at this time.</p>
+          <p className="text-gray-500 italic">{t("pending")}</p>
         ) : (
           <div className="grid gap-4">
             {recommendations.map((journal) => {
@@ -79,16 +87,28 @@ export default function RejectStateHandler({
                     <div className="flex items-center gap-3 mb-1">
                       <h4 className="text-md font-bold text-gray-900">{journal.name}</h4>
                       <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        {journal.matchScore}% Match
+                        {t("match", { score: journal.matchScore })}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mb-2">{journal.rationale}</p>
                     {journal.impactFactor && (
-                      <p className="text-xs text-gray-500 font-medium">Impact Factor: {journal.impactFactor}</p>
+                      <p className="text-xs text-gray-500 font-medium">{t("impact", { value: journal.impactFactor })}</p>
                     )}
                   </div>
                   
                   <div className="w-full sm:w-auto flex flex-col gap-2 shrink-0">
+                    {!onReformatRequest ? (
+                      journal.url ? (
+                        <a
+                          href={journal.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full sm:w-auto px-4 py-2 rounded-md font-medium text-sm text-center bg-indigo-600 text-white hover:bg-indigo-700"
+                        >
+                          {t("website")}
+                        </a>
+                      ) : null
+                    ) : (
                     <button
                       onClick={() => handleReformat(journal.id)}
                       disabled={isLoading || isSuccess}
@@ -110,10 +130,11 @@ export default function RejectStateHandler({
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       )}
-                      {isLoading ? 'Reformatting AI...' : isSuccess ? 'Reformated!' : 'Select & Reformat'}
+                      {isLoading ? t("reformatting") : isSuccess ? t("reformatted") : t("reformat")}
                     </button>
+                    )}
                     {isError && (
-                      <span className="text-xs text-red-600 font-medium text-center">Failed. Try again.</span>
+                      <span className="text-xs text-red-600 font-medium text-center">{t("failed")}</span>
                     )}
                   </div>
                 </div>

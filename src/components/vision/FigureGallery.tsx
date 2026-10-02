@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import FigureAnalysisCard from "./FigureAnalysisCard";
+import { useTranslations } from "next-intl";
 import { SkeletonCard } from "@/components/ui/Skeleton";
 import { Image as ImageIcon, Sparkles, RefreshCw, AlertCircle } from "lucide-react";
 
@@ -18,6 +19,7 @@ interface FigureGalleryProps {
 }
 
 export default function FigureGallery({ paperId }: FigureGalleryProps) {
+  const t = useTranslations("PaperTools.figures");
   const [figures, setFigures] = useState<Figure[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,7 @@ export default function FigureGallery({ paperId }: FigureGalleryProps) {
       }
     } catch (err: any) {
       console.error("Failed to fetch figures", err);
-      setError(err?.message || "Failed to fetch figure analyses.");
+      setError(err?.message || t("loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -69,7 +71,7 @@ export default function FigureGallery({ paperId }: FigureGalleryProps) {
           <AlertCircle className="w-6 h-6" />
         </div>
         <div>
-          <h4 className="text-base font-bold text-red-900">Error Loading Figures</h4>
+          <h4 className="text-base font-bold text-red-900">{t("errorTitle")}</h4>
           <p className="text-xs text-red-600 mt-1">{error}</p>
         </div>
         <button
@@ -77,7 +79,7 @@ export default function FigureGallery({ paperId }: FigureGalleryProps) {
           className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          <span>Retry Loading</span>
+          <span>{t("retry")}</span>
         </button>
       </div>
     );
@@ -90,9 +92,9 @@ export default function FigureGallery({ paperId }: FigureGalleryProps) {
           <ImageIcon className="w-7 h-7" />
         </div>
         <div className="space-y-1 max-w-sm mx-auto">
-          <h3 className="text-base font-bold text-slate-800">No Figures Extracted</h3>
+          <h3 className="text-base font-bold text-slate-800">{t("emptyTitle")}</h3>
           <p className="text-xs text-slate-500 leading-relaxed">
-            No image figures or plots were detected in this PDF manuscript. If your manuscript contains figures, they will appear here once vision parsing completes.
+            {t("emptyDescription")}
           </p>
         </div>
         <button
@@ -100,7 +102,7 @@ export default function FigureGallery({ paperId }: FigureGalleryProps) {
           className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          <span>Refresh Gallery</span>
+          <span>{t("refresh")}</span>
         </button>
       </div>
     );
@@ -114,13 +116,13 @@ export default function FigureGallery({ paperId }: FigureGalleryProps) {
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-800">Vision AI Figure Analysis</h3>
-            <p className="text-xs text-slate-500">Autonomous legend verification, quality assessment, and claim alignment</p>
+            <h3 className="text-sm font-bold text-slate-800">{t("title")}</h3>
+            <p className="text-xs text-slate-500">{t("subtitle")}</p>
           </div>
         </div>
 
         <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold border border-slate-200">
-          {figures.length} figures analyzed
+          {t("analyzed", { count: figures.length })}
         </span>
       </div>
 

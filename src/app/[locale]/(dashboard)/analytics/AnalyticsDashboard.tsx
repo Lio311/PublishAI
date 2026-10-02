@@ -40,12 +40,13 @@ interface AnalyticsData {
 }
 
 export function AnalyticsDashboardSkeleton() {
+  const t = useTranslations("Analytics");
   return (
     <div 
       className="space-y-8 pb-12 animate-pulse"
       role="status"
       aria-busy="true"
-      aria-label="Loading analytics dashboard"
+      aria-label={t("loading")}
     >
       {/* Header Skeleton */}
       <div className="rounded-2xl p-8 bg-slate-200 h-32" />
@@ -98,7 +99,7 @@ export function AnalyticsDashboardSkeleton() {
 
       {/* Network Graph Skeleton */}
       <NetworkGraphSkeleton />
-      <span className="sr-only">Loading analytics dashboard metrics and charts...</span>
+      <span className="sr-only">{t("loading")}</span>
     </div>
   );
 }
@@ -179,7 +180,7 @@ export default function AnalyticsDashboard() {
     return (
       <div 
         role="region"
-        aria-label="Empty Analytics Dashboard"
+        aria-label={t("empty")}
         className="flex flex-col h-[50vh] items-center justify-center space-y-4"
       >
         <Brain className="h-16 w-16 text-gray-300" />
@@ -243,16 +244,16 @@ export default function AnalyticsDashboard() {
           <div 
             className="h-[300px]"
             role="region"
-            aria-label="Entity Distribution Pie Chart"
+            aria-label={t("entityDistribution")}
           >
             {/* Screen reader text alternative */}
             <div className="sr-only">
               <table>
-                <caption>Entity type distribution</caption>
+                <caption>{t("entityDistribution")}</caption>
                 <thead>
                   <tr>
-                    <th>Type</th>
-                    <th>Count</th>
+                    <th>{t("colType")}</th>
+                    <th>{t("colCount")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -302,16 +303,16 @@ export default function AnalyticsDashboard() {
           <div 
             className="h-[300px]"
             role="region"
-            aria-label="Relationship Distribution Bar Chart"
+            aria-label={t("relationshipDistribution")}
           >
             {/* Screen reader text alternative */}
             <div className="sr-only">
               <table>
-                <caption>Relationship type distribution</caption>
+                <caption>{t("relationshipDistribution")}</caption>
                 <thead>
                   <tr>
-                    <th>Relationship</th>
-                    <th>Count</th>
+                    <th>{t("colRelationship")}</th>
+                    <th>{t("colCount")}</th>
                   </tr>
                 </thead>
                 <tbody>

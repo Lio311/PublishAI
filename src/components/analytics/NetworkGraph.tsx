@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect, useCallback, useId } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
 import { AlertCircle, RefreshCw, Layers } from 'lucide-react';
 
@@ -39,11 +39,12 @@ export interface NetworkEdge {
 }
 
 export function NetworkGraphSkeleton() {
+  const t = useTranslations("Analytics");
   return (
     <div
       role="status"
       aria-busy="true"
-      aria-label="Loading network graph"
+      aria-label={t("graphLoading")}
       className="w-full h-[500px] bg-slate-50 border border-slate-200 rounded-xl relative overflow-hidden flex flex-col items-center justify-center p-6 animate-pulse"
     >
       <div className="absolute top-4 left-4 flex items-center gap-2 bg-white/80 px-3 py-2 rounded-lg border border-slate-200">
@@ -76,10 +77,9 @@ export function NetworkGraphSkeleton() {
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
         <div className="bg-white/90 backdrop-blur-xs px-4 py-2.5 rounded-xl border border-slate-200 shadow-xs flex items-center gap-2.5 text-xs font-medium text-slate-600">
           <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
-          <span>Simulating GraphRAG Knowledge Network...</span>
+          <span>{t("graphLoading")}</span>
         </div>
       </div>
-      <span className="sr-only">Loading graph network data...</span>
     </div>
   );
 }

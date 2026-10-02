@@ -178,7 +178,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
           <input 
             id="conn-display-name"
             type="text" 
-            placeholder="My Medical Journal"
+            placeholder={t("displayNamePlaceholder")}
             className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
@@ -221,7 +221,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
               type="password" 
               required 
               aria-required="true"
-              placeholder="Application Password"
+              placeholder={t("passwordPlaceholder")}
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setTestResult(null); }}

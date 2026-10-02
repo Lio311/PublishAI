@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface HumanInterventionModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export const HumanInterventionModal: React.FC<HumanInterventionModalProps> = ({
   onResume,
   onClose,
 }) => {
+  const t = useTranslations('PaperTools.intervention');
   const [userInput, setUserInput] = useState('');
 
   if (!isOpen) return null;
@@ -25,25 +27,25 @@ export const HumanInterventionModal: React.FC<HumanInterventionModalProps> = ({
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            Human Intervention Required
+            {t('title')}
           </h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
+          <button onClick={onClose} aria-label={t('cancel')} className="text-gray-500 hover:text-gray-700 transition-colors">
             &times;
           </button>
         </div>
         
         <div className="p-6 flex-grow">
-          <p className="text-gray-700 mb-4">{message || "The bot requires your attention to proceed."}</p>
+          <p className="text-gray-700 mb-4">{message || t('defaultMessage')}</p>
           
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="intervention-input">
-              Provide necessary input (optional)
+              {t('inputLabel')}
             </label>
             <input
               id="intervention-input"
               type="text"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., confirmation code, extra details"
+              placeholder={t('inputPlaceholder')}
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
             />
@@ -55,7 +57,7 @@ export const HumanInterventionModal: React.FC<HumanInterventionModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors font-medium"
           >
-            Cancel
+            {t('cancel')}
           </button>
           <button
             onClick={() => {
@@ -64,7 +66,7 @@ export const HumanInterventionModal: React.FC<HumanInterventionModalProps> = ({
             }}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center"
           >
-            Resume Bot
+            {t('resume')}
           </button>
         </div>
       </div>

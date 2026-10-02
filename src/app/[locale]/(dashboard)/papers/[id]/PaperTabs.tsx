@@ -38,6 +38,7 @@ function toRecommendations(suggested: unknown[]): JournalRecommendation[] {
       impactFactor: typeof s.impactFactor === "number" ? s.impactFactor : undefined,
       matchScore: Number(s.matchScore ?? s.score ?? 0),
       rationale: String(s.rationale ?? s.reason ?? ""),
+      url: typeof s.homepageUrl === "string" ? s.homepageUrl : null,
     }));
 }
 
@@ -127,7 +128,7 @@ export default function PaperTabs({
       {/* Tab Panels */}
       <div className="relative">
                 {activeTab === "Editor" && (
-          <ErrorBoundary name="Editor">
+          <ErrorBoundary name={t("tabs.editor")}>
             <div className="space-y-8">
               <RichDocumentEditor
                 documentId={manuscript?.id}
@@ -142,7 +143,7 @@ export default function PaperTabs({
         )}
 
                 {activeTab === "Processing" && (
-          <ErrorBoundary name="Pipeline Processing">
+          <ErrorBoundary name={t("tabs.processing")}>
             <div className="space-y-8">
               <PaperProcessingUI paperId={paperId} initialStatus={initialStatus} />
               <SubmissionTracker paperId={paperId} />
@@ -158,7 +159,7 @@ export default function PaperTabs({
         )}
 
                 {activeTab === "Data Sandbox" && (
-          <ErrorBoundary name="Data Sandbox">
+          <ErrorBoundary name={t("tabs.dataSandbox")}>
             <div className="space-y-8">
               <PreflightCheckPanel paperId={String(paperId)} codeSnippet="" dependencies={[]} />
               <DataUploadSection paperId={paperId} />
@@ -169,7 +170,7 @@ export default function PaperTabs({
         )}
 
                 {activeTab === "Knowledge Graph" && (
-          <ErrorBoundary name="Knowledge Graph">
+          <ErrorBoundary name={t("tabs.knowledgeGraph")}>
             <div className="space-y-8">
               <KnowledgeGraphViewer paperId={paperId} />
               <LogicConsistencyReport paperId={paperId} />
@@ -178,7 +179,7 @@ export default function PaperTabs({
         )}
 
                 {activeTab === "AI Debate" && (
-          <ErrorBoundary name="AI Debate Room">
+          <ErrorBoundary name={t("tabs.aiDebate")}>
             <div className="space-y-8">
               <DebateRoom paperId={paperId} />
             </div>
@@ -186,7 +187,7 @@ export default function PaperTabs({
         )}
 
         {activeTab === "Vision AI" && (
-          <ErrorBoundary name="Vision AI Figure Gallery">
+          <ErrorBoundary name={t("tabs.visionAi")}>
             <div className="space-y-8">
               <FigureGallery paperId={paperId} />
             </div>

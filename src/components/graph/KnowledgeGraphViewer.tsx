@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { 
   Share2, 
@@ -44,11 +45,12 @@ export interface KnowledgeGraphData {
 }
 
 export function KnowledgeGraphViewerSkeleton() {
+  const t = useTranslations("PaperTools.graph");
   return (
     <div
       role="status"
       aria-busy="true"
-      aria-label="Constructing Knowledge Graph"
+      aria-label={t("loading")}
       className="w-full bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden flex flex-col animate-pulse"
     >
       {/* Toolbar Skeleton */}
@@ -86,8 +88,8 @@ export function KnowledgeGraphViewerSkeleton() {
           <div className="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg flex items-center gap-3 text-slate-300 text-xs">
             <RefreshCw className="w-4 h-4 animate-spin text-sky-400" />
             <div className="text-left">
-              <span className="font-semibold block text-slate-100">Constructing Knowledge Graph...</span>
-              <span className="text-[11px] text-slate-400">Extracting entities and cross-paper citations</span>
+              <span className="font-semibold block text-slate-100">{t("loading")}</span>
+              <span className="text-[11px] text-slate-400">{t("loadingDetail")}</span>
             </div>
           </div>
         </div>
@@ -97,6 +99,7 @@ export function KnowledgeGraphViewerSkeleton() {
 }
 
 function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
+  const t = useTranslations("PaperTools.graph");
   const [data, setData] = useState<KnowledgeGraphData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -123,7 +126,7 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
       if (err?.name === "AbortError") return;
       if (!isMountedRef.current) return;
       console.error("Knowledge graph fetch failed:", err);
-      setError(err?.message || "Failed to load knowledge graph.");
+      setError(err?.message || t("loadFailed"));
     } finally {
       if (isMountedRef.current) {
         setLoading(false);
@@ -176,7 +179,7 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
           <AlertCircle className="w-6 h-6" />
         </div>
         <div>
-          <h4 className="text-base font-semibold text-red-900">Failed to render knowledge graph</h4>
+          <h4 className="text-base font-semibold text-red-900">{t("renderFailed")}</h4>
           <p className="text-xs text-red-600 mt-1 max-w-sm">{error}</p>
         </div>
         <button
@@ -185,7 +188,7 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
           className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          <span>Retry Graph Extraction</span>
+          <span>{t("retry")}</span>
         </button>
       </div>
     );
@@ -195,16 +198,16 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
     return (
       <div 
         role="region"
-        aria-label="Empty Knowledge Graph"
+        aria-label={t("emptyTitle")}
         className="w-full h-[360px] bg-white/70 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-xs flex flex-col items-center justify-center p-6 text-center space-y-3"
       >
         <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center">
           <Share2 className="w-6 h-6" />
         </div>
         <div>
-          <h4 className="text-base font-semibold text-slate-800">No Knowledge Graph Entities Extracted</h4>
+          <h4 className="text-base font-semibold text-slate-800">{t("emptyTitle")}</h4>
           <p className="text-xs text-slate-500 mt-1 max-w-sm">
-            Entities and cross-disciplinary concepts will appear once the manuscript has finished full text processing.
+            {t("emptyDescription")}
           </p>
         </div>
         <button
@@ -213,7 +216,7 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
           className="inline-flex items-center gap-2 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          <span>Refresh</span>
+          <span>{t("refresh")}</span>
         </button>
       </div>
     );
@@ -223,16 +226,16 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
     <div 
       className="w-full bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden flex flex-col"
       role="region"
-      aria-label="Paper Knowledge Graph"
+      aria-label={t("title")}
     >
       {/* Screen reader summary */}
       <div className="sr-only">
-        <h4>Knowledge Graph Summary for Paper #{paperId}</h4>
-        <p>This graph has {data.nodes.length} entities and {data.links.length} relationships.</p>
+        <h4>{t("srSummary", { paperId })}</h4>
+        <p>{t("srCounts", { entities: data.nodes.length, relationships: data.links.length })}</p>
         <ul>
           {data.nodes.map((n) => (
             <li key={n.id}>
-              {n.name} (Category: {n.group || "Entity"}) - {n.description || "No description"}
+              {t("srEntity", { name: n.name, category: n.group || "-", description: n.description || "-" })}
             </li>
           ))}
         </ul>
@@ -245,21 +248,21 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
             <Share2 className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-800">Interactive Entity Network</h3>
+            <h3 className="text-sm font-bold text-slate-800">{t("title")}</h3>
             <p className="text-xs text-slate-500">
               {viewMode === "graph"
-                ? "Click any node to zoom in and center its citations"
-                : "Accessible tabular representation of graph relationships"}
+                ? t("graphHint")
+                : t("tableHint")}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-100">
-            <span>{data.nodes.length} nodes</span>
+            <span>{t("nodes", { count: data.nodes.length })}</span>
           </span>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-100">
-            <span>{data.links.length} relationships</span>
+            <span>{t("relationships", { count: data.links.length })}</span>
           </span>
 
           <div className="h-4 w-px bg-slate-200 mx-1" />
@@ -268,18 +271,18 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
           <button
             type="button"
             onClick={() => setViewMode(viewMode === "graph" ? "table" : "graph")}
-            aria-label={viewMode === "graph" ? "Switch to accessible table view" : "Switch to 2D force graph"}
+            aria-label={viewMode === "graph" ? t("toTable") : t("toGraph")}
             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-medium transition-colors cursor-pointer"
           >
             {viewMode === "graph" ? (
               <>
                 <TableIcon className="w-3.5 h-3.5 text-slate-500" />
-                <span>Table</span>
+                <span>{t("table")}</span>
               </>
             ) : (
               <>
                 <Eye className="w-3.5 h-3.5 text-slate-500" />
-                <span>Graph</span>
+                <span>{t("graph")}</span>
               </>
             )}
           </button>
@@ -289,8 +292,8 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
               <button
                 type="button"
                 onClick={handleZoomIn}
-                aria-label="Zoom In"
-                title="Zoom In"
+                aria-label={t("zoomIn")}
+                title={t("zoomIn")}
                 className="p-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 transition-colors cursor-pointer"
               >
                 <ZoomIn className="w-4 h-4" />
@@ -298,8 +301,8 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
               <button
                 type="button"
                 onClick={handleZoomOut}
-                aria-label="Zoom Out"
-                title="Zoom Out"
+                aria-label={t("zoomOut")}
+                title={t("zoomOut")}
                 className="p-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 transition-colors cursor-pointer"
               >
                 <ZoomOut className="w-4 h-4" />
@@ -307,8 +310,8 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
               <button
                 type="button"
                 onClick={handleResetZoom}
-                aria-label="Fit to Screen"
-                title="Fit to Screen"
+                aria-label={t("fit")}
+                title={t("fit")}
                 className="p-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 transition-colors cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" />
@@ -323,20 +326,20 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
         <div 
           className="h-[520px] w-full bg-slate-950 relative"
           role="region"
-          aria-label="Interactive force-directed graph canvas"
+          aria-label={t("canvas")}
         >
           <ErrorBoundary 
             name="ForceGraph2D"
             fallback={
               <div className="h-full flex flex-col items-center justify-center p-6 text-slate-300 text-xs text-center space-y-3">
                 <Layers className="w-8 h-8 text-slate-500" />
-                <p>2D Canvas rendering was interrupted or not supported.</p>
+                <p>{t("canvasFailed")}</p>
                 <button
                   type="button"
                   onClick={() => setViewMode("table")}
                   className="px-3 py-1.5 rounded-lg bg-sky-600 text-white text-xs font-semibold"
                 >
-                  View as Table
+                  {t("viewAsTable")}
                 </button>
               </div>
             }
@@ -365,14 +368,14 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
         <div className="h-[520px] overflow-auto p-4 bg-white">
           <div className="space-y-6">
             <div>
-              <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Entities ({data.nodes.length})</h4>
+              <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">{t("entitiesHeading", { count: data.nodes.length })}</h4>
               <div className="border border-slate-200 rounded-xl overflow-hidden">
                 <table className="w-full text-xs text-left">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-600">
                     <tr>
-                      <th className="py-2.5 px-3 font-semibold">Name</th>
-                      <th className="py-2.5 px-3 font-semibold">Type</th>
-                      <th className="py-2.5 px-3 font-semibold">Description</th>
+                      <th className="py-2.5 px-3 font-semibold">{t("colName")}</th>
+                      <th className="py-2.5 px-3 font-semibold">{t("colType")}</th>
+                      <th className="py-2.5 px-3 font-semibold">{t("colDescription")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -393,15 +396,15 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
             </div>
 
             <div>
-              <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Relationships ({data.links.length})</h4>
+              <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">{t("relationshipsHeading", { count: data.links.length })}</h4>
               <div className="border border-slate-200 rounded-xl overflow-hidden">
                 <table className="w-full text-xs text-left">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-600">
                     <tr>
-                      <th className="py-2.5 px-3 font-semibold">Source</th>
-                      <th className="py-2.5 px-3 font-semibold">Type</th>
-                      <th className="py-2.5 px-3 font-semibold">Target</th>
-                      <th className="py-2.5 px-3 font-semibold">Evidence</th>
+                      <th className="py-2.5 px-3 font-semibold">{t("colSource")}</th>
+                      <th className="py-2.5 px-3 font-semibold">{t("colType")}</th>
+                      <th className="py-2.5 px-3 font-semibold">{t("colTarget")}</th>
+                      <th className="py-2.5 px-3 font-semibold">{t("colEvidence")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">

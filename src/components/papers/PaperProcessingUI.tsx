@@ -227,6 +227,7 @@ export function PaperProcessingUI({
   submissionId: initialSubmissionId
 }: PaperProcessingUIProps) {
   const t = useTranslations("SystemFlow");
+  const tp = useTranslations("PaperTools.processing");
   const isInitialFinished = initialStatus === "completed" || initialStatus === "approved" || initialStatus === "submitted";
 
   const [currentStepIndex, setCurrentStepIndex] = useState(isInitialFinished ? FLOW_STEPS.length - 1 : 1);
@@ -294,7 +295,7 @@ export function PaperProcessingUI({
           }
 
           if (data.status === "failed") {
-            setPollError(data.error || "Submission processing failed. Please check status or try again.");
+            setPollError(data.error || tp("processingFailed"));
             return;
           }
 
@@ -358,7 +359,7 @@ export function PaperProcessingUI({
   const handleCaptchaSubmit = async () => {
     const targetSubmissionId = resolvedSubmissionId ?? initialSubmissionId ?? paperId;
     if (!targetSubmissionId || targetSubmissionId <= 0) {
-      const msg = "Invalid submission ID for captcha.";
+      const msg = tp("noSubmission");
       setCaptchaError(msg);
       toast.error(msg);
       return;
@@ -378,15 +379,15 @@ export function PaperProcessingUI({
       if (res.ok) {
         setRequiresCaptcha(false);
         setCaptchaInput("");
-        toast.success("Captcha submitted successfully.");
+        toast.success(tp("captchaSent"));
       } else {
         const errorData = await res.json().catch(() => ({}));
-        const msg = errorData.error || "Failed to submit captcha";
+        const msg = errorData.error || tp("captchaFailed");
         setCaptchaError(msg);
         toast.error(msg);
       }
     } catch (err: any) {
-      const msg = err instanceof Error ? err.message : "Failed to submit captcha";
+      const msg = err instanceof Error ? err.message : tp("captchaFailed");
       setCaptchaError(msg);
       toast.error(msg);
       console.error(err);
@@ -398,7 +399,7 @@ export function PaperProcessingUI({
   const handleApproveAndSubmit = async () => {
     const targetSubmissionId = resolvedSubmissionId ?? initialSubmissionId ?? paperId;
     if (!targetSubmissionId || targetSubmissionId <= 0) {
-      const msg = "Valid submission ID is required to initiate autonomous submission.";
+      const msg = tp("noSubmission");
       setSubmitError(msg);
       toast.error(msg);
       return;
@@ -417,12 +418,12 @@ export function PaperProcessingUI({
         toast.success("RPA Autonomous Submission initiated successfully!");
       } else {
         const data = await res.json().catch(() => ({}));
-        const msg = data.error || `Failed to initiate submission (HTTP ${res.status})`;
+        const msg = data.error || tp("submitFailed");
         setSubmitError(msg);
         toast.error(msg);
       }
     } catch (err: any) {
-      const msg = err instanceof Error ? err.message : "Network error during submission";
+      const msg = err instanceof Error ? err.message : tp("submitFailed");
       setSubmitError(msg);
       toast.error(msg);
       console.error("Submission failed:", err);
@@ -438,8 +439,8 @@ export function PaperProcessingUI({
         {isFinished 
           ? t("processComplete") 
           : requiresCaptcha 
-            ? "Captcha verification required" 
-            : `Step ${currentStepIndex + 1} of ${FLOW_STEPS.length}: ${t(FLOW_STEPS[currentStepIndex]?.titleKey || "")}`}
+            ? tp("captchaRequired")
+            : tp("stepOf", { current: currentStepIndex + 1, total: FLOW_STEPS.length, title: t(FLOW_STEPS[currentStepIndex]?.titleKey || "") })}
       </div>
 
       {/* Captcha Modal Dialog with Full A11y and Keyboard Support */}
@@ -452,9 +453,9 @@ export function PaperProcessingUI({
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm"
         >
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
-            <h3 id="captcha-dialog-title" className="text-xl font-bold text-slate-800 mb-2">Solve Captcha</h3>
+            <h3 id="captcha-dialog-title" className="text-xl font-bold text-slate-800 mb-2">{tp("captchaTitle")}</h3>
             <p id="captcha-dialog-desc" className="text-slate-600 mb-6 text-sm">
-              A captcha is required by the journal platform to continue the autonomous submission process.
+              {tp("captchaDescription")}
             </p>
             
             {captchaError && (
@@ -465,7 +466,7 @@ export function PaperProcessingUI({
             )}
 
             <label htmlFor="captcha-solution-input" className="block text-sm font-semibold text-slate-700 mb-2">
-              Captcha Solution
+              {tp("captchaLabel")}
             </label>
             <input 
               id="captcha-solution-input"
@@ -482,7 +483,7 @@ export function PaperProcessingUI({
               }}
               disabled={submittingCaptcha}
               className="w-full border border-slate-300 rounded-lg px-4 py-2 mb-6 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter captcha text..."
+              placeholder={tp("captchaPlaceholder")}
               autoFocus
             />
             
@@ -493,7 +494,7 @@ export function PaperProcessingUI({
                 disabled={submittingCaptcha}
                 className="px-4 py-2.5 border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-100 disabled:opacity-50 transition-colors"
               >
-                Dismiss
+                {tp("dismiss")}
               </button>
               <button
                 type="button"
@@ -505,10 +506,10 @@ export function PaperProcessingUI({
                 {submittingCaptcha ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-                    <span>Submitting...</span>
+                    <span>{tp("submitting")}</span>
                   </>
                 ) : (
-                  "Submit Captcha"
+                  tp("submitCaptcha")
                 )}
               </button>
             </div>
@@ -525,7 +526,7 @@ export function PaperProcessingUI({
         <div role="alert" className="mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" aria-hidden="true" />
           <div className="flex-1 text-sm">
-            <p className="font-semibold">Notice regarding processing status</p>
+            <p className="font-semibold">{tp("notice")}</p>
             <p className="text-amber-700 mt-1">{pollError}</p>
           </div>
         </div>
@@ -556,7 +557,7 @@ export function PaperProcessingUI({
                   shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2
                   border-slate-300">
                 <span className="sr-only">
-                  {isCompleted ? "Completed step: " : isCurrent ? "Current active step: " : "Pending step: "}
+                  {isCompleted ? tp("stepDone") : isCurrent ? tp("stepCurrent") : tp("stepPending")}
                 </span>
                 {isCompleted ? (
                   <CheckCircle className="w-5 h-5 text-green-500" aria-hidden="true" />
@@ -620,15 +621,15 @@ export function PaperProcessingUI({
             {isSubmitting ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
-                <span>Initiating Submission...</span>
+                <span>{tp("initiating")}</span>
               </>
             ) : isApproved ? (
               <>
                 <CheckCircle className="w-5 h-5 text-white" aria-hidden="true" />
-                <span>Submission Initiated</span>
+                <span>{tp("initiated")}</span>
               </>
             ) : (
-              "Approve & Submit"
+              tp("approveSubmit")
             )}
           </button>
         </div>

@@ -257,7 +257,7 @@ export function SubmissionWizard({
               {isLoadingConnections ? (
                 <div className="flex justify-center py-10" role="status">
                   <Loader2 className="w-6 h-6 animate-spin text-sky-500" />
-                  <span className="sr-only">Loading connections...</span>
+                  <span className="sr-only">{t("panel.loadingConnections")}</span>
                 </div>
               ) : connections.length === 0 ? (
                 <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-slate-500">

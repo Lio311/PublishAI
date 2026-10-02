@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { useTranslations } from "next-intl";
 import { CheckCircle2, XCircle, Terminal, AlertCircle } from "lucide-react";
 
 export function AnalysisStatus({ paperId }: { paperId: number }) {
+  const t = useTranslations("PaperTools.sandbox");
   const [status, setStatus] = useState<string>("idle");
 
   useEffect(() => {
@@ -78,7 +80,7 @@ export function AnalysisStatus({ paperId }: { paperId: number }) {
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold">Execution Environment Sandbox</span>
+            <span className="text-sm font-bold">{t("statusTitle")}</span>
             <span
               className={`text-xs px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider ${
                 isRunning
@@ -90,13 +92,13 @@ export function AnalysisStatus({ paperId }: { paperId: number }) {
                   : "bg-slate-200 text-slate-700"
               }`}
             >
-              {status}
+              {t.has(`status.${status}`) ? t(`status.${status}`) : status}
             </span>
           </div>
           <p className="text-xs opacity-80 mt-0.5">
-            {isRunning && "Executing Python analysis script and validating statistical claims against raw tabular data..."}
-            {isCompleted && "Statistical verification completed successfully. All data re-plots generated."}
-            {isFailed && "Execution encountered errors during script execution. Check logs for details."}
+            {isRunning && t("running")}
+            {isCompleted && t("completed")}
+            {isFailed && t("failed")}
           </p>
         </div>
       </div>

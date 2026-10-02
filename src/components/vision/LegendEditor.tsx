@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface LegendEditorProps {
   figureId: string;
@@ -11,6 +12,7 @@ interface LegendEditorProps {
 }
 
 export default function LegendEditor({ figureId, originalLegend, suggestedLegend, onClose }: LegendEditorProps) {
+  const t = useTranslations("PaperTools.figures");
   const [currentLegend, setCurrentLegend] = useState(originalLegend);
   const [isSaving, setIsSaving] = useState(false);
   const isMountedRef = useRef(true);
@@ -38,14 +40,14 @@ export default function LegendEditor({ figureId, originalLegend, suggestedLegend
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Save failed (${res.status})`);
+        throw new Error(errorData.error || t("saveFailed"));
       }
 
-      toast.success("Legend updated successfully");
+      toast.success(t("saved"));
       onClose();
     } catch (error: any) {
       console.error("Failed to save legend", error);
-      toast.error(error.message || "Failed to save legend");
+      toast.error(error.message || t("saveFailed"));
     } finally {
       if (isMountedRef.current) {
         setIsSaving(false);
@@ -56,9 +58,9 @@ export default function LegendEditor({ figureId, originalLegend, suggestedLegend
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <label className="text-xs font-semibold text-gray-500">AI Suggested Legend</label>
+        <label className="text-xs font-semibold text-gray-500">{t("suggestedLegend")}</label>
         <div className="text-sm bg-purple-50 p-2 rounded border border-purple-100 text-purple-900">
-          {suggestedLegend || "No suggestion available."}
+          {suggestedLegend || t("noSuggestion")}
         </div>
         {suggestedLegend && (
           <button 
@@ -66,13 +68,13 @@ export default function LegendEditor({ figureId, originalLegend, suggestedLegend
             onClick={() => setCurrentLegend(suggestedLegend)}
             className="text-xs text-purple-600 text-left hover:underline mt-1 cursor-pointer"
           >
-            Use suggestion
+            {t("useSuggestion")}
           </button>
         )}
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-xs font-semibold text-gray-500">Edit Legend</label>
+        <label className="text-xs font-semibold text-gray-500">{t("editLegend")}</label>
         <textarea
           value={currentLegend}
           onChange={(e) => setCurrentLegend(e.target.value)}
@@ -88,7 +90,7 @@ export default function LegendEditor({ figureId, originalLegend, suggestedLegend
           disabled={isSaving}
           className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded cursor-pointer disabled:opacity-50"
         >
-          Cancel
+          {t("cancel")}
         </button>
         <button 
           type="button"
@@ -96,7 +98,7 @@ export default function LegendEditor({ figureId, originalLegend, suggestedLegend
           disabled={isSaving}
           className="px-3 py-1 text-sm bg-sky-500 text-white rounded hover:bg-sky-600 disabled:opacity-50 cursor-pointer"
         >
-          {isSaving ? "Saving..." : "Save Legend"}
+          {isSaving ? t("saving") : t("save")}
         </button>
       </div>
     </div>

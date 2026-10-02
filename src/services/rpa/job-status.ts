@@ -44,21 +44,23 @@ export function presentRpaJob(job: RpaJob) {
         ? "initializing"
         : job.status;
 
-  const message =
+  // The client translates messageKey; errorDetail carries the raw failure reason.
+  const messageKey =
     job.status === "paused"
       ? state.kind === "2fa"
-        ? "The journal portal requires a two-factor authentication code."
-        : "The journal portal requires a CAPTCHA to be solved."
+        ? "needs2fa"
+        : "needsCaptcha"
       : job.status === "error"
-        ? job.errorLog || "Submission failed"
+        ? "failed"
         : job.status === "completed"
-          ? "Submission completed"
-          : "Submitting to the journal portal...";
+          ? "completed"
+          : "running";
 
   return {
     jobId: job.id,
     status,
-    message,
+    messageKey,
+    errorDetail: job.status === "error" ? job.errorLog : null,
     progress: job.status === "completed" ? 100 : job.status === "error" ? 100 : job.status === "paused" ? 75 : STEP_PROGRESS[job.currentStep ?? ""] ?? 10,
     interventionKind: job.status === "paused" ? state.kind ?? "captcha" : null,
     captchaUrl: state.captchaUrl ?? null,

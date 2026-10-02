@@ -67,7 +67,7 @@ describe("Papers Components Audit Tests", () => {
       expect(dialog).toHaveAttribute("aria-modal", "true");
       expect(dialog).toHaveAttribute("aria-labelledby", "captcha-dialog-title");
 
-      const input = screen.getByLabelText(/Captcha Solution/i);
+      const input = screen.getByLabelText('captchaLabel');
       expect(input).toBeInTheDocument();
       expect(input).toHaveAttribute("id", "captcha-solution-input");
     });
@@ -80,10 +80,10 @@ describe("Papers Components Audit Tests", () => {
 
       render(<PaperProcessingUI paperId={789} initialStatus="requires_captcha" />);
 
-      const input = screen.getByLabelText(/Captcha Solution/i);
+      const input = screen.getByLabelText('captchaLabel');
       fireEvent.change(input, { target: { value: "solution123" } });
 
-      const submitBtn = screen.getByRole("button", { name: /Submit Captcha/i });
+      const submitBtn = screen.getByRole("button", { name: 'submitCaptcha' });
       fireEvent.click(submitBtn);
 
       await waitFor(() => {
@@ -119,7 +119,7 @@ describe("Papers Components Audit Tests", () => {
 
       render(<PaperProcessingUI paperId={99} initialStatus="completed" />);
 
-      const approveBtn = screen.getByRole("button", { name: /Approve & Submit/i });
+      const approveBtn = screen.getByRole("button", { name: 'approveSubmit' });
       expect(approveBtn).toBeInTheDocument();
 
       fireEvent.click(approveBtn);

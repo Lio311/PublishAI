@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { HumanInterventionModal } from './HumanInterventionModal';
 
 interface SubmissionTrackerProps {
@@ -10,7 +11,8 @@ type JobStatus = 'initializing' | 'logging_in' | 'uploading' | 'filling_forms' |
 interface JobDetails {
   jobId: string;
   status: JobStatus;
-  message?: string;
+  messageKey?: 'running' | 'needs2fa' | 'needsCaptcha' | 'failed' | 'completed' | 'resuming';
+  errorDetail?: string | null;
   progress?: number;
   interventionKind?: 'captcha' | '2fa' | null;
 }
@@ -20,6 +22,7 @@ const POLL_INTERVAL_MS = 3000;
 
 /** Tracks the paper's latest automated (RPA) submission; renders nothing if there is none. */
 export const SubmissionTracker: React.FC<SubmissionTrackerProps> = ({ paperId }) => {
+  const t = useTranslations('PaperTools.tracker');
   const [jobDetails, setJobDetails] = useState<JobDetails | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +48,7 @@ export const SubmissionTracker: React.FC<SubmissionTrackerProps> = ({ paperId })
         }
       } catch (err) {
         console.error("Error polling status:", err);
-        if (!cancelled) setError("Failed to track submission status.");
+        if (!cancelled) setError(t('errors.track'));
       }
     };
 
@@ -68,14 +71,14 @@ export const SubmissionTracker: React.FC<SubmissionTrackerProps> = ({ paperId })
       });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.error || 'Resume failed');
+        throw new Error(data?.error || t('errors.resume'));
       }
 
       setIsModalOpen(false);
-      setJobDetails(prev => prev && ({ ...prev, status: 'logging_in', message: 'Resuming process...' }));
+      setJobDetails(prev => prev && ({ ...prev, status: 'logging_in', messageKey: 'resuming' }));
     } catch (err) {
       console.error("Failed to resume bot:", err);
-      setError(err instanceof Error ? err.message : "Failed to resume the bot.");
+      setError(err instanceof Error ? err.message : t('errors.resume'));
     }
   };
 
@@ -110,11 +113,11 @@ export const SubmissionTracker: React.FC<SubmissionTrackerProps> = ({ paperId })
     <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-md border border-gray-100">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-800">Automated Submission Tracker</h2>
-          <p className="text-sm text-gray-500 mt-1">Job ID: {jobId}</p>
+          <h2 className="text-xl font-bold text-gray-800">{t('title')}</h2>
+          <p className="text-sm text-gray-500 mt-1">{t('jobId', { id: jobId ?? '' })}</p>
         </div>
         <div className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${getStatusColor(jobDetails.status)}`}>
-          {jobDetails.status.replace('_', ' ')}
+          {t(`status.${jobDetails.status}`)}
         </div>
       </div>
 
@@ -125,7 +128,10 @@ export const SubmissionTracker: React.FC<SubmissionTrackerProps> = ({ paperId })
       )}
 
       <div className="mb-2 flex justify-between items-center text-sm">
-        <span className="font-medium text-gray-700">{jobDetails.message || 'Processing...'}</span>
+        <span className="font-medium text-gray-700">
+          {t(`messages.${jobDetails.messageKey ?? 'running'}`)}
+          {jobDetails.errorDetail ? `: ${jobDetails.errorDetail}` : ''}
+        </span>
         <span className="text-gray-500">{getProgressWidth(jobDetails.status, jobDetails.progress)}</span>
       </div>
       
@@ -142,22 +148,22 @@ export const SubmissionTracker: React.FC<SubmissionTrackerProps> = ({ paperId })
 
       <div className="grid grid-cols-4 gap-2 text-center text-xs sm:text-sm text-gray-500">
         <div className={jobDetails.status === 'logging_in' || getProgressValue(jobDetails.status) >= 30 ? 'text-blue-600 font-semibold' : ''}>
-          Login
+          {t('steps.login')}
         </div>
         <div className={jobDetails.status === 'uploading' || getProgressValue(jobDetails.status) >= 50 ? 'text-blue-600 font-semibold' : ''}>
-          Upload Files
+          {t('steps.upload')}
         </div>
         <div className={jobDetails.status === 'filling_forms' || getProgressValue(jobDetails.status) >= 70 ? 'text-blue-600 font-semibold' : ''}>
-          Fill Forms
+          {t('steps.forms')}
         </div>
         <div className={jobDetails.status === 'completed' ? 'text-green-600 font-semibold' : ''}>
-          Complete
+          {t('steps.complete')}
         </div>
       </div>
 
       <HumanInterventionModal 
         isOpen={isModalOpen}
-        message={jobDetails.message || "Please complete the requested action to continue."}
+        message={t(`messages.${jobDetails.messageKey === 'needs2fa' ? 'needs2fa' : 'needsCaptcha'}`)}
         onResume={handleResume}
         onClose={() => setIsModalOpen(false)}
       />

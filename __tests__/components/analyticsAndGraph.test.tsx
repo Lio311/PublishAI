@@ -28,7 +28,7 @@ describe('Analytics & Graph Components', () => {
     it('renders NetworkGraphSkeleton with accessible status', () => {
       render(<NetworkGraphSkeleton />);
       expect(screen.getByRole('status')).toBeInTheDocument();
-      expect(screen.getByText(/Simulating GraphRAG Knowledge Network/i)).toBeInTheDocument();
+      expect(screen.getByText('graphLoading')).toBeInTheDocument();
     });
 
     it('renders NetworkGraph with loaded data and accessible elements', async () => {
@@ -76,7 +76,7 @@ describe('Analytics & Graph Components', () => {
     it('renders KnowledgeGraphViewerSkeleton with accessible role', () => {
       render(<KnowledgeGraphViewerSkeleton />);
       expect(screen.getByRole('status')).toBeInTheDocument();
-      expect(screen.getByText(/Constructing Knowledge Graph/i)).toBeInTheDocument();
+      expect(screen.getByText('loading')).toBeInTheDocument();
     });
 
     it('renders dual view mode and allows switching to accessible table view', async () => {
@@ -96,14 +96,14 @@ describe('Analytics & Graph Components', () => {
       render(<KnowledgeGraphViewer paperId={42} />);
 
       await waitFor(() => {
-        expect(screen.getByText('Interactive Entity Network')).toBeInTheDocument();
+        expect(screen.getByText('title')).toBeInTheDocument();
       });
 
       // Click Table toggle button
-      const tableToggleBtn = screen.getByRole('button', { name: /Switch to accessible table view/i });
+      const tableToggleBtn = screen.getByRole('button', { name: 'toTable' });
       fireEvent.click(tableToggleBtn);
 
-      expect(screen.getByText('Entities (2)')).toBeInTheDocument();
+      expect(screen.getByText('entitiesHeading')).toBeInTheDocument();
       expect(screen.getByText('Curcumin')).toBeInTheDocument();
       expect(screen.getByText('NF-kB')).toBeInTheDocument();
       expect(screen.getByText('inhibits')).toBeInTheDocument();
@@ -131,14 +131,14 @@ describe('Analytics & Graph Components', () => {
 
       render(<LogicConsistencyReport paperId={42} />);
 
-      const textarea = screen.getByPlaceholderText(/Enter claims to check/i);
+      const textarea = screen.getByPlaceholderText('placeholder');
       fireEvent.change(textarea, { target: { value: 'Curcumin decreases inflammation' } });
 
-      const submitBtn = screen.getByRole('button', { name: /Run Logic Check/i });
+      const submitBtn = screen.getByRole('button', { name: 'run' });
       fireEvent.click(submitBtn);
 
       await waitFor(() => {
-        expect(screen.getByText('Consistent')).toBeInTheDocument();
+        expect(screen.getAllByText('consistent')[0]).toBeInTheDocument();
       });
 
       expect(screen.getByText('Suppressed cytokine production in mice')).toBeInTheDocument();
@@ -148,7 +148,7 @@ describe('Analytics & Graph Components', () => {
   describe('AnalyticsDashboard & Skeleton', () => {
     it('renders AnalyticsDashboardSkeleton with accessible role', () => {
       render(<AnalyticsDashboardSkeleton />);
-      expect(screen.getByRole('status', { name: /Loading analytics dashboard/i })).toBeInTheDocument();
+      expect(screen.getByRole('status', { name: 'loading' })).toBeInTheDocument();
     });
 
     it('renders AnalyticsDashboard with metric cards, charts, and screen reader tables', async () => {
@@ -181,8 +181,8 @@ describe('Analytics & Graph Components', () => {
       });
 
       // Accessible regions for charts
-      expect(screen.getByRole('region', { name: /Entity Distribution Pie Chart/i })).toBeInTheDocument();
-      expect(screen.getByRole('region', { name: /Relationship Distribution Bar Chart/i })).toBeInTheDocument();
+      expect(screen.getByRole('region', { name: 'entityDistribution' })).toBeInTheDocument();
+      expect(screen.getByRole('region', { name: 'relationshipDistribution' })).toBeInTheDocument();
     });
   });
 });

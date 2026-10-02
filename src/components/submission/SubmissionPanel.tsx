@@ -477,7 +477,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
                       ) : (
                         <ArrowDownRight className="w-4 h-4" />
                       )}
-                      Cascade to Next Journal
+                      {t("panel.cascadeNext")}
                     </button>
                   )}
                   {sub.status === 'submitted' && sub.remotePostUrl && (
