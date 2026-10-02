@@ -4,12 +4,28 @@ import { submissionProcessEvent } from "../events";
 import { db } from "@/services/db";
 import { submissions, papers, users, rpaJobs } from "@/services/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
-import { runSubmissionWorkflow } from "@/services/rpa/submission-bot";
 import { buildSubmissionPayload, loadConnection, recordAttemptOutcome } from "@/services/rpa/submission-job";
 import {
   sendSubmissionSuccessEmail,
   sendSubmissionFailedEmail,
 } from "@/services/email/submission-email";
+
+/**
+ * The portal bot drives a real browser through Playwright. It is loaded only when a submission
+ * actually runs, so the rest of the Inngest functions still load on hosts without a browser
+ * (such as Vercel functions).
+ */
+async function loadSubmissionBot() {
+  try {
+    const { runSubmissionWorkflow } = await import("@/services/rpa/submission-bot");
+    return runSubmissionWorkflow;
+  } catch (error) {
+    throw new NonRetriableError(
+      "Automated portal submission needs a browser runtime (Playwright), which is not available on this deployment.",
+      { cause: error }
+    );
+  }
+}
 
 export const processSubmission = inngest.createFunction(
   {
@@ -99,6 +115,7 @@ export const processSubmission = inngest.createFunction(
 
     const runAttempt = (stepId: string, resume?: { captchaSolution?: string; twoFACode?: string }) =>
       step.run(stepId, async () => {
+        const runSubmissionWorkflow = await loadSubmissionBot();
         const result = await runSubmissionWorkflow(String(submissionId), await loadConnection(submissionId, jobId, resume), await buildSubmissionPayload(submissionId));
         return recordAttemptOutcome(jobId, result);
       });

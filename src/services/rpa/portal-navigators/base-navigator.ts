@@ -1,4 +1,4 @@
-import { Page } from 'playwright';
+import type { Page } from 'playwright';
 import { ScreenshotManager } from '../screenshot-manager';
 import { WorkflowResult, NavigatorConfig } from '../types';
 
