@@ -6,7 +6,7 @@ import { Link, usePathname, useRouter } from "@/app/i18n/routing";
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { FileText, Home, Settings, LogOut, LogIn, Globe, Book, Link as LinkIcon, Send, Share2, Brain, X, Workflow, BarChart3 } from "lucide-react";
+import { FileText, Home, Settings, LogOut, LogIn, Globe, Book, Link as LinkIcon, Send, Share2, Brain, X, Workflow, BarChart3, Target } from "lucide-react";
 
 export interface SidebarProps {
   isAdmin?: boolean;
@@ -39,6 +39,7 @@ export default function AnimatedSidebar({ isAdmin = false, onClose }: SidebarPro
     const items = [
       { name: t("home"), icon: Home, href: `/` },
       { name: t("myPapers"), icon: FileText, href: `/papers` },
+      { name: t("journalMatch"), icon: Target, href: `/journal-match` },
       { name: t("connections"), icon: LinkIcon, href: `/connections` },
       { name: t("rules"), icon: Book, href: `/journals` },
       { name: t("submissions"), icon: Send, href: `/submissions` },
