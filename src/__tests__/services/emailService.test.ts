@@ -11,7 +11,7 @@ jest.mock('@/services/db', () => ({
   }
 }));
 
-jest.mock('pdf-parse', () => ({
+jest.mock('pdf-parse/lib/pdf-parse.js', () => ({
   __esModule: true,
   default: jest.fn().mockResolvedValue({
     text: 'Reviewer requests major revisions on Section 3.',

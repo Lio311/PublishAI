@@ -4,6 +4,8 @@ import { eq } from "drizzle-orm";
 import { generateObject, generateText } from "ai";
 import { AI_MODELS } from "@/services/ai/provider";
 import { z } from "zod";
+import { readPaperFile } from "./storage/paperFiles";
+import { extractTextFromBuffer } from "./documents/extractText";
 
 export async function extractFiguresFromDocument(documentUrlOrText?: string): Promise<Array<{imageUrl: string, legend: string, figureNumber: number, resolution: number}>> {
   if (!documentUrlOrText) {
@@ -13,25 +15,17 @@ export async function extractFiguresFromDocument(documentUrlOrText?: string): Pr
   
   let textToAnalyze = documentUrlOrText;
 
-  // If it's a URL, try to fetch and parse it (especially for PDF)
+  // Uploaded manuscripts live in private Blob storage and must be read with credentials.
   if (documentUrlOrText.startsWith('http://') || documentUrlOrText.startsWith('https://')) {
-    try {
-      const response = await fetch(documentUrlOrText);
-      if (response.ok) {
-        const contentType = response.headers.get('content-type') || '';
-        if (contentType.includes('application/pdf') || documentUrlOrText.toLowerCase().endsWith('.pdf')) {
-          const arrayBuffer = await response.arrayBuffer();
-          const buffer = Buffer.from(arrayBuffer);
-          const pdfParse = (await import('pdf-parse')).default;
-          const pdfData = await pdfParse(buffer);
-          textToAnalyze = pdfData.text;
-        } else {
-          textToAnalyze = await response.text();
-        }
-      }
-    } catch (e) {
-      console.warn("Failed to fetch/parse document URL, falling back to treating as text", e);
+    const file = await readPaperFile(documentUrlOrText).catch((e) => {
+      console.warn("Failed to read document from storage:", e);
+      return null;
+    });
+    if (!file) {
+      // Never send the URL itself to the model as if it were manuscript text.
+      return [];
     }
+    textToAnalyze = await extractTextFromBuffer(file.buffer, file.filename);
   }
 
   try {

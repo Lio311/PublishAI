@@ -8,10 +8,11 @@ import { auth } from "@/app/auth";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { checkIsAdmin } from "@/services/auth-utils";
 import { Link } from "@/app/i18n/routing";
-import { ArrowLeft, Download, Calendar, Building2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Download, Calendar, Building2 } from "lucide-react";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import SubmissionProgressBar from "@/components/submission/SubmissionProgressBar";
-import { submissions } from "@/services/db/schema";
+import { submissions, documents } from "@/services/db/schema";
+import { textToHtml } from "@/services/documents/manuscriptStore";
 import { desc } from "drizzle-orm";
 
 export default async function PaperPage({
@@ -42,6 +43,7 @@ export default async function PaperPage({
       createdAt: papers.createdAt,
       journalName: journals.name,
       citationStyle: journals.citationStyle,
+      suggestedJournals: papers.suggestedJournals,
     })
     .from(papers)
     .leftJoin(journals, eq(papers.targetJournalId, journals.id))
@@ -61,6 +63,13 @@ export default async function PaperPage({
     .limit(1);
     
   if (!paperRecord) return notFound();
+
+  const [manuscript] = await db
+    .select({ id: documents.id, title: documents.title, content: documents.content })
+    .from(documents)
+    .where(eq(documents.paperId, paperId))
+    .orderBy(desc(documents.createdAt))
+    .limit(1);
 
 
   const formatDate = (date: Date | null) => {
@@ -168,14 +177,12 @@ export default async function PaperPage({
             {paperRecord.originalFileUrl && (
               <div className="shrink-0">
                 <a
-                  href={paperRecord.originalFileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={`/api/papers/${paperRecord.id}/file`}
+                  download
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-700 border border-slate-200 hover:border-sky-200 font-medium text-xs transition-all shadow-2xs group cursor-pointer"
                 >
                   <Download className="w-4 h-4 text-slate-500 group-hover:text-sky-600 transition-colors" />
                   <span>{t("downloadOriginal")}</span>
-                  <ExternalLink className="w-3 h-3 opacity-60" />
                 </a>
               </div>
             )}
@@ -188,7 +195,19 @@ export default async function PaperPage({
            <SubmissionProgressBar currentStatus={latestSubmission?.status || "draft"} />
         </div>
         <ErrorBoundary name="Paper Workspace">
-          <PaperTabs paperId={paperRecord.id} initialStatus={paperRecord.status || "pending"} />
+          <PaperTabs
+            paperId={paperRecord.id}
+            paperTitle={paperRecord.title}
+            initialStatus={paperRecord.status || "pending"}
+            journalName={paperRecord.journalName}
+            isRejected={latestSubmission?.status === "rejected"}
+            suggestedJournals={Array.isArray(paperRecord.suggestedJournals) ? paperRecord.suggestedJournals : []}
+            manuscript={
+              manuscript
+                ? { id: manuscript.id, title: manuscript.title, html: textToHtml(manuscript.content ?? "") }
+                : null
+            }
+          />
         </ErrorBoundary>
       </div>
     </DashboardLayout>

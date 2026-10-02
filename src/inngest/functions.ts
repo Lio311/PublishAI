@@ -3,7 +3,7 @@ import {
   paperUploadedEvent,
   paperReviewerCommentsReceivedEvent,
 } from "./events";
-import { cron } from "inngest";
+import { cron, NonRetriableError } from "inngest";
 import { db } from "@/services/db";
 import {
   papers,
@@ -13,6 +13,7 @@ import {
   paperStages,
 } from "@/services/db/schema";
 import { eq, and, gte } from "drizzle-orm";
+import { loadManuscriptText, updateManuscriptMetadata } from "@/services/documents/manuscriptStore";
 import { AgentOrchestrator } from "@/services/agents/orchestrator";
 import { ClarificationAgent } from "@/services/agents/clarification-agent";
 import { PlanningAgent } from "@/services/agents/planning-agent";
@@ -58,18 +59,13 @@ export const processPaper = inngest.createFunction(
   },
   async ({ event, step }) => {
     const { paperId } = event.data;
-    let textContent = event.data.textContent;
 
-    // Fallback if textContent was not in event: fetch from DB
+    // Events carry ids only; the manuscript text is stored with the paper's document.
+    const textContent =
+      event.data.textContent ||
+      (await step.run("load-manuscript-text", () => loadManuscriptText(paperId)));
     if (!textContent) {
-      const paperRecord = await step.run("fetch-paper-text-fallback", async () => {
-        const [rec] = await db
-          .select({ title: papers.title, originalFileUrl: papers.originalFileUrl })
-          .from(papers)
-          .where(eq(papers.id, paperId));
-        return rec;
-      });
-      textContent = paperRecord?.title || "Manuscript Text";
+      throw new NonRetriableError(`No manuscript text available for paper ${paperId}`);
     }
 
     const orchestrator = new AgentOrchestrator(step);
@@ -86,6 +82,21 @@ export const processPaper = inngest.createFunction(
       manuscriptText: textContent,
       previousStageOutputs: new Map<Stage, AgentResult>(),
     };
+
+    // 0. Integrity scan of the author's original text. It must run before the
+    // writing agents (which rewrite the text with AI and would trip the AI-text
+    // heuristic) and is advisory: an LLM estimate is not grounds to fail a paper.
+    await step.run("integrity-scan", async () => {
+      try {
+        const { IntegrityScanner } = await import("@/services/security/integrity-scanner");
+        const report = await IntegrityScanner.scanManuscript(textContent);
+        await updateManuscriptMetadata(paperId, { integrityReport: { ...report, scannedAt: new Date().toISOString() } });
+        return { passed: report.passed };
+      } catch (error) {
+        console.warn(`[Integrity] Scan unavailable for paper ${paperId}:`, error);
+        return { passed: null };
+      }
+    });
 
     // 1. Clarification
     const clarification = await orchestrator.runStage(
@@ -132,24 +143,6 @@ export const processPaper = inngest.createFunction(
     if (execution.metadata?.updatedText) {
       context.manuscriptText = execution.metadata.updatedText as string;
     }
-
-    // 6.5 Integrity Scan
-    await step.run("integrity-scan", async () => {
-      const { IntegrityScanner } = await import(
-        "@/services/security/integrity-scanner"
-      );
-      const report = await IntegrityScanner.scanManuscript(
-        context.manuscriptText
-      );
-      console.log(
-        `[Integrity] Passed: ${report.passed}. Plagiarism: ${report.plagiarismScore}%. AI: ${report.aiGeneratedScore}%.`
-      );
-      if (!report.passed) {
-        throw new Error(
-          `Integrity check failed: Plagiarism ${report.plagiarismScore}%, AI ${report.aiGeneratedScore}%`
-        );
-      }
-    });
 
     // 7. QA
     const qa = await orchestrator.runStage(new QaAgent(), context);
@@ -203,6 +196,12 @@ export const processPaper = inngest.createFunction(
           console.error("Failed to send email notification", e);
         }
       }
+    });
+
+    // Hand the finished manuscript to the multi-agent reviewer debate.
+    await step.sendEvent("start-review-debate", {
+      name: "submission/review-started",
+      data: { paperId },
     });
 
     return { success: true, stagesCompleted: 9 };
@@ -308,7 +307,7 @@ export const processResubmission = inngest.createFunction(
       key: "event.data.paperId",
       limit: 1,
     },
-    idempotency: "event.data.paperId",
+    // No idempotency key: a paper can go through several review rounds.
     retries: 2,
     onFailure: async ({ event, step }) => {
       const paperId =
@@ -344,22 +343,23 @@ export const processResubmission = inngest.createFunction(
     });
 
     const manuscriptText = await step.run("fetch-paper-text", async () => {
+      // Prefer the latest revised manuscript (compilation > execution > writing output);
+      // other stages (QA, cover letter...) produce reports, not the manuscript itself.
       const stages = await db
         .select()
         .from(paperStages)
         .where(eq(paperStages.paperId, paperId));
-      const sorted = stages.sort(
-        (a, b) =>
-          (b.completedAt?.getTime() || 0) - (a.completedAt?.getTime() || 0)
-      );
-      const latestText = sorted.find((s) => s.agentOutput)?.agentOutput;
-      if (latestText) return latestText;
+      const manuscriptStages = ["compilation", "execution", "writing"] as const;
+      for (const stageName of manuscriptStages) {
+        const latest = stages
+          .filter((s) => s.stage === stageName && s.status === "completed" && s.agentOutput)
+          .sort((a, b) => (b.completedAt?.getTime() || 0) - (a.completedAt?.getTime() || 0))[0];
+        if (latest?.agentOutput) return latest.agentOutput;
+      }
 
-      const [rec] = await db
-        .select()
-        .from(papers)
-        .where(eq(papers.id, paperId));
-      return rec?.title || "Latest Manuscript Text Here";
+      const original = await loadManuscriptText(paperId);
+      if (!original) throw new NonRetriableError(`No manuscript text available for paper ${paperId}`);
+      return original;
     });
 
     const context: AgentContext = {

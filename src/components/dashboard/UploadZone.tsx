@@ -175,7 +175,7 @@ export default function UploadZone() {
           ref={fileInputRef}
           type="file" 
           multiple
-          accept=".pdf,.docx,.csv,.xlsx,.png,.jpg,.jpeg,.pptx"
+          accept=".pdf,.docx,.txt,.md,.csv,.xlsx"
           aria-label={t("button")}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
           disabled={isUploading || uploadSuccess}

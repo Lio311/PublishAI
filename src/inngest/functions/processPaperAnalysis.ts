@@ -5,6 +5,7 @@ import { generateAnalysisScript } from "../../services/dataAnalysisService";
 import { db } from "../../services/db";
 import { dataFiles, sandboxRuns, generatedCharts, papers } from "../../services/db/schema";
 import { eq } from "drizzle-orm";
+import { loadManuscriptText } from "@/services/documents/manuscriptStore";
 
 export const processPaperAnalysis = inngest.createFunction(
   {
@@ -48,13 +49,8 @@ export const processPaperAnalysis = inngest.createFunction(
       return { success: false, reason: "No data files found for paper" };
     }
 
-    const paperContent = await step.run("fetch-paper-content", async () => {
-      const [paper] = await db
-        .select({ title: papers.title })
-        .from(papers)
-        .where(eq(papers.id, paperId));
-      return paper?.title || "";
-    });
+    // The analysis script is designed from the manuscript itself (methods, hypotheses), not its title.
+    const paperContent = await step.run("fetch-paper-content", async () => (await loadManuscriptText(paperId)) ?? "");
 
     if (!paperContent) {
       return { success: false, reason: "Paper content not found" };

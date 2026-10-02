@@ -46,6 +46,8 @@ export interface DocumentSection {
 
 export interface DocumentEditorProps {
   documentId?: string;
+  /** Links newly created documents to this paper. */
+  paperId?: number;
   initialTitle?: string;
   initialJournal?: string;
   initialContent?: string;
@@ -135,6 +137,7 @@ function extractDocumentCitations(htmlOrText: string): string[] {
 
 export default function RichDocumentEditor({
   documentId = "doc-new",
+  paperId,
   initialTitle = "",
   initialJournal = "Nature Biotechnology",
   initialContent = "",
@@ -258,6 +261,7 @@ export default function RichDocumentEditor({
             content: contentToSave,
             wordCount: words,
             status: "draft",
+            paperId,
           }),
         });
 

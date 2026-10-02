@@ -14,21 +14,31 @@ import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { Sparkles, Database, Network, Users, Eye, Edit3 } from "lucide-react";
 import RichDocumentEditor from "@/components/RichDocumentEditor";
 import { PreflightCheckPanel } from "@/components/sandbox/PreflightCheckPanel";
-import DataScienceSandboxUI from "@/components/stage1/DataScienceSandboxUI";
-import EntityHighlighter from "@/components/graph/EntityHighlighter";
-import { MultiAgentDebatePanel } from "@/components/debate/MultiAgentDebatePanel";
 import { SubmissionTracker } from "@/components/rpa/SubmissionTracker";
-import RejectStateHandler from "@/components/cascade/RejectStateHandler";
-import { RevisionRequestForm } from "@/components/pingpong/RevisionRequestForm";
-import { RevisionDiffViewer } from "@/components/pingpong/RevisionDiffViewer";
+import RejectStateHandler, { type JournalRecommendation } from "@/components/cascade/RejectStateHandler";
 import CitationSearch from "@/components/literature/CitationSearch";
-import { ExportAgentToggle } from "@/components/export/ExportAgentToggle";
-import UploadClarificationModal from "@/components/stage1/UploadClarificationModal";
 
 
 interface PaperTabsProps {
   paperId: number;
+  paperTitle: string;
   initialStatus: string;
+  journalName: string | null;
+  isRejected: boolean;
+  suggestedJournals: unknown[];
+  manuscript: { id: string; title: string; html: string } | null;
+}
+
+function toRecommendations(suggested: unknown[]): JournalRecommendation[] {
+  return suggested
+    .filter((s): s is Record<string, unknown> => typeof s === "object" && s !== null && "name" in s)
+    .map((s, i) => ({
+      id: String(s.id ?? s.journalId ?? i),
+      name: String(s.name),
+      impactFactor: typeof s.impactFactor === "number" ? s.impactFactor : undefined,
+      matchScore: Number(s.matchScore ?? s.score ?? 0),
+      rationale: String(s.rationale ?? s.reason ?? ""),
+    }));
 }
 
 interface TabDefinition {
@@ -38,7 +48,15 @@ interface TabDefinition {
   description: string;
 }
 
-export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
+export default function PaperTabs({
+  paperId,
+  paperTitle,
+  initialStatus,
+  journalName,
+  isRejected,
+  suggestedJournals,
+  manuscript,
+}: PaperTabsProps) {
   const [activeTab, setActiveTab] = useState("Editor");
   const t = useTranslations("Papers");
 
@@ -111,11 +129,14 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
                 {activeTab === "Editor" && (
           <ErrorBoundary name="Editor">
             <div className="space-y-8">
-              <RichDocumentEditor documentId={String(paperId)} />
+              <RichDocumentEditor
+                documentId={manuscript?.id}
+                paperId={paperId}
+                initialTitle={manuscript?.title ?? paperTitle}
+                initialContent={manuscript?.html ?? ""}
+                {...(journalName ? { initialJournal: journalName } : {})}
+              />
               <CitationSearch />
-              <RevisionRequestForm onSubmit={() => {}} isLoading={false} />
-              <RevisionDiffViewer originalContent="" newContent="" />
-              <ExportAgentToggle paperId={String(paperId)} hasVerifiedCode={false} codeSnippet="" datasets={[]} requirements={[]} />
             </div>
           </ErrorBoundary>
         )}
@@ -125,8 +146,13 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
             <div className="space-y-8">
               <PaperProcessingUI paperId={paperId} initialStatus={initialStatus} />
               <SubmissionTracker paperId={paperId} />
-              <RejectStateHandler paperTitle="Sample Paper" originalJournal="Nature" recommendations={[]} />
-              <UploadClarificationModal isOpen={false} onClose={() => {}} onComplete={() => {}} />
+              {isRejected && (
+                <RejectStateHandler
+                  paperTitle={paperTitle}
+                  originalJournal={journalName ?? ""}
+                  recommendations={toRecommendations(suggestedJournals)}
+                />
+              )}
             </div>
           </ErrorBoundary>
         )}
@@ -135,7 +161,6 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
           <ErrorBoundary name="Data Sandbox">
             <div className="space-y-8">
               <PreflightCheckPanel paperId={String(paperId)} codeSnippet="" dependencies={[]} />
-              <DataScienceSandboxUI />
               <DataUploadSection paperId={paperId} />
               <AnalysisStatus paperId={paperId} />
               <GeneratedChartsViewer paperId={paperId} />
@@ -146,7 +171,6 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
                 {activeTab === "Knowledge Graph" && (
           <ErrorBoundary name="Knowledge Graph">
             <div className="space-y-8">
-              <EntityHighlighter text="" />
               <KnowledgeGraphViewer paperId={paperId} />
               <LogicConsistencyReport paperId={paperId} />
             </div>
@@ -156,7 +180,6 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
                 {activeTab === "AI Debate" && (
           <ErrorBoundary name="AI Debate Room">
             <div className="space-y-8">
-              <MultiAgentDebatePanel userFindings="No initial findings" />
               <DebateRoom paperId={paperId} />
             </div>
           </ErrorBoundary>

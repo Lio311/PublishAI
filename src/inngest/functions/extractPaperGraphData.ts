@@ -2,9 +2,7 @@ import { inngest } from "../client";
 import { paperUploadedEvent } from "../events";
 import { extractScientificGraphData } from "../../services/graph/entityExtractor";
 import { buildGraphFromRelationships } from "../../services/graph/graphBuilder";
-import { db } from "@/services/db";
-import { papers } from "@/services/db/schema";
-import { eq } from "drizzle-orm";
+import { loadManuscriptText } from "@/services/documents/manuscriptStore";
 
 export const extractPaperGraphData = inngest.createFunction(
   {
@@ -23,24 +21,16 @@ export const extractPaperGraphData = inngest.createFunction(
   },
   async ({ event, step }) => {
     const { paperId } = event.data;
-    let text = event.data.textContent;
-
-    if (!text) {
-      text = await step.run("fetch-fallback-text", async () => {
-        const [paper] = await db
-          .select({ title: papers.title })
-          .from(papers)
-          .where(eq(papers.id, paperId));
-        return paper?.title || "";
-      });
-    }
+    const text =
+      event.data.textContent ||
+      (await step.run("load-manuscript-text", () => loadManuscriptText(paperId)));
 
     if (!text) {
       return { success: false, reason: "No text content available for graph extraction" };
     }
 
     const graphData = await step.run("extract-graph-data", async () => {
-      return await extractScientificGraphData(text!);
+      return await extractScientificGraphData(text);
     });
 
     await step.run("build-graph", async () => {

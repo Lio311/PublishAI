@@ -50,13 +50,12 @@ export async function processIncomingReviewEmail(emailData: IncomingEmailData) {
     for (const attachment of emailData.attachments) {
       if (attachment.contentType === 'application/pdf' || attachment.filename?.endsWith('.pdf')) {
         try {
-          const pdfParse = (await import('pdf-parse')).default;
-          // Ensure we have a Buffer for pdf-parse
+          const { extractTextFromBuffer } = await import('./documents/extractText');
           const buffer = Buffer.isBuffer(attachment.content) 
             ? attachment.content 
             : Buffer.from(attachment.content, 'base64');
-          const pdfData = await pdfParse(buffer);
-          comments.push(`Extracted text from ${attachment.filename || 'PDF'}: ${pdfData.text}`);
+          const text = await extractTextFromBuffer(buffer, attachment.filename || 'attachment.pdf');
+          comments.push(`Extracted text from ${attachment.filename || 'PDF'}: ${text}`);
         } catch (err: any) {
           console.error('Error parsing PDF:', err);
           comments.push(`Failed to extract text from ${attachment.filename || 'PDF'}: ${err.message}`);

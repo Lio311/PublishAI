@@ -10,6 +10,9 @@ import { debateAgents, debates, papers } from "@/services/db/schema";
 import { eq, and } from "drizzle-orm";
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
+import { NonRetriableError } from "inngest";
+import { loadManuscriptText } from "@/services/documents/manuscriptStore";
 
 export const scientificReviewDebate = inngest.createFunction(
   {
@@ -19,7 +22,8 @@ export const scientificReviewDebate = inngest.createFunction(
       key: "event.data.paperId",
       limit: 1,
     },
-    idempotency: "event.data.paperId",
+    // No idempotency key: the start route allows a retry once a debate has failed;
+    // the per-paper concurrency limit above prevents parallel runs.
     retries: 2,
     onFailure: async ({ event, step }) => {
       const paperId =
@@ -38,13 +42,11 @@ export const scientificReviewDebate = inngest.createFunction(
   async ({ event, step }) => {
     const { paperId } = event.data;
 
-    // 1. Fetch paper manuscript / content
+    // 1. Load the manuscript the reviewers will debate (its full text, not just the title)
     const paperContext = await step.run("fetch-paper-content", async () => {
-      const [paper] = await db
-        .select({ title: papers.title, status: papers.status })
-        .from(papers)
-        .where(eq(papers.id, paperId));
-      return paper?.title || "Scientific Research Manuscript";
+      const text = await loadManuscriptText(paperId);
+      if (!text) throw new NonRetriableError(`No manuscript text available for paper ${paperId}`);
+      return text;
     });
 
     // 2. Initialize debate idempotently
@@ -77,7 +79,7 @@ Role: ${agent.name} (${agent.persona}).
 Provide a focused, concise scientific critique (max 3-4 paragraphs) emphasizing key strengths, methodology questions, or consensus points.`;
 
             const { text } = await generateText({
-              model: openai("gpt-4o-mini"),
+              model: openai(OPENAI_MODELS.mini),
               system: agent.systemPrompt,
               prompt,
             });
