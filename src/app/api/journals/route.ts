@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/services/db";
 import { journals, journalCitationRules, journalArticleTypes, journalAbstractRules, journalCoverLetterRules } from "@/services/db/schema";
 import { askClaude } from "@/services/agents/claude-client";
+import { applyRateLimit } from "@/services/rate-limit";
+import { sql } from "drizzle-orm";
 
 export async function GET() {
   const allJournals = await db.select().from(journals);
@@ -11,11 +13,20 @@ export async function GET() {
 export async function POST(req: Request) {
   const { auth } = await import("@/app/auth");
   const session = await auth();
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const limited = await applyRateLimit(req, "ai", session.user.id);
+  if (limited) return limited;
   try {
-    const { name } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const name = typeof body?.name === "string" ? body.name.trim().slice(0, 200) : "";
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    }
+
+    // The journal catalog is shared by all users: return the existing entry instead of duplicating it.
+    const [existing] = await db.select().from(journals).where(sql`lower(${journals.name}) = lower(${name})`).limit(1);
+    if (existing) {
+      return NextResponse.json(existing);
     }
 
     const prompt = `You are a helpful academic assistant. The user wants to add the academic journal "${name}".
@@ -97,73 +108,74 @@ Return ONLY the JSON object, with no markdown formatting or other text.`;
       console.error("Failed to parse Claude response:", e);
     }
 
-    const newJournal = await db.transaction(async (tx) => {
-      const [insertedJournal] = await tx.insert(journals).values(dataToInsert).returning();
+    const [newJournal] = await db.insert(journals).values(dataToInsert).returning();
 
-      // Insert enrichment data into related tables
-      try {
-        if (enrichmentData.citationRules) {
-          const cr = enrichmentData.citationRules as Record<string, unknown>;
-          await tx.insert(journalCitationRules).values({
-            journalId: insertedJournal.id,
-            styleName: (cr.styleName as string) || "",
-            inTextFormat: (cr.inTextFormat as string) || "brackets",
-            referenceListOrder: (cr.referenceListOrder as string) || "order-of-appearance",
-            etAlThreshold: (cr.etAlThreshold as number) || null,
-            etAlDisplayCount: (cr.etAlDisplayCount as number) || null,
-            authorFormat: (cr.authorFormat as string) || null,
-            lastAuthorSeparator: (cr.lastAuthorSeparator as string) || null,
-            articleTitleFormat: (cr.articleTitleFormat as string) || null,
-            exampleReference: (cr.exampleReference as string) || null,
-          }).onConflictDoUpdate({ target: journalCitationRules.journalId, set: { styleName: (cr.styleName as string) || "" } });
-        }
-
-        if (Array.isArray(enrichmentData.articleTypes)) {
-          for (const at of enrichmentData.articleTypes as Record<string, unknown>[]) {
-            await tx.insert(journalArticleTypes).values({
-              journalId: insertedJournal.id,
-              typeName: (at.typeName as string) || "Research Article",
-              isPrimary: (at.isPrimary as boolean) || false,
-              wordLimit: (at.wordLimit as number) || null,
-              wordLimitNotes: (at.wordLimitNotes as string) || null,
-              displayItemsLimit: (at.displayItemsLimit as number) || null,
-              referencesLimit: (at.referencesLimit as number) || null,
-              abstractWordLimit: (at.abstractWordLimit as number) || null,
-            });
-          }
-        }
-
-        if (enrichmentData.abstractRules) {
-          const ar = enrichmentData.abstractRules as Record<string, unknown>;
-          await tx.insert(journalAbstractRules).values({
-            journalId: insertedJournal.id,
-            abstractType: (ar.abstractType as string) || "unstructured",
-            defaultWordLimit: (ar.defaultWordLimit as number) || null,
-            label: (ar.label as string) || "Abstract",
-            allowCitations: (ar.allowCitations as boolean) || false,
-            structuredHeadings: ar.structuredHeadings || null,
-            notes: (ar.notes as string) || null,
-          }).onConflictDoUpdate({ target: journalAbstractRules.journalId, set: { abstractType: (ar.abstractType as string) || "unstructured" } });
-        }
-
-        if (enrichmentData.coverLetterRules) {
-          const cl = enrichmentData.coverLetterRules as Record<string, unknown>;
-          await tx.insert(journalCoverLetterRules).values({
-            journalId: insertedJournal.id,
-            required: (cl.required as boolean) ?? true,
-            maxPages: (cl.maxPages as number) || 1,
-            requiredContent: cl.requiredContent || null,
-            toneGuidance: (cl.toneGuidance as string) || null,
-            notes: (cl.notes as string) || null,
-          }).onConflictDoUpdate({ target: journalCoverLetterRules.journalId, set: { required: (cl.required as boolean) ?? true } });
-        }
-      } catch (enrichError) {
-        console.error("Failed to insert enrichment data:", enrichError);
-        // Journal was created, enrichment can be retried
+    // Enrichment rows are written as one atomic batch (neon-http has no interactive transactions).
+    // If it fails the journal still exists and enrichment can be retried.
+    try {
+      const enrichmentQueries = [];
+      if (enrichmentData.citationRules) {
+        const cr = enrichmentData.citationRules as Record<string, unknown>;
+        enrichmentQueries.push(db.insert(journalCitationRules).values({
+          journalId: newJournal.id,
+          styleName: (cr.styleName as string) || "",
+          inTextFormat: (cr.inTextFormat as string) || "brackets",
+          referenceListOrder: (cr.referenceListOrder as string) || "order-of-appearance",
+          etAlThreshold: (cr.etAlThreshold as number) || null,
+          etAlDisplayCount: (cr.etAlDisplayCount as number) || null,
+          authorFormat: (cr.authorFormat as string) || null,
+          lastAuthorSeparator: (cr.lastAuthorSeparator as string) || null,
+          articleTitleFormat: (cr.articleTitleFormat as string) || null,
+          exampleReference: (cr.exampleReference as string) || null,
+        }));
       }
-      
-      return insertedJournal;
-    });
+
+      if (Array.isArray(enrichmentData.articleTypes)) {
+        for (const at of enrichmentData.articleTypes as Record<string, unknown>[]) {
+          enrichmentQueries.push(db.insert(journalArticleTypes).values({
+            journalId: newJournal.id,
+            typeName: (at.typeName as string) || "Research Article",
+            isPrimary: (at.isPrimary as boolean) || false,
+            wordLimit: (at.wordLimit as number) || null,
+            wordLimitNotes: (at.wordLimitNotes as string) || null,
+            displayItemsLimit: (at.displayItemsLimit as number) || null,
+            referencesLimit: (at.referencesLimit as number) || null,
+            abstractWordLimit: (at.abstractWordLimit as number) || null,
+          }));
+        }
+      }
+
+      if (enrichmentData.abstractRules) {
+        const ar = enrichmentData.abstractRules as Record<string, unknown>;
+        enrichmentQueries.push(db.insert(journalAbstractRules).values({
+          journalId: newJournal.id,
+          abstractType: (ar.abstractType as string) || "unstructured",
+          defaultWordLimit: (ar.defaultWordLimit as number) || null,
+          label: (ar.label as string) || "Abstract",
+          allowCitations: (ar.allowCitations as boolean) || false,
+          structuredHeadings: ar.structuredHeadings || null,
+          notes: (ar.notes as string) || null,
+        }));
+      }
+
+      if (enrichmentData.coverLetterRules) {
+        const cl = enrichmentData.coverLetterRules as Record<string, unknown>;
+        enrichmentQueries.push(db.insert(journalCoverLetterRules).values({
+          journalId: newJournal.id,
+          required: (cl.required as boolean) ?? true,
+          maxPages: (cl.maxPages as number) || 1,
+          requiredContent: cl.requiredContent || null,
+          toneGuidance: (cl.toneGuidance as string) || null,
+          notes: (cl.notes as string) || null,
+        }));
+      }
+
+      if (enrichmentQueries.length > 0) {
+        await db.batch(enrichmentQueries as [typeof enrichmentQueries[number], ...typeof enrichmentQueries]);
+      }
+    } catch (enrichError) {
+      console.error("Failed to insert enrichment data:", enrichError);
+    }
 
     return NextResponse.json(newJournal);
   } catch (error) {

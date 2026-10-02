@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/services/db";
-import { submissions, papers, journalConnections } from "@/services/db/schema";
-import { eq } from "drizzle-orm";
+import { submissions, papers, journalConnections, journals } from "@/services/db/schema";
+import { and, eq } from "drizzle-orm";
+import { emitSubmissionStatusEvents } from "@/services/submission/statusEvents";
 import { auth } from "@/app/auth";
 import { checkRateLimit } from "@/services/rate-limit";
-import { encrypt } from "@/services/security/encryption";
 
 export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
@@ -78,72 +78,38 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     const nextJournalId = parseInt(nextJournalIdStr, 10);
     const newQueue = queue.slice(1);
 
-    const newSubmission = await db.transaction(async (tx) => {
-      // Update its status to 'rejected'
-      await tx.update(submissions)
-        .set({ status: 'rejected' })
-        .where(eq(submissions.id, submissionId));
-
-      // Update the paper's currentJournalId and save the new cascadeQueue
-      await tx.update(papers)
-        .set({ 
-          currentJournalId: isNaN(nextJournalId) ? null : nextJournalId, 
-          cascadeQueue: newQueue 
-        })
-        .where(eq(papers.id, paper.id));
-
-      let connection;
-      if (!isNaN(nextJournalId)) {
-        connection = await tx.query.journalConnections.findFirst({
-          where: (jc, { eq, and }) => and(
-            eq(jc.userId, userId),
-            eq(jc.journalId, nextJournalId)
-          ),
-        });
-      }
-
-      if (!connection) {
-        const [newConn] = await tx.insert(journalConnections).values({
-          userId: userId,
-          journalId: isNaN(nextJournalId) ? null : nextJournalId,
-          platform: 'email',
-          siteUrl: 'http://example.com',
-          encryptedUsername: encrypt('cascade_system'),
-          encryptedPassword: encrypt(''),
-        }).returning();
-        connection = newConn;
-      }
-
-      const [insertedSub] = await tx.insert(submissions).values({
-        paperId: paper.id,
-        connectionId: connection.id,
-        userId: userId,
-        status: "draft",
-      }).returning();
-      
-      return insertedSub;
-    });
-
-    // Trigger the AI pipeline asynchronously
-    const previousJournalId = (submission.connection as any)?.journalId;
-
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-      fetch(`${baseUrl}/api/agents/run`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'cascade',
-          paperId: paper.id,
-          targetJournalId: nextJournalIdStr,
-          previousJournalId: previousJournalId,
-        }),
-      }).catch(err => {
-        console.warn("[cascade] Agent run notification skipped or failed:", err?.message || err);
-      });
-    } catch (err) {
-      console.warn("[cascade] Failed to trigger agent run:", err);
+    if (isNaN(nextJournalId)) {
+      return NextResponse.json({ error: "Invalid journal in cascade queue" }, { status: 400 });
     }
+
+    // A real connection is required to submit; never fabricate placeholder credentials.
+    const connection = await db.query.journalConnections.findFirst({
+      where: and(eq(journalConnections.userId, userId), eq(journalConnections.journalId, nextJournalId)),
+    });
+    if (!connection) {
+      const nextJournal = await db.query.journals.findFirst({ where: eq(journals.id, nextJournalId) });
+      return NextResponse.json(
+        {
+          error: `Connect your ${nextJournal?.name ?? "next journal"} account before cascading.`,
+          code: "CONNECTION_REQUIRED",
+          journalId: nextJournalId,
+        },
+        { status: 409 }
+      );
+    }
+
+    // neon-http has no interactive transactions; db.batch runs these atomically.
+    const [, , [newSubmission]] = await db.batch([
+      db.update(submissions).set({ status: "rejected" }).where(eq(submissions.id, submissionId)),
+      db.update(papers).set({ currentJournalId: nextJournalId, cascadeQueue: newQueue }).where(eq(papers.id, paper.id)),
+      db
+        .insert(submissions)
+        .values({ paperId: paper.id, connectionId: connection.id, userId, status: "draft" })
+        .returning(),
+    ]);
+
+    // Outcome learning + fresh alternative-journal recommendations run in the background.
+    await emitSubmissionStatusEvents(submissionId, "rejected");
 
     return NextResponse.json(newSubmission, { status: 201 });
   } catch (error: any) {

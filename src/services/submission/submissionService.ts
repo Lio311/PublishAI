@@ -4,6 +4,7 @@ import { papers, submissions, submissionLogs, submissionEvents } from "@/service
 import { eq, desc } from "drizzle-orm";
 import { SubmissionStatusService } from "./submissionStatusService";
 import { JournalSubmissionStatus, SubmissionTrackingSummary } from "./types";
+import { emitSubmissionStatusEvents } from "./statusEvents";
 
 
 export interface SubmissionEvent {
@@ -341,7 +342,10 @@ export class SubmissionService {
   ): Promise<{ success: boolean; error?: string; event?: SubmissionEvent }> {
     const subId = Number(submissionId);
     const existing = inMemorySubmissionsStore.get(subId);
-    const previousStatus = existing?.status || "draft";
+    const stored = db?.query?.submissions
+      ? await db.query.submissions.findFirst({ where: eq(submissions.id, subId) }).catch(() => undefined)
+      : undefined;
+    const previousStatus = stored?.status || existing?.status || "draft";
 
     const transitionResult = await SubmissionStatusService.transitionStatus(
       subId,
@@ -353,19 +357,17 @@ export class SubmissionService {
       return transitionResult;
     }
 
-    // Update in DB
-    try {
-      if (db) {
+    // Persist the real status (every editorial status is a valid enum value).
+    if (stored) {
+      try {
         await db
           .update(submissions)
-          .set({
-            status: (newStatus === "draft" || newStatus === "submitted" || newStatus === "failed" ? newStatus : "submitted") as any,
-            lastAttemptAt: new Date(),
-          })
+          .set({ status: newStatus as (typeof submissions.$inferInsert)["status"] })
           .where(eq(submissions.id, subId));
+      } catch (error) {
+        console.error(`[SubmissionService] Failed to persist status for submission ${subId}:`, error);
+        return { success: false, error: "Failed to persist submission status" };
       }
-    } catch {
-      // Fallback
     }
 
     // Update in memory
@@ -388,6 +390,10 @@ export class SubmissionService {
         metadata: options.metadata,
       },
     });
+
+    if (stored && previousStatus !== newStatus) {
+      await emitSubmissionStatusEvents(subId, String(newStatus), options.notes);
+    }
 
     return { success: true, event };
   }

@@ -15,22 +15,23 @@ interface PreflightProps {
 export function PreflightCheckPanel({ paperId, codeSnippet, dependencies }: PreflightProps) {
   const [status, setStatus] = useState<'idle' | 'running' | 'success' | 'failed'>('idle');
   const [logs, setLogs] = useState<{ stdout?: string; stderr?: string; error?: string } | null>(null);
+  const [code, setCode] = useState(codeSnippet);
+  const [deps, setDeps] = useState<string[]>(dependencies);
+  const [isFixing, setIsFixing] = useState(false);
 
-  const runPreflight = async () => {
+  const runPreflight = async (codeToRun = code, depsToUse = deps) => {
     setStatus('running');
     setLogs(null);
     
     try {
-      // In a real app, this would trigger an Inngest event via an API route
-      // and we would poll or listen to SSE for the result.
-      // For MVP, we simulate the API call to the backend which triggers Inngest.
       const res = await fetch('/api/preflight/trigger', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paperId, code: codeSnippet, dependencies })
+        body: JSON.stringify({ paperId, code: codeToRun || undefined, dependencies: depsToUse })
       });
       
       const data = await res.json();
+      if (data.code) setCode(data.code);
       
       if (data.success) {
         setStatus('success');
@@ -39,7 +40,7 @@ export function PreflightCheckPanel({ paperId, codeSnippet, dependencies }: Pref
       } else {
         setStatus('failed');
         setLogs({ stderr: data.stderr, error: data.error?.message });
-        toast.error('Pre-Flight Check Failed. Missing dependencies or syntax errors.');
+        toast.error(data.error?.message || 'Pre-Flight Check Failed.');
       }
     } catch (error) {
       setStatus('failed');
@@ -47,9 +48,26 @@ export function PreflightCheckPanel({ paperId, codeSnippet, dependencies }: Pref
     }
   };
 
-  const handleAutoFix = () => {
-    toast.info('Triggering AI Auto-Fix... analyzing stack trace and rewriting dependencies.');
-    // Trigger fixCodeAgent...
+  const handleAutoFix = async () => {
+    if (!code || !(logs?.stderr || logs?.error)) return;
+    setIsFixing(true);
+    try {
+      const res = await fetch('/api/sandbox/auto-fix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, stderr: logs?.stderr || logs?.error, dependencies: deps }),
+      });
+      if (!res.ok) throw new Error('Auto-fix failed');
+      const fix: { fixedCode: string; newDependencies: string[]; explanation: string } = await res.json();
+      setCode(fix.fixedCode);
+      setDeps(fix.newDependencies);
+      toast.info(fix.explanation);
+      await runPreflight(fix.fixedCode, fix.newDependencies);
+    } catch {
+      toast.error('AI Auto-Fix could not repair the code.');
+    } finally {
+      setIsFixing(false);
+    }
   };
 
   return (
@@ -66,7 +84,7 @@ export function PreflightCheckPanel({ paperId, codeSnippet, dependencies }: Pref
           </p>
           
           {status === 'idle' && (
-            <Button onClick={runPreflight} className="w-full">
+            <Button onClick={() => runPreflight()} className="w-full">
               Run Pre-Flight Check
             </Button>
           )}
@@ -100,8 +118,8 @@ export function PreflightCheckPanel({ paperId, codeSnippet, dependencies }: Pref
                 </pre>
               </div>
               
-              <Button onClick={handleAutoFix} variant="secondary" className="w-full flex items-center gap-2">
-                <Wrench className="h-4 w-4" /> ✨ AI Auto-Fix Dependencies
+              <Button onClick={handleAutoFix} disabled={isFixing || !code} variant="secondary" className="w-full flex items-center gap-2">
+                {isFixing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wrench className="h-4 w-4" />} AI Auto-Fix
               </Button>
             </div>
           )}

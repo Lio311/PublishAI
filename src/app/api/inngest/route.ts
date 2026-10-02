@@ -19,6 +19,9 @@ import { processSubmissionOutcome } from "../../../inngest/functions/processSubm
 import { runPreflightCheck } from "../../../inngest/functions/run-preflight";
 import { scientificReviewDebate } from "../../../inngest/functions/scientificReviewDebate";
 
+// Long steps (agent stages, journal matching) need more than the default function timeout.
+export const maxDuration = 300;
+
 // Create an API that serves zero-downtime background jobs
 export const { GET, POST, PUT } = serve({
   client: inngest,

@@ -1,12 +1,30 @@
 import { NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
+import { db } from "@/services/db";
+import { debates } from "@/services/db/schema";
+import { inngest } from "@/inngest/client";
+import { requirePaperOwner } from "@/services/api/route-auth";
+import { applyRateLimit } from "@/services/rate-limit";
 
+/** Starts the multi-agent scientific review debate for one of the caller's papers. */
 export async function POST(req: Request) {
-  return NextResponse.json({
-    turns: [
-      { speaker: "PaperA (Smith et al. 2023)", message: "The user's findings corroborate our thesis that neural pathways adapt quickly." },
-      { speaker: "PaperB (Johnson 2022)", message: "However, my model showed a delayed adaptation. The user's sample size might explain the variance." },
-      { speaker: "PaperC (Lee 2024)", message: "If we synthesize both, the rapid adaptation might be specific to the stimuli used in the user's protocol." }
-    ],
-    synthesis: "The findings demonstrate a rapid neural adaptation consistent with Smith et al. (2023). While Johnson (2022) suggested delayed responses, our specific stimulus protocol appears to trigger the immediate pathway observed by Lee (2024), bridging the gap between both models."
-  });
+  const body = await req.json().catch(() => ({}));
+  const paperId = Number(body?.paperId);
+
+  const guard = await requirePaperOwner(paperId);
+  if (guard instanceof NextResponse) return guard;
+  const limited = await applyRateLimit(req, "ai", guard.userId);
+  if (limited) return limited;
+
+  const [existing] = await db.select({ status: debates.status }).from(debates).where(eq(debates.paperId, paperId));
+  if (existing && existing.status !== "failed") {
+    return NextResponse.json({ error: "A debate already exists for this paper", status: existing.status }, { status: 409 });
+  }
+
+  if (existing?.status === "failed") {
+    await db.update(debates).set({ status: "pending", completedAt: null }).where(eq(debates.paperId, paperId));
+  }
+
+  await inngest.send({ name: "submission/review-started", data: { paperId } });
+  return NextResponse.json({ started: true }, { status: 202 });
 }

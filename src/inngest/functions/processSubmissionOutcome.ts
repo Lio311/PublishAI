@@ -13,7 +13,8 @@ export const processSubmissionOutcome = inngest.createFunction(
       key: "event.data.submissionId",
       limit: 1,
     },
-    idempotency: "event.data.submissionId",
+    // No idempotency key: keyed on the submission alone it dropped every outcome after the first
+    // status change. Events are emitted only on an actual status transition.
     retries: 2,
   },
   async ({ event, step }) => {

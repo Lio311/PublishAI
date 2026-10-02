@@ -12,6 +12,37 @@ export default function DebateRoom({ paperId }: { paperId: number }) {
   const [realDebateId, setRealDebateId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [streaming, setStreaming] = useState<boolean>(false);
+  const [starting, setStarting] = useState<boolean>(false);
+  const [startError, setStartError] = useState<string | null>(null);
+
+  const startDebate = async () => {
+    setStarting(true);
+    setStartError(null);
+    try {
+      const res = await fetch("/api/debate/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paperId }),
+      });
+      if (!res.ok && res.status !== 409) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Failed to start the debate");
+      }
+      // The debate record is created by the background job; poll until it appears.
+      for (let attempt = 0; attempt < 10; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        const poll = await fetch(`/api/debates/${paperId}`);
+        if (poll.ok) {
+          await fetchInitial();
+          return;
+        }
+      }
+    } catch (err) {
+      setStartError(err instanceof Error ? err.message : "Failed to start the debate");
+    } finally {
+      setStarting(false);
+    }
+  };
 
   const fetchInitial = async () => {
     setLoading(true);
@@ -128,6 +159,18 @@ export default function DebateRoom({ paperId }: { paperId: number }) {
             <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
               When the autonomous pipeline reaches the Review &amp; QA stage, specialized reviewer personas (e.g. Statistical Critic, Domain Specialist) will conduct a multi-turn adversarial debate here.
             </p>
+            {!realDebateId && (
+              <button
+                type="button"
+                onClick={startDebate}
+                disabled={starting}
+                className="inline-flex items-center gap-2 mt-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold disabled:opacity-60 cursor-pointer"
+              >
+                {starting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {starting ? "Starting debate..." : "Start review debate now"}
+              </button>
+            )}
+            {startError && <p className="text-xs text-rose-600">{startError}</p>}
           </div>
         ) : (
           <div className="max-h-[550px] overflow-y-auto pr-1">

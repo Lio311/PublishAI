@@ -1,20 +1,18 @@
 import { db } from "./db";
 import { journals, papers } from "./db/schema";
-import { eq, ne } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+import { loadManuscriptText } from "./documents/manuscriptStore";
+import { matchJournals } from "./journal-matcher/pipeline";
+import { toSuggestedJournals, type SuggestedJournal } from "@/inngest/functions/cascade";
 
-export interface AlternativeJournal {
-  journalId: number;
-  name: string;
-  field: string | null;
-  matchScore: number;
-  reason: string;
-}
+export type AlternativeJournal = SuggestedJournal;
 
 export class RecommendationService {
   /**
-   * Recommends alternative journals for a rejected paper.
+   * Recommends alternative journals for a paper using the journal-matching agents
+   * (excluding its current target journal) and stores them on the paper.
    */
-  static async recommendAlternatives(paperId: number): Promise<AlternativeJournal[]> {
+  static async recommendAlternatives(paperId: number, locale = "en"): Promise<AlternativeJournal[]> {
     const paper = await db.query.papers.findFirst({
       where: eq(papers.id, paperId)
     });
@@ -23,30 +21,22 @@ export class RecommendationService {
       throw new Error(`Paper with ID ${paperId} not found`);
     }
 
-    const currentJournalId = paper.targetJournalId;
-    
-    // Query actual journals table, excluding the current one
-    const alternativeJournals = currentJournalId 
-      ? await db.select().from(journals).where(ne(journals.id, currentJournalId)).limit(3)
-      : await db.select().from(journals).limit(3);
-    
-    const alternatives = alternativeJournals.map((j, index) => {
-      // Mock score for now since we don't have embeddings or match score in the DB
-      const score = 95 - index * 5;
-      
-      const rules = (j.rules as any) || {};
-      const reason = rules.reason || `High semantic overlap with your manuscript in the field of ${j.field || 'general science'}. Scope and formatting requirements are a good fit.`;
+    const text = await loadManuscriptText(paperId);
+    if (!text) {
+      throw new Error(`Paper ${paperId} has no manuscript text to analyze`);
+    }
 
-      return {
-        journalId: j.id,
-        name: j.name,
-        field: j.field,
-        matchScore: score,
-        reason: reason,
-      };
-    });
+    const currentJournal = paper.targetJournalId
+      ? await db.query.journals.findFirst({ where: eq(journals.id, paper.targetJournalId) })
+      : undefined;
 
-    // Save these suggestions to the paper record for the UI to display
+    const result = await matchJournals(
+      text,
+      { priority: "balanced", openAccessOnly: false, excludeJournalNames: currentJournal ? [currentJournal.name] : [] },
+      locale
+    );
+    const alternatives = toSuggestedJournals(result);
+
     await db.update(papers)
       .set({ suggestedJournals: alternatives })
       .where(eq(papers.id, paperId));

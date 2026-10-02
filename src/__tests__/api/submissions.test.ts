@@ -55,6 +55,9 @@ jest.mock("@/services/db", () => {
         journalConnections: {
           findFirst: jest.fn(async () => mockConnections[100]),
         },
+        journals: {
+          findFirst: jest.fn(async () => ({ id: 5, name: "Cell" })),
+        },
         submissions: {
           findFirst: jest.fn(async () => mockSubmissions[10]),
           findMany: jest.fn(async () => [mockSubmissions[10]]),
@@ -70,28 +73,14 @@ jest.mock("@/services/db", () => {
           where: jest.fn().mockResolvedValue([{ id: 10 }]),
         })),
       })),
-      transaction: jest.fn(async (cb) => {
-        return cb({
-          update: jest.fn(() => ({
-            set: jest.fn(() => ({
-              where: jest.fn().mockResolvedValue([]),
-            })),
-          })),
-          query: {
-            journalConnections: {
-              findFirst: jest.fn().mockResolvedValue(mockConnections[100]),
-            },
-          },
-          insert: jest.fn(() => ({
-            values: jest.fn(() => ({
-              returning: jest.fn().mockResolvedValue([{ id: 999, status: "draft" }]),
-            })),
-          })),
-        });
-      }),
+      batch: jest.fn(async () => [[], [], [{ id: 999, status: "draft" }]]),
     },
   };
 });
+
+jest.mock("@/services/submission/statusEvents", () => ({
+  emitSubmissionStatusEvents: jest.fn().mockResolvedValue(undefined),
+}));
 
 // Mock rate limit
 jest.mock("@/services/rate-limit", () => ({
@@ -468,6 +457,34 @@ describe("Submissions API Routes", () => {
       const req = new Request("http://localhost/api/submissions/10/cascade", { method: "POST" });
       const res = await cascadeSubmission(req, { params: Promise.resolve({ id: "10" }) });
       expect(res.status).toBe(201);
+      expect((await res.json()).id).toBe(999);
+      expect(db.batch).toHaveBeenCalledTimes(1);
+
+      const { emitSubmissionStatusEvents } = require("@/services/submission/statusEvents");
+      expect(emitSubmissionStatusEvents).toHaveBeenCalledWith(10, "rejected");
+    });
+
+    it("returns 409 instead of fabricating a connection when the next journal is not connected", async () => {
+      const { db } = require("@/services/db");
+      db.query.submissions.findFirst.mockResolvedValueOnce({
+        id: 10,
+        paperId: 1,
+        userId: "user_test_123",
+        connection: { journalId: 5 },
+      });
+      db.query.papers.findFirst.mockResolvedValueOnce({
+        id: 1,
+        userId: "user_test_123",
+        cascadeQueue: ["10"],
+      });
+      db.query.journalConnections.findFirst.mockResolvedValueOnce(undefined);
+      db.batch.mockClear();
+
+      const req = new Request("http://localhost/api/submissions/10/cascade", { method: "POST" });
+      const res = await cascadeSubmission(req, { params: Promise.resolve({ id: "10" }) });
+      expect(res.status).toBe(409);
+      expect((await res.json()).code).toBe("CONNECTION_REQUIRED");
+      expect(db.batch).not.toHaveBeenCalled();
     });
   });
 
