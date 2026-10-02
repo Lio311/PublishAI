@@ -1,10 +1,11 @@
 import { BaseAgent, AgentContext, AgentResult, Stage } from "./base-agent";
 
 import { askClaude } from "./claude-client";
+import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
 
 export class CompilationAgent extends BaseAgent {
   stage: Stage = "compilation";
-  model = "claude-3-7-sonnet-20250219";
+  model = ANTHROPIC_MODELS.standard;
 
   async execute(context: AgentContext): Promise<AgentResult> {
     const manuscript = context.manuscriptText || "";

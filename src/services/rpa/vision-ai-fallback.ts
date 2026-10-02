@@ -1,6 +1,7 @@
 import { generateObject } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 import { z } from 'zod';
+import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
 
 const VisionActionSchema = z.object({
   action: z.enum(['click', 'type', 'select', 'scroll', 'none']),
@@ -40,7 +41,7 @@ export async function analyzeScreenshot(
   }
 
   try {
-    const visionModelName = process.env.ANTHROPIC_MODEL || 'claude-3-7-sonnet-20250219';
+    const visionModelName = ANTHROPIC_MODELS.standard;
 
     const { object } = await generateObject({
       model: anthropic(visionModelName),

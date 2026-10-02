@@ -2,6 +2,7 @@ import { ChatAnthropic } from "@langchain/anthropic";
 import { HumanMessage } from "@langchain/core/messages";
 import { PublishAIState } from "../state";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
+import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
 
 const CONTENT_MAPPINGS: Record<string, string> = {
   "significance-and-fit": "Explain why these findings represent a substantial breakthrough and are of immediate interest to [journal] readership",
@@ -49,7 +50,7 @@ const TONE_MAPPINGS: Record<string, string> = {
 
 export const coverLetterNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   const model = new ChatAnthropic({
-    modelName: "claude-3-7-sonnet-20250219",
+    modelName: ANTHROPIC_MODELS.standard,
     callbacks: [langfuseLangchainHandler],
   });
 

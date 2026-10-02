@@ -3,12 +3,12 @@ import { HumanMessage } from "@langchain/core/messages";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
 import { PublishAIState } from "../state";
 import { AgentResult } from "../../base-agent";
+import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
 
 export const clarificationNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
-  const modelName = "claude-3-7-sonnet-20250219";
+  const modelName = ANTHROPIC_MODELS.standard;
   const model = new ChatAnthropic({
     modelName,
-    temperature: 0,
   });
 
   const content = state.documentContent || "No manuscript content provided.";

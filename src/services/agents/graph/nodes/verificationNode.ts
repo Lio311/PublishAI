@@ -2,10 +2,11 @@ import { ChatAnthropic } from "@langchain/anthropic";
 import { HumanMessage } from "@langchain/core/messages";
 import { PublishAIState } from "../state";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
+import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
 
 export const verificationNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   const model = new ChatAnthropic({
-    modelName: "claude-3-7-sonnet-20250219",
+    modelName: ANTHROPIC_MODELS.standard,
     callbacks: [langfuseLangchainHandler],
   });
 

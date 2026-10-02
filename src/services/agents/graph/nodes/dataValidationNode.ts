@@ -4,6 +4,7 @@ import { PublishAIState } from "../state";
 import { runPythonInSandbox } from "../../../e2bService";
 import { z } from "zod";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export const dataValidationNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   // If no dataSchema is provided or it's empty, skip data validation gracefully
@@ -14,7 +15,7 @@ export const dataValidationNode = async (state: PublishAIState): Promise<Partial
   }
 
   const model = new ChatOpenAI({
-    modelName: "gpt-4o",
+    modelName: OPENAI_MODELS.standard,
     callbacks: [langfuseLangchainHandler],
   });
 

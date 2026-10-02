@@ -37,6 +37,7 @@ import {
   PeerReviewCritiqueOptions,
   ReviewResponseOptions,
 } from "./types";
+import { claudeAcceptsSamplingParams } from "./modelIds";
 
 export const DEFAULT_OPENAI_MODEL = DEFAULT_OPENAI_MODEL_NAME;
 export const DEFAULT_ANTHROPIC_MODEL = DEFAULT_ANTHROPIC_MODEL_NAME;
@@ -145,7 +146,7 @@ export async function callLLM(options: GenerateTextOptions): Promise<AIResponse>
             client.messages.create({
               model: candidate.model,
               max_tokens: maxTokens,
-              temperature: options.temperature,
+              temperature: claudeAcceptsSamplingParams(candidate.model) ? options.temperature : undefined,
               system: finalSystemPrompt,
               messages: [{ role: "user", content: sanitizedUserPrompt }],
             }),
@@ -200,7 +201,7 @@ export async function callLLM(options: GenerateTextOptions): Promise<AIResponse>
               model: modelInstance,
               prompt: sanitizedUserPrompt,
               system: finalSystemPrompt,
-              temperature: options.temperature,
+              temperature: claudeAcceptsSamplingParams(candidate.model) ? options.temperature : undefined,
             }),
             timeoutMs,
             `callLLM(openai:${candidate.model})`
@@ -314,7 +315,7 @@ export async function chatLLM(options: ChatOptions): Promise<AIResponse> {
             client.messages.create({
               model: candidate.model,
               max_tokens: maxTokens,
-              temperature: options.temperature,
+              temperature: claudeAcceptsSamplingParams(candidate.model) ? options.temperature : undefined,
               system: systemPrompt,
               messages: formattedAnthropicMessages,
             }),
@@ -421,7 +422,7 @@ export async function streamLLMText(options: GenerateTextOptions) {
         return await client.messages.stream({
           model: candidate.model,
           max_tokens: options.maxTokens || 4096,
-          temperature: options.temperature,
+          temperature: claudeAcceptsSamplingParams(candidate.model) ? options.temperature : undefined,
           system: systemPrompt,
           messages: [{ role: "user", content: sanitizedPrompt }],
         });

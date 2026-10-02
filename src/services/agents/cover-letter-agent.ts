@@ -1,5 +1,6 @@
 import { BaseAgent, AgentContext, AgentResult } from "./base-agent";
 import { askClaude, ClaudeModel } from "./claude-client";
+import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
 
 const CONTENT_MAPPINGS: Record<string, string> = {
   "significance-and-fit": "Explain why these findings represent a substantial breakthrough and are of immediate interest to [journal] readership",
@@ -47,7 +48,7 @@ const TONE_MAPPINGS: Record<string, string> = {
 
 export class CoverLetterAgent extends BaseAgent {
   stage = "cover_letter" as const; // Assuming it runs during compilation
-  model: ClaudeModel = "claude-3-7-sonnet-20250219";
+  model: ClaudeModel = ANTHROPIC_MODELS.standard;
 
   async execute(context: AgentContext): Promise<AgentResult> {
     const journalName = String((context.journalRules as any)?.name || "the target journal");

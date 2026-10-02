@@ -5,6 +5,7 @@ import { generateObject } from "@/services/ai/aiService";
 import { resolveProvider } from "@/services/ai/aiService";
 import { z } from "zod";
 import { eq, and } from "drizzle-orm";
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 const feedbackExtractionSchema = z.object({
   category: z.enum([
@@ -47,7 +48,7 @@ Your task is to analyze this feedback for two purposes:
 
   try {
     const { object } = await generateObject({
-      model: openai("gpt-4o-mini"), // Fast model for telemetry
+      model: openai(OPENAI_MODELS.mini), // Fast model for telemetry
       schema: feedbackExtractionSchema,
       prompt,
     });
@@ -88,7 +89,7 @@ Your task is to analyze this feedback for two purposes:
 
   try {
     const { object } = await generateObject({
-      model: openai("gpt-4o"), // Stronger model for parsing complex reviewer comments
+      model: openai(OPENAI_MODELS.standard), // Stronger model for parsing complex reviewer comments
       schema: feedbackExtractionSchema,
       prompt,
     });

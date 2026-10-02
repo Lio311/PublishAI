@@ -164,9 +164,13 @@ describe("AI Services Audit & Security Suite", () => {
       expect(gpt4Chain[0].model).toBe("gpt-4o");
       expect(gpt4Chain[1].model).toBe("gpt-4o-mini");
 
-      const claudeChain = getModelFallbackChain("claude-3-7-sonnet-20250219", "anthropic");
-      expect(claudeChain[0].model).toBe("claude-3-7-sonnet-20250219");
-      expect(claudeChain[1].model).toBe("claude-3-5-haiku-20241022");
+      const claudeChain = getModelFallbackChain("claude-sonnet-5-5", "anthropic");
+      expect(claudeChain[0].model).toBe("claude-sonnet-5-5");
+      expect(claudeChain[1].model).toBe("claude-haiku-4-5");
+
+      const opusChain = getModelFallbackChain("claude-opus-5-5", "anthropic");
+      expect(opusChain[0].model).toBe("claude-opus-5-5");
+      expect(opusChain[1].model).toBe("claude-sonnet-5-5");
     });
 
     it("should fallback to next candidate when stream initiation encounters rate limit", async () => {

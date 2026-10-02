@@ -5,6 +5,7 @@ import { SubmissionPayload } from "./connection-types";
 import { generateObject } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
+import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
 
 const MetadataSchema = z.object({
   title: z.string(),
@@ -40,7 +41,7 @@ export class MetadataExtractor {
       
       try {
         const { object } = await generateObject({
-          model: anthropic("claude-3-7-sonnet-20250219"), // Using Claude 3.7 to match the flowchart architecture
+          model: anthropic(ANTHROPIC_MODELS.standard),
           schema: MetadataSchema,
           prompt: `Extract structured metadata from the following academic manuscript header. Pay special attention to authors, their emails, and institutional affiliations.\n\n${headerText}`
         });

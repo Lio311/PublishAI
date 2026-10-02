@@ -5,6 +5,7 @@ import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { google } from "@ai-sdk/google";
+import { ANTHROPIC_MODELS, OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export async function initializeDebate(paperId: number): Promise<string> {
   const existing = await db
@@ -59,13 +60,13 @@ export async function runReviewAgents(debateId: string, paperText: string): Prom
       name: "Reviewer 1", 
       system: "You are a rigorous, constructive, and demanding peer reviewer for a top-tier scientific journal. Provide an insightful review of the submitted manuscript, deliberately searching for logical flaws, statistical inconsistencies, methodological limitations, and potential reviewer objections. Do not hold back on critiques; offer actionable, highly specific suggestions to fortify the research claims.",
       prompt: "Evaluate the methodology and provide critical feedback on the following manuscript:\n\n" + paperText, 
-      model: openai("gpt-4o") 
+      model: openai(OPENAI_MODELS.standard) 
     },
     { 
       name: "Reviewer 2", 
       system: "You are an elite academic co-author and principal investigator specialized in scientific writing and publishing for high-impact journals. Your objective is to produce rigorous, publication-grade academic text adhering to strict scholarly norms, objective prose, and domain-appropriate terminology. Analyze the methodology, emphasize the research gap, and preserve the author's unique voice while maintaining an authoritative and precise academic tone.",
       prompt: "Evaluate the novelty, related work, and overall impact of the following manuscript:\n\n" + paperText, 
-      model: anthropic("claude-3-5-sonnet-20240620") 
+      model: anthropic(ANTHROPIC_MODELS.standard) 
     },
     { 
       name: "Reviewer 3", 

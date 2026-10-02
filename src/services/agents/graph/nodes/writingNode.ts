@@ -2,9 +2,10 @@ import { PublishAIState, getPreviousStageOutput } from "../state";
 import { askClaude, ClaudeModel } from "../../claude-client";
 import { AIMessage } from "@langchain/core/messages";
 import { AgentResult } from "../../base-agent";
+import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
 
 export const writingNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
-  const model: ClaudeModel = "claude-3-opus-20240229";
+  const model: ClaudeModel = ANTHROPIC_MODELS.reasoning;
   const reviewResult = getPreviousStageOutput(state, "scientific_review");
   const review = reviewResult?.output || state.scientificReview || "";
   

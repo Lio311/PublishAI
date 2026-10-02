@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { ANTHROPIC_MODELS, claudeAcceptsSamplingParams } from "@/services/ai/modelIds";
 
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
 if (!anthropicApiKey && process.env.NODE_ENV === "production") {
@@ -10,11 +11,7 @@ export const claude = new Anthropic({
   dangerouslyAllowBrowser: process.env.NODE_ENV === "test",
 });
 
-export type ClaudeModel =
-  | "claude-3-opus-20240229"
-  | "claude-3-7-sonnet-20250219"
-  | "claude-3-5-sonnet-20241022"
-  | (string & {});
+export type ClaudeModel = string;
 
 export interface AskClaudeOptions {
   maxTokens?: number;
@@ -24,7 +21,7 @@ export interface AskClaudeOptions {
 
 export async function askClaude(
   prompt: string, 
-  model: ClaudeModel = "claude-3-7-sonnet-20250219",
+  model: ClaudeModel = ANTHROPIC_MODELS.standard,
   systemOrOptions?: string | AskClaudeOptions
 ): Promise<{ text: string; tokensUsed: number }> {
   try {
@@ -36,20 +33,35 @@ export async function askClaude(
       ? { system: systemOrOptions } 
       : (systemOrOptions || {});
 
-    const max_tokens = options.maxTokens ?? (typeof model === "string" && model.includes("opus") ? 4096 : 8192);
+    // Agents return whole manuscripts, so allow long outputs; streaming avoids HTTP timeouts.
+    const max_tokens = options.maxTokens ?? 64000;
+    const usesServerFallbacks = /claude-(opus-5-5|sonnet-5-5)/.test(model);
 
-    const msg = await claude.messages.create({
-      model,
-      max_tokens,
-      system: options.system,
-      temperature: options.temperature,
-      messages: [{ role: "user", content: prompt }],
-    });
+    const msg = await claude.beta.messages
+      .stream({
+        model,
+        max_tokens,
+        system: options.system,
+        ...(options.temperature !== undefined && claudeAcceptsSamplingParams(model)
+          ? { temperature: options.temperature }
+          : {}),
+        // On a safety-classifier decline, retry on a fallback model instead of failing the stage.
+        ...(usesServerFallbacks ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const } : {}),
+        messages: [{ role: "user", content: prompt }],
+      })
+      .finalMessage();
 
-    const textBlock = msg.content.find(
-      (c): c is Anthropic.TextBlock => c.type === "text"
-    );
-    const text = textBlock?.text || "";
+    if (msg.stop_reason === "refusal") {
+      throw new Error(`Claude declined the request (${msg.stop_details?.category ?? "unspecified"})`);
+    }
+    if (msg.stop_reason === "max_tokens") {
+      console.warn(`[claude-client] Output truncated at max_tokens=${max_tokens} (model ${model}).`);
+    }
+
+    const text = msg.content
+      .filter((c): c is Anthropic.Beta.BetaTextBlock => c.type === "text")
+      .map((c) => c.text)
+      .join("");
     
     return {
       text,

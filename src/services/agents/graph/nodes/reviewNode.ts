@@ -2,10 +2,11 @@ import { PublishAIState } from "../state";
 import { SystemMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export const reviewNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   const llm = new ChatOpenAI({
-    modelName: "gpt-4o-mini",
+    modelName: OPENAI_MODELS.mini,
     temperature: 0.1,
   });
 

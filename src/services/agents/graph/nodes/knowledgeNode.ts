@@ -4,9 +4,10 @@ import { langfuseLangchainHandler } from "@/lib/langfuse";
 import { PublishAIState } from "../state";
 import { pubmedTool } from "../../../ai/tools/pubmedTool";
 import { AgentResult } from "../../base-agent";
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export const knowledgeNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
-  const modelName = "gpt-4o";
+  const modelName = OPENAI_MODELS.standard;
   const model = new ChatOpenAI({
     modelName,
     temperature: 0,

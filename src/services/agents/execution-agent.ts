@@ -1,10 +1,11 @@
 import { BaseAgent, AgentContext, AgentResult, Stage } from "./base-agent";
 
 import { askClaude } from "./claude-client";
+import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
 
 export class ExecutionAgent extends BaseAgent {
   stage: Stage = "execution";
-  model = "claude-3-opus-20240229";
+  model = ANTHROPIC_MODELS.reasoning;
 
   async execute(context: AgentContext): Promise<AgentResult> {
     const writingResult = context.previousStageOutputs instanceof Map

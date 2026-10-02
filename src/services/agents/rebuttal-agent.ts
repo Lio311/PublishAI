@@ -1,10 +1,11 @@
 import { BaseAgent, AgentContext, AgentResult, Stage } from "./base-agent";
 import { askClaude, ClaudeModel } from "./claude-client";
 import { fetchCrossDomainAnalogies } from "../graph/analogicalReasoning";
+import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
 
 export class RebuttalAgent extends BaseAgent {
   stage: Stage = "rebuttal";
-  model = "claude-3-7-sonnet-20250219";
+  model = ANTHROPIC_MODELS.standard;
 
   async execute(context: AgentContext): Promise<AgentResult> {
     const reviewerComments = context.reviewerComments;

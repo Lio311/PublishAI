@@ -3,6 +3,7 @@ import { runPythonInSandbox } from "./e2bService";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export async function verifyStatisticalSignificance(
   imageUrl: string,
@@ -14,7 +15,7 @@ export async function verifyStatisticalSignificance(
   const imageBuffer = await imageResponse.arrayBuffer();
 
   const { object: extractedData } = await generateObject({
-    model: openai("gpt-4o"),
+    model: openai(OPENAI_MODELS.standard),
     schema: z.object({
       dataPoints: z.array(z.object({
         group: z.string(),
@@ -40,7 +41,7 @@ export async function verifyStatisticalSignificance(
 
   // 2. Generate a Python script to run a t-test or ANOVA on the extracted data
   const { object: scriptInfo } = await generateObject({
-    model: openai("gpt-4o"),
+    model: openai(OPENAI_MODELS.standard),
     schema: z.object({
       pythonCode: z.string(),
     }),

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { generateObject } from 'ai';
 import { openai } from '@ai-sdk/openai';
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export interface ExtractedEntity {
   name: string;
@@ -23,7 +24,7 @@ export interface GraphData {
 
 export async function extractScientificEntities(text: string): Promise<ExtractedEntity[]> {
   const { object } = await generateObject({
-    model: openai('gpt-4o'),
+    model: openai(OPENAI_MODELS.standard),
     schema: z.object({
       entities: z.array(
         z.object({
@@ -40,7 +41,7 @@ export async function extractScientificEntities(text: string): Promise<Extracted
 
 export async function extractScientificGraphData(text: string): Promise<GraphData> {
   const { object } = await generateObject({
-    model: openai('gpt-4o'),
+    model: openai(OPENAI_MODELS.standard),
     schema: z.object({
       entities: z.array(
         z.object({

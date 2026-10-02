@@ -7,6 +7,7 @@ import { ArticleReference } from './researchService';
 import { generateObject } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export interface GenerationInput {
   statisticalConclusions: string;
@@ -40,7 +41,7 @@ export class ArticleGeneratorService {
     }
 
     const { object } = await generateObject({
-      model: openai('gpt-4o'),
+      model: openai(OPENAI_MODELS.standard),
       schema: z.object({
         title: z.string(),
         abstract: z.string(),

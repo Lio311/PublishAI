@@ -1,5 +1,6 @@
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export async function fetchCrossDomainAnalogies(problemStatement: string, domain: string = "science"): Promise<string[]> {
   // Simulates analogical reasoning (AR) by prompting the LLM to extract the core abstract problem,
@@ -12,7 +13,7 @@ Then, retrieve 3 concrete, cross-domain analogies that solve a structurally simi
 Return only the analogies as a numbered list.`;
 
   const { text } = await generateText({
-    model: openai("gpt-4o"),
+    model: openai(OPENAI_MODELS.standard),
     prompt,
   });
 

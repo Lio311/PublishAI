@@ -1,6 +1,7 @@
 import { generateObject } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export interface IntegrityReport {
   plagiarismScore: number; // 0-100 (higher means more copied)
@@ -19,7 +20,7 @@ export class IntegrityScanner {
     
     try {
       const { object } = await generateObject({
-        model: openai('gpt-4o'),
+        model: openai(OPENAI_MODELS.standard),
         schema: z.object({
           plagiarismScore: z.number().min(0).max(100).describe("Estimated percentage of plagiarized content (0-100)."),
           aiGeneratedScore: z.number().min(0).max(100).describe("Estimated probability that the text is AI-generated (0-100)."),

@@ -1,18 +1,18 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
 import { AIProvider } from './types';
+import { ANTHROPIC_MODELS, OPENAI_MODELS } from './modelIds';
 
-export const DEFAULT_OPENAI_MODEL_NAME = process.env.OPENAI_MODEL || 'gpt-4o';
-export const DEFAULT_OPENAI_MINI_MODEL_NAME = process.env.OPENAI_MINI_MODEL || 'gpt-4o-mini';
-export const DEFAULT_OPENAI_EMBEDDING_MODEL_NAME = process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-small';
-export const DEFAULT_ANTHROPIC_MODEL_NAME = process.env.ANTHROPIC_MODEL || 'claude-3-7-sonnet-20250219';
-export const DEFAULT_ANTHROPIC_FAST_MODEL_NAME = process.env.ANTHROPIC_FAST_MODEL || 'claude-3-5-haiku-20241022';
-export const DEFAULT_ANTHROPIC_CODING_MODEL_NAME = process.env.ANTHROPIC_CODING_MODEL || 'claude-3-5-sonnet-20240620';
+export const DEFAULT_OPENAI_MODEL_NAME = OPENAI_MODELS.standard;
+export const DEFAULT_OPENAI_MINI_MODEL_NAME = OPENAI_MODELS.mini;
+export const DEFAULT_OPENAI_EMBEDDING_MODEL_NAME = OPENAI_MODELS.embedding;
+export const DEFAULT_ANTHROPIC_MODEL_NAME = ANTHROPIC_MODELS.standard;
+export const DEFAULT_ANTHROPIC_FAST_MODEL_NAME = ANTHROPIC_MODELS.fast;
+export const DEFAULT_ANTHROPIC_CODING_MODEL_NAME = ANTHROPIC_MODELS.coding;
 
 export const FALLBACK_OPENAI_EMBEDDING_MODELS = [
   DEFAULT_OPENAI_EMBEDDING_MODEL_NAME,
   'text-embedding-3-large',
-  'text-embedding-ada-002',
 ];
 
 export interface ModelCandidate {
@@ -27,43 +27,29 @@ export interface ModelCandidate {
  */
 export const MODEL_FALLBACK_CHAINS: Record<string, ModelCandidate[]> = {
   // OpenAI
-  'gpt-4o': [
-    { model: 'gpt-4o', provider: 'openai' },
-    { model: 'gpt-4o-mini', provider: 'openai' },
-    { model: 'claude-3-5-haiku-20241022', provider: 'anthropic' },
+  [OPENAI_MODELS.standard]: [
+    { model: OPENAI_MODELS.standard, provider: 'openai' },
+    { model: OPENAI_MODELS.mini, provider: 'openai' },
+    { model: ANTHROPIC_MODELS.fast, provider: 'anthropic' },
   ],
-  'gpt-4o-mini': [
-    { model: 'gpt-4o-mini', provider: 'openai' },
-    { model: 'claude-3-5-haiku-20241022', provider: 'anthropic' },
-  ],
-  'o1': [
-    { model: 'o1', provider: 'openai' },
-    { model: 'gpt-4o', provider: 'openai' },
-    { model: 'gpt-4o-mini', provider: 'openai' },
-  ],
-  'o3-mini': [
-    { model: 'o3-mini', provider: 'openai' },
-    { model: 'gpt-4o-mini', provider: 'openai' },
+  [OPENAI_MODELS.mini]: [
+    { model: OPENAI_MODELS.mini, provider: 'openai' },
+    { model: ANTHROPIC_MODELS.fast, provider: 'anthropic' },
   ],
   // Anthropic
-  'claude-3-7-sonnet-20250219': [
-    { model: 'claude-3-7-sonnet-20250219', provider: 'anthropic' },
-    { model: 'claude-3-5-haiku-20241022', provider: 'anthropic' },
-    { model: 'gpt-4o-mini', provider: 'openai' },
+  [ANTHROPIC_MODELS.reasoning]: [
+    { model: ANTHROPIC_MODELS.reasoning, provider: 'anthropic' },
+    { model: ANTHROPIC_MODELS.standard, provider: 'anthropic' },
+    { model: OPENAI_MODELS.standard, provider: 'openai' },
   ],
-  'claude-3-5-sonnet-20240620': [
-    { model: 'claude-3-5-sonnet-20240620', provider: 'anthropic' },
-    { model: 'claude-3-5-haiku-20241022', provider: 'anthropic' },
-    { model: 'gpt-4o-mini', provider: 'openai' },
+  [ANTHROPIC_MODELS.standard]: [
+    { model: ANTHROPIC_MODELS.standard, provider: 'anthropic' },
+    { model: ANTHROPIC_MODELS.fast, provider: 'anthropic' },
+    { model: OPENAI_MODELS.mini, provider: 'openai' },
   ],
-  'claude-3-5-sonnet-20241022': [
-    { model: 'claude-3-5-sonnet-20241022', provider: 'anthropic' },
-    { model: 'claude-3-5-haiku-20241022', provider: 'anthropic' },
-    { model: 'gpt-4o-mini', provider: 'openai' },
-  ],
-  'claude-3-5-haiku-20241022': [
-    { model: 'claude-3-5-haiku-20241022', provider: 'anthropic' },
-    { model: 'gpt-4o-mini', provider: 'openai' },
+  [ANTHROPIC_MODELS.fast]: [
+    { model: ANTHROPIC_MODELS.fast, provider: 'anthropic' },
+    { model: OPENAI_MODELS.mini, provider: 'openai' },
   ],
 };
 

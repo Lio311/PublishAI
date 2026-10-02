@@ -5,6 +5,7 @@ import { getOpenAIModelInstance, resolveProvider } from "@/services/ai/aiService
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { auth } from "@/app/auth";
 import { applyRateLimit } from "@/services/rate-limit";
+import { ANTHROPIC_MODELS, OPENAI_MODELS } from "@/services/ai/modelIds";
 
 const patchSchema = z.object({
   patches: z.array(
@@ -19,7 +20,10 @@ const patchSchema = z.object({
 export async function POST(req: Request) {
   try {
     const session = await auth();
-    const rateLimitResponse = await applyRateLimit(req, "ai", session?.user?.id);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const rateLimitResponse = await applyRateLimit(req, "ai", session.user.id);
     if (rateLimitResponse) return rateLimitResponse;
 
     const body = await req.json();
@@ -32,6 +36,12 @@ export async function POST(req: Request) {
       );
     }
 
+    // Clients may only choose among the configured tiers, never an arbitrary (costly) model id.
+    const allowedModels = new Set<string>([...Object.values(ANTHROPIC_MODELS), OPENAI_MODELS.standard, OPENAI_MODELS.mini]);
+    if (model !== undefined && (typeof model !== "string" || !allowedModels.has(model))) {
+      return NextResponse.json({ error: "Unsupported model" }, { status: 400 });
+    }
+
     const providerName = resolveProvider(undefined, model);
     let aiModel;
 
@@ -39,9 +49,9 @@ export async function POST(req: Request) {
       const anthropic = createAnthropic({
         apiKey: process.env.ANTHROPIC_API_KEY || "",
       });
-      aiModel = anthropic(model || "claude-3-7-sonnet-20250219") as any;
+      aiModel = anthropic(model || ANTHROPIC_MODELS.standard) as any;
     } else {
-      aiModel = getOpenAIModelInstance(model || "gpt-4o") as any;
+      aiModel = getOpenAIModelInstance(model || OPENAI_MODELS.standard) as any;
     }
 
     const enhancedSystemPrompt = `${systemPrompt || ""}
@@ -67,7 +77,7 @@ Analyze the prompt and provide the necessary patch operations to fulfill the req
     return NextResponse.json({
       patches: object.patches,
       provider: providerName,
-      model: model || (providerName === "anthropic" ? "claude-3-7-sonnet-20250219" : "gpt-4o"),
+      model: model || (providerName === "anthropic" ? ANTHROPIC_MODELS.standard : OPENAI_MODELS.standard),
       tokensUsed: usage?.totalTokens,
       usage,
     });

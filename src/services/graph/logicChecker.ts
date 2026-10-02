@@ -5,6 +5,7 @@ import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';
 
 import { eq } from "drizzle-orm";
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export interface LogicCheckResult {
   claim: string;
@@ -34,7 +35,7 @@ export async function checkLogicalConsistency(claims: string[], paperId?: number
   
   for (const claim of claims) {
     const { object } = await generateObject({
-      model: openai('gpt-4o'),
+      model: openai(OPENAI_MODELS.standard),
       schema: z.object({
         isConsistent: z.boolean(),
         contradictingEvidence: z.array(z.string()).optional(),

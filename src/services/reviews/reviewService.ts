@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { generateObject, generateText, getOpenAIModelInstance } from "../ai/aiService";
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export interface ReviewPoint {
   id?: string;
@@ -173,7 +174,7 @@ export async function processReviewComments(
   }
 
   try {
-    const model = getOpenAIModelInstance(options?.model || "gpt-4o", options?.apiKey);
+    const model = getOpenAIModelInstance(options?.model || OPENAI_MODELS.standard, options?.apiKey);
 
     const prompt = `You are an elite academic peer-review analyst and manuscript rebuttal strategist for high-impact journals.
 Your task is to analyze the provided raw reviewer comments block, separate them into discrete actionable points, and compose an articulate, polite, and persuasive AI draft author response for every point.

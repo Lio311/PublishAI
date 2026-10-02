@@ -1,6 +1,7 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { z } from "zod";
 import { PublishAIState } from "../state";
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 const RebuttalOutput = z.object({
   rebuttalStrategy: z.string().describe("The strategy for addressing the reviewer comments."),
@@ -9,7 +10,7 @@ const RebuttalOutput = z.object({
 
 export async function rebuttalNode(state: PublishAIState): Promise<Partial<PublishAIState>> {
   const model = new ChatOpenAI({
-    model: "gpt-4o",
+    model: OPENAI_MODELS.standard,
     temperature: 0,
   }).withStructuredOutput(RebuttalOutput);
 

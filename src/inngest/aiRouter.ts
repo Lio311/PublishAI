@@ -2,6 +2,7 @@ import { askClaude } from "@/services/agents/claude-client";
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { Stage } from "@/services/agents/base-agent";
+import { ANTHROPIC_MODELS, OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export interface AIRoutePayload {
   prompt: string;
@@ -22,11 +23,11 @@ export async function routeAIRequest(
     if (taskType === "scientific_review" || taskType === "writing") {
       const { text, tokensUsed } = await askClaude(
         payload.prompt,
-        "claude-3-opus-20240229",
+        ANTHROPIC_MODELS.reasoning,
         payload.system
       );
       return {
-        modelUsed: "claude-3-opus-20240229",
+        modelUsed: ANTHROPIC_MODELS.reasoning,
         output: text,
         tokensUsed,
       };
@@ -37,22 +38,22 @@ export async function routeAIRequest(
     ) {
       const { text, tokensUsed } = await askClaude(
         payload.prompt,
-        "claude-3-7-sonnet-20250219",
+        ANTHROPIC_MODELS.standard,
         payload.system
       );
       return {
-        modelUsed: "claude-3-7-sonnet-20250219",
+        modelUsed: ANTHROPIC_MODELS.standard,
         output: text,
         tokensUsed,
       };
     } else {
       const { text, usage } = await generateText({
-        model: openai("gpt-4o"),
+        model: openai(OPENAI_MODELS.standard),
         prompt: payload.prompt,
         system: payload.system,
       });
       return {
-        modelUsed: "gpt-4o",
+        modelUsed: OPENAI_MODELS.standard,
         output: text,
         tokensUsed: usage?.totalTokens ?? 0,
       };

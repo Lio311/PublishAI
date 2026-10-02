@@ -7,12 +7,12 @@ import { db } from "@/services/db";
 import { eq } from "drizzle-orm";
 import { papers } from "@/services/db/schema";
 import { AgentResult } from "../../base-agent";
+import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
 
 export const planningNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
-  const modelName = "claude-3-opus-20240229";
+  const modelName = ANTHROPIC_MODELS.reasoning;
   const model = new ChatAnthropic({
     modelName,
-    temperature: 0,
   });
 
   const clarificationOutput = getPreviousStageOutput(state, "clarification")?.output || state.clarification || "No clarification available.";

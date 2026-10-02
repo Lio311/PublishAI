@@ -3,12 +3,12 @@ import { HumanMessage } from "@langchain/core/messages";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
 import { PublishAIState } from "../state";
 import { AgentResult } from "../../base-agent";
+import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
 
 export const scientificReviewNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
-  const modelName = "claude-3-opus-20240229";
+  const modelName = ANTHROPIC_MODELS.reasoning;
   const model = new ChatAnthropic({
     modelName,
-    temperature: 0,
   });
 
   const prompt = `Perform a rigorous peer review on the manuscript provided between <manuscript> tags. Highlight logical flaws, methodological issues, and unsubstantiated claims.\n\n<manuscript>\n${state.documentContent || "No manuscript content provided."}\n</manuscript>`;

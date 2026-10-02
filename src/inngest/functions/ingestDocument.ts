@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { openai } from "@ai-sdk/openai";
 import { embedMany } from "ai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export const ingestDocument = inngest.createFunction(
   {
@@ -64,7 +65,7 @@ export const ingestDocument = inngest.createFunction(
       for (let i = 0; i < chunkTexts.length; i += batchSize) {
         const batch = chunkTexts.slice(i, i + batchSize);
         const { embeddings: batchEmbeddings } = await embedMany({
-          model: openai.embedding("text-embedding-3-small"),
+          model: openai.embedding(OPENAI_MODELS.embedding),
           values: batch,
         });
         allEmbeddings.push(...batchEmbeddings);

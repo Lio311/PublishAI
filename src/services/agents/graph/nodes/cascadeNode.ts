@@ -1,10 +1,11 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { PublishAIState } from "../state";
 import { AIMessage } from "@langchain/core/messages";
+import { OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export const cascadeNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   const llm = new ChatOpenAI({
-    modelName: "gpt-4o",
+    modelName: OPENAI_MODELS.standard,
     temperature: 0.2,
   });
 
