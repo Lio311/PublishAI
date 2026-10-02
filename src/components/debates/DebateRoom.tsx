@@ -6,17 +6,19 @@ import ConsensusSummary from "./ConsensusSummary";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Users, Radio, MessageSquare, Sparkles, RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { DebateMessageDto } from "@/types/api";
+import type { DebateAgentDto, DebateMessageDto } from "@/types/api";
 import { errorName } from "@/services/utils/errors";
 
 interface DebateResponse {
   debate?: { id: string; status?: string | null; consensusSummary?: string | null } | null;
   messages?: DebateMessageDto[];
+  agents?: DebateAgentDto[];
 }
 
 export default function DebateRoom({ paperId }: { paperId: number }) {
   const t = useTranslations("PaperTools.debate");
   const [messages, setMessages] = useState<DebateMessageDto[]>([]);
+  const [agents, setAgents] = useState<DebateAgentDto[]>([]);
   const [consensus, setConsensus] = useState<string | null>(null);
   const [realDebateId, setRealDebateId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -61,6 +63,7 @@ export default function DebateRoom({ paperId }: { paperId: number }) {
   const applyDebate = useCallback((data: DebateResponse | null) => {
     if (data) {
       setMessages(data.messages || []);
+      setAgents(data.agents || []);
       if (data.debate?.id) {
         setRealDebateId(data.debate.id);
       }
@@ -194,7 +197,7 @@ export default function DebateRoom({ paperId }: { paperId: number }) {
           </div>
         ) : (
           <div className="max-h-[550px] overflow-y-auto pr-1">
-            <DebateTranscript messages={messages} />
+            <DebateTranscript messages={messages} agents={agents} />
           </div>
         )}
 

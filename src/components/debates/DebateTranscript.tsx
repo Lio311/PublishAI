@@ -1,24 +1,45 @@
 import React, { useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import AgentAvatar from "./AgentAvatar";
-import type { DebateMessageDto } from "@/types/api";
+import type { DebateAgentDto, DebateMessageDto } from "@/types/api";
 
-export default function DebateTranscript({ messages }: { messages: DebateMessageDto[] }) {
+const KNOWN_PERSONAS = ["harsh_reviewer", "novelty_expert", "optimist", "area_chair"];
+
+export default function DebateTranscript({
+  messages,
+  agents = [],
+}: {
+  messages: DebateMessageDto[];
+  agents?: DebateAgentDto[];
+}) {
+  const t = useTranslations("PaperTools.debate");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const agentsById = new Map(agents.map((agent) => [agent.id, agent]));
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const speakerLabel = (agentId: string | null) => {
+    const agent = agentId ? agentsById.get(agentId) : undefined;
+    if (!agent) return t("personas.system");
+    return KNOWN_PERSONAS.includes(agent.persona) ? t(`personas.${agent.persona}`) : agent.name;
+  };
+
   return (
     <div className="flex-1 overflow-y-auto bg-white border border-gray-200 rounded p-4 space-y-4">
-      {messages.map((msg, idx) => (
-        <div key={idx} className={`flex items-start gap-3 p-3 rounded ${msg.isConsensusProposal ? 'bg-green-50' : 'bg-gray-50'}`}>
-          <AgentAvatar persona={msg.agentId ? "Agent" : "System"} name={msg.agentId ? "A" : "S"} />
-          <div>
-            <p className="text-sm text-gray-700">{msg.content}</p>
+      {messages.map((msg) => {
+        const label = speakerLabel(msg.agentId);
+        return (
+          <div key={msg.id} className={`flex items-start gap-3 p-3 rounded ${msg.isConsensusProposal ? "bg-green-50" : "bg-gray-50"}`}>
+            <AgentAvatar persona={label} name={label} />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-slate-500 mb-1">{t("round", { round: msg.round })}</p>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">{msg.content}</p>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
       <div ref={bottomRef} />
     </div>
   );

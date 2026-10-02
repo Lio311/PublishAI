@@ -126,7 +126,7 @@
       },
       "compile": {
         "title": "Compilation & Restoration",
-        "desc": "After all edits are made, the system packages your manuscript back into a final, clean file, carefully preserving all your original citations (e.g., Mendeley) and page layouts."
+        "desc": "After all edits are made, the system assembles your manuscript into a final, clean Word file that you can review and download."
       },
       "export": {
         "title": "Download for Review",
@@ -658,7 +658,15 @@
       "start": "Start review debate now",
       "starting": "Starting debate...",
       "startFailed": "Failed to start the debate",
-      "consensus": "Reviewer consensus reached"
+      "consensus": "Reviewer consensus reached",
+      "personas": {
+        "harsh_reviewer": "Critical reviewer",
+        "novelty_expert": "Novelty expert",
+        "optimist": "Optimistic reviewer",
+        "area_chair": "Area Chair",
+        "system": "System"
+      },
+      "round": "Round {round}"
     },
     "graph": {
       "title": "Interactive Entity Network",

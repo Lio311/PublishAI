@@ -30,6 +30,12 @@ export type SubmissionDto = Jsonified<Submission> & {
 
 export type DebateMessageDto = Jsonified<typeof debateMessages.$inferSelect>;
 
+export interface DebateAgentDto {
+  id: string;
+  name: string;
+  persona: string;
+}
+
 export type GeneratedChartDto = Jsonified<typeof generatedCharts.$inferSelect>;
 
 export type FigureAnalysisDto = Jsonified<typeof figureAnalyses.$inferSelect>;

@@ -3,16 +3,22 @@ import { submissionReviewStartedEvent } from "../events";
 import {
   initializeDebate,
   addDebateMessage,
-  checkConsensus,
+  runReviewerTurn,
+  runAreaChair,
+  REVIEWER_PERSONAS,
+  AREA_CHAIR_PERSONA,
+  type DebatePosition,
 } from "../../services/debateService";
 import { db } from "@/services/db";
-import { debateAgents, debates } from "@/services/db/schema";
+import { debateAgents, debateMessages, debates } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
-import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
-import { OPENAI_MODELS } from "@/services/ai/modelIds";
 import { NonRetriableError } from "inngest";
 import { loadManuscriptText } from "@/services/documents/manuscriptStore";
+
+/** Independent reviews, then one round where reviewers answer each other. */
+const ROUNDS = 2;
+/** Fewer than two responding reviewers is not a debate. */
+const MIN_REVIEWERS = 2;
 
 export const scientificReviewDebate = inngest.createFunction(
   {
@@ -48,109 +54,91 @@ export const scientificReviewDebate = inngest.createFunction(
       return text;
     });
 
-    // 2. Initialize debate idempotently
-    const debateId = await step.run("initialize-debate", () =>
-      initializeDebate(paperId)
-    );
-
-    let reachedConsensus = false;
-    let round = 1;
-    const maxRounds = 3; // 3 rounds is standard for multi-agent peer review
-    let finalSummary: string | undefined;
-
-    while (!reachedConsensus && round <= maxRounds) {
-      const agents = await step.run(`get-agents-round-${round}`, async () => {
-        return await db
-          .select()
-          .from(debateAgents)
-          .where(eq(debateAgents.debateId, debateId));
-      });
-
-      // Execute real AI agent reviews for the round
-      const agentResponses = await step.run(`debate-round-${round}`, async () => {
-        const responses: Array<{ agentId: string; content: string }> = [];
-
-        for (const agent of agents) {
-          try {
-            const prompt = `Round ${round} of scientific review debate.
-Manuscript Title/Abstract: "${paperContext}".
-Role: ${agent.name} (${agent.persona}).
-Provide a focused, concise scientific critique (max 3-4 paragraphs) emphasizing key strengths, methodology questions, or consensus points.`;
-
-            const { text } = await generateText({
-              model: openai(OPENAI_MODELS.mini),
-              system: agent.systemPrompt,
-              prompt,
-            });
-
-            responses.push({
-              agentId: agent.id,
-              content: text,
-            });
-          } catch (error) {
-            console.error(
-              `Agent ${agent.name} failed generating review for round ${round}:`,
-              error
-            );
-            responses.push({
-              agentId: agent.id,
-              content: `Reviewer ${agent.name} evaluated the manuscript methodology and agrees with the panel's focus areas for round ${round}.`,
-            });
-          }
-        }
-        return responses;
-      });
-
-      // Save messages idempotently for this round
-      await step.run(`save-messages-round-${round}`, async () => {
-        for (const res of agentResponses) {
-          const isProposal = round === maxRounds;
-          await addDebateMessage(
-            debateId,
-            res.agentId,
-            res.content,
-            round,
-            isProposal
-          );
-        }
-      });
-
-      const consensusCheck = await step.run(
-        `check-consensus-round-${round}`,
-        () => checkConsensus(debateId)
-      );
-
-      reachedConsensus = consensusCheck.reached;
-      if (consensusCheck.summary) {
-        finalSummary = consensusCheck.summary;
-      }
-
-      if (reachedConsensus) {
-        break;
-      }
-
-      round++;
-    }
-
-    // Finalize debate status in DB (regardless of whether consensus was reached or max rounds met)
-    await step.run("finalize-debate", async () => {
-      const finalStatus = reachedConsensus
-        ? "consensus_reached"
-        : "failed";
-      const summaryText =
-        finalSummary ||
-        `Debate concluded after ${Math.min(round, maxRounds)} rounds of scientific review.`;
-
+    // 2. Initialize debate idempotently. A restarted (previously failed) debate starts
+    // from a clean transcript.
+    const debateId = await step.run("initialize-debate", async () => {
+      const id = await initializeDebate(paperId);
+      await db.delete(debateMessages).where(eq(debateMessages.debateId, id));
       await db
         .update(debates)
-        .set({
-          status: finalStatus,
-          consensusSummary: summaryText,
-          completedAt: new Date(),
-        })
+        .set({ status: "in_progress", consensusSummary: null, completedAt: null })
+        .where(eq(debates.id, id));
+      return id;
+    });
+
+    const agents = await step.run("get-agents", () =>
+      db.select().from(debateAgents).where(eq(debateAgents.debateId, debateId))
+    );
+    const reviewers = agents.filter((a) =>
+      (REVIEWER_PERSONAS as readonly string[]).includes(a.persona)
+    );
+    const areaChair = agents.find((a) => a.persona === AREA_CHAIR_PERSONA);
+    if (!areaChair || reviewers.length < MIN_REVIEWERS) {
+      throw new NonRetriableError(`Debate ${debateId} is missing its reviewer panel`);
+    }
+
+    // 3. Debate rounds: reviewers run in parallel, each on its own model. Round 1 is
+    // independent; in later rounds every reviewer answers the others' last positions.
+    // A reviewer whose provider fails is left out of that round; nothing is written
+    // in its name.
+    let positions = new Map<string, DebatePosition>();
+    for (let round = 1; round <= ROUNDS; round++) {
+      const previous = positions;
+      const turns = await Promise.all(
+        reviewers
+          .filter((agent) => round === 1 || previous.has(agent.id))
+          .map((agent) =>
+            step.run(`round-${round}-${agent.persona}`, async () => {
+              try {
+                const content = await runReviewerTurn({
+                  agent,
+                  round,
+                  manuscript: paperContext,
+                  otherPositions: [...previous.entries()]
+                    .filter(([id]) => id !== agent.id)
+                    .map(([, position]) => position),
+                });
+                await addDebateMessage(debateId, agent.id, content, round);
+                return { agentId: agent.id, name: agent.name, content };
+              } catch (error) {
+                console.error(`[debate] ${agent.name} failed in round ${round}:`, error);
+                return { agentId: agent.id, name: agent.name, content: null };
+              }
+            })
+          )
+      );
+
+      const next = new Map<string, DebatePosition>();
+      for (const turn of turns) {
+        if (turn.content) next.set(turn.agentId, { name: turn.name, content: turn.content });
+      }
+      if (next.size < MIN_REVIEWERS) {
+        throw new NonRetriableError(
+          `Only ${next.size} reviewer(s) responded in round ${round}; a debate needs at least ${MIN_REVIEWERS}`
+        );
+      }
+      positions = next;
+    }
+
+    // 4. The area chair synthesizes the final positions into the consensus decision.
+    const summary = await step.run("area-chair-synthesis", async () => {
+      const decision = await runAreaChair({
+        agent: areaChair,
+        manuscript: paperContext,
+        positions: [...positions.values()],
+      });
+      await addDebateMessage(debateId, areaChair.id, decision, ROUNDS + 1, true);
+      return decision;
+    });
+
+    await step.run("finalize-debate", async () => {
+      await db
+        .update(debates)
+        .set({ status: "consensus_reached", consensusSummary: summary, completedAt: new Date() })
         .where(eq(debates.id, debateId));
     });
 
-    return { success: true, debateId, reachedConsensus };
+    return { success: true, debateId, reviewers: positions.size };
   }
 );
+

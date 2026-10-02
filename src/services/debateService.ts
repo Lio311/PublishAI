@@ -1,11 +1,11 @@
 import { db } from "@/services/db";
 import { debates, debateAgents, debateMessages } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
-import { generateText } from "ai";
+import { generateText, type LanguageModel } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { google } from "@ai-sdk/google";
-import { ANTHROPIC_MODELS, OPENAI_MODELS } from "@/services/ai/modelIds";
+import { ANTHROPIC_MODELS, GOOGLE_MODELS, OPENAI_MODELS } from "@/services/ai/modelIds";
 
 export async function initializeDebate(paperId: number): Promise<string> {
   const existing = await db
@@ -53,61 +53,90 @@ export async function initializeDebate(paperId: number): Promise<string> {
   return debate.id;
 }
 
-export async function runReviewAgents(debateId: string, paperText: string): Promise<string> {
-  // 1. Run 3 Reviewers in Parallel (Multi-Model Topology)
-  const reviewerPrompts = [
-    { 
-      name: "Reviewer 1", 
-      system: "You are a rigorous, constructive, and demanding peer reviewer for a top-tier scientific journal. Provide an insightful review of the submitted manuscript, deliberately searching for logical flaws, statistical inconsistencies, methodological limitations, and potential reviewer objections. Do not hold back on critiques; offer actionable, highly specific suggestions to fortify the research claims.",
-      prompt: "Evaluate the methodology and provide critical feedback on the following manuscript:\n\n" + paperText, 
-      model: openai(OPENAI_MODELS.standard) 
-    },
-    { 
-      name: "Reviewer 2", 
-      system: "You are an elite academic co-author and principal investigator specialized in scientific writing and publishing for high-impact journals. Your objective is to produce rigorous, publication-grade academic text adhering to strict scholarly norms, objective prose, and domain-appropriate terminology. Analyze the methodology, emphasize the research gap, and preserve the author's unique voice while maintaining an authoritative and precise academic tone.",
-      prompt: "Evaluate the novelty, related work, and overall impact of the following manuscript:\n\n" + paperText, 
-      model: anthropic(ANTHROPIC_MODELS.standard) 
-    },
-    { 
-      name: "Reviewer 3", 
-      system: "You are a visionary research scientist synthesizing prior literature and exploring novel connections. With your vast context window, analyze the entire manuscript to identify consensus, methodological synergies, hidden strengths, and open research gaps. Find the 'silver lining' in complex data and suggest ways to amplify the paper's novelty and broader impact.",
-      prompt: "Evaluate the hidden strengths, potential synergies, and novel connections within the following manuscript:\n\n" + paperText, 
-      model: google("models/gemini-1.5-pro-latest") 
-    },
-  ];
+/** Reviewer personas debate; the area chair only synthesizes their final positions. */
+export const REVIEWER_PERSONAS = ["harsh_reviewer", "novelty_expert", "optimist"] as const;
+export const AREA_CHAIR_PERSONA = "area_chair";
 
-  const reviewResults = await Promise.all(
-    reviewerPrompts.map(async (rev) => {
-      const { text } = await generateText({
-        model: rev.model,
-        system: rev.system,
-        prompt: rev.prompt,
-      });
-      return { name: rev.name, feedback: text };
-    })
-  );
+/** Keeps the manuscript well inside every reviewer model's context window. */
+const MAX_MANUSCRIPT_CHARS = 150_000;
 
-  for (const result of reviewResults) {
-    await addDebateMessage(debateId, null, result.feedback, 1, false);
+/**
+ * Each reviewer runs on a different provider so the panel does not share one model's
+ * blind spots; the area chair uses the strongest reasoning model.
+ */
+function modelForPersona(persona: string): LanguageModel {
+  switch (persona) {
+    case "harsh_reviewer":
+      return openai(OPENAI_MODELS.standard);
+    case "optimist":
+      return google(GOOGLE_MODELS.standard);
+    case AREA_CHAIR_PERSONA:
+      return anthropic(ANTHROPIC_MODELS.reasoning);
+    default:
+      return anthropic(ANTHROPIC_MODELS.standard);
   }
+}
 
-  // 2. Run Area Chair Synthesis (Sequential Meta-Agent)
-  const chairPrompt = "As Area Chair, synthesize the following 3 reviews into a final structured decision:\\n\\n" +
-    reviewResults.map(r => `${r.name}:\\n${r.feedback}`).join("\\n\\n");
+function manuscriptBlock(manuscript: string): string {
+  const text =
+    manuscript.length > MAX_MANUSCRIPT_CHARS
+      ? `${manuscript.slice(0, MAX_MANUSCRIPT_CHARS)}\n\n[Manuscript truncated for length]`
+      : manuscript;
+  return `<manuscript>\n${text}\n</manuscript>`;
+}
 
-  const { text: areaChairDecision } = await generateText({
-    model: openai("o1-preview"),
-    prompt: "System Context:\nYou are the Area Chair and Meta-Reviewer. Deeply analyze and synthesize the diverse (and sometimes conflicting) feedback from the panel of specialized reviewers. Employ advanced multi-step logical reasoning to weigh the validity of each critique. Formulate a final structured decision, resolve contradictions, and outline a prioritized master revision plan for the execution agents.\n\n" + chairPrompt,
+export interface DebateAgentInfo {
+  name: string;
+  persona: string;
+  systemPrompt: string;
+}
+
+export interface DebatePosition {
+  name: string;
+  content: string;
+}
+
+/**
+ * One reviewer's turn. Round 1 is an independent review; later rounds respond to the
+ * other reviewers' previous positions, so the panel actually debates.
+ */
+export async function runReviewerTurn(params: {
+  agent: DebateAgentInfo;
+  round: number;
+  manuscript: string;
+  otherPositions: DebatePosition[];
+}): Promise<string> {
+  const { agent, round, manuscript, otherPositions } = params;
+  const task =
+    round === 1 || otherPositions.length === 0
+      ? `Write your independent review of the manuscript as ${agent.name}. Cover the key strengths, the most important weaknesses, and specific, actionable revisions. Keep it to 3-4 focused paragraphs.`
+      : `This is round ${round} of the review debate. Below are the other reviewers' positions from the previous round. Respond to them directly: state where you agree, where you disagree and why, and which revisions you consider essential versus optional. Keep it to 2-3 focused paragraphs.\n\n` +
+        otherPositions.map((p) => `<review reviewer="${p.name}">\n${p.content}\n</review>`).join("\n\n");
+
+  const { text } = await generateText({
+    model: modelForPersona(agent.persona),
+    system: agent.systemPrompt,
+    prompt: `${manuscriptBlock(manuscript)}\n\n${task}`,
   });
+  return text.trim();
+}
 
-  await addDebateMessage(debateId, null, areaChairDecision, 2, true);
-
-  // Update debate status
-  await db.update(debates)
-    .set({ status: "consensus_reached", consensusSummary: areaChairDecision })
-    .where(eq(debates.id, debateId));
-
-  return areaChairDecision;
+/** The area chair weighs the final positions and writes the consolidated decision. */
+export async function runAreaChair(params: {
+  agent: DebateAgentInfo;
+  manuscript: string;
+  positions: DebatePosition[];
+}): Promise<string> {
+  const { agent, manuscript, positions } = params;
+  const { text } = await generateText({
+    model: modelForPersona(AREA_CHAIR_PERSONA),
+    system: agent.systemPrompt,
+    prompt:
+      `${manuscriptBlock(manuscript)}\n\nThese are the reviewers' final positions after the debate:\n\n` +
+      positions.map((p) => `<review reviewer="${p.name}">\n${p.content}\n</review>`).join("\n\n") +
+      `\n\nAs Area Chair, write the consolidated decision: an overall recommendation, the points the reviewers agree on, how you resolve their disagreements, and a prioritized revision plan for the authors.`,
+  });
+  return text.trim();
 }
 
 export async function addDebateMessage(
@@ -126,15 +155,4 @@ export async function addDebateMessage(
   }).returning();
 
   return message.id;
-}
-
-export async function checkConsensus(debateId: string): Promise<{ reached: boolean; summary?: string }> {
-  const msgs = await db.select().from(debateMessages).where(eq(debateMessages.debateId, debateId));
-  const consensusProposals = msgs.filter((m) => m.isConsensusProposal);
-  
-  if (consensusProposals.length > 0) {
-    return { reached: true, summary: consensusProposals[consensusProposals.length - 1].content };
-  }
-  
-  return { reached: false };
 }

@@ -23,6 +23,11 @@ export const OPENAI_MODELS = {
   embedding: process.env.OPENAI_EMBEDDING_MODEL || "text-embedding-3-small",
 } as const;
 
+export const GOOGLE_MODELS = {
+  /** Gemini Pro, used for the optimist reviewer in the review debate. */
+  standard: process.env.GOOGLE_MODEL || "gemini-pro-latest",
+} as const;
+
 /**
  * Current Claude models reject non-default sampling parameters (temperature /
  * top_p / top_k) with a 400. Haiku 4.5 and older 4.x models still accept them.
