@@ -50,18 +50,23 @@ export default function GlobalPasswordProtection({ children }: { children: React
         };
     }, []);
 
+    // Access is decided by the server (signed httpOnly cookie); the PIN never reaches the client bundle.
     useEffect(() => {
-        const authTime = localStorage.getItem('publishai_global_auth_time_v2');
-        const now = new Date().getTime();
-        
-        // 24 hours in milliseconds = 86400000
-        if (authTime && (now - parseInt(authTime, 10)) < 86400000) {
-            setIsAuthenticated(true);
-        } else {
-            setIsAuthenticated(false);
-            localStorage.removeItem('publishai_global_auth_time_v2');
-        }
-        setIsChecking(false);
+        let cancelled = false;
+        fetch('/api/site-access')
+            .then(res => res.json())
+            .then((data: { granted?: boolean }) => {
+                if (!cancelled) setIsAuthenticated(Boolean(data.granted));
+            })
+            .catch(() => {
+                if (!cancelled) setIsAuthenticated(false);
+            })
+            .finally(() => {
+                if (!cancelled) setIsChecking(false);
+            });
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const verifyPin = useCallback(async (currentPin: string) => {
@@ -69,11 +74,20 @@ export default function GlobalPasswordProtection({ children }: { children: React
         setIsAuthLoading(true);
         isAuthLoadingRef.current = true;
         
-        await new Promise(resolve => setTimeout(resolve, 400));
+        let granted = false;
+        try {
+            const res = await fetch('/api/site-access', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: currentPin }),
+            });
+            granted = res.ok && Boolean((await res.json()).granted);
+        } catch {
+            granted = false;
+        }
         if (!isMountedRef.current) return;
         
-        if (currentPin === (process.env.NEXT_PUBLIC_SITE_PIN || '2580')) {
-            localStorage.setItem('publishai_global_auth_time_v2', new Date().getTime().toString());
+        if (granted) {
             setIsAuthenticated(true);
             setIsAuthLoading(false);
             isAuthLoadingRef.current = false;
