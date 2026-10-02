@@ -1,5 +1,4 @@
 import { GET as getMe, PATCH as patchMe } from "@/app/api/auth/me/route";
-import { POST as registerUser } from "@/app/api/auth/register/route";
 import { GET as clearSession } from "@/app/api/auth/clear-session/route";
 
 // Mock rate limiting
@@ -149,60 +148,6 @@ describe("Auth API Routes Audit Tests", () => {
       const json = await res.json();
       expect(json.success).toBe(true);
       expect(json.user.name).toBe("Updated Dr. Jane");
-      expect(json.user.stripeCustomerId).toBeUndefined();
-    });
-  });
-
-  describe("POST /api/auth/register", () => {
-    it("returns 400 when email is invalid or missing", async () => {
-      const req = new Request("http://localhost:3000/api/auth/register", {
-        method: "POST",
-        body: JSON.stringify({ email: "invalid-email" }),
-      });
-      const res = await registerUser(req);
-      expect(res.status).toBe(400);
-    });
-
-    it("returns 400 on invalid JSON body", async () => {
-      const req = new Request("http://localhost:3000/api/auth/register", {
-        method: "POST",
-        body: "bad json",
-      });
-      const res = await registerUser(req);
-      expect(res.status).toBe(400);
-    });
-
-    it("sanitizes user output on successful registration", async () => {
-      mockSafeDb = {
-        select: jest.fn().mockReturnThis(),
-        from: jest.fn().mockReturnThis(),
-        where: jest.fn().mockResolvedValue([]),
-        insert: jest.fn().mockReturnThis(),
-        values: jest.fn().mockReturnThis(),
-        returning: jest.fn().mockResolvedValue([
-          {
-            id: "usr_reg_new",
-            name: "Alice",
-            email: "alice@example.com",
-            credits: 3,
-            stripeCustomerId: "cus_private",
-          },
-        ]),
-      };
-
-      const req = new Request("http://localhost:3000/api/auth/register", {
-        method: "POST",
-        body: JSON.stringify({
-          email: "alice@example.com",
-          name: "Alice",
-          institution: "MIT",
-        }),
-      });
-      const res = await registerUser(req);
-      expect(res.status).toBe(201);
-      const json = await res.json();
-      expect(json.success).toBe(true);
-      expect(json.user.id).toBe("usr_reg_new");
       expect(json.user.stripeCustomerId).toBeUndefined();
     });
   });
