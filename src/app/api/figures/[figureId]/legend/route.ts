@@ -2,13 +2,17 @@ import { NextResponse } from "next/server";
 import { db } from "@/services/db";
 import { figures } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
+import { requireFigureOwner } from "@/services/api/route-auth";
 
 export async function PUT(request: Request, { params }: { params: Promise<{ figureId: string }> }) {
   try {
-    const { legend } = await request.json();
     const { figureId } = await params;
+    const guard = await requireFigureOwner(figureId);
+    if (guard instanceof NextResponse) return guard;
 
-    if (!legend) {
+    const { legend } = await request.json();
+
+    if (!legend || typeof legend !== "string" || legend.length > 5000) {
       return NextResponse.json({ error: "Legend text is required" }, { status: 400 });
     }
 

@@ -1,77 +1,39 @@
 import { NextResponse } from "next/server";
-import { db } from "@/services/db";
-import { scientificEntities, scientificRelationships } from "@/services/db/schema";
-import { sql } from "drizzle-orm";
+import { getUserPaperIds, requireUser } from "@/services/api/route-auth";
+import { countBy, loadGraphForPapers } from "@/services/graph/userGraph";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  const guard = await requireUser();
+  if (guard instanceof NextResponse) return guard;
+
   try {
-    const [
-      [{ totalEntities }],
-      entitiesByType,
-      [{ totalRelationships }],
-      relationshipsByType,
-      topEntitiesQuery
-    ] = await Promise.all([
-      db.select({ totalEntities: sql<number>`count(*)::int` }).from(scientificEntities),
-      db.select({ type: scientificEntities.type, count: sql<number>`count(*)::int` }).from(scientificEntities).groupBy(scientificEntities.type),
-      db.select({ totalRelationships: sql<number>`count(*)::int` }).from(scientificRelationships),
-      db.select({ type: scientificRelationships.relationshipType, count: sql<number>`count(*)::int` }).from(scientificRelationships).groupBy(scientificRelationships.relationshipType),
-      db.execute(sql`
-        SELECT 
-          e.name, 
-          e.type, 
-          CAST(COUNT(r.id) AS INTEGER) as "connectionCount"
-        FROM ${scientificEntities} e
-        LEFT JOIN (
-          SELECT id, source_entity_id as entity_id FROM ${scientificRelationships}
-          UNION ALL
-          SELECT id, target_entity_id as entity_id FROM ${scientificRelationships}
-        ) r ON e.id = r.entity_id
-        GROUP BY e.id, e.name, e.type
-        ORDER BY "connectionCount" DESC
-        LIMIT 10
-      `)
-    ]);
+    const { entities, relationships } = await loadGraphForPapers(await getUserPaperIds(guard.userId));
 
-    const topEntitiesRaw = (topEntitiesQuery as any).rows || topEntitiesQuery;
-    const topEntitiesList = Array.isArray(topEntitiesRaw) ? topEntitiesRaw : [];
+    const entityDistribution = countBy(entities, (e) => e.type);
+    const relationshipDistribution = countBy(relationships, (r) => r.relationshipType);
 
-    // Find most common
-    let mostCommonEntityType = '-';
-    let maxEntityCount = 0;
-    for (const e of entitiesByType) {
-      if (e.count > maxEntityCount) {
-        maxEntityCount = e.count;
-        mostCommonEntityType = e.type;
-      }
+    const connections = new Map<string, number>();
+    for (const r of relationships) {
+      connections.set(r.sourceEntityId, (connections.get(r.sourceEntityId) ?? 0) + 1);
+      connections.set(r.targetEntityId, (connections.get(r.targetEntityId) ?? 0) + 1);
     }
-
-    let mostCommonRelationship = '-';
-    let maxRelCount = 0;
-    for (const r of relationshipsByType) {
-      if (r.count > maxRelCount) {
-        maxRelCount = r.count;
-        mostCommonRelationship = r.type;
-      }
-    }
+    const topEntities = [...entities]
+      .sort((a, b) => (connections.get(b.id) ?? 0) - (connections.get(a.id) ?? 0))
+      .slice(0, 10)
+      .map((e) => ({ id: e.id, name: e.name, type: e.type, connections: connections.get(e.id) ?? 0 }));
 
     return NextResponse.json({
       summary: {
-        totalEntities,
-        totalRelationships,
-        mostCommonEntityType,
-        mostCommonRelationship
+        totalEntities: entities.length,
+        totalRelationships: relationships.length,
+        mostCommonEntityType: entityDistribution[0]?.name ?? '-',
+        mostCommonRelationship: relationshipDistribution[0]?.name ?? '-',
       },
-      entityDistribution: entitiesByType.map(e => ({ name: e.type, value: e.count })),
-      relationshipDistribution: relationshipsByType.map(r => ({ name: r.type, value: r.count })),
-      topEntities: topEntitiesList.map((row: any) => ({
-        id: row.name, // hack id
-        name: row.name,
-        type: row.type,
-        connections: row.connectionCount
-      }))
+      entityDistribution,
+      relationshipDistribution,
+      topEntities,
     });
   } catch (error) {
     console.error("Error fetching analytics data:", error);

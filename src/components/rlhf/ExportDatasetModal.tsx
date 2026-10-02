@@ -16,10 +16,10 @@ export default function ExportDatasetModal() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ outcomeFilter })
       });
-      const data = await res.json();
-      if (data.downloadUrl) {
-        setDownloadUrl(data.downloadUrl);
-      }
+      if (!res.ok) throw new Error(`Export failed (${res.status})`);
+      const blob = await res.blob();
+      if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+      setDownloadUrl(URL.createObjectURL(blob));
     } catch (e) {
       console.error(e);
     } finally {

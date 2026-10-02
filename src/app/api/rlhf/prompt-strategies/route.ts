@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import { db } from "@/services/db";
 import { promptStrategies } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
+import { requireAdmin } from '@/services/api/route-auth';
 
 export async function GET() {
+  const guard = await requireAdmin();
+  if (guard instanceof NextResponse) return guard;
+
   try {
     const strategies = await db.select().from(promptStrategies);
     return NextResponse.json(strategies);
@@ -13,6 +17,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const guard = await requireAdmin();
+  if (guard instanceof NextResponse) return guard;
+
   try {
     const body = await request.json();
     const { name, promptTemplate, isActive } = body;
@@ -34,6 +41,9 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const guard = await requireAdmin();
+  if (guard instanceof NextResponse) return guard;
+
   try {
     const body = await request.json();
     const { id, isActive } = body;

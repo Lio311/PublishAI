@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fixCodeAgent } from "@/services/agents/fix-code-agent";
+import { requireUser } from "@/services/api/route-auth";
+import { applyRateLimit } from "@/services/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const guard = await requireUser();
+  if (guard instanceof NextResponse) return guard;
+  const limited = await applyRateLimit(req, "strict", guard.userId);
+  if (limited) return limited;
+
   try {
     const body = await req.json();
     const { code, stderr, dependencies } = body;

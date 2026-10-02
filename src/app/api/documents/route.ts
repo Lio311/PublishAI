@@ -3,6 +3,7 @@ import { db } from "@/services/db";
 import { documents } from "@/services/db/schema";
 import { auth } from "@/app/auth";
 import { eq, desc, and, ilike } from "drizzle-orm";
+import { userOwnsPaper } from "@/services/api/route-auth";
 
 export async function GET(req: NextRequest) {
   try {
@@ -75,6 +76,11 @@ export async function POST(req: Request) {
         { error: "Title is required" },
         { status: 400 }
       );
+    }
+
+    // A document may only be attached to the caller's own paper (its text feeds that paper's pipeline).
+    if (paperId && !(await userOwnsPaper(session.user.id, Number(paperId)))) {
+      return NextResponse.json({ error: "Paper not found" }, { status: 404 });
     }
 
     const [newDoc] = await db

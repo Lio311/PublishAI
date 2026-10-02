@@ -39,10 +39,9 @@ export async function authenticateMcpRequest(req: NextRequest): Promise<Authenti
     tokenParam ||
     (authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : null);
 
-  const configuredKey =
-    process.env.MCP_API_KEY ||
-    process.env.AUTH_SECRET ||
-    process.env.NEXTAUTH_SECRET;
+  // A dedicated key only: reusing AUTH_SECRET would expose the session-signing secret
+  // to every MCP client (and query strings end up in access logs).
+  const configuredKey = process.env.MCP_API_KEY;
 
   if (providedKey && configuredKey) {
     // Use timing-safe comparison to prevent timing attacks

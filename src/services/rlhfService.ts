@@ -58,6 +58,24 @@ export async function logFeedbackOutcome(
   });
 }
 
+/** Builds the fine-tuning dataset as JSONL (one prompt/completion pair per line). */
+export async function buildFineTuningDataset(
+  journalId?: number,
+  outcomeFilter?: 'accepted' | 'rejected' | 'revision_required'
+): Promise<string> {
+  const conditions = [];
+  if (journalId) conditions.push(eq(rlhfFeedbackLogs.journalId, journalId));
+  if (outcomeFilter) conditions.push(eq(rlhfFeedbackLogs.outcome, outcomeFilter));
+
+  const query = db.select().from(rlhfFeedbackLogs);
+  const results = conditions.length > 0 ? await query.where(and(...conditions)) : await query;
+
+  return results.map(row => JSON.stringify({
+    prompt: row.correctionData,
+    completion: row.outcome
+  })).join("\n");
+}
+
 export async function exportDatasetForFineTuning(
   journalId?: number, 
   outcomeFilter?: 'accepted' | 'rejected' | 'revision_required'

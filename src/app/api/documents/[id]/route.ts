@@ -4,6 +4,7 @@ import { documents } from "@/services/db/schema";
 import { auth } from "@/app/auth";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
+import { userOwnsPaper } from "@/services/api/route-auth";
 
 const patchDocSchema = z.object({
   title: z.string().optional(),
@@ -72,7 +73,12 @@ export async function PATCH(
     if (body.content !== undefined) updateData.content = body.content;
     if (body.status !== undefined) updateData.status = body.status;
     if (body.targetJournalId !== undefined) updateData.targetJournalId = body.targetJournalId ? Number(body.targetJournalId) : null;
-    if (body.paperId !== undefined) updateData.paperId = body.paperId ? Number(body.paperId) : null;
+    if (body.paperId !== undefined) {
+      if (body.paperId && !(await userOwnsPaper(session.user.id, Number(body.paperId)))) {
+        return NextResponse.json({ error: "Paper not found" }, { status: 404 });
+      }
+      updateData.paperId = body.paperId ? Number(body.paperId) : null;
+    }
     if (body.fileUrl !== undefined) updateData.fileUrl = body.fileUrl;
     if (body.fileType !== undefined) updateData.fileType = body.fileType;
     if (body.metadata !== undefined) updateData.metadata = body.metadata;

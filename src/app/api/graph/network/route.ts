@@ -1,27 +1,29 @@
 import { NextResponse } from "next/server";
-import { db } from "@/services/db";
-import { scientificEntities, scientificRelationships } from "@/services/db/schema";
+import { getUserPaperIds, requireUser } from "@/services/api/route-auth";
+import { loadGraphForPapers } from "@/services/graph/userGraph";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  const guard = await requireUser();
+  if (guard instanceof NextResponse) return guard;
+
   try {
-    const [nodes, edges] = await Promise.all([
-      db.select({
-        id: scientificEntities.id,
-        name: scientificEntities.name,
-        type: scientificEntities.type,
-        description: scientificEntities.description,
-      }).from(scientificEntities),
-      
-      db.select({
-        source: scientificRelationships.sourceEntityId,
-        target: scientificRelationships.targetEntityId,
-        type: scientificRelationships.relationshipType,
-        evidenceText: scientificRelationships.evidenceText,
-        confidenceScore: scientificRelationships.confidenceScore,
-      }).from(scientificRelationships)
-    ]);
+    const { entities, relationships } = await loadGraphForPapers(await getUserPaperIds(guard.userId));
+
+    const nodes = entities.map((e) => ({
+      id: e.id,
+      name: e.name,
+      type: e.type,
+      description: e.description,
+    }));
+    const edges = relationships.map((r) => ({
+      source: r.sourceEntityId,
+      target: r.targetEntityId,
+      type: r.relationshipType,
+      evidenceText: r.evidenceText,
+      confidenceScore: r.confidenceScore,
+    }));
 
     return NextResponse.json({ nodes, edges });
   } catch (error) {

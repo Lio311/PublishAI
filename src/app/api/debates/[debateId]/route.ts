@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/services/db";
 import { debates, debateMessages } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
+import { requirePaperOwner } from "@/services/api/route-auth";
 
 export async function GET(
   req: NextRequest,
@@ -13,6 +14,10 @@ export async function GET(
   if (isNaN(paperId)) {
     return NextResponse.json({ error: "Invalid paper ID" }, { status: 400 });
   }
+
+  // The route segment carries the paper id (DebateRoom passes paperId).
+  const guard = await requirePaperOwner(paperId);
+  if (guard instanceof NextResponse) return guard;
 
   const [debate] = await db.select().from(debates).where(eq(debates.paperId, paperId));
   

@@ -3,11 +3,18 @@ import { db } from "@/services/db";
 import { figures, figureAnalyses } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import { analyzeFigureWithVisionAi } from "@/services/visionAi.service";
+import { requireFigureOwner } from "@/services/api/route-auth";
+import { applyRateLimit } from "@/services/rate-limit";
 
 export async function POST(request: Request, { params }: { params: Promise<{ figureId: string }> }) {
   try {
-    const { claims } = await request.json();
     const { figureId } = await params;
+    const guard = await requireFigureOwner(figureId);
+    if (guard instanceof NextResponse) return guard;
+    const limited = await applyRateLimit(request, "ai", guard.userId);
+    if (limited) return limited;
+
+    const { claims } = await request.json();
 
     const [figure] = await db.select().from(figures).where(eq(figures.id, figureId));
     if (!figure) {

@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import { db } from "@/services/db";
 import { rlhfFeedbackLogs } from "@/services/db/schema";
 import { sql } from "drizzle-orm";
+import { requireAdmin } from '@/services/api/route-auth';
 
 export async function GET() {
+  const guard = await requireAdmin();
+  if (guard instanceof NextResponse) return guard;
+
   try {
     const stats = await db.select({
       outcome: rlhfFeedbackLogs.outcome,

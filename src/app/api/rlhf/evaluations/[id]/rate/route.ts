@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/services/db';
 import { agentEvaluations } from '@/services/db/schema';
 import { eq } from 'drizzle-orm';
+import { requireAdmin } from '@/services/api/route-auth';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const guard = await requireAdmin();
+  if (guard instanceof NextResponse) return guard;
+
   try {
     const { id } = await params;
     const body = await request.json();

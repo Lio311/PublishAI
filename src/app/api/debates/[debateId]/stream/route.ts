@@ -2,11 +2,28 @@ import { NextRequest } from "next/server";
 import { db } from "@/services/db";
 import { debateMessages, debates } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
+import { requirePaperOwner } from "@/services/api/route-auth";
+
+const POLL_INTERVAL_MS = 2000;
+const MAX_STREAM_MS = 10 * 60 * 1000;
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ debateId: string }> }) {
   const { debateId } = await params;
 
+  const [owner] = await db
+    .select({ paperId: debates.paperId })
+    .from(debates)
+    .where(eq(debates.id, debateId))
+    .catch(() => []);
+  if (!owner) {
+    return NextResponse.json({ error: "Debate not found" }, { status: 404 });
+  }
+  const guard = await requirePaperOwner(owner.paperId);
+  if (guard instanceof NextResponse) return guard;
+
   let isClosed = false;
+  const startedAt = Date.now();
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -16,7 +33,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ deba
 
       const seenIds = new Set<string>();
 
-      while (!isClosed) {
+      while (!isClosed && Date.now() - startedAt < MAX_STREAM_MS) {
         const [debate] = await db.select().from(debates).where(eq(debates.id, debateId));
         if (!debate) {
             isClosed = true;
@@ -41,8 +58,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ deba
           break;
         }
 
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS));
       }
+      if (!isClosed) controller.close();
     }
   });
 
