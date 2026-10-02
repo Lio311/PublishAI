@@ -124,7 +124,7 @@ export default function PaperTabs({ paperId, initialStatus }: PaperTabsProps) {
           <ErrorBoundary name="Pipeline Processing">
             <div className="space-y-8">
               <PaperProcessingUI paperId={paperId} initialStatus={initialStatus} />
-              <SubmissionTracker jobId={String(paperId)} />
+              <SubmissionTracker paperId={paperId} />
               <RejectStateHandler paperTitle="Sample Paper" originalJournal="Nature" recommendations={[]} />
               <UploadClarificationModal isOpen={false} onClose={() => {}} onComplete={() => {}} />
             </div>

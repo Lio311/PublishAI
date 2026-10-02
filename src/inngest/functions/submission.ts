@@ -1,9 +1,11 @@
+import { NonRetriableError } from "inngest";
 import { inngest } from "../client";
 import { submissionProcessEvent } from "../events";
 import { db } from "@/services/db";
-import { submissions, papers, users } from "@/services/db/schema";
-import { eq } from "drizzle-orm";
+import { submissions, papers, users, rpaJobs } from "@/services/db/schema";
+import { and, eq, inArray } from "drizzle-orm";
 import { runSubmissionWorkflow } from "@/services/rpa/submission-bot";
+import { buildSubmissionPayload, loadConnection, recordAttemptOutcome } from "@/services/rpa/submission-job";
 import {
   sendSubmissionSuccessEmail,
   sendSubmissionFailedEmail,
@@ -33,6 +35,10 @@ export const processSubmission = inngest.createFunction(
               errorLog: error?.message || "Unknown error",
             })
             .where(eq(submissions.id, submissionId));
+          await db
+            .update(rpaJobs)
+            .set({ status: "error", errorLog: error?.message || "Unknown error", updatedAt: new Date() })
+            .where(and(eq(rpaJobs.submissionId, submissionId), inArray(rpaJobs.status, ["pending", "running", "paused"])));
         });
 
         // Notify user of submission failure
@@ -69,86 +75,78 @@ export const processSubmission = inngest.createFunction(
   async ({ event, step }) => {
     const { submissionId } = event.data;
 
-    // Increment attempt count and mark status
-    await step.run("update-attempt-count", async () => {
+    // Increment attempt count, mark status and open an RPA job the UI can track
+    const jobId = await step.run("start-submission-job", async () => {
       const sub = await db.query.submissions.findFirst({
         where: eq(submissions.id, submissionId),
       });
-      if (sub) {
-        await db
-          .update(submissions)
-          .set({
-            attemptCount: (sub.attemptCount || 0) + 1,
-            lastAttemptAt: new Date(),
-            status: "submitting",
-          })
-          .where(eq(submissions.id, submissionId));
-      }
+      if (!sub) throw new NonRetriableError(`Submission ${submissionId} not found`);
+
+      await db
+        .update(submissions)
+        .set({
+          attemptCount: (sub.attemptCount || 0) + 1,
+          lastAttemptAt: new Date(),
+          status: "submitting",
+        })
+        .where(eq(submissions.id, submissionId));
+
+      const [job] = await db
+        .insert(rpaJobs)
+        .values({ submissionId, status: "running", currentStep: "logging_in" })
+        .returning({ id: rpaJobs.id });
+      return job.id;
     });
 
-    const result = await step.run("execute-submission", async () => {
-      // Load connection details and decrypt credentials
-      const sub = await db.query.submissions.findFirst({
-        where: eq(submissions.id, submissionId),
-        with: { connection: true } as any,
+    const runAttempt = (stepId: string, resume?: { captchaSolution?: string; twoFACode?: string }) =>
+      step.run(stepId, async () => {
+        const result = await runSubmissionWorkflow(String(submissionId), await loadConnection(submissionId, jobId, resume), await buildSubmissionPayload(submissionId));
+        return recordAttemptOutcome(jobId, result);
       });
-      const conn = (sub as any)?.connection;
-      if (!conn) throw new Error("No connection found for submission");
 
-      const { decrypt } = await import("@/services/security/encryption");
-      return await runSubmissionWorkflow(submissionId.toString(), {
-        siteUrl: conn.siteUrl,
-        username: decrypt(conn.encryptedUsername),
-        password: decrypt(conn.encryptedPassword),
-      });
-    });
+    let outcome = await runAttempt("execute-submission");
 
-    if (result.status === "error") {
-      // Throwing an error will cause Inngest to retry based on retry policy
-      throw new Error(`Submission failed: ${result.message}`);
-    }
-
-    if (result.status === "requires_captcha") {
+    if (outcome.status === "requires_captcha") {
       const captchaEvent = await step.waitForEvent("wait-for-captcha", {
         event: "submission/captcha-solved",
         timeout: "24h",
         match: "data.submissionId",
       });
-
       if (!captchaEvent) {
-        throw new Error("Captcha not solved within 24 hours");
+        throw new NonRetriableError("Captcha not solved within 24 hours");
       }
-
-      await step.run("resume-submission-after-captcha", async () => {
-        const sub = await db.query.submissions.findFirst({
-          where: eq(submissions.id, submissionId),
-          with: { connection: true } as any,
-        });
-        const conn = (sub as any)?.connection;
-        if (!conn) throw new Error("No connection found for submission");
-
-        const { decrypt } = await import("@/services/security/encryption");
-
-        return await runSubmissionWorkflow(submissionId.toString(), {
-          siteUrl: conn.siteUrl,
-          username: decrypt(conn.encryptedUsername),
-          password: decrypt(conn.encryptedPassword),
-          captchaSolution: (captchaEvent.data as any).solution,
-        } as any);
-      });
+      outcome = await runAttempt("resume-submission-after-captcha", { captchaSolution: captchaEvent.data.solution });
     }
 
-    if (result.status === "requires_2fa") {
+    if (outcome.status === "requires_2fa") {
       const twoFAEvent = await step.waitForEvent("wait-for-2fa", {
         event: "submission/2fa-solved",
         timeout: "1h",
         match: "data.submissionId",
       });
-
       if (!twoFAEvent) {
-        throw new Error("2FA not completed within 1 hour");
+        throw new NonRetriableError("2FA not completed within 1 hour");
       }
+      outcome = await runAttempt("resume-submission-after-2fa", { twoFACode: twoFAEvent.data.code });
     }
+
+    if (outcome.status !== "success") {
+      // A second roadblock or an error after resuming: fail (onFailure marks the submission).
+      throw new Error(`Submission did not complete: ${outcome.message || outcome.status}`);
+    }
+    const result = outcome;
+
+    await step.run("mark-submitted", async () => {
+      await db
+        .update(submissions)
+        .set({
+          status: "submitted",
+          submittedAt: new Date(),
+          confirmationId: result.trackingId ?? null,
+          errorLog: null,
+        })
+        .where(eq(submissions.id, submissionId));
+    });
 
     // Send real confirmation email to author
     await step.run("send-confirmation-email", async () => {

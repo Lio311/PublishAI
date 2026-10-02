@@ -2,88 +2,84 @@ import React, { useState, useEffect } from 'react';
 import { HumanInterventionModal } from './HumanInterventionModal';
 
 interface SubmissionTrackerProps {
-  jobId: string;
+  paperId: number;
 }
 
 type JobStatus = 'initializing' | 'logging_in' | 'uploading' | 'filling_forms' | 'paused' | 'completed' | 'failed' | 'error';
 
 interface JobDetails {
+  jobId: string;
   status: JobStatus;
   message?: string;
   progress?: number;
+  interventionKind?: 'captcha' | '2fa' | null;
 }
 
-export const SubmissionTracker: React.FC<SubmissionTrackerProps> = ({ jobId }) => {
-  const [jobDetails, setJobDetails] = useState<JobDetails>({
-    status: 'initializing',
-    progress: 0,
-    message: 'Initializing submission...',
-  });
+const TERMINAL_STATUSES: JobStatus[] = ['completed', 'failed', 'error'];
+const POLL_INTERVAL_MS = 3000;
+
+/** Tracks the paper's latest automated (RPA) submission; renders nothing if there is none. */
+export const SubmissionTracker: React.FC<SubmissionTrackerProps> = ({ paperId }) => {
+  const [jobDetails, setJobDetails] = useState<JobDetails | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const jobId = jobDetails?.jobId;
 
   useEffect(() => {
-    if (!jobId) return;
+    let cancelled = false;
+    let timeoutId: NodeJS.Timeout;
 
-    // Polling function to check bot status
-    const pollStatus = async () => {
+    const poll = async () => {
       try {
-        const response = await fetch(`/api/rpa/status/${jobId}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch job status');
+        const response = await fetch(`/api/papers/${paperId}/rpa-job`);
+        if (!response.ok) throw new Error('Failed to fetch job status');
+        const { job } = (await response.json()) as { job: JobDetails | null };
+        if (cancelled) return;
+
+        setJobDetails(job);
+        setError(null);
+        if (!job) return;
+        if (job.status === 'paused') setIsModalOpen(true);
+        if (!TERMINAL_STATUSES.includes(job.status)) {
+          timeoutId = setTimeout(poll, POLL_INTERVAL_MS);
         }
-        const data = await response.json();
-        
-        setJobDetails(data);
-        
-        if (data.status === 'paused') {
-          setIsModalOpen(true);
-        } else if (data.status === 'completed' || data.status === 'failed' || data.status === 'error') {
-          // Stop polling if terminal state
-          return true; // indicates done
-        }
-        
-        return false;
       } catch (err) {
         console.error("Error polling status:", err);
-        setError("Failed to track submission status.");
-        return true; // stop polling on error
+        if (!cancelled) setError("Failed to track submission status.");
       }
     };
 
-    let timeoutId: NodeJS.Timeout;
-    
-    const runPoll = async () => {
-      const isDone = await pollStatus();
-      if (!isDone) {
-        timeoutId = setTimeout(runPoll, 3000); // poll every 3 seconds
-      }
+    poll();
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
     };
-    
-    runPoll();
-
-    return () => clearTimeout(timeoutId);
-  }, [jobId]);
+  }, [paperId]);
 
   const handleResume = async (input?: string) => {
+    if (!jobId) return;
     try {
-      await fetch(`/api/rpa/resume/${jobId}`, {
+      const res = await fetch(`/api/rpa/resume/${jobId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ input }),
       });
-      console.log(`Resuming job ${jobId} with input: ${input}`);
-      
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || 'Resume failed');
+      }
+
       setIsModalOpen(false);
-      setJobDetails(prev => ({ ...prev, status: 'uploading', message: 'Resuming process...' }));
-      // The polling will naturally pick up the new status
+      setJobDetails(prev => prev && ({ ...prev, status: 'logging_in', message: 'Resuming process...' }));
     } catch (err) {
       console.error("Failed to resume bot:", err);
-      setError("Failed to resume the bot.");
+      setError(err instanceof Error ? err.message : "Failed to resume the bot.");
     }
   };
+
+  if (!jobDetails) return null;
 
   const getStatusColor = (status: JobStatus) => {
     switch (status) {
