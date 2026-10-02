@@ -1,4 +1,5 @@
 import { ConnectionTestResult, SubmissionPayload, SubmissionResult } from '../connection-types';
+import { errorMessage } from "@/services/utils/errors";
 
 /**
  * Editorial Manager adapter (Aries Systems).
@@ -42,10 +43,10 @@ export class EditorialManagerAdapter {
         userDisplayName: data?.displayName || data?.name || undefined,
         userRole: data?.role || undefined,
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
-        message: `Network error connecting to Editorial Manager: ${error.message}`,
+        message: `Network error connecting to Editorial Manager: ${errorMessage(error)}`,
       };
     }
   }
@@ -89,10 +90,10 @@ export class EditorialManagerAdapter {
         confirmationId: data.manuscriptId || data.trackingNumber,
         rawResponse: data,
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
-        error: `Editorial Manager submission error: ${error.message}. Consider using the RPA submission pathway.`,
+        error: `Editorial Manager submission error: ${errorMessage(error)}. Consider using the RPA submission pathway.`,
       };
     }
   }

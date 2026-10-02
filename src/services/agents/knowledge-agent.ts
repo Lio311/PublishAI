@@ -1,4 +1,4 @@
-import { BaseAgent, AgentContext, AgentResult, Stage } from "./base-agent";
+import { BaseAgent, AgentContext, AgentResult, Stage, getStageOutput } from "./base-agent";
 import { gatherLiterature } from "../search/search-orchestrator";
 import { askClaude } from "./claude-client";
 import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
@@ -8,9 +8,7 @@ export class KnowledgeAgent extends BaseAgent {
   model = ANTHROPIC_MODELS.standard;
 
   async execute(context: AgentContext): Promise<AgentResult> {
-    const clarificationResult = context.previousStageOutputs instanceof Map
-      ? context.previousStageOutputs.get("clarification")
-      : (context.previousStageOutputs as any)?.["clarification"];
+    const clarificationResult = getStageOutput(context, "clarification");
     const clarification = clarificationResult?.output || "";
     const kwPrompt = `Extract 3 main search queries for academic literature based on this text:\n${clarification}\nOutput ONLY the 3 queries, separated by commas, with no additional text, numbering, or formatting.`;
     

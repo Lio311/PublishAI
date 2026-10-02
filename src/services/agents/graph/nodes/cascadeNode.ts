@@ -2,6 +2,8 @@ import { ChatOpenAI } from "@langchain/openai";
 import { PublishAIState } from "../state";
 import { AIMessage } from "@langchain/core/messages";
 import { OPENAI_MODELS } from "@/services/ai/modelIds";
+import { errorMessage } from "@/services/utils/errors";
+import { messageText } from "../messageUtils";
 
 export const cascadeNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   const llm = new ChatOpenAI({
@@ -29,15 +31,13 @@ Respond with a JSON object containing a list of edits under the key "edits". Eac
       response_format: { type: "json_object" }
     });
 
-    const contentStr = typeof response.content === "string" 
-      ? response.content 
-      : (Array.isArray(response.content) ? response.content.map(c => typeof c === "string" ? c : (c as any).text || "").join("") : String(response.content));
+    const contentStr = messageText(response.content);
 
     let edits;
     try {
       const parsed = JSON.parse(contentStr);
       edits = parsed.edits || parsed;
-    } catch (e) {
+    } catch {
       edits = [{ section: "All", instruction: contentStr }];
     }
 
@@ -45,11 +45,11 @@ Respond with a JSON object containing a list of edits under the key "edits". Eac
       edits,
       messages: [new AIMessage("Generated cascade edits based on target journal requirements.")],
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[cascadeNode] Execution failed:", error);
     return {
-      edits: [{ section: "All", instruction: `Cascade analysis failed: ${error?.message || "Unknown error"}` }],
-      messages: [new AIMessage(`Cascade analysis failed: ${error?.message || "Unknown error"}`)],
+      edits: [{ section: "All", instruction: `Cascade analysis failed: ${errorMessage(error) || "Unknown error"}` }],
+      messages: [new AIMessage(`Cascade analysis failed: ${errorMessage(error) || "Unknown error"}`)],
     };
   }
 };

@@ -131,6 +131,7 @@ export default function PaperTabs({
           <ErrorBoundary name={t("tabs.editor")}>
             <div className="space-y-8">
               <RichDocumentEditor
+                key={manuscript?.id ?? "new"}
                 documentId={manuscript?.id}
                 paperId={paperId}
                 initialTitle={manuscript?.title ?? paperTitle}

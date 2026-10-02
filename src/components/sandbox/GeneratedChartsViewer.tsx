@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { Download, X, BarChart3, Sparkles } from "lucide-react";
+import { Download, X, BarChart3 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { GeneratedChartDto } from "@/types/api";
+import Image from "next/image";
 
 export function GeneratedChartsViewer({ paperId }: { paperId: number }) {
   const t = useTranslations("PaperTools.sandbox");
-  const [charts, setCharts] = useState<any[]>([]);
+  const [charts, setCharts] = useState<GeneratedChartDto[]>([]);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
@@ -59,10 +61,14 @@ export function GeneratedChartsViewer({ paperId }: { paperId: number }) {
             className="border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs bg-white/90 backdrop-blur-md p-5 flex flex-col hover:shadow-sm transition-all"
           >
             <div className="relative w-full h-64 mb-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center p-3">
-              <img
+              {/* Sandbox charts are data/blob URLs, so Next image optimization does not apply. */}
+              <Image
                 src={chart.chartUrl}
                 alt={chart.description || t("chartAlt")}
-                className="max-h-full max-w-full object-contain rounded-lg"
+                fill
+                unoptimized
+                sizes="(min-width: 768px) 50vw, 100vw"
+                className="object-contain rounded-lg p-3"
               />
             </div>
             <p className="text-xs text-slate-700 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed font-sans">

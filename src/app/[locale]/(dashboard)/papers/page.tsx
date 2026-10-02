@@ -1,7 +1,7 @@
 import { db } from "@/services/db";
 import { papers, journals } from "@/services/db/schema";
 import { desc, eq } from "drizzle-orm";
-import { FileText, Search, ArrowRight, ArrowLeft, UploadCloud, ChevronRight, ChevronLeft } from "lucide-react";
+import { FileText, Search, UploadCloud, ChevronRight, ChevronLeft } from "lucide-react";
 import { Link } from "@/app/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import DashboardLayout from "@/components/layout/DashboardLayout";

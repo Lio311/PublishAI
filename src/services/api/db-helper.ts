@@ -11,6 +11,7 @@
 
 import { isDatabaseConfigured, type AppDb } from "@/services/db";
 import { getSafePgPool, isPgDatabaseConfigured, closePgPool } from "@/services/db/pool";
+import { errorMessage, errorCode } from "@/services/utils/errors";
 
 export { isDatabaseConfigured, isPgDatabaseConfigured, getSafePgPool, closePgPool };
 
@@ -32,8 +33,8 @@ export interface RetryOptions {
  */
 export function isTransientDbError(err: unknown): boolean {
   if (!err) return false;
-  const msg = String((err as any)?.message || err).toLowerCase();
-  const code = String((err as any)?.code || "").toUpperCase();
+  const msg = String(errorMessage(err) || err).toLowerCase();
+  const code = String(errorCode(err) || "").toUpperCase();
 
   return (
     code === "ECONNRESET" ||
@@ -112,7 +113,7 @@ export async function executeWithRetry<T>(
         const delay = Math.min(initialDelay * Math.pow(factor, attempt - 1) + Math.random() * 50, maxDelay);
         console.warn(
           `[DB Helper] Transient connection drop on query attempt ${attempt}/${maxRetries}. Retrying in ${Math.round(delay)}ms...`,
-          (err as any)?.message || err
+          errorMessage(err) || err
         );
         await new Promise((resolve) => setTimeout(resolve, delay));
         continue;
@@ -138,7 +139,7 @@ export async function withSafeDb<T>(
       return result;
     }
   } catch (err) {
-    console.warn("[DB Helper] Database query failed. Returning fallback.", (err as any)?.message || err);
+    console.warn("[DB Helper] Database query failed. Returning fallback.", errorMessage(err) || err);
   }
 
   return typeof fallback === "function" ? await (fallback as () => T | Promise<T>)() : fallback;
@@ -167,11 +168,11 @@ export async function checkDatabaseConnection(): Promise<{
       healthy: true,
       latencyMs: Date.now() - startTime,
     };
-  } catch (err: any) {
+  } catch (err) {
     return {
       healthy: false,
       latencyMs: Date.now() - startTime,
-      error: err?.message || String(err),
+      error: errorMessage(err) || String(err),
     };
   }
 }

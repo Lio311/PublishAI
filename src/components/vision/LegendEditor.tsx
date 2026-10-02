@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { errorMessage } from "@/services/utils/errors";
 
 interface LegendEditorProps {
   figureId: string;
@@ -24,11 +25,6 @@ export default function LegendEditor({ figureId, originalLegend, suggestedLegend
     };
   }, []);
 
-  // Synchronize state if originalLegend changes externally
-  useEffect(() => {
-    setCurrentLegend(originalLegend);
-  }, [originalLegend]);
-
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -45,9 +41,9 @@ export default function LegendEditor({ figureId, originalLegend, suggestedLegend
 
       toast.success(t("saved"));
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to save legend", error);
-      toast.error(error.message || t("saveFailed"));
+      toast.error(errorMessage(error) || t("saveFailed"));
     } finally {
       if (isMountedRef.current) {
         setIsSaving(false);

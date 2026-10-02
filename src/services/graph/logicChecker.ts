@@ -1,5 +1,5 @@
 import { db } from "@/services/db";
-import { scientificRelationships, scientificEntities } from "@/services/db/schema";
+import { scientificRelationships } from "@/services/db/schema";
 import { generateObject } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';
@@ -15,13 +15,13 @@ export interface LogicCheckResult {
 }
 
 export async function checkLogicalConsistency(claims: string[], paperId?: number): Promise<LogicCheckResult[]> {
-  let query: any = db.select({
+  let query = db.select({
     id: scientificRelationships.id,
     sourceId: scientificRelationships.sourceEntityId,
     targetId: scientificRelationships.targetEntityId,
     relType: scientificRelationships.relationshipType,
     evidence: scientificRelationships.evidenceText
-  }).from(scientificRelationships);
+  }).from(scientificRelationships).$dynamic();
 
   if (paperId) {
     query = query.where(eq(scientificRelationships.paperId, paperId));

@@ -8,6 +8,8 @@ import { eq } from "drizzle-orm";
 import { papers } from "@/services/db/schema";
 import { AgentResult } from "../../base-agent";
 import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
+import { errorMessage } from "@/services/utils/errors";
+import { messageText, totalTokens } from "../messageUtils";
 
 export const planningNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   const modelName = ANTHROPIC_MODELS.reasoning;
@@ -54,10 +56,8 @@ Create a structural revision plan for this paper. Identify weaknesses, required 
       callbacks: [langfuseLangchainHandler],
     });
 
-    const output = typeof response.content === "string" 
-      ? response.content 
-      : (Array.isArray(response.content) ? response.content.map(c => typeof c === "string" ? c : (c as any).text || "").join("") : String(response.content));
-    const tokensUsed = (response.response_metadata as any)?.usage?.total_tokens ?? 0;
+    const output = messageText(response.content);
+    const tokensUsed = totalTokens(response);
 
     const result: AgentResult = {
       stage: "planning",
@@ -72,12 +72,12 @@ Create a structural revision plan for this paper. Identify weaknesses, required 
       previousStageOutputs: new Map([["planning", result]]),
       currentStage: "planning"
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[planningNode] Execution failed:", error);
-    const fallbackOutput = `Planning failed: ${error?.message || "Unknown error"}`;
+    const fallbackOutput = `Planning failed: ${errorMessage(error) || "Unknown error"}`;
     return {
       plan: fallbackOutput,
-      validationErrors: [`Planning failed: ${error?.message || "Unknown error"}`],
+      validationErrors: [`Planning failed: ${errorMessage(error) || "Unknown error"}`],
       currentStage: "planning"
     };
   }

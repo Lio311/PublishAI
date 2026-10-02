@@ -1,36 +1,10 @@
 import mammoth from 'mammoth';
-// @ts-ignore
+// @ts-expect-error pdf-parse's internal entry has no type declarations
 import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { generateDocx } from "@/services/export/docx-generator";
 import { generatePdf } from "@/services/export/pdf-generator";
-import util from 'util';
-import {
-  DocumentFormat,
-  DocumentMetadata,
-  ExportDocumentOptions,
-  DocumentExportResult,
-  DocumentImportOptions,
-  DocumentImportResult,
-  ReviewerCommentItem,
-  ParsedReviewerReport,
-  DocumentFormatOptions,
-} from './types';
-
-// Ensure TextEncoder / TextDecoder exist in Node environment
-if (typeof global !== 'undefined') {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const util = require('util');
-    if (typeof (global as any).TextEncoder === 'undefined' && util.TextEncoder) {
-      (global as any).TextEncoder = util.TextEncoder;
-    }
-    if (typeof (global as any).TextDecoder === 'undefined' && util.TextDecoder) {
-      (global as any).TextDecoder = util.TextDecoder;
-    }
-  } catch {
-    // Ignore if not in node
-  }
-}
+import { DocumentFormat, ExportDocumentOptions, DocumentExportResult, DocumentImportOptions, DocumentImportResult, ReviewerCommentItem, ParsedReviewerReport, DocumentFormatOptions } from './types';
+import { errorMessage } from "@/services/utils/errors";
 
 export class DocumentService {
   /**
@@ -112,8 +86,8 @@ export class DocumentService {
           dateCreated: new Date(),
         },
       };
-    } catch (error: any) {
-      throw new Error(`Failed to parse Word document: ${error.message}`);
+    } catch (error) {
+      throw new Error(`Failed to parse Word document: ${errorMessage(error)}`);
     }
   }
 
@@ -139,8 +113,8 @@ export class DocumentService {
           dateCreated: new Date(),
         },
       };
-    } catch (error: any) {
-      throw new Error(`Failed to parse PDF document: ${error.message}`);
+    } catch (error) {
+      throw new Error(`Failed to parse PDF document: ${errorMessage(error)}`);
     }
   }
 

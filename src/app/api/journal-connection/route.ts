@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     const { encryptedUsername: _u, encryptedPassword: _p, ...safeConnection } = newConnection[0];
 
     return NextResponse.json(safeConnection);
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error creating journal connection:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
@@ -64,7 +64,7 @@ export async function GET() {
     });
 
     return NextResponse.json(safeConnections);
-  } catch (error: any) {
+  } catch {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

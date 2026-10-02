@@ -18,14 +18,13 @@ export const retrieveMemoryNode = async (state: PublishAIState): Promise<Partial
     // Remove system prompt attempts
     safeInput = safeInput.replace(/system prompt/ig, "").replace(/ignore previous instructions/ig, "");
 
+    // mem0 v3 rejects top-level user ids in search(); scoping must go through filters,
+    // otherwise the call throws (or, worse, searches every user's memories).
     const searchResponse = await mem0.search(safeInput, {
-      user_id: validUserId,
-    } as any);
+      filters: { user_id: validUserId },
+    });
 
-    const results = (searchResponse as any).results || searchResponse;
-    const memoryContext = Array.isArray(results) 
-      ? results.map((result: any) => `- ${result.memory}`).join("\n")
-      : "";
+    const memoryContext = searchResponse.results.map((result) => `- ${result.memory}`).join("\n");
 
     return { memoryContext };
   } catch (e) {
@@ -50,7 +49,7 @@ export const updateMemoryNode = async (state: PublishAIState): Promise<Partial<P
     await mem0.add(
       [{ role: "user", content: String(userMessage.content).replace(/<[^>]*>?/gm, "").replace(/system prompt/ig, "").replace(/ignore previous instructions/ig, "") },
        { role: "assistant", content: String(aiMessage.content || "") }],
-      { user_id: validUserId } as any
+      { userId: validUserId }
     );
   } catch (e) {
     console.warn("[updateMemoryNode] Mem0 update failed:", e);

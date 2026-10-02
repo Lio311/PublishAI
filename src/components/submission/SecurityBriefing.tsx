@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Shield, Lock, Trash2, Info, CheckCircle, AlertTriangle } from "lucide-react";
+import { Shield, Lock, Info, CheckCircle, AlertTriangle } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 
 interface SecurityBriefingProps {

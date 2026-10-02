@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ConnectionTestResult, SubmissionPayload, SubmissionResult } from "../connection-types";
+import { errorMessage } from "@/services/utils/errors";
 
 export class WordPressAdapter {
   private siteUrl: string;
@@ -46,8 +46,8 @@ export class WordPressAdapter {
           siteName: this.siteUrl,
         },
       };
-    } catch (error: any) {
-      return { success: false, message: `Network error: ${error.message}` };
+    } catch (error) {
+      return { success: false, message: `Network error: ${errorMessage(error)}` };
     }
   }
 
@@ -99,8 +99,8 @@ export class WordPressAdapter {
         confirmationId: `WP-${data.id}`,
         rawResponse: data
       };
-    } catch (error: any) {
-      return { success: false, error: `Network error: ${error.message}` };
+    } catch (error) {
+      return { success: false, error: `Network error: ${errorMessage(error)}` };
     }
   }
 }

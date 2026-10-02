@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Loader2, Link as LinkIcon, CheckCircle, XCircle } from "lucide-react";
+import { errorMessage } from "@/services/utils/errors";
+import type { ApiErrorBody } from "@/types/api";
 
 interface ConnectionFormProps {
   onSuccess: (connectionId: string | number) => void;
@@ -38,7 +40,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
         body: JSON.stringify({ platform, siteUrl, username, password, captchaStrategy }),
       });
       
-      let data: any = null;
+      let data: (ApiErrorBody & { success?: boolean; userRole?: string }) | null = null;
       try {
         data = await res.json();
       } catch {
@@ -46,12 +48,12 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
       }
 
       if (res.ok && data?.success) {
-        setTestResult(data);
+        setTestResult({ success: true, message: data.message ?? "", userRole: data.userRole });
       } else {
         const errorMsg = data?.message || data?.error || (isHe ? "בדיקת החיבור נכשלה. אנא ודא את הפרטים." : "Connection test failed. Please verify credentials.");
         setTestResult({ success: false, message: errorMsg, userRole: data?.userRole });
       }
-    } catch (err: any) {
+    } catch {
       setTestResult({ success: false, message: isHe ? "אירעה שגיאת רשת. בדוק את החיבור ונסה שוב." : "Network error occurred. Please check connectivity and try again." });
     } finally {
       setIsTesting(false);
@@ -85,7 +87,7 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
         }),
       });
       
-      let data: any = null;
+      let data: (ApiErrorBody & { id?: number | string }) | null = null;
       try {
         data = await res.json();
       } catch {
@@ -97,9 +99,9 @@ export function ConnectionForm({ onSuccess, onCancel }: ConnectionFormProps) {
         throw new Error(errorMsg);
       }
       
-      onSuccess(data.id);
-    } catch (err: any) {
-      setSaveError(err.message || (isHe ? "נכשל בשמירת החיבור." : "Failed to save connection."));
+      onSuccess(data?.id ?? "");
+    } catch (err) {
+      setSaveError(errorMessage(err) || (isHe ? "נכשל בשמירת החיבור." : "Failed to save connection."));
     } finally {
       setIsSaving(false);
     }

@@ -2,6 +2,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { z } from "zod";
 import { PublishAIState } from "../state";
 import { OPENAI_MODELS } from "@/services/ai/modelIds";
+import { errorMessage } from "@/services/utils/errors";
 
 const RebuttalOutput = z.object({
   rebuttalStrategy: z.string().describe("The strategy for addressing the reviewer comments."),
@@ -36,9 +37,9 @@ ${reviewerComments}
       rebuttalLetter: result.rebuttalLetter,
       currentStage: "rebuttal",
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[rebuttalNode] Failed to generate rebuttal:", error);
-    const fallbackStrategy = `Rebuttal generation failed: ${error?.message || "Unknown error"}`;
+    const fallbackStrategy = `Rebuttal generation failed: ${errorMessage(error) || "Unknown error"}`;
     return {
       rebuttal: {
         rebuttalStrategy: fallbackStrategy,

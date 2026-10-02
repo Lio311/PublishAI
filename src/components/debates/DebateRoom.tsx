@@ -1,15 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DebateTranscript from "./DebateTranscript";
 import ConsensusSummary from "./ConsensusSummary";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Users, Radio, MessageSquare, Sparkles, RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { DebateMessageDto } from "@/types/api";
+import { errorName } from "@/services/utils/errors";
+
+interface DebateResponse {
+  debate?: { id: string; status?: string | null; consensusSummary?: string | null } | null;
+  messages?: DebateMessageDto[];
+}
 
 export default function DebateRoom({ paperId }: { paperId: number }) {
   const t = useTranslations("PaperTools.debate");
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<DebateMessageDto[]>([]);
   const [consensus, setConsensus] = useState<string | null>(null);
   const [realDebateId, setRealDebateId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -46,36 +53,46 @@ export default function DebateRoom({ paperId }: { paperId: number }) {
     }
   };
 
+  const loadDebate = useCallback(async (signal?: AbortSignal): Promise<DebateResponse | null> => {
+    const res = await fetch(`/api/debates/${paperId}`, { signal });
+    return res.ok ? res.json() : null;
+  }, [paperId]);
+
+  const applyDebate = useCallback((data: DebateResponse | null) => {
+    if (data) {
+      setMessages(data.messages || []);
+      if (data.debate?.id) {
+        setRealDebateId(data.debate.id);
+      }
+      if (data.debate?.status === "consensus_reached") {
+        setConsensus(data.debate.consensusSummary ?? null);
+      }
+    }
+    setLoading(false);
+  }, []);
+
+  const failDebate = useCallback((err: unknown) => {
+    if (errorName(err) === "AbortError") return;
+    console.error("Failed to fetch debate data:", err);
+    setLoading(false);
+  }, []);
+
   const fetchInitial = async () => {
     setLoading(true);
-    try {
-      const res = await fetch(`/api/debates/${paperId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setMessages(data.messages || []);
-        if (data.debate?.id) {
-          setRealDebateId(data.debate.id);
-        }
-        if (data.debate?.status === "consensus_reached") {
-          setConsensus(data.debate.consensusSummary);
-        }
-      }
-    } catch (err) {
-      console.error("Failed to fetch debate data:", err);
-    } finally {
-      setLoading(false);
-    }
+    await loadDebate().then(applyDebate, failDebate);
   };
 
   useEffect(() => {
-    fetchInitial();
-  }, [paperId]);
+    const controller = new AbortController();
+    loadDebate(controller.signal).then(applyDebate, failDebate);
+    return () => controller.abort();
+  }, [loadDebate, applyDebate, failDebate]);
 
   useEffect(() => {
     if (!realDebateId) return;
 
-    setStreaming(true);
     const evtSource = new EventSource(`/api/debates/${realDebateId}/stream`);
+    evtSource.onopen = () => setStreaming(true);
     evtSource.onmessage = (event) => {
       try {
         const newMsg = JSON.parse(event.data);

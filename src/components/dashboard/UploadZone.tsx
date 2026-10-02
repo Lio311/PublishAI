@@ -5,6 +5,7 @@ import { useCallback, useState, useRef, useEffect } from "react";
 import { useRouter } from "@/app/i18n/routing";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { errorMessage } from "@/services/utils/errors";
 
 export default function UploadZone() {
   const [isDragging, setIsDragging] = useState(false);
@@ -86,9 +87,9 @@ export default function UploadZone() {
         router.push(`/papers/${paperId}`); 
       }, 1500);
 
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error uploading file:", error);
-      toast.error(error?.message || t('error_uploading') || "שגיאה בהעלאת הקובץ. אנא נסה שוב.");
+      toast.error(errorMessage(error) || t('error_uploading') || "שגיאה בהעלאת הקובץ. אנא נסה שוב.");
       setUploadSuccess(false);
     } finally {
       setIsUploading(false);

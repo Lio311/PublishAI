@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { generateObject, generateText, getOpenAIModelInstance } from "../ai/aiService";
+import { generateObject, getOpenAIModelInstance } from "../ai/aiService";
 import { OPENAI_MODELS } from "@/services/ai/modelIds";
+import { errorMessage } from "@/services/utils/errors";
 
 export interface ReviewPoint {
   id?: string;
@@ -33,7 +34,7 @@ export interface ProcessReviewResult {
  */
 export function fallbackParseReviewComments(
   rawText: string,
-  options?: ProcessReviewOptions
+  _options?: ProcessReviewOptions
 ): ProcessReviewResult {
   const lines = rawText.split(/\r?\n/);
   const comments: ReviewPoint[] = [];
@@ -41,8 +42,6 @@ export function fallbackParseReviewComments(
   let currentReviewer = "Reviewer 1";
   let currentPointNumber = 0;
   let currentCommentBuffer: string[] = [];
-  const currentCategory: ReviewPoint["category"] = "general";
-  const currentSeverity: ReviewPoint["severity"] = "minor";
 
   const flushCurrent = () => {
     if (currentCommentBuffer.length > 0) {
@@ -225,8 +224,8 @@ Deconstruct these comments into individual discrete points. For each point:
       comments: commentsWithIds,
       totalComments: commentsWithIds.length,
     };
-  } catch (error: any) {
-    console.warn("[reviewService] generateObject failed or OpenAI unavailable, falling back to heuristic parser:", error?.message);
+  } catch (error) {
+    console.warn("[reviewService] generateObject failed or OpenAI unavailable, falling back to heuristic parser:", errorMessage(error));
     return fallbackParseReviewComments(rawText, options);
   }
 }

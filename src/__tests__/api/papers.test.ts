@@ -79,7 +79,7 @@ jest.mock("@/services/db", () => {
     db: {
       query: {
         papers: {
-          findFirst: jest.fn(async ({ where }: any) => {
+          findFirst: jest.fn(async (_query: any) => {
             return mockPapers[1]; // default, overridden in tests
           }),
           findMany: jest.fn(async () => [mockPapers[1]]),
@@ -95,7 +95,7 @@ jest.mock("@/services/db", () => {
         },
       },
       select: jest.fn(() => ({
-        from: jest.fn((table: any) => ({
+        from: jest.fn((_table: any) => ({
           where: jest.fn(() => ({
             orderBy: jest.fn(() => ({
               limit: jest.fn().mockResolvedValue([mockSandboxRuns[1]]),

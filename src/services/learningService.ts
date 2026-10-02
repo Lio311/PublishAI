@@ -2,7 +2,6 @@ import { openai } from "@ai-sdk/openai";
 import { db } from "@/services/db";
 import { aiSystemFeedback } from "@/services/db/schema";
 import { generateObject } from "@/services/ai/aiService";
-import { resolveProvider } from "@/services/ai/aiService";
 import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { OPENAI_MODELS } from "@/services/ai/modelIds";
@@ -139,15 +138,6 @@ Your task is to analyze this feedback for two purposes:
  * Retrieves applicable actionable rules for a user and/or journal.
  */
 export async function getApplicableRules(userId?: string, journalId?: number): Promise<string> {
-  const conditions = [eq(aiSystemFeedback.isActionable, true)];
-  
-  if (userId && journalId) {
-    // Should match (userId = userId OR journalId = journalId)
-    // To keep it simple, fetch all and filter in memory, or use `or` from drizzle.
-    // Let's do two queries or an OR query.
-  }
-
-  // A simplified approach for now:
   let rulesText = "";
 
   if (userId) {

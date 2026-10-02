@@ -1,11 +1,4 @@
-import {
-  withRateLimitRetry,
-  withModelFallback,
-  withTimeout,
-  TimeoutError,
-  isRateLimitError,
-  isTransientError,
-} from "@/services/ai/rateLimiter";
+import { withModelFallback, withTimeout, TimeoutError, isRateLimitError, isTransientError } from "@/services/ai/rateLimiter";
 import {
   sanitizePromptInput,
   wrapPromptContext,
@@ -15,7 +8,7 @@ import {
   SYSTEM_PROMPT_GUARDRAILS,
 } from "@/services/ai/promptSanitizer";
 import { getModelFallbackChain } from "@/services/ai/provider";
-import { streamLLMText, callLLM, refineAcademicWriting } from "@/services/ai/aiService";
+import { streamLLMText, refineAcademicWriting } from "@/services/ai/aiService";
 import { predictAcceptance } from "@/services/ai/acceptance-predictor";
 import { extractAndStoreEntities, queryJournalTrends } from "@/services/ai/graphrag";
 
@@ -93,9 +86,8 @@ jest.mock("@/lib/mem0", () => ({
 }));
 
 jest.mock("@/services/learningService", () => ({
-  getApplicableRules: jest.fn().mockResolvedValue([
-    { ruleText: "Always format p-values as p < 0.05" },
-  ]),
+  // Mirrors the real return type: a formatted rules string.
+  getApplicableRules: jest.fn().mockResolvedValue("User specific writing preferences:\n- Always format p-values as p < 0.05"),
   extractUserRewriteFeedback: jest.fn(),
 }));
 

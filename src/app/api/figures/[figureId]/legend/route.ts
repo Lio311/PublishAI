@@ -23,7 +23,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ figu
       .returning();
 
     return NextResponse.json({ figure: updatedFigure });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to update legend" }, { status: 500 });
   }
 }

@@ -7,8 +7,6 @@ import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import Header from "./Header";
 import AnimatedSidebar from "./AnimatedSidebar";
 
-const emptySubscribe = () => () => {};
-
 function useIsMobile() {
   return useSyncExternalStore(
     (callback) => {
@@ -37,19 +35,14 @@ export default function DashboardLayout({
   const locale = useLocale();
   const t = useTranslations("Sidebar");
   const pathname = usePathname();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileMenuRequested, setIsMobileMenuOpen] = useState(false);
   const isMobile = useIsMobile();
+  // The menu only exists on mobile; resizing to desktop closes it.
+  const isMobileMenuOpen = isMobile && mobileMenuRequested;
 
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const prevPathnameRef = useRef(pathname);
-
-  // Close mobile menu if resized to desktop
-  useEffect(() => {
-    if (!isMobile && isMobileMenuOpen) {
-      setIsMobileMenuOpen(false);
-    }
-  }, [isMobile, isMobileMenuOpen]);
 
   // Close mobile menu on route change
   useEffect(() => {

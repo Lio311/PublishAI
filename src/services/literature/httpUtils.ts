@@ -5,8 +5,9 @@
  * external API rate limit handling (Retry-After parsing, proactive pacing), and exponential backoff.
  */
 
-import { LiteratureErrorSource, LiteratureApiError, RateLimitError, RemoteServerError, TimeoutError } from './errors';
+import { LiteratureErrorSource, RateLimitError, RemoteServerError, TimeoutError } from './errors';
 import { literatureRateLimiter } from './rateLimiter';
+import { errorCode, errorMessage, errorName } from "@/services/utils/errors";
 
 export interface FetchWithRetryOptions extends RequestInit {
   timeoutMs?: number;
@@ -217,14 +218,14 @@ export async function fetchWithRetryAndTimeout(
                 `${source} API rate limit exceeded (HTTP ${response.status}): ${text.slice(0, 150)}`
               );
             }
-          } catch (peekErr: any) {
+          } catch (peekErr) {
             if (peekErr instanceof RateLimitError) throw peekErr;
           }
         }
       }
 
       return response;
-    } catch (err: any) {
+    } catch (err) {
       // Re-throw if cancelled by user
       if (userSignal?.aborted) {
         throw userSignal.reason || err;
@@ -238,11 +239,11 @@ export async function fetchWithRetryAndTimeout(
       // Handle timeout
       const isTimeout =
         timedOut ||
-        err?.name === 'TimeoutError' ||
-        err?.name === 'AbortError' && timedOut ||
-        err?.code === 'ETIMEDOUT' ||
-        err?.code === 'UND_ERR_CONNECT_TIMEOUT' ||
-        err?.message?.toLowerCase().includes('timed out');
+        errorName(err) === 'TimeoutError' ||
+        errorName(err) === 'AbortError' && timedOut ||
+        errorCode(err) === 'ETIMEDOUT' ||
+        errorCode(err) === 'UND_ERR_CONNECT_TIMEOUT' ||
+        errorMessage(err)?.toLowerCase().includes('timed out');
 
       if (isTimeout) {
         if (attempt <= retries) {
@@ -256,14 +257,14 @@ export async function fetchWithRetryAndTimeout(
 
       // Handle network errors (connection dropped, DNS lookup failed, fetch failed)
       const isNetworkError =
-        err?.name === 'TypeError' ||
-        err?.code === 'ECONNRESET' ||
-        err?.code === 'ECONNREFUSED' ||
-        err?.message?.includes('fetch failed');
+        errorName(err) === 'TypeError' ||
+        errorCode(err) === 'ECONNRESET' ||
+        errorCode(err) === 'ECONNREFUSED' ||
+        errorMessage(err)?.includes('fetch failed');
 
       if (attempt <= retries && isNetworkError) {
         const delay = Math.min(maxBackoffMs, backoffMs * Math.pow(2, attempt - 1));
-        console.warn(`[${source}] Network error connecting to ${url}: ${err.message}. Retrying attempt ${attempt}/${retries} after ${Math.round(delay)}ms...`);
+        console.warn(`[${source}] Network error connecting to ${url}: ${errorMessage(err)}. Retrying attempt ${attempt}/${retries} after ${Math.round(delay)}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
         continue;
       }

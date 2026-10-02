@@ -55,7 +55,8 @@ export const processStripeWebhook = inngest.createFunction(
           const customerId = data.customer as string | undefined;
           const subscriptionId = data.id as string | undefined;
           const priceId = data.items?.data?.[0]?.price?.id as string | undefined;
-          const currentPeriodEndSec = data.current_period_end as number | undefined;
+          // Current Stripe API versions report the period on subscription items; older ones on the subscription.
+          const currentPeriodEndSec = (data.items?.data?.[0]?.current_period_end ?? data.current_period_end) as number | undefined;
           const currentPeriodEnd = currentPeriodEndSec
             ? new Date(currentPeriodEndSec * 1000)
             : undefined;

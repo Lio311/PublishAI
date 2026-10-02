@@ -5,6 +5,7 @@ import { submissions } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import { inngest } from "@/inngest/client";
 import { checkRateLimit } from "@/services/rate-limit";
+import { errorMessage } from "@/services/utils/errors";
 
 export async function POST(
   req: NextRequest,
@@ -63,10 +64,10 @@ export async function POST(
       success: true,
       message: "Submission process triggered via Inngest",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("[API submissions/[id]/submit POST] Error:", error);
     return NextResponse.json(
-      { error: error?.message || "Internal server error" },
+      { error: errorMessage(error) || "Internal server error" },
       { status: 500 }
     );
   }

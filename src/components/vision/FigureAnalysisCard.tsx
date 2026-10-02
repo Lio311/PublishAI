@@ -4,7 +4,9 @@ import React, { useState } from "react";
 import ClaimVerificationBadge from "./ClaimVerificationBadge";
 import LegendEditor from "./LegendEditor";
 import { useTranslations } from "next-intl";
-import { Sparkles, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Sparkles, AlertTriangle } from "lucide-react";
+import type { FigureAnalysisDto } from "@/types/api";
+import Image from "next/image";
 
 interface FigureAnalysisCardProps {
   figure: {
@@ -12,7 +14,7 @@ interface FigureAnalysisCardProps {
     figureNumber: number;
     imageUrl: string;
     originalLegend: string | null;
-    analyses?: any[];
+    analyses?: FigureAnalysisDto[];
   };
 }
 
@@ -23,15 +25,18 @@ export default function FigureAnalysisCard({ figure }: FigureAnalysisCardProps) 
     figure.analyses && figure.analyses.length > 0
       ? figure.analyses[figure.analyses.length - 1]
       : null;
+  const issues: string[] = Array.isArray(latestAnalysis?.issuesFound) ? (latestAnalysis.issuesFound as string[]) : [];
 
   return (
     <div className="rounded-2xl border border-slate-200/80 shadow-xs bg-white/90 backdrop-blur-md overflow-hidden flex flex-col transition-all hover:shadow-sm">
       <div className="relative w-full h-52 bg-slate-100 flex items-center justify-center p-2">
-        <img
+        <Image
           src={figure.imageUrl}
-          alt={`Figure ${figure.figureNumber}`}
-          className="w-full h-full object-contain rounded-lg"
-          loading="lazy"
+          alt={t("figure", { number: figure.figureNumber })}
+          fill
+          unoptimized
+          sizes="(min-width: 768px) 33vw, 100vw"
+          className="object-contain rounded-lg p-2"
         />
       </div>
 
@@ -46,7 +51,7 @@ export default function FigureAnalysisCard({ figure }: FigureAnalysisCardProps) 
             )}
           </div>
           {latestAnalysis && (
-            <ClaimVerificationBadge status={latestAnalysis.claimVerificationStatus} />
+            <ClaimVerificationBadge status={latestAnalysis.claimVerificationStatus ?? "unclear"} />
           )}
         </div>
 
@@ -57,14 +62,14 @@ export default function FigureAnalysisCard({ figure }: FigureAnalysisCardProps) 
           </p>
         </div>
 
-        {latestAnalysis?.issuesFound && latestAnalysis.issuesFound.length > 0 && (
+        {issues.length > 0 && (
           <div className="mb-4 p-3 bg-red-50/70 border border-red-200/70 rounded-xl space-y-1.5">
             <span className="font-bold text-xs text-red-700 flex items-center gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
               <span>{t("issues")}</span>
             </span>
             <ul className="list-disc pl-4 text-xs text-red-800 space-y-1">
-              {latestAnalysis.issuesFound.map((issue: string, idx: number) => (
+              {issues.map((issue, idx) => (
                 <li key={idx} className="leading-snug">{issue}</li>
               ))}
             </ul>
@@ -74,9 +79,10 @@ export default function FigureAnalysisCard({ figure }: FigureAnalysisCardProps) 
         <div className="mt-auto pt-4 border-t border-slate-100">
           {isEditingLegend && latestAnalysis ? (
             <LegendEditor
+              key={figure.id}
               figureId={figure.id}
               originalLegend={figure.originalLegend || ""}
-              suggestedLegend={latestAnalysis.suggestedLegend}
+              suggestedLegend={latestAnalysis.suggestedLegend ?? undefined}
               onClose={() => setIsEditingLegend(false)}
             />
           ) : (

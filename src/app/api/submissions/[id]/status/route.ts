@@ -6,6 +6,7 @@ import { submissions, submissionStatusEnumValues } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import { checkRateLimit } from "@/services/rate-limit";
 import { SubmissionService } from "@/services/submission";
+import { errorMessage } from "@/services/utils/errors";
 
 const updateStatusSchema = z.object({
   status: z.enum(submissionStatusEnumValues),
@@ -44,7 +45,7 @@ export async function GET(
     }
 
     // Verify submission existence and ownership
-    let existingSubmission: any = null;
+    let existingSubmission: typeof submissions.$inferSelect | undefined;
     try {
       if (db?.query?.submissions) {
         existingSubmission = await db.query.submissions.findFirst({
@@ -81,10 +82,10 @@ export async function GET(
       summary,
       events,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("[API submissions/[id]/status GET] Error:", error);
     return NextResponse.json(
-      { error: error?.message || "Internal server error" },
+      { error: errorMessage(error) || "Internal server error" },
       { status: 500 }
     );
   }
@@ -178,10 +179,10 @@ export async function PATCH(
       status,
       event: result.event,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("[API submissions/[id]/status PATCH] Error:", error);
     return NextResponse.json(
-      { error: error?.message || "Internal server error" },
+      { error: errorMessage(error) || "Internal server error" },
       { status: 500 }
     );
   }

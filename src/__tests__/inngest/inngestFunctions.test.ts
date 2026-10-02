@@ -21,37 +21,13 @@ jest.mock("@/services/rpa/submission-bot", () => ({
   runSubmissionWorkflow: jest.fn().mockResolvedValue({ status: "success", trackingId: "test-123" }),
 }));
 
-import {
-  paperUploadedEvent,
-  paperReviewerCommentsReceivedEvent,
-  paperRejectedEvent,
-  paperPreflightEvent,
-  submissionProcessEvent,
-  submissionStatusUpdatedEvent,
-  submissionReviewStartedEvent,
-  submissionCaptchaSolvedEvent,
-  datasetUploadedEvent,
-  documentUploadedEvent,
-  qaFiguresAnalyzedEvent,
-  paperUploadedSchema,
-  submissionProcessSchema,
-  paperPreflightSchema,
-  emailReviewReceivedSchema,
-  stripeEventReceivedSchema,
-} from "@/inngest/events";
-import {
-  processPaper,
-  processResubmission,
-  sendWeeklyDigest,
-  processIncomingEmailReview,
-  processStripeWebhook,
-} from "@/inngest/functions";
+import { paperUploadedEvent, paperUploadedSchema, submissionProcessSchema, paperPreflightSchema, emailReviewReceivedSchema, stripeEventReceivedSchema } from "@/inngest/events";
+import { processPaper, sendWeeklyDigest, processIncomingEmailReview, processStripeWebhook } from "@/inngest/functions";
 import { processSubmission } from "@/inngest/functions/submission";
 import { processPaperRejected } from "@/inngest/functions/cascade";
 import { ingestDocument } from "@/inngest/functions/ingestDocument";
 import { syncCitations } from "@/inngest/functions/citations";
 import { extractPaperGraphData } from "@/inngest/functions/extractPaperGraphData";
-import { generateWeeklyFineTuningDataset } from "@/inngest/functions/generateWeeklyDataset";
 import { processPaperAnalysis } from "@/inngest/functions/processPaperAnalysis";
 import { processPaperFigures } from "@/inngest/functions/processPaperFigures";
 import { processSubmissionOutcome } from "@/inngest/functions/processSubmissionOutcome";

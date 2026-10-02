@@ -5,6 +5,7 @@ import { runPythonInSandbox } from "../../../e2bService";
 import { z } from "zod";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
 import { OPENAI_MODELS } from "@/services/ai/modelIds";
+import { errorMessage } from "@/services/utils/errors";
 
 export const dataValidationNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   // If no dataSchema is provided or it's empty, skip data validation gracefully
@@ -44,9 +45,9 @@ ${JSON.stringify(state.dataSchema)}
       try {
         const e2bResult = await runPythonInSandbox(safeScript, [{ filename: "data.csv", url: state.dataSchema.url }]);
         pythonOutput = (e2bResult.logs || "") + "\n" + JSON.stringify(e2bResult.results || {});
-      } catch (e: any) {
+      } catch (e) {
         console.warn("[dataValidationNode] Sandbox execution failed:", e);
-        pythonOutput = `Execution note: Sandbox execution unavailable (${e?.message || "error"}). Validating against schema directly.`;
+        pythonOutput = `Execution note: Sandbox execution unavailable (${errorMessage(e) || "error"}). Validating against schema directly.`;
       }
     } else {
       pythonOutput = `Schema structure: ${JSON.stringify(state.dataSchema)}`;
@@ -75,7 +76,7 @@ ${JSON.stringify(pythonOutput)}
     return {
       dataWarnings: annotationResult.annotations || [],
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[dataValidationNode] Validation failed:", error);
     return {
       dataWarnings: [],

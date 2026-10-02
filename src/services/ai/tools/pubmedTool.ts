@@ -23,8 +23,7 @@ export const pubmedTool = tool(
                 )}&retmode=json&retmax=3${apiKeyParam}`
               );
               if (searchRes.status === 429) {
-                const err: any = new Error("PubMed API rate limit exceeded (429)");
-                err.status = 429;
+                const err = Object.assign(new Error("PubMed API rate limit exceeded (429)"), { status: 429 });
                 throw err;
               }
               if (!searchRes.ok) {
@@ -52,8 +51,7 @@ export const pubmedTool = tool(
                 )}&retmode=text&rettype=abstract${apiKeyParam}`
               );
               if (fetchRes.status === 429) {
-                const err: any = new Error("PubMed API rate limit exceeded (429)");
-                err.status = 429;
+                const err = Object.assign(new Error("PubMed API rate limit exceeded (429)"), { status: 429 });
                 throw err;
               }
               if (!fetchRes.ok) {

@@ -2,14 +2,8 @@
 
 import React from 'react';
 import { useLocale } from 'next-intl';
-import { Link } from '@/app/i18n/routing';
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import {
-  Code, FileText, Database, Zap, Brain, Search, Edit3, MessageSquare,
-  ShieldCheck, CheckCircle, Download, Globe, Lock, Eye, Settings, Mail, User,
-  Bot, Scissors, ListChecks, RefreshCw, AlertTriangle, CheckCircle2, Box, HelpCircle, Workflow, BarChart2,
-  Shield, Cpu, Fingerprint, Activity, Key, Layers, ArrowRight
-} from 'lucide-react';
+import { Code, FileText, Database, Zap, Brain, Search, Edit3, MessageSquare, ShieldCheck, CheckCircle, Download, Globe, Lock, Eye, Settings, Mail, User, Bot, Scissors, ListChecks, RefreshCw, CheckCircle2, Workflow, BarChart2, Shield, Activity, Key, Layers, ArrowRight } from 'lucide-react';
 
 // ═══════════════════════════════════════════
 // Types
@@ -195,10 +189,6 @@ function NodeCard({ titleEn, titleHe, descEn, descHe, icon: Icon, type, isHe, is
   );
 }
 
-function BranchLabel({ text, color = 'text-green-600' }: { text: string; color?: string }) {
-  return <span className={`text-[10.5px] font-extrabold ${color} bg-white px-2 py-0.5 rounded border border-slate-200 shadow-sm relative z-20 mb-1`}>{text}</span>;
-}
-
 
 function OrDivider({ isHe, labelEn = 'OR', labelHe = 'או (נתיב חלופי)' }: { isHe: boolean, labelEn?: string, labelHe?: string }) {
   return (
@@ -212,7 +202,7 @@ function OrDivider({ isHe, labelEn = 'OR', labelHe = 'או (נתיב חלופי)
 }
 
 
-function SplitFork({ isHe, yesLabel, noLabel }: { isHe: boolean, yesLabel: string, noLabel: string }) {
+function SplitFork({ yesLabel, noLabel }: { isHe: boolean, yesLabel: string, noLabel: string }) {
   return (
     <div className="flex flex-col items-center w-full my-0 relative z-0">
       <div className="h-4 w-[3px] bg-slate-400"></div>

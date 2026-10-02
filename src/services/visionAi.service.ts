@@ -1,6 +1,3 @@
-import { db } from "@/services/db";
-import { figures, figureAnalyses } from "@/services/db/schema";
-import { eq } from "drizzle-orm";
 import { generateObject, generateText } from "ai";
 import { AI_MODELS } from "@/services/ai/provider";
 import { z } from "zod";
@@ -78,7 +75,16 @@ export async function extractFiguresFromDocument(documentUrlOrText?: string): Pr
   }
 }
 
-export async function analyzeFigureWithVisionAi(imageUrl: string, legend: string, claims: string[]): Promise<any> {
+export interface FigureAnalysisResult {
+  modelUsed: string;
+  legendAccuracyScore: number;
+  claimVerificationStatus: "verified" | "discrepancy" | "unclear";
+  suggestedLegend: string;
+  issuesFound: string[];
+  rawAnalysis: Record<string, unknown>;
+}
+
+export async function analyzeFigureWithVisionAi(imageUrl: string, legend: string, claims: string[]): Promise<FigureAnalysisResult> {
   try {
     const imageResponse = await fetch(imageUrl);
     if (!imageResponse.ok) {

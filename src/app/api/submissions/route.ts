@@ -4,7 +4,7 @@ import { db } from "@/services/db";
 import { submissions, papers, journalConnections } from "@/services/db/schema";
 import { auth } from "@/app/auth";
 import { inngest } from "@/inngest/client";
-import { eq, desc } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { checkRateLimit } from "@/services/rate-limit";
 
 const createSubmissionSchema = z.object({
@@ -82,7 +82,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(newSubmission[0], { status: 202 });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error creating submission:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
@@ -112,13 +112,17 @@ export async function GET() {
             journalId: true,
             userId: true,
             createdAt: true,
+            displayName: true,
+            platform: true,
+            siteUrl: true,
           }
         },
+        paper: { columns: { title: true } },
       }
     });
 
     return NextResponse.json(userSubmissions);
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching submissions:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

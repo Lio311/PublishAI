@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useTranslations } from "next-intl";
-import { CheckCircle2, XCircle, Terminal, AlertCircle } from "lucide-react";
+import { CheckCircle2, XCircle, Terminal } from "lucide-react";
 
 export function AnalysisStatus({ paperId }: { paperId: number }) {
   const t = useTranslations("PaperTools.sandbox");

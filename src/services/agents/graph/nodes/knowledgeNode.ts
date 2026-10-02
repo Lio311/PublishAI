@@ -5,6 +5,8 @@ import { PublishAIState } from "../state";
 import { pubmedTool } from "../../../ai/tools/pubmedTool";
 import { AgentResult } from "../../base-agent";
 import { OPENAI_MODELS } from "@/services/ai/modelIds";
+import { errorMessage } from "@/services/utils/errors";
+import { messageText, totalTokens } from "../messageUtils";
 
 export const knowledgeNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   const modelName = OPENAI_MODELS.standard;
@@ -35,7 +37,7 @@ export const knowledgeNode = async (state: PublishAIState): Promise<Partial<Publ
               const parsed = JSON.parse(toolCall.args);
               query = parsed.query || "";
             } else if (toolCall.args && typeof toolCall.args === "object") {
-              query = (toolCall.args as any).query || "";
+              query = String((toolCall.args as { query?: unknown }).query ?? "");
             }
             if (query) {
               const result = await pubmedTool.invoke({ query });
@@ -50,13 +52,11 @@ export const knowledgeNode = async (state: PublishAIState): Promise<Partial<Publ
     }
 
     if (!knowledgeContext.trim()) {
-      const responseText = typeof response.content === "string" 
-        ? response.content 
-        : (Array.isArray(response.content) ? response.content.map(c => typeof c === "string" ? c : (c as any).text || "").join("") : "");
+      const responseText = messageText(response.content);
       knowledgeContext = responseText || "Literature search completed. No direct PubMed references required.";
     }
 
-    const tokensUsed = (response.response_metadata as any)?.usage?.total_tokens ?? 0;
+    const tokensUsed = totalTokens(response);
     
     const result: AgentResult = {
       stage: "knowledge",
@@ -72,9 +72,9 @@ export const knowledgeNode = async (state: PublishAIState): Promise<Partial<Publ
       previousStageOutputs: new Map([["knowledge", result]]),
       currentStage: "knowledge"
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[knowledgeNode] Execution failed:", error);
-    const fallbackText = `Knowledge search could not be completed: ${error?.message || "Unknown error"}`;
+    const fallbackText = `Knowledge search could not be completed: ${errorMessage(error) || "Unknown error"}`;
     return {
       literature: fallbackText,
       knowledgeContext: fallbackText,

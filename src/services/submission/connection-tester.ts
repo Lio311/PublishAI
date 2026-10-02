@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { ConnectionTestResult } from "./connection-types";
 import { WordPressAdapter } from "./adapters/wordpress-adapter";
 import { OJSAdapter } from "./adapters/ojs-adapter";
 import { EmailAdapter } from "./adapters/email-adapter";
 import { EditorialManagerAdapter } from "./adapters/editorial-manager-adapter";
+import { errorMessage } from "@/services/utils/errors";
 
 export class ConnectionTester {
   /**
@@ -23,8 +23,8 @@ export class ConnectionTester {
     if (platform !== "email") {
       try {
         this.validateUrl(siteUrl);
-      } catch (err: any) {
-        return { success: false, message: err.message };
+      } catch (err) {
+        return { success: false, message: errorMessage(err) };
       }
     }
 

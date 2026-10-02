@@ -4,6 +4,7 @@ import { useState } from "react";
 import { UploadCloud, CheckCircle2, AlertCircle, FileSpreadsheet } from "lucide-react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useTranslations } from "next-intl";
+import { errorMessage } from "@/services/utils/errors";
 
 export function DataUploadSection({ paperId }: { paperId: number }) {
   const t = useTranslations("PaperTools.sandbox");
@@ -60,9 +61,9 @@ export function DataUploadSection({ paperId }: { paperId: number }) {
         text: t("uploaded", { name: file.name }),
         type: "success",
       });
-    } catch (err: any) {
+    } catch (err) {
       setMessage({
-        text: err.message || t("uploadFailed"),
+        text: errorMessage(err) || t("uploadFailed"),
         type: "error",
       });
     } finally {

@@ -9,6 +9,7 @@ import {
   SubmissionSuccessTemplateParams,
   SubmissionFailedTemplateParams,
 } from "./templates";
+import { errorMessage } from "@/services/utils/errors";
 
 export interface SubmissionSuccessOptions {
   journalName?: string;
@@ -77,7 +78,7 @@ export async function sendSubmissionSuccessEmail(
     }
 
     return result;
-  } catch (error: any) {
+  } catch (error) {
     console.error(`[Email Service] Error sending submission success email to ${userEmail}:`, error);
 
     if (options?.throwOnError) {
@@ -86,7 +87,7 @@ export async function sendSubmissionSuccessEmail(
 
     return {
       success: false,
-      error: error?.message || String(error),
+      error: errorMessage(error) || String(error),
       isTransient: isTransientError(error),
     };
   }
@@ -135,7 +136,7 @@ export async function sendSubmissionFailedEmail(
     }
 
     return result;
-  } catch (error: any) {
+  } catch (error) {
     console.error(`[Email Service] Error sending submission failed email to ${userEmail}:`, error);
 
     if (options?.throwOnError) {
@@ -144,7 +145,7 @@ export async function sendSubmissionFailedEmail(
 
     return {
       success: false,
-      error: error?.message || String(error),
+      error: errorMessage(error) || String(error),
       isTransient: isTransientError(error),
     };
   }

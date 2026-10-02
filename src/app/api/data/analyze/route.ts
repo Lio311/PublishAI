@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const worksheet = workbook.Sheets[firstSheetName];
 
     // Convert sheet to JSON, treating the first row as headers
-    const rawData = xlsx.utils.sheet_to_json(worksheet) as Record<string, any>[];
+    const rawData = xlsx.utils.sheet_to_json<Record<string, unknown>>(worksheet);
 
     // Get the first 5 rows of data for sample
     const sampleData = rawData.slice(0, 5);

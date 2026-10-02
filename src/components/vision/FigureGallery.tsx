@@ -1,17 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback } from "react";
 import FigureAnalysisCard from "./FigureAnalysisCard";
 import { useTranslations } from "next-intl";
 import { SkeletonCard } from "@/components/ui/Skeleton";
 import { Image as ImageIcon, Sparkles, RefreshCw, AlertCircle } from "lucide-react";
+import { useLoadable } from "@/hooks/useLoadable";
+import type { FigureAnalysisDto } from "@/types/api";
 
 interface Figure {
   id: string;
   figureNumber: number;
   imageUrl: string;
   originalLegend: string | null;
-  analyses?: any[];
+  analyses?: FigureAnalysisDto[];
 }
 
 interface FigureGalleryProps {
@@ -20,31 +22,14 @@ interface FigureGalleryProps {
 
 export default function FigureGallery({ paperId }: FigureGalleryProps) {
   const t = useTranslations("PaperTools.figures");
-  const [figures, setFigures] = useState<Figure[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchFigures = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/papers/${paperId}/figures`);
-      if (!res.ok) throw new Error(`Server returned ${res.status}`);
-      const data = await res.json();
-      if (data.figures) {
-        setFigures(data.figures);
-      }
-    } catch (err: any) {
-      console.error("Failed to fetch figures", err);
-      setError(err?.message || t("loadFailed"));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchFigures();
+  const loadFigures = useCallback(async (signal: AbortSignal): Promise<Figure[]> => {
+    const res = await fetch(`/api/papers/${paperId}/figures`, { signal });
+    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    const data = await res.json();
+    return Array.isArray(data?.figures) ? data.figures : [];
   }, [paperId]);
+  const { data, loading, error, reload } = useLoadable(loadFigures);
+  const figures = data ?? [];
 
   if (loading) {
     return (
@@ -75,7 +60,7 @@ export default function FigureGallery({ paperId }: FigureGalleryProps) {
           <p className="text-xs text-red-600 mt-1">{error}</p>
         </div>
         <button
-          onClick={fetchFigures}
+          onClick={reload}
           className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -98,7 +83,7 @@ export default function FigureGallery({ paperId }: FigureGalleryProps) {
           </p>
         </div>
         <button
-          onClick={fetchFigures}
+          onClick={reload}
           className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />

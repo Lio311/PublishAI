@@ -1,13 +1,14 @@
 import { db } from '@/services/db';
 import { journals, submissions, journalConnections } from '@/services/db/schema';
 import { eq, ilike, and } from 'drizzle-orm';
+import { errorMessage } from "@/services/utils/errors";
 
 export interface IncomingEmailData {
   sender: string;
   recipient?: string;
   subject: string;
   body: string;
-  attachments?: any[];
+  attachments?: { filename?: string; contentType?: string; content: Buffer | string }[];
 }
 
 export async function processIncomingReviewEmail(emailData: IncomingEmailData) {
@@ -56,9 +57,9 @@ export async function processIncomingReviewEmail(emailData: IncomingEmailData) {
             : Buffer.from(attachment.content, 'base64');
           const text = await extractTextFromBuffer(buffer, attachment.filename || 'attachment.pdf');
           comments.push(`Extracted text from ${attachment.filename || 'PDF'}: ${text}`);
-        } catch (err: any) {
+        } catch (err) {
           console.error('Error parsing PDF:', err);
-          comments.push(`Failed to extract text from ${attachment.filename || 'PDF'}: ${err.message}`);
+          comments.push(`Failed to extract text from ${attachment.filename || 'PDF'}: ${errorMessage(err)}`);
         }
       }
     }

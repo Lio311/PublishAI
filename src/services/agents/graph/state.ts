@@ -2,6 +2,28 @@ import { Annotation, messagesStateReducer } from "@langchain/langgraph";
 import { BaseMessage } from "@langchain/core/messages";
 import { Stage, AgentResult } from "../base-agent";
 
+export interface IntegrityResult {
+  passed: boolean;
+  status: "pass" | "fail" | "warning";
+  success: boolean;
+  plagiarismScore: number;
+  aiScore: number;
+  flaggedSentences?: string[];
+  notes: string;
+}
+
+export interface CoverLetterRulesContext {
+  templatePrompt?: string | null;
+  toneGuidance?: string | null;
+  requiredContent?: string[] | null;
+  uniqueRequirements?: string | null;
+}
+
+export type JournalRulesContext = Record<string, unknown> & { coverLetterRules?: CoverLetterRulesContext | null };
+
+/** Uploaded dataset descriptor (columns and an optional file URL for sandbox validation). */
+export type DataSchemaContext = Record<string, unknown> & { url?: string };
+
 export const PublishAIStateAnnotation = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
@@ -83,17 +105,17 @@ export const PublishAIStateAnnotation = Annotation.Root({
     reducer: (x, y) => y ?? x,
     default: () => [],
   }),
-  clarification: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
-  plan: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
-  literature: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
-  scientificReview: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
-  draft: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
-  edits: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
-  integrityResult: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
-  qa: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
-  verification: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
-  coverLetter: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
-  journalRules: Annotation<Record<string, any>>({
+  clarification: Annotation<unknown>({ reducer: (x, y) => y ?? x, default: () => null }),
+  plan: Annotation<unknown>({ reducer: (x, y) => y ?? x, default: () => null }),
+  literature: Annotation<unknown>({ reducer: (x, y) => y ?? x, default: () => null }),
+  scientificReview: Annotation<unknown>({ reducer: (x, y) => y ?? x, default: () => null }),
+  draft: Annotation<string | { output?: string; status?: string } | null>({ reducer: (x, y) => y ?? x, default: () => null }),
+  edits: Annotation<unknown>({ reducer: (x, y) => y ?? x, default: () => null }),
+  integrityResult: Annotation<IntegrityResult | "fail" | null>({ reducer: (x, y) => y ?? x, default: () => null }),
+  qa: Annotation<unknown>({ reducer: (x, y) => y ?? x, default: () => null }),
+  verification: Annotation<unknown>({ reducer: (x, y) => y ?? x, default: () => null }),
+  coverLetter: Annotation<unknown>({ reducer: (x, y) => y ?? x, default: () => null }),
+  journalRules: Annotation<JournalRulesContext>({
     reducer: (x, y) => y ?? x,
     default: () => ({}),
   }),
@@ -101,9 +123,9 @@ export const PublishAIStateAnnotation = Annotation.Root({
     reducer: (x, y) => x + (y ? "\n" + y : ""),
     default: () => "",
   }),
-  rebuttal: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
-  dataSchema: Annotation<any>({ reducer: (x, y) => y ?? x, default: () => null }),
-  dataWarnings: Annotation<any[]>({
+  rebuttal: Annotation<unknown>({ reducer: (x, y) => y ?? x, default: () => null }),
+  dataSchema: Annotation<DataSchemaContext | null>({ reducer: (x, y) => y ?? x, default: () => null }),
+  dataWarnings: Annotation<unknown[]>({
     reducer: (x, y) => (y ? (Array.isArray(y) ? [...x, ...y] : [...x, y]) : x),
     default: () => [],
   }),

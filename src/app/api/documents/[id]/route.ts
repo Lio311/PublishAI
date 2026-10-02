@@ -63,11 +63,11 @@ export async function PATCH(
     let body;
     try {
       body = patchDocSchema.parse(await req.json());
-    } catch (error) {
+    } catch {
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    const updateData: any = { updatedAt: new Date() };
+    const updateData: Partial<typeof documents.$inferInsert> = { updatedAt: new Date() };
     if (body.title !== undefined) updateData.title = body.title;
     if (body.abstract !== undefined) updateData.abstract = body.abstract;
     if (body.content !== undefined) updateData.content = body.content;

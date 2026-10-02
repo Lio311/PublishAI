@@ -3,8 +3,23 @@
 import { useState, useEffect, useCallback } from "react";
 import { User, Bell, Shield, Key, AlertCircle, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { errorMessage, errorName } from "@/services/utils/errors";
 
 type Tab = "profile" | "notifications" | "privacy" | "api_keys";
+
+interface SettingsResponse {
+  name?: string | null;
+  email?: string | null;
+  academicRole?: string | null;
+  emailNotifications?: boolean | null;
+  browserNotifications?: boolean | null;
+  weeklyDigest?: boolean | null;
+  publicProfile?: boolean | null;
+  dataCollectionForAi?: boolean | null;
+  openaiConfigured?: boolean;
+  anthropicConfigured?: boolean;
+  googleConfigured?: boolean;
+}
 
 export interface SettingsClientProps {
   locale: string;
@@ -35,41 +50,51 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
     dataCollectionForAi: false,
   });
 
-  const loadSettings = useCallback(async () => {
-    setIsLoading(true);
-    setLoadError(null);
-    try {
-      const res = await fetch("/api/settings");
-      if (!res.ok) {
-        throw new Error(`Failed to fetch settings: status ${res.status}`);
-      }
-      const data = await res.json();
-      setSettings({
-        name: data.name || "",
-        email: data.email || "",
-        academicRole: data.academicRole || "Researcher",
-        emailNotifications: data.emailNotifications ?? true,
-        browserNotifications: data.browserNotifications ?? false,
-        weeklyDigest: data.weeklyDigest ?? true,
-        publicProfile: data.publicProfile ?? true,
-        dataCollectionForAi: data.dataCollectionForAi ?? false,
-      });
-      setApiKeyStatus({
-        openai: data.openaiConfigured ?? false,
-        anthropic: data.anthropicConfigured ?? false,
-        google: data.googleConfigured ?? false,
-      });
-    } catch (err: any) {
-      console.error("Failed to load settings:", err);
-      setLoadError(err?.message || (isHe ? "שגיאה בטעינת ההגדרות." : "Failed to load settings."));
-    } finally {
-      setIsLoading(false);
+  const fetchSettings = useCallback(async (signal?: AbortSignal): Promise<SettingsResponse> => {
+    const res = await fetch("/api/settings", { signal });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch settings: status ${res.status}`);
     }
+    return res.json();
+  }, []);
+
+  const applySettings = useCallback((data: SettingsResponse) => {
+    setSettings({
+      name: data.name || "",
+      email: data.email || "",
+      academicRole: data.academicRole || "Researcher",
+      emailNotifications: data.emailNotifications ?? true,
+      browserNotifications: data.browserNotifications ?? false,
+      weeklyDigest: data.weeklyDigest ?? true,
+      publicProfile: data.publicProfile ?? true,
+      dataCollectionForAi: data.dataCollectionForAi ?? false,
+    });
+    setApiKeyStatus({
+      openai: data.openaiConfigured ?? false,
+      anthropic: data.anthropicConfigured ?? false,
+      google: data.googleConfigured ?? false,
+    });
+    setIsLoading(false);
+  }, []);
+
+  const failSettings = useCallback((err: unknown) => {
+    if (errorName(err) === "AbortError") return;
+    console.error("Failed to load settings:", err);
+    setLoadError(errorMessage(err) || (isHe ? "שגיאה בטעינת ההגדרות." : "Failed to load settings."));
+    setIsLoading(false);
   }, [isHe]);
 
+  const loadSettings = () => {
+    setIsLoading(true);
+    setLoadError(null);
+    fetchSettings().then(applySettings, failSettings);
+  };
+
   useEffect(() => {
-    loadSettings();
-  }, [loadSettings]);
+    const controller = new AbortController();
+    fetchSettings(controller.signal).then(applySettings, failSettings);
+    return () => controller.abort();
+  }, [fetchSettings, applySettings, failSettings]);
 
   const handleSettingChange = (key: string, value: string | boolean) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
@@ -119,9 +144,9 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
       }
 
       toast.success(isHe ? "השינויים נשמרו בהצלחה!" : "Changes saved successfully!");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error saving settings:", error);
-      toast.error(error?.message || (isHe ? "שגיאה בשמירת ההגדרות." : "Error saving settings."));
+      toast.error(errorMessage(error) || (isHe ? "שגיאה בשמירת ההגדרות." : "Error saving settings."));
     } finally {
       setIsSaving(false);
     }

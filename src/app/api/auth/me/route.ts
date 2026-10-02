@@ -76,7 +76,7 @@ export async function PATCH(req: Request) {
     const rateLimitResponse = await applyRateLimit(req, "write", session.user.id);
     if (rateLimitResponse) return rateLimitResponse;
 
-    let body: any;
+    let body: Record<string, unknown>;
     try {
       body = await req.json();
     } catch {

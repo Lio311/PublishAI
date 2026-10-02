@@ -78,7 +78,7 @@ export default async function AdminDashboardPage({
   `);
   
   // Format for Recharts
-  const papersData = papersChartRaw.rows.map((row: any) => {
+  const papersData = (papersChartRaw.rows as { date: string; count: string | number }[]).map((row) => {
     const d = new Date(row.date);
     return {
       date: `${d.getDate()}/${d.getMonth() + 1}`,
@@ -97,7 +97,7 @@ export default async function AdminDashboardPage({
     LIMIT 30
   `);
   
-  const usersData = usersChartRaw.rows.map((row: any) => {
+  const usersData = (usersChartRaw.rows as { date: string; count: string | number }[]).map((row) => {
     const d = new Date(row.date);
     return {
       date: `${d.getDate()}/${d.getMonth() + 1}`,

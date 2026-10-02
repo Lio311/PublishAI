@@ -6,6 +6,7 @@ import { submissions, reviewThreads, reviewComments } from "@/services/db/schema
 import { eq } from "drizzle-orm";
 import { reviewService } from "@/services/reviews/reviewService";
 import { checkRateLimit } from "@/services/rate-limit";
+import { errorMessage } from "@/services/utils/errors";
 
 const reviewInputSchema = z.object({
   rawText: z.string().optional(),
@@ -160,8 +161,8 @@ export async function POST(
         }
         savedToDatabase = true;
       }
-    } catch (dbErr: any) {
-      console.warn("[reviews/process] Database persistence skipped or failed:", dbErr?.message || dbErr);
+    } catch (dbErr) {
+      console.warn("[reviews/process] Database persistence skipped or failed:", errorMessage(dbErr) || dbErr);
     }
 
     return NextResponse.json({
@@ -173,10 +174,10 @@ export async function POST(
       savedToDatabase,
       savedCount,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("[POST /api/submissions/[id]/reviews/process] Error:", error);
     return NextResponse.json(
-      { error: error?.message || "Internal server error processing reviewer comments" },
+      { error: errorMessage(error) || "Internal server error processing reviewer comments" },
       { status: 500 }
     );
   }

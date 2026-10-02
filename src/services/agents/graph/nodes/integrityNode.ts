@@ -1,5 +1,6 @@
 import { PublishAIState } from "../state";
 import { IntegrityScanner } from "@/services/security/integrity-scanner";
+import { errorMessage } from "@/services/utils/errors";
 
 export async function integrityNode(state: PublishAIState): Promise<Partial<PublishAIState>> {
   const contentToScan = state.documentContent || 
@@ -36,7 +37,7 @@ export async function integrityNode(state: PublishAIState): Promise<Partial<Publ
         ? [] 
         : [`Integrity check failed: Plagiarism score ${report.plagiarismScore}%, AI score ${report.aiGeneratedScore}%`],
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[integrityNode] Error scanning manuscript:", error);
     return {
       integrityResult: {
@@ -45,7 +46,7 @@ export async function integrityNode(state: PublishAIState): Promise<Partial<Publ
         success: true,
         plagiarismScore: 0,
         aiScore: 0,
-        notes: `Integrity scanner temporarily unavailable: ${error?.message || "Unknown error"}. Proceeding with caution.`,
+        notes: `Integrity scanner temporarily unavailable: ${errorMessage(error) || "Unknown error"}. Proceeding with caution.`,
       },
     };
   }

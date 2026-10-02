@@ -66,5 +66,5 @@ export interface ClientOptions {
   apiKey?: string;
   defaultTimeoutMs?: number;
   retries?: number;
-  cache?: any; // LiteratureCache
+  cache?: import("./literatureCache").LiteratureCache;
 }

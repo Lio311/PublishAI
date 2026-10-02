@@ -112,7 +112,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     await emitSubmissionStatusEvents(submissionId, "rejected");
 
     return NextResponse.json(newSubmission, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in cascade route:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

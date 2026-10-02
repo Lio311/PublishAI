@@ -11,6 +11,7 @@ import {
   sanitizePromptInput,
   redactApiKeys,
 } from "./promptSanitizer";
+import { errorMessage } from "@/services/utils/errors";
 
 const entitySchema = z.object({
   entities: z.array(z.object({
@@ -148,8 +149,8 @@ ${wrapPromptContext("scientific_text", text, "Scientific text for knowledge grap
         );
       }
     }
-  } catch (error: any) {
-    const safeErrMsg = redactApiKeys(error?.message || String(error));
+  } catch (error) {
+    const safeErrMsg = redactApiKeys(errorMessage(error) || String(error));
     console.error("[GraphRAG] Extraction pipeline failed:", safeErrMsg);
     throw new Error(`GraphRAG entity extraction failed: ${safeErrMsg}`);
   }
@@ -196,11 +197,15 @@ export async function queryJournalTrends(journalId: number, topic: string) {
       "queryJournalTrends:scientificRelationships"
     );
 
+    const relationshipSummary = relationships.length
+      ? ` Frequent relationships between them: ${Array.from(new Set(relationships.map((r) => r.relationshipType))).join(", ")}.`
+      : "";
     return (
       `Found ${relevantEntities.length} entities related to "${sanitizePromptInput(topic)}". ` +
       `These reflect current journal trends emphasizing topics like: ${relevantEntities
         .map((e) => sanitizePromptInput(e.name))
-        .join(", ")}.`
+        .join(", ")}.` +
+      relationshipSummary
     );
   } catch (error) {
     console.warn("[GraphRAG] queryJournalTrends failed:", redactApiKeys(String(error)));

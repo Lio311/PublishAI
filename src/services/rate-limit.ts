@@ -71,12 +71,12 @@ function checkInMemoryRateLimit(identifier: string, limit: number, windowMs = 60
   };
 }
 
-let UpstashRatelimit: any = null;
-let UpstashRedis: any = null;
-const rateLimiters: Partial<Record<RateLimitTier, any>> = {};
+let UpstashRatelimit: typeof import("@upstash/ratelimit").Ratelimit | null = null;
+let UpstashRedis: typeof import("@upstash/redis").Redis | null = null;
+const rateLimiters: Partial<Record<RateLimitTier, import("@upstash/ratelimit").Ratelimit>> = {};
 let hasLoggedEnvWarning = false;
 
-async function getRateLimiterForTier(tier: RateLimitTier): Promise<any | null> {
+async function getRateLimiterForTier(tier: RateLimitTier): Promise<import("@upstash/ratelimit").Ratelimit | null> {
   if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
     if (!hasLoggedEnvWarning && process.env.NODE_ENV !== "test") {
       console.warn("[RateLimit] Upstash Redis credentials not set. Falling back to in-memory rate limiting.");
@@ -127,8 +127,10 @@ export function getClientIp(req: Request): string {
   const xClientIp = req.headers.get("x-client-ip");
   if (xClientIp) return xClientIp.trim();
 
-  if ("ip" in req && typeof (req as any).ip === "string" && (req as any).ip) {
-    return (req as any).ip.trim();
+  // NextRequest on some platforms exposes the client address as `ip`.
+  const platformIp = (req as Request & { ip?: unknown }).ip;
+  if (typeof platformIp === "string" && platformIp) {
+    return platformIp.trim();
   }
 
   return "127.0.0.1";

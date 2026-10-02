@@ -18,7 +18,7 @@ export interface DocumentMetadata {
   wordCount?: number;
   dateCreated?: Date;
   journalTarget?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ExportDocumentOptions {

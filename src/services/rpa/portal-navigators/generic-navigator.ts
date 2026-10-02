@@ -420,10 +420,11 @@ export class GenericNavigator extends BaseNavigator {
             const isDataUrl = rawBuf.startsWith('data:');
             const cleanStr = isDataUrl ? rawBuf.replace(/^data:[^;]+;base64,/, '') : rawBuf;
             buf = Buffer.from(cleanStr, isDataUrl ? 'base64' : 'utf-8');
-          } else if (rawBuf && typeof rawBuf === 'object' && (rawBuf as any).type === 'Buffer' && Array.isArray((rawBuf as any).data)) {
-            buf = Buffer.from((rawBuf as any).data);
+          } else if (rawBuf && typeof rawBuf === 'object' && Array.isArray((rawBuf as { data?: unknown }).data)) {
+            // A Buffer that went through JSON serialization: { type: "Buffer", data: number[] }
+            buf = Buffer.from((rawBuf as { data: number[] }).data);
           } else {
-            buf = Buffer.from((rawBuf as any) || '');
+            buf = Buffer.from(String(rawBuf ?? ''));
           }
           return {
             name: att.filename,

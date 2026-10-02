@@ -1,7 +1,8 @@
 import React, { useRef, useEffect } from "react";
 import AgentAvatar from "./AgentAvatar";
+import type { DebateMessageDto } from "@/types/api";
 
-export default function DebateTranscript({ messages }: { messages: any[] }) {
+export default function DebateTranscript({ messages }: { messages: DebateMessageDto[] }) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

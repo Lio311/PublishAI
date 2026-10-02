@@ -3,6 +3,7 @@ import { askClaude, ClaudeModel } from "../../claude-client";
 import { AIMessage } from "@langchain/core/messages";
 import { AgentResult } from "../../base-agent";
 import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
+import { errorMessage } from "@/services/utils/errors";
 
 export const writingNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   const model: ClaudeModel = ANTHROPIC_MODELS.reasoning;
@@ -45,11 +46,11 @@ export const writingNode = async (state: PublishAIState): Promise<Partial<Publis
       messages: [new AIMessage({ content: text, name: "writingNode" })],
       currentStage: "writing"
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[writingNode] Claude execution failed:", error);
     return {
-      messages: [new AIMessage({ content: `Writing stage failed: ${error?.message || "Unknown error"}`, name: "writingNode" })],
-      validationErrors: [`Writing node failed: ${error?.message || "Unknown error"}`],
+      messages: [new AIMessage({ content: `Writing stage failed: ${errorMessage(error) || "Unknown error"}`, name: "writingNode" })],
+      validationErrors: [`Writing node failed: ${errorMessage(error) || "Unknown error"}`],
       currentStage: "writing"
     };
   }

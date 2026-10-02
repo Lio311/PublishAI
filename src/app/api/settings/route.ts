@@ -67,7 +67,7 @@ export async function PUT(request: Request) {
   let body;
   try {
     body = putSettingsSchema.parse(await request.json());
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 

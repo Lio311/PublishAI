@@ -1,4 +1,4 @@
-import { BaseAgent, AgentContext, AgentResult, Stage } from "./base-agent";
+import { BaseAgent, AgentContext, AgentResult, Stage, getStageOutput } from "./base-agent";
 import { askClaude } from "./claude-client";
 import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
 
@@ -7,9 +7,7 @@ export class AcademicWritingAgent extends BaseAgent {
   model = ANTHROPIC_MODELS.reasoning;
 
   async execute(context: AgentContext): Promise<AgentResult> {
-    const reviewResult = context.previousStageOutputs instanceof Map
-      ? context.previousStageOutputs.get("scientific_review")
-      : (context.previousStageOutputs as any)?.["scientific_review"];
+    const reviewResult = getStageOutput(context, "scientific_review");
     const review = reviewResult?.output || "";
     const manuscript = context.manuscriptText || "";
     const prompt = `Rewrite the text to elevate the academic tone, address the following review feedback, and remove any generic AI-sounding phrases.\n\nReview:\n${review}\n\nManuscript provided between <manuscript> tags:\n<manuscript>\n${manuscript}\n</manuscript>`;

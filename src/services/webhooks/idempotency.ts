@@ -47,7 +47,7 @@ class InMemoryIdempotencyStore {
 
 const memoryStore = new InMemoryIdempotencyStore();
 
-let upstashRedisClient: any = null;
+let upstashRedisClient: import("@upstash/redis").Redis | null = null;
 
 async function getRedisClient() {
   if (

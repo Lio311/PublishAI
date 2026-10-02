@@ -1,4 +1,5 @@
 import { getInngestClient, runScript } from "./env";
+import { errorCode, errorMessage } from "@/services/utils/errors";
 
 /**
  * End-to-End QA Runner Script
@@ -40,9 +41,9 @@ export async function runQA(): Promise<void> {
     console.log("🎉 QA Simulation Event dispatched successfully.");
     console.log(`   Event IDs: ${JSON.stringify(result.ids || [])}`);
     console.log("   Check Inngest Dev Server (http://127.0.0.1:8288) or Inngest Cloud for execution results.");
-  } catch (error: any) {
+  } catch (error) {
     console.error("❌ Failed to dispatch event to Inngest.");
-    if (error?.message?.includes("fetch failed") || error?.code === "ECONNREFUSED") {
+    if (errorMessage(error)?.includes("fetch failed") || errorCode(error) === "ECONNREFUSED") {
       console.error(
         "💡 Hint: Inngest Dev Server might not be running. Start it with:\n" +
           "   npx inngest-cli@latest dev -u http://localhost:3000/api/inngest\n" +

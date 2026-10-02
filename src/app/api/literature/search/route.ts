@@ -3,6 +3,7 @@ import { literatureService } from '@/services/literature/literatureService';
 import { RateLimitError, TimeoutError, RemoteServerError } from '@/services/literature/errors';
 import { auth } from '@/app/auth';
 import { applyRateLimit } from '@/services/rate-limit';
+import type { LiteratureSearchOptions } from '@/services/literature/types';
 
 export async function GET(request: Request) {
   // 1. Authentication check
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Query parameter "q" is required' }, { status: 400 });
   }
 
-  const options: any = {};
+  const options: LiteratureSearchOptions = {};
   if (limitStr) {
     const parsedLimit = parseInt(limitStr, 10);
     if (!isNaN(parsedLimit) && parsedLimit > 0) {
@@ -54,7 +55,7 @@ export async function GET(request: Request) {
   try {
     const results = await literatureService.search(query.trim(), options);
     return NextResponse.json(results);
-  } catch (error: any) {
+  } catch (error) {
     console.error('[API /api/literature/search] Error:', error);
 
     if (error instanceof RateLimitError) {

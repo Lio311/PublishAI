@@ -79,7 +79,7 @@ Please provide the following details about this journal in valid JSON format:
 
 Return ONLY the JSON object, with no markdown formatting or other text.`;
 
-    let dataToInsert: any = { name, dataSource: "ai-generated" };
+    let dataToInsert: typeof journals.$inferInsert = { name, dataSource: "ai-generated" };
     let enrichmentData: Record<string, unknown> = {};
 
     try {

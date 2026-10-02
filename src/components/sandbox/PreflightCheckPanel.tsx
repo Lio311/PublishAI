@@ -44,7 +44,7 @@ export function PreflightCheckPanel({ paperId, codeSnippet, dependencies }: Pref
         setLogs({ stderr: data.stderr, error: data.error?.message });
         toast.error(data.error?.message || t('failedToast'));
       }
-    } catch (error) {
+    } catch {
       setStatus('failed');
       setLogs({ error: t('networkError') });
     }

@@ -72,7 +72,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error solving captcha:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

@@ -6,8 +6,8 @@ import {
   checkConsensus,
 } from "../../services/debateService";
 import { db } from "@/services/db";
-import { debateAgents, debates, papers } from "@/services/db/schema";
-import { eq, and } from "drizzle-orm";
+import { debateAgents, debates } from "@/services/db/schema";
+import { eq } from "drizzle-orm";
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { OPENAI_MODELS } from "@/services/ai/modelIds";
@@ -27,8 +27,7 @@ export const scientificReviewDebate = inngest.createFunction(
     retries: 2,
     onFailure: async ({ event, step }) => {
       const paperId =
-        (event.data as any)?.event?.data?.paperId ??
-        (event.data as any)?.paperId;
+        event.data.event?.data?.paperId;
       if (paperId) {
         await step.run("mark-debate-failed", async () => {
           await db

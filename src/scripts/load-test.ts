@@ -1,4 +1,5 @@
 import { getInngestClient, runScript } from "./env";
+import { errorCode, errorMessage } from "@/services/utils/errors";
 
 /**
  * Load Testing Script
@@ -42,9 +43,9 @@ export async function runLoadTest(): Promise<void> {
     console.log("🎉 Load test events dispatched successfully.");
     console.log(`   Dispatched event count: ${result.ids?.length ?? events.length}`);
     console.log("   Check Inngest Dev Server or Inngest Cloud for pipeline execution.");
-  } catch (error: any) {
+  } catch (error) {
     console.error("❌ Failed to dispatch load test events to Inngest.");
-    if (error?.message?.includes("fetch failed") || error?.code === "ECONNREFUSED") {
+    if (errorMessage(error)?.includes("fetch failed") || errorCode(error) === "ECONNREFUSED") {
       console.error(
         "💡 Hint: Inngest Dev Server might not be running. Start it with:\n" +
           "   npx inngest-cli@latest dev -u http://localhost:3000/api/inngest\n" +

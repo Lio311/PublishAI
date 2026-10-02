@@ -9,6 +9,7 @@ import {
   WeeklyDigestTemplateParams,
   GenericNotificationTemplateParams,
 } from "./templates";
+import { errorCode, errorMessage, errorStatus } from "@/services/utils/errors";
 
 /**
  * Cached transporter instance and pending initialization promise to prevent race conditions.
@@ -23,12 +24,12 @@ export interface SendEmailResult {
   previewUrl?: string;
   error?: string;
   isTransient?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface AttachmentOption {
   filename: string;
-  content?: any;
+  content?: string | Buffer | import("stream").Readable;
   path?: string;
   contentType?: string;
   encoding?: string;
@@ -138,11 +139,11 @@ export function setTransporter(customTransporter: nodemailer.Transporter | null)
 /**
  * Safely extracts the preview URL from an Ethereal test account send result.
  */
-export function getSafeTestMessageUrl(mailer: nodemailer.Transporter, info: any): string | undefined {
+export function getSafeTestMessageUrl(mailer: nodemailer.Transporter, info: nodemailer.SentMessageInfo): string | undefined {
   try {
     const isEthereal =
       mailer.transporter?.name === "smtp.ethereal.email" ||
-      (mailer.options as any)?.host === "smtp.ethereal.email";
+      (mailer.options as { host?: string } | undefined)?.host === "smtp.ethereal.email";
     if (info && info.messageId && isEthereal) {
       const url = nodemailer.getTestMessageUrl(info);
       return url || undefined;
@@ -156,12 +157,13 @@ export function getSafeTestMessageUrl(mailer: nodemailer.Transporter, info: any)
 /**
  * Detects whether an error thrown during email dispatch is transient (recoverable via retry).
  */
-export function isTransientError(error: any): boolean {
+export function isTransientError(error: unknown): boolean {
   if (!error) return false;
-  const msg = (error.message || "").toLowerCase();
-  const code = (error.code || "").toUpperCase();
-  const responseCode = Number(error.responseCode) || 0;
-  const status = Number(error.status || error.statusCode) || 0;
+  const fields = (typeof error === "object" ? error : {}) as { responseCode?: unknown };
+  const msg = errorMessage(error).toLowerCase();
+  const code = (errorCode(error) || "").toUpperCase();
+  const responseCode = Number(fields.responseCode) || 0;
+  const status = errorStatus(error) || 0;
 
   // Network and socket-level transient errors
   const transientCodes = [
@@ -223,10 +225,10 @@ export async function verifyTransport(
       await target.verify();
     }
     return { success: true };
-  } catch (err: any) {
+  } catch (err) {
     return {
       success: false,
-      error: err?.message || String(err),
+      error: errorMessage(err) || String(err),
     };
   }
 }
@@ -258,7 +260,7 @@ export async function getTransporter(): Promise<nodemailer.Transporter> {
         });
         transporter = mailer;
         return transporter;
-      } catch (err: any) {
+      } catch (err) {
         console.error("[Email Service] Failed to initialize SMTP URL transport:", err);
         throw err;
       }
@@ -287,7 +289,7 @@ export async function getTransporter(): Promise<nodemailer.Transporter> {
 
         transporter = mailer;
         return transporter;
-      } catch (err: any) {
+      } catch (err) {
         console.error("[Email Service] Failed to initialize SMTP transport:", err);
         throw err;
       }
@@ -315,7 +317,7 @@ export async function getTransporter(): Promise<nodemailer.Transporter> {
         console.log("[Email Service] Initialized Resend SMTP transport.");
         transporter = mailer;
         return transporter;
-      } catch (err: any) {
+      } catch (err) {
         console.error("[Email Service] Failed to initialize Resend transport:", err);
         throw err;
       }
@@ -340,7 +342,7 @@ export async function getTransporter(): Promise<nodemailer.Transporter> {
         console.log("[Email Service] Initialized SendGrid SMTP transport.");
         transporter = mailer;
         return transporter;
-      } catch (err: any) {
+      } catch (err) {
         console.error("[Email Service] Failed to initialize SendGrid transport:", err);
         throw err;
       }
@@ -366,7 +368,7 @@ export async function getTransporter(): Promise<nodemailer.Transporter> {
         console.log("[Email Service] Initialized Postmark SMTP transport.");
         transporter = mailer;
         return transporter;
-      } catch (err: any) {
+      } catch (err) {
         console.error("[Email Service] Failed to initialize Postmark transport:", err);
         throw err;
       }
@@ -400,9 +402,9 @@ export async function getTransporter(): Promise<nodemailer.Transporter> {
       });
       console.log(`[Email Service] Using Ethereal Email test account: ${testAccount.user}`);
       return transporter;
-    } catch (err: any) {
+    } catch (err) {
       console.warn(
-        `[Email Service] Failed to initialize Ethereal test account (${err?.message || err}). Falling back to JSON transport.`
+        `[Email Service] Failed to initialize Ethereal test account (${errorMessage(err) || err}). Falling back to JSON transport.`
       );
       transporter = nodemailer.createTransport({
         jsonTransport: true,
@@ -467,7 +469,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
   const maxRetries = options.maxRetries !== undefined ? options.maxRetries : defaultRetries;
 
   let attempt = 0;
-  let lastError: any = null;
+  let lastError: unknown = null;
 
   while (attempt <= maxRetries) {
     try {
@@ -515,7 +517,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
         previewUrl,
         ...info,
       };
-    } catch (error: any) {
+    } catch (error) {
       lastError = error;
       const transient = isTransientError(error);
 
@@ -523,7 +525,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
         attempt++;
         const backoffMs = (process.env.NODE_ENV === "test" ? 10 : 500) * Math.pow(2, attempt - 1);
         console.warn(
-          `[Email Service] Transient error dispatching email to ${options.to} (attempt ${attempt}/${maxRetries}): ${error.message}. Retrying in ${backoffMs}ms...`
+          `[Email Service] Transient error dispatching email to ${options.to} (attempt ${attempt}/${maxRetries}): ${errorMessage(error)}. Retrying in ${backoffMs}ms...`
         );
 
         // Reset transporter to re-establish dropped connection if not a custom mock
@@ -546,7 +548,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
 
   return {
     success: false,
-    error: lastError?.message || String(lastError),
+    error: errorMessage(lastError) || String(lastError),
     isTransient: isTransientError(lastError),
   };
 }
@@ -592,7 +594,7 @@ export async function sendAwaitingApprovalEmail(
     }
 
     return result;
-  } catch (error: any) {
+  } catch (error) {
     console.error(`[Email Service] Error sending Awaiting Approval email to ${userEmail}:`, error);
 
     if (options?.throwOnError) {
@@ -601,7 +603,7 @@ export async function sendAwaitingApprovalEmail(
 
     return {
       success: false,
-      error: error?.message || String(error),
+      error: errorMessage(error) || String(error),
       isTransient: isTransientError(error),
     };
   }
@@ -646,7 +648,7 @@ export async function sendWeeklyDigestEmail(
     }
 
     return result;
-  } catch (error: any) {
+  } catch (error) {
     console.error(`[Email Service] Error sending weekly digest email to ${userEmail}:`, error);
 
     if (options?.throwOnError) {
@@ -655,7 +657,7 @@ export async function sendWeeklyDigestEmail(
 
     return {
       success: false,
-      error: error?.message || String(error),
+      error: errorMessage(error) || String(error),
       isTransient: isTransientError(error),
     };
   }
@@ -702,7 +704,7 @@ export async function sendGenericNotificationEmail(
     }
 
     return result;
-  } catch (error: any) {
+  } catch (error) {
     console.error(`[Email Service] Error sending generic notification email to ${userEmail}:`, error);
 
     if (options?.throwOnError) {
@@ -711,7 +713,7 @@ export async function sendGenericNotificationEmail(
 
     return {
       success: false,
-      error: error?.message || String(error),
+      error: errorMessage(error) || String(error),
       isTransient: isTransientError(error),
     };
   }

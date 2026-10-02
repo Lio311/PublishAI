@@ -1,35 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useEffectEvent, useCallback, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import {
-  X,
-  MessageSquareText,
-  ClipboardList,
-  BookOpen,
-  Microscope,
-  PenTool,
-  Play,
-  ShieldCheck,
-  FileCheck,
-  Package,
-  Upload,
-  Download,
-  Workflow,
-  CircleCheckBig,
-  ArrowRight,
-  RotateCcw,
-  Pause,
-  BarChart2,
-  TrendingUp,
-  Users,
-  Brain,
-  Code,
-  Send,
-  RefreshCcw,
-  Layers,
-  Megaphone
-} from "lucide-react";
+import { X, MessageSquareText, ClipboardList, BookOpen, PenTool, Play, ShieldCheck, FileCheck, Package, Upload, Download, Workflow, CircleCheckBig, RotateCcw, Pause, BarChart2, TrendingUp, Users, Brain, Code, Send, RefreshCcw, Layers, Megaphone } from "lucide-react";
 
 interface FlowStep {
   id: number;
@@ -304,44 +277,49 @@ export default function SystemFlowModal({
   
 
 
-  // Reset state when opening
-   
-  useEffect(() => {
+  // Reset state when the modal opens (adjusting state on a prop change during render).
+  const [wasOpen, setWasOpen] = useState(false);
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
     if (isOpen) {
-      clearTimer();
-      clearCompletionTimer();
+      const hasSeen = typeof window !== 'undefined' && localStorage.getItem('publishAiHasSeenFlow') === 'true';
       setIsClosing(false);
       setIsPaused(false);
-
-      
-      const hasSeen = typeof window !== 'undefined' && localStorage.getItem('publishAiHasSeenFlow') === 'true';
+      setAnimPhase("idle");
       if (hasSeen) {
         // Skip animation if already seen
         setCurrentStepIndex(FLOW_STEPS.length);
-        setAnimPhase("idle");
         setIsFinished(true);
         setCompletedSteps(new Set(FLOW_STEPS.map((_, i) => i)));
-        // Scroll to marketing message after render
-        completionTimerRef.current = setTimeout(() => scrollToFinish(), 400);
       } else {
-        // Start animation from beginning
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('publishAiHasSeenFlow', 'true');
-        }
         setCurrentStepIndex(-1);
-        setAnimPhase("idle");
         setCompletedSteps(new Set());
         setIsFinished(false);
-
-        timerRef.current = setTimeout(() => {
-          setCurrentStepIndex(0);
-          setAnimPhase("appearing");
-        }, INITIAL_DELAY);
       }
     }
+  }
 
+  // Kick off the intro animation (or jump to the finish) once the modal has opened.
+  const startOpenSequence = useEffectEvent(() => {
+    clearTimer();
+    clearCompletionTimer();
+    if (isFinished) {
+      // Scroll to marketing message after render
+      completionTimerRef.current = setTimeout(() => scrollToFinish(), 400);
+    } else {
+      localStorage.setItem('publishAiHasSeenFlow', 'true');
+      timerRef.current = setTimeout(() => {
+        setCurrentStepIndex(0);
+        setAnimPhase("appearing");
+      }, INITIAL_DELAY);
+    }
+  });
+
+  useEffect(() => {
+    if (!isOpen) return;
+    startOpenSequence();
     return () => { clearTimer(); clearCompletionTimer(); };
-  }, [isOpen, clearTimer, clearCompletionTimer, scrollToFinish]);
+  }, [isOpen, clearTimer, clearCompletionTimer]);
 
   // Main animation state machine
    

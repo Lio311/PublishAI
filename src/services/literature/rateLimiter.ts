@@ -24,10 +24,11 @@ export interface ScheduleOptions {
   signal?: AbortSignal;
 }
 
-interface QueuedTask<T> {
-  fn: () => Promise<T>;
-  resolve: (value: T | PromiseLike<T>) => void;
-  reject: (reason?: any) => void;
+/** Queue entries are type-erased; schedule<T>() restores T at the resolve boundary. */
+interface QueuedTask {
+  fn: () => Promise<unknown>;
+  resolve: (value: unknown) => void;
+  reject: (reason?: unknown) => void;
   enqueuedAt: number;
   timerId?: NodeJS.Timeout | null;
   abortListener?: (() => void) | null;
@@ -36,7 +37,7 @@ interface QueuedTask<T> {
 
 export class LiteratureRateLimiter {
   private configs: Map<string, DomainPacerConfig> = new Map();
-  private queues: Map<string, QueuedTask<any>[]> = new Map();
+  private queues: Map<string, QueuedTask[]> = new Map();
   private inFlight: Map<string, number> = new Map();
   private lastRequestTime: Map<string, number> = new Map();
   private pausedUntil: Map<string, number> = new Map();
@@ -110,9 +111,9 @@ export class LiteratureRateLimiter {
     }
 
     return new Promise<T>((resolve, reject) => {
-      const task: QueuedTask<T> = {
+      const task: QueuedTask = {
         fn,
-        resolve,
+        resolve: (value) => resolve(value as T),
         reject,
         enqueuedAt: Date.now(),
         signal: options?.signal,
@@ -141,7 +142,7 @@ export class LiteratureRateLimiter {
     });
   }
 
-  private removeQueuedTask(key: string, task: QueuedTask<any>): void {
+  private removeQueuedTask(key: string, task: QueuedTask): void {
     const queue = this.queues.get(key);
     if (!queue) return;
     const idx = queue.indexOf(task);

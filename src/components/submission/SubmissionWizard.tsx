@@ -1,29 +1,19 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { errorName } from "@/services/utils/errors";
 import { useTranslations, useLocale } from "next-intl";
-import { 
-  Send, 
-  CheckCircle2, 
-  AlertCircle, 
-  ArrowLeft, 
-  ArrowRight, 
-  Loader2, 
-  Building2, 
-  FileText, 
-  ShieldCheck, 
-  RefreshCw,
-  ExternalLink
-} from "lucide-react";
+import { Send, AlertCircle, ArrowLeft, ArrowRight, Loader2, Building2, ShieldCheck, ExternalLink } from "lucide-react";
 import { SecurityBriefing } from "./SecurityBriefing";
 import { ConnectionForm } from "./ConnectionForm";
 import SubmissionProgressBar from "./SubmissionProgressBar";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import type { ApiErrorBody, JournalConnectionDto, SubmissionDto } from "@/types/api";
 
 export interface SubmissionWizardProps {
   paperId?: number;
   initialConnectionId?: number;
-  onComplete?: (submission: any) => void;
+  onComplete?: (submission: SubmissionDto) => void;
   onCancel?: () => void;
   className?: string;
 }
@@ -42,57 +32,61 @@ export function SubmissionWizard({
   const isHe = locale === "he";
 
   const [step, setStep] = useState<WizardStep>("select_connection");
-  const [connections, setConnections] = useState<any[]>([]);
+  const [connections, setConnections] = useState<JournalConnectionDto[]>([]);
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(initialConnectionId || null);
   const [publishMode, setPublishMode] = useState<"draft" | "publish">("draft");
   const [fundingDeclaration, setFundingDeclaration] = useState(false);
   const [aiUsageDeclaration, setAiUsageDeclaration] = useState(false);
   const [dataAvailableStatement, setDataAvailableStatement] = useState("");
   
-  const [activeSubmission, setActiveSubmission] = useState<any | null>(null);
+  const [activeSubmission, setActiveSubmission] = useState<SubmissionDto | null>(null);
   const [isLoadingConnections, setIsLoadingConnections] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchConnections = useCallback(async (isMounted = true) => {
-    setIsLoadingConnections(true);
-    try {
-      const res = await fetch("/api/journal-connection");
-      if (!isMounted) return;
-      if (res.ok) {
-        const data = await res.json();
-        const list = Array.isArray(data) ? data : data?.connections || [];
-        setConnections(list);
-        if (list.length > 0 && !selectedConnectionId) {
-          setSelectedConnectionId(list[0].id);
-        }
-      }
-    } catch (err) {
-      if (isMounted) console.error("Error loading connections:", err);
-    } finally {
-      if (isMounted) setIsLoadingConnections(false);
+  const loadConnections = useCallback(async (signal?: AbortSignal): Promise<JournalConnectionDto[] | null> => {
+    const res = await fetch("/api/journal-connection", { signal });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return Array.isArray(data) ? data : data?.connections || [];
+  }, []);
+
+  const applyConnections = useCallback((list: JournalConnectionDto[] | null) => {
+    if (list) {
+      setConnections(list);
+      setSelectedConnectionId((current) => current ?? list[0]?.id ?? null);
     }
-  }, [selectedConnectionId]);
+    setIsLoadingConnections(false);
+  }, []);
+
+  const failConnections = useCallback((err: unknown) => {
+    if (errorName(err) === "AbortError") return;
+    console.error("Error loading connections:", err);
+    setIsLoadingConnections(false);
+  }, []);
+
+  const fetchConnections = () => {
+    setIsLoadingConnections(true);
+    loadConnections().then(applyConnections, failConnections);
+  };
 
   useEffect(() => {
-    let mounted = true;
-    fetchConnections(mounted);
-    return () => {
-      mounted = false;
-    };
-  }, [fetchConnections]);
+    const controller = new AbortController();
+    loadConnections(controller.signal).then(applyConnections, failConnections);
+    return () => controller.abort();
+  }, [loadConnections, applyConnections, failConnections]);
 
   // Live polling when in progress step
   useEffect(() => {
     if (step !== "progress" || !activeSubmission?.id) return;
-    if (["submitted", "failed", "rejected", "accepted"].includes(activeSubmission.status)) return;
+    if (["submitted", "failed", "rejected", "accepted"].includes(activeSubmission.status ?? "")) return;
 
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`/api/submissions/${activeSubmission.id}/status`);
         if (res.ok) {
           const data = await res.json();
-          setActiveSubmission((prev: any) => ({ ...prev, ...data }));
+          setActiveSubmission((prev) => (prev ? { ...prev, ...data } : prev));
         }
       } catch (err) {
         console.warn("Polling status error:", err);
@@ -136,19 +130,20 @@ export function SubmissionWizard({
         }),
       });
 
-      let data: any = null;
+      let data: (ApiErrorBody & Partial<SubmissionDto>) | null = null;
       try {
         data = await res.json();
       } catch {}
 
-      if (res.ok) {
-        setActiveSubmission(data);
+      if (res.ok && data) {
+        const created = data as SubmissionDto;
+        setActiveSubmission(created);
         setStep("progress");
-        onComplete?.(data);
+        onComplete?.(created);
       } else {
         setError(data?.error || (isHe ? "שגיאה ביצירת הגשה." : "Failed to initiate submission."));
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Submission error:", err);
       setError(isHe ? "אירעה שגיאת רשת בעת שליחת המאמר." : "Network error during manuscript submission.");
     } finally {
@@ -569,7 +564,7 @@ export function SubmissionWizard({
                 <button
                   type="button"
                   onClick={() => {
-                    if (onComplete) onComplete(activeSubmission);
+                    if (onComplete && activeSubmission) onComplete(activeSubmission);
                     if (onCancel) onCancel();
                   }}
                   className="px-5 py-2 bg-white border border-slate-300 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"

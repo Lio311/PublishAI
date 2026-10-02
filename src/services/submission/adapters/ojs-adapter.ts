@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ConnectionTestResult, SubmissionPayload, SubmissionResult } from "../connection-types";
+import { errorMessage } from "@/services/utils/errors";
 
 export class OJSAdapter {
   private siteUrl: string;
@@ -44,8 +44,8 @@ export class OJSAdapter {
           siteName: this.siteUrl,
         },
       };
-    } catch (error: any) {
-      return { success: false, message: `Network error: ${error.message}` };
+    } catch (error) {
+      return { success: false, message: `Network error: ${errorMessage(error)}` };
     }
   }
 
@@ -114,8 +114,8 @@ export class OJSAdapter {
         confirmationId: `OJS-${submissionId}`,
         rawResponse: submissionData
       };
-    } catch (error: any) {
-      return { success: false, error: `Network error: ${error.message}` };
+    } catch (error) {
+      return { success: false, error: `Network error: ${errorMessage(error)}` };
     }
   }
 }

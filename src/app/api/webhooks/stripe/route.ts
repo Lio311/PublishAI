@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { checkAndRecordWebhookEvent } from "@/services/webhooks/idempotency";
 import { inngest } from "@/inngest/client";
+import { errorMessage } from "@/services/utils/errors";
 
 const HANDLED_STRIPE_EVENTS = new Set([
   "checkout.session.completed",
@@ -12,7 +13,7 @@ const HANDLED_STRIPE_EVENTS = new Set([
   "invoice.payment_failed",
 ]);
 
-function getCryptoProvider(): any {
+function getCryptoProvider(): Stripe.CryptoProvider | undefined {
   if (typeof Stripe.createNodeCryptoProvider === "function") {
     try {
       return Stripe.createNodeCryptoProvider();
@@ -22,12 +23,11 @@ function getCryptoProvider(): any {
   }
 
   try {
-    const { webcrypto } = require("crypto");
     if (
-      webcrypto?.subtle &&
+      globalThis.crypto?.subtle &&
       typeof Stripe.createSubtleCryptoProvider === "function"
     ) {
-      return Stripe.createSubtleCryptoProvider(webcrypto.subtle);
+      return Stripe.createSubtleCryptoProvider(globalThis.crypto.subtle);
     }
   } catch {}
 
@@ -39,9 +39,8 @@ function getStripeInstance(): Stripe {
   if (!secretKey && process.env.NODE_ENV === "production") {
     throw new Error("STRIPE_SECRET_KEY environment variable is required in production.");
   }
-  return new Stripe(secretKey || "sk_test_dummy_key", {
-    apiVersion: "2025-02-24.acacia" as any,
-  });
+  // Only used to verify webhook signatures, so no API version pin is needed.
+  return new Stripe(secretKey || "sk_test_dummy_key");
 }
 
 export async function POST(request: Request) {
@@ -100,12 +99,12 @@ export async function POST(request: Request) {
         secretToUse
       );
     }
-  } catch (err: any) {
+  } catch (err) {
     console.warn(
-      `[StripeWebhook] Cryptographic signature verification failed: ${err.message}`
+      `[StripeWebhook] Cryptographic signature verification failed: ${errorMessage(err)}`
     );
     return NextResponse.json(
-      { error: `Webhook signature verification failed: ${err.message}` },
+      { error: `Webhook signature verification failed: ${errorMessage(err)}` },
       { status: 400 }
     );
   }
@@ -145,7 +144,7 @@ export async function POST(request: Request) {
       data: {
         id: event.id,
         type: event.type,
-        data: event.data.object as Record<string, any>,
+        data: event.data.object as unknown as Record<string, unknown>,
         created: event.created,
       },
     });
@@ -171,41 +170,44 @@ export async function POST(request: Request) {
       const { users } = await import("@/services/db/schema");
       const { eq } = await import("drizzle-orm");
 
-      const data = event.data.object as any;
+      const idOf = (ref: string | { id: string } | null | undefined) => (typeof ref === "string" ? ref : ref?.id);
 
       if (event.type === "checkout.session.completed") {
-        const customerId = data.customer as string | undefined;
-        const clientReferenceId = data.client_reference_id as string | undefined;
-        const subscriptionId = data.subscription as string | undefined;
+        const session = event.data.object;
+        const customerId = idOf(session.customer);
+        const subscriptionId = idOf(session.subscription);
 
-        if (clientReferenceId) {
+        if (session.client_reference_id) {
           await db
             .update(users)
             .set({
               stripeCustomerId: customerId || undefined,
               stripeSubscriptionId: subscriptionId || undefined,
             })
-            .where(eq(users.id, clientReferenceId));
+            .where(eq(users.id, session.client_reference_id));
         }
       } else if (
         event.type === "customer.subscription.created" ||
         event.type === "customer.subscription.updated"
       ) {
-        const customerId = data.customer as string | undefined;
+        const subscription = event.data.object;
+        const customerId = idOf(subscription.customer);
+        const firstItem = subscription.items?.data?.[0];
         if (customerId) {
           await db
             .update(users)
             .set({
-              stripeSubscriptionId: data.id,
-              stripePriceId: data.items?.data?.[0]?.price?.id,
-              stripeCurrentPeriodEnd: data.current_period_end
-                ? new Date(data.current_period_end * 1000)
+              stripeSubscriptionId: subscription.id,
+              stripePriceId: firstItem?.price?.id,
+              // The billing period lives on subscription items in current Stripe API versions.
+              stripeCurrentPeriodEnd: firstItem?.current_period_end
+                ? new Date(firstItem.current_period_end * 1000)
                 : undefined,
             })
             .where(eq(users.stripeCustomerId, customerId));
         }
       } else if (event.type === "customer.subscription.deleted") {
-        const customerId = data.customer as string | undefined;
+        const customerId = idOf(event.data.object.customer);
         if (customerId) {
           await db
             .update(users)

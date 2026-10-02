@@ -78,8 +78,8 @@ export async function seedDatabase(): Promise<void> {
         articleTitleFormat: citationRule.articleTitleFormat ?? null,
         personalCommsInRefList: citationRule.personalCommsInRefList ?? false,
         exampleReference:
-          (citationRule as any).exampleReference ||
-          (citationRule as any).exampleRef ||
+          citationRule.exampleReference ||
+          citationRule.exampleRef ||
           null,
         notes: citationRule.notes ?? null,
         journalId,
@@ -115,12 +115,12 @@ export async function seedDatabase(): Promise<void> {
           typeName: articleType.name,
           isPrimary: articleType.isPrimary ?? false,
           wordLimit: articleType.wordLimit ?? null,
-          wordLimitNotes: (articleType as any).notes ?? null,
-          displayItemsLimit: (articleType as any).displayItems ?? null,
-          referencesLimit: (articleType as any).refs ?? null,
-          methodsWordLimit: (articleType as any).methods ?? null,
-          abstractWordLimit: (articleType as any).abstractWordLimit ?? null,
-          supplementaryNotes: (articleType as any).supplementaryNotes ?? null,
+          wordLimitNotes: articleType.notes ?? null,
+          displayItemsLimit: articleType.displayItems ?? null,
+          referencesLimit: articleType.refs ?? null,
+          methodsWordLimit: articleType.methods ?? null,
+          abstractWordLimit: articleType.abstractWordLimit ?? null,
+          supplementaryNotes: articleType.supplementaryNotes ?? null,
           journalId,
         };
 
@@ -137,15 +137,15 @@ export async function seedDatabase(): Promise<void> {
       const mappedData = {
         abstractType: abstractRule.type,
         defaultWordLimit: abstractRule.limit ?? null,
-        label: (abstractRule as any).label ?? "Abstract",
-        allowCitations: (abstractRule as any).allowCitations ?? false,
+        label: abstractRule.label ?? "Abstract",
+        allowCitations: abstractRule.allowCitations ?? false,
         structuredHeadings:
-          (abstractRule as any).structuredHeadings ||
-          (abstractRule as any).headings ||
+          abstractRule.structuredHeadings ||
+          abstractRule.headings ||
           null,
         additionalRequirements:
-          (abstractRule as any).additionalRequirements ?? null,
-        notes: (abstractRule as any).notes ?? null,
+          abstractRule.additionalRequirements ?? null,
+        notes: abstractRule.notes ?? null,
         journalId,
       };
 
@@ -174,10 +174,10 @@ export async function seedDatabase(): Promise<void> {
         maxPages: coverLetterRule.maxPages ?? 1,
         shownToReviewers: coverLetterRule.shownToReviewers ?? false,
         requiredContent: coverLetterRule.requiredContent ?? null,
-        uniqueRequirements: (coverLetterRule as any).uniqueRequirements ?? null,
-        toneGuidance: (coverLetterRule as any).toneGuidance ?? null,
-        templatePrompt: (coverLetterRule as any).templatePrompt ?? null,
-        notes: (coverLetterRule as any).notes ?? null,
+        uniqueRequirements: coverLetterRule.uniqueRequirements ?? null,
+        toneGuidance: coverLetterRule.toneGuidance ?? null,
+        templatePrompt: coverLetterRule.templatePrompt ?? null,
+        notes: coverLetterRule.notes ?? null,
         journalId,
       };
 

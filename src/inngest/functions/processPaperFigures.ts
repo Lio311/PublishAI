@@ -1,5 +1,5 @@
 import { inngest } from "../client";
-import { paperUploadedEvent, qaFiguresAnalyzedEvent } from "../events";
+import { paperUploadedEvent } from "../events";
 import {
   extractFiguresFromDocument,
   analyzeFigureWithVisionAi,

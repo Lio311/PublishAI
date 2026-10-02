@@ -1,30 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  CheckCircle2,
-  Circle,
-  AlertTriangle,
-  Sparkles,
-  Edit3,
-  Save,
-  Download,
-  Copy,
-  Check,
-  FileText,
-  Filter,
-  MessageSquare,
-  Undo2,
-  ArrowRight,
-  ExternalLink,
-  Info,
-  Layers,
-  ChevronDown,
-  ChevronUp,
-  X,
-  Send,
-  Wand2
-} from "lucide-react";
+import { CheckCircle2, Circle, Sparkles, Edit3, Save, Download, Copy, Check, FileText, Filter, MessageSquare, Undo2, Layers, X, Wand2 } from "lucide-react";
 
 export interface ReviewerCommentData {
   id: string;
@@ -57,11 +34,10 @@ export interface ReviewResponseInterfaceProps {
 export default function ReviewResponseInterface({
   comments: initialComments = [],
   paperTitle = "",
-  journalName = "Nature Biotechnology",
-  manuscriptId = "NBT-2026-08942",
+  journalName = "",
+  manuscriptId = "",
   onSaveResponse,
   onToggleResolve,
-  onExportRebuttal,
   locale = "en",
 }: ReviewResponseInterfaceProps) {
   const isHe = locale === "he";
@@ -358,14 +334,14 @@ export default function ReviewResponseInterface({
             {isHe ? "סטטוס:" : "Status:"}
           </span>
           <div className="flex items-center bg-slate-100 p-1 rounded-xl text-xs">
-            {[
+            {([
               { key: "all", label: isHe ? "הכל" : "All" },
               { key: "unresolved", label: isHe ? "פתוח" : "Unresolved" },
               { key: "resolved", label: isHe ? "נפתר" : "Resolved" },
-            ].map((st) => (
+            ] as { key: typeof selectedStatus; label: string }[]).map((st) => (
               <button
                 key={st.key}
-                onClick={() => setSelectedStatus(st.key as any)}
+                onClick={() => setSelectedStatus(st.key)}
                 className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
                   selectedStatus === st.key ? "bg-white font-semibold text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
                 }`}

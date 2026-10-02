@@ -2,6 +2,7 @@ import { neon, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import * as baseSchema from './schema';
 import * as embeddingsSchema from './schema/embeddings';
+import { errorMessage, errorCode } from "@/services/utils/errors";
 
 export const schema = { ...baseSchema, ...embeddingsSchema };
 export type AppSchema = typeof schema;
@@ -38,8 +39,8 @@ const globalForDb = globalThis as unknown as GlobalDbCache;
  */
 function isTransientConnectionError(err: unknown): boolean {
   if (!err) return false;
-  const msg = String((err as any)?.message || err).toLowerCase();
-  const code = String((err as any)?.code || '').toUpperCase();
+  const msg = String(errorMessage(err) || err).toLowerCase();
+  const code = String(errorCode(err) || '').toUpperCase();
   return (
     code === 'ECONNRESET' ||
     code === 'ETIMEDOUT' ||
@@ -69,7 +70,7 @@ function setupNeonResilience(): void {
   const defaultFetch = neonConfig.fetchFunction ?? globalThis.fetch;
   if (!defaultFetch) return;
 
-  neonConfig.fetchFunction = async (url: any, options?: any) => {
+  neonConfig.fetchFunction = async (url: string | URL | Request, options?: RequestInit) => {
     const maxRetries = 3;
     let lastErr: unknown;
 
@@ -91,7 +92,7 @@ function setupNeonResilience(): void {
         if (isTransientConnectionError(err) && attempt < maxRetries) {
           const delayMs = Math.min(100 * Math.pow(2, attempt) + Math.random() * 50, 1500);
           console.warn(
-            `[Neon Driver] Transient connection drop on attempt ${attempt}/${maxRetries} (${(err as any)?.message || err}). Retrying in ${Math.round(delayMs)}ms...`
+            `[Neon Driver] Transient connection drop on attempt ${attempt}/${maxRetries} (${errorMessage(err) || err}). Retrying in ${Math.round(delayMs)}ms...`
           );
           await new Promise((resolve) => setTimeout(resolve, delayMs));
           continue;
@@ -114,7 +115,7 @@ function createSqlClient(): ReturnType<typeof neon> {
 
   // Safe placeholder executor when DATABASE_URL is omitted or a placeholder (e.g. during build-time)
   // Avoids hardcoded connection strings while failing gracefully if queried.
-  return ((..._args: any[]) => {
+  return ((..._args: unknown[]) => {
     throw new Error(
       '[Database] DATABASE_URL is not configured or is a placeholder. Please configure a valid DATABASE_URL in your environment.'
     );
@@ -125,7 +126,7 @@ function createSqlClient(): ReturnType<typeof neon> {
 if (!globalForDb.__publish_ai_db__ || !globalForDb.__publish_ai_sql__) {
   const sqlInstance = createSqlClient();
   globalForDb.__publish_ai_sql__ = sqlInstance;
-  globalForDb.__publish_ai_db__ = drizzle(sqlInstance as any, { schema }) as AppDb;
+  globalForDb.__publish_ai_db__ = drizzle(sqlInstance, { schema }) as AppDb;
 }
 
 export const sql = globalForDb.__publish_ai_sql__!;

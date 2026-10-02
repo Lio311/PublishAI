@@ -434,7 +434,8 @@
   "Submissions": {
     "title": "Submissions Tracker",
     "reviewsTab": "Reviewer Rebuttal & Responses",
-    "backToSubmissions": "Back to Submissions"
+    "backToSubmissions": "Back to Submissions",
+    "loading": "Loading submissions..."
   },
   "Analytics": {
     "title": "GraphRAG Analytics Dashboard",

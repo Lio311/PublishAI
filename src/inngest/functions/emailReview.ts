@@ -1,8 +1,5 @@
 import { inngest } from "../client";
-import {
-  emailReviewReceivedEvent,
-  paperReviewerCommentsReceivedEvent,
-} from "../events";
+import { emailReviewReceivedEvent } from "../events";
 import { processIncomingReviewEmail } from "@/services/emailService";
 import { db } from "@/services/db";
 import { submissions, reviewThreads, reviewComments } from "@/services/db/schema";

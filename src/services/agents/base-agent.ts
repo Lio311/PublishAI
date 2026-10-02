@@ -52,3 +52,13 @@ export abstract class BaseAgent {
     };
   }
 }
+
+/**
+ * Reads a previous stage's result. Inside Inngest steps the Map is rebuilt in
+ * memory, but after a step replay it may arrive as a plain serialized object.
+ */
+export function getStageOutput(context: AgentContext, stage: Stage): AgentResult | undefined {
+  const outputs = context.previousStageOutputs as Map<Stage, AgentResult> | Partial<Record<Stage, AgentResult>> | undefined;
+  if (!outputs) return undefined;
+  return outputs instanceof Map ? outputs.get(stage) : outputs[stage];
+}

@@ -5,13 +5,14 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { ThumbsUp, ThumbsDown, ChevronRight } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import type { AgentEvaluationDto } from '@/types/api';
 
 export default function RlhfClient() {
   const locale = useLocale();
   const t = useTranslations("RLHF");
   const isHe = locale === "he";
 
-  const [evaluations, setEvaluations] = useState<any[]>([]);
+  const [evaluations, setEvaluations] = useState<AgentEvaluationDto[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [feedbackText, setFeedbackText] = useState("");

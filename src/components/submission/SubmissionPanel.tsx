@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { errorName } from "@/services/utils/errors";
 import { useTranslations, useLocale } from "next-intl";
 import { SecurityBriefing } from "./SecurityBriefing";
 import { ConnectionForm } from "./ConnectionForm";
 import SubmissionProgressBar from "./SubmissionProgressBar";
 import { Loader2, ExternalLink, RefreshCw, Send, CheckCircle2, AlertCircle, ArrowDownRight, ArrowLeft } from "lucide-react";
+import type { ApiErrorBody, JournalConnectionDto, SubmissionDto } from "@/types/api";
 
 interface SubmissionPanelProps {
   paperId: number;
@@ -16,77 +18,84 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
   const locale = useLocale();
   const isHe = locale === "he";
   const [step, setStep] = useState<"briefing" | "list" | "form" | "confirm" | "progress">("list");
-  const [connections, setConnections] = useState<any[]>([]);
+  const [connections, setConnections] = useState<JournalConnectionDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null);
   const [cascadingId, setCascadingId] = useState<number | null>(null);
-  const [submissions, setSubmissions] = useState<any[]>([]);
-  const [activeSubmission, setActiveSubmission] = useState<any | null>(null);
+  const [submissions, setSubmissions] = useState<SubmissionDto[]>([]);
+  const [activeSubmission, setActiveSubmission] = useState<SubmissionDto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
-  const fetchConnections = useCallback(async (isMounted = true) => {
-    try {
-      const res = await fetch("/api/journal-connection");
-      if (!isMounted) return;
-      if (res.ok) {
-        const data = await res.json();
-        setConnections(Array.isArray(data) ? data : data?.connections || []);
-      } else {
-        console.warn("Could not fetch journal connections:", res.status);
-      }
-    } catch (err) {
-      if (isMounted) console.error("Error fetching connections:", err);
-    } finally {
-      if (isMounted) setIsLoading(false);
+  const loadConnections = useCallback(async (signal?: AbortSignal): Promise<JournalConnectionDto[] | null> => {
+    const res = await fetch("/api/journal-connection", { signal });
+    if (!res.ok) {
+      console.warn("Could not fetch journal connections:", res.status);
+      return null;
+    }
+    const data = await res.json();
+    return Array.isArray(data) ? data : data?.connections || [];
+  }, []);
+
+  const loadSubmissions = useCallback(async (signal?: AbortSignal): Promise<SubmissionDto[] | null> => {
+    const res = await fetch("/api/submissions", { signal });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const list: SubmissionDto[] = Array.isArray(data) ? data : data?.submissions || [];
+    return list.filter((s) => s.paperId === paperId);
+  }, [paperId]);
+
+  const applySubmissions = useCallback((filtered: SubmissionDto[] | null) => {
+    if (!filtered) return;
+    setSubmissions(filtered);
+    // Update active submission if in progress view
+    if (filtered.length > 0) {
+      setActiveSubmission((prev) => {
+        if (!prev) return filtered[0];
+        return filtered.find((s) => s.id === prev.id) || filtered[0];
+      });
     }
   }, []);
 
-  const fetchSubmissions = useCallback(async (isMounted = true) => {
+  const fetchConnections = () => {
+    loadConnections().then(
+      (list) => {
+        if (list) setConnections(list);
+      },
+      (err: unknown) => console.error("Error fetching connections:", err)
+    );
+  };
+
+  const fetchSubmissions = useCallback(async () => {
     try {
-      const res = await fetch("/api/submissions");
-      if (!isMounted) return;
-      if (res.ok) {
-        const data = await res.json();
-        const list = Array.isArray(data) ? data : data?.submissions || [];
-        const filtered = list.filter((s: any) => s.paperId === paperId);
-        setSubmissions(filtered);
-        
-        // Update active submission if in progress view
-        if (filtered.length > 0) {
-          setActiveSubmission((prev: any) => {
-            if (!prev) return filtered[0];
-            return filtered.find((s: any) => s.id === prev.id) || filtered[0];
-          });
-        }
-      }
+      applySubmissions(await loadSubmissions());
     } catch (e) {
-      if (isMounted) console.error("Error fetching submissions:", e);
+      console.error("Error fetching submissions:", e);
     }
-  }, [paperId]);
+  }, [loadSubmissions, applySubmissions]);
 
   useEffect(() => {
-    let isMounted = true;
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    Promise.all([
-      fetchConnections(isMounted),
-      fetchSubmissions(isMounted)
-    ]).finally(() => {
-      if (isMounted) setIsLoading(false);
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [paperId, fetchConnections, fetchSubmissions]);
+    const controller = new AbortController();
+    Promise.all([loadConnections(controller.signal), loadSubmissions(controller.signal)]).then(
+      ([loadedConnections, loadedSubmissions]) => {
+        if (loadedConnections) setConnections(loadedConnections);
+        applySubmissions(loadedSubmissions);
+        setIsLoading(false);
+      },
+      (err: unknown) => {
+        if (errorName(err) === "AbortError") return;
+        console.error("Error loading submission panel:", err);
+        setIsLoading(false);
+      }
+    );
+    return () => controller.abort();
+  }, [loadConnections, loadSubmissions, applySubmissions]);
 
   // Polling when in progress view and submission is active
   useEffect(() => {
     if (step !== "progress" || !activeSubmission?.id) return;
-    if (["submitted", "failed", "rejected", "accepted"].includes(activeSubmission.status)) return;
+    if (["submitted", "failed", "rejected", "accepted"].includes(activeSubmission.status ?? "")) return;
 
     const interval = setInterval(() => {
       fetchSubmissions();
@@ -101,7 +110,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
     setFeedbackMessage(null);
     try {
       const res = await fetch(`/api/submissions/${submissionId}/cascade`, { method: "POST" });
-      let data: any = null;
+      let data: (ApiErrorBody & Partial<SubmissionDto>) | null = null;
       try {
         data = await res.json();
       } catch {}
@@ -112,7 +121,7 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
       } else {
         setErrorMessage(data?.error || (isHe ? "העברת ההגשה נכשלה." : "Failed to cascade submission."));
       }
-    } catch (e: any) {
+    } catch (e) {
       console.error("Cascade error:", e);
       setErrorMessage(isHe ? "אירעה שגיאת רשת במהלך ניוד ההגשה." : "A network error occurred while cascading.");
     } finally {
@@ -152,19 +161,19 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
         body: JSON.stringify({ paperId, connectionId: selectedConnectionId, publishMode }),
       });
 
-      let data: any = null;
+      let data: (ApiErrorBody & Partial<SubmissionDto>) | null = null;
       try {
         data = await res.json();
       } catch {}
 
-      if (res.ok) {
-        setActiveSubmission(data);
+      if (res.ok && data) {
+        setActiveSubmission(data as SubmissionDto);
         setStep("progress");
         await fetchSubmissions();
       } else {
         setErrorMessage(data?.error || (isHe ? "שגיאה ביצירת הגשה." : "Failed to initiate submission."));
       }
-    } catch (e: any) {
+    } catch (e) {
       console.error("Submission error:", e);
       setErrorMessage(isHe ? "שגיאת תקשורת עם שרת ההגשות." : "Network error initiating submission.");
     } finally {
@@ -441,18 +450,18 @@ export function SubmissionPanel({ paperId }: SubmissionPanelProps) {
                 <div className="flex items-center gap-3">
                   {sub.status === 'submitted' && <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />}
                   {(sub.status === 'failed' || sub.status === 'rejected') && <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />}
-                  {['preparing', 'submitting'].includes(sub.status) && <Loader2 className="w-5 h-5 text-sky-500 animate-spin shrink-0" />}
+                  {['preparing', 'submitting'].includes(sub.status ?? '') && <Loader2 className="w-5 h-5 text-sky-500 animate-spin shrink-0" />}
                   
                   <div>
                     <div className="font-medium text-slate-800 capitalize">{sub.status}</div>
                     <div className="text-sm text-slate-500">
-                      {new Date(sub.createdAt).toLocaleString()} • {isHe ? "מצב:" : "Mode:"} {sub.publishMode}
+                      {sub.createdAt ? new Date(sub.createdAt).toLocaleString() : "—"} • {isHe ? "מצב:" : "Mode:"} {sub.publishMode}
                     </div>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  {['preparing', 'submitting'].includes(sub.status) && (
+                  {['preparing', 'submitting'].includes(sub.status ?? '') && (
                     <button
                       type="button"
                       onClick={() => {

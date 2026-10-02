@@ -4,6 +4,8 @@ import { langfuseLangchainHandler } from "@/lib/langfuse";
 import { PublishAIState } from "../state";
 import { AgentResult } from "../../base-agent";
 import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
+import { errorMessage } from "@/services/utils/errors";
+import { messageText, totalTokens } from "../messageUtils";
 
 export const scientificReviewNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   const modelName = ANTHROPIC_MODELS.reasoning;
@@ -20,10 +22,8 @@ export const scientificReviewNode = async (state: PublishAIState): Promise<Parti
       callbacks: [langfuseLangchainHandler],
     });
 
-    const output = typeof response.content === "string" 
-      ? response.content 
-      : (Array.isArray(response.content) ? response.content.map(c => typeof c === "string" ? c : (c as any).text || "").join("") : String(response.content));
-    const tokensUsed = (response.response_metadata as any)?.usage?.total_tokens ?? 0;
+    const output = messageText(response.content);
+    const tokensUsed = totalTokens(response);
 
     const result: AgentResult = {
       stage: "scientific_review",
@@ -38,12 +38,12 @@ export const scientificReviewNode = async (state: PublishAIState): Promise<Parti
       previousStageOutputs: new Map([["scientific_review", result]]),
       currentStage: "scientific_review"
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[scientificReviewNode] Execution failed:", error);
-    const fallbackOutput = `Scientific review could not be completed: ${error?.message || "Unknown error"}`;
+    const fallbackOutput = `Scientific review could not be completed: ${errorMessage(error) || "Unknown error"}`;
     return {
       scientificReview: fallbackOutput,
-      validationErrors: [`Scientific review failed: ${error?.message || "Unknown error"}`],
+      validationErrors: [`Scientific review failed: ${errorMessage(error) || "Unknown error"}`],
       currentStage: "scientific_review"
     };
   }

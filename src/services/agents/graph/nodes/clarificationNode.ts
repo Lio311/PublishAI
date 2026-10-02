@@ -4,6 +4,8 @@ import { langfuseLangchainHandler } from "@/lib/langfuse";
 import { PublishAIState } from "../state";
 import { AgentResult } from "../../base-agent";
 import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
+import { errorMessage } from "@/services/utils/errors";
+import { messageText, totalTokens } from "../messageUtils";
 
 export const clarificationNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   const modelName = ANTHROPIC_MODELS.standard;
@@ -30,10 +32,8 @@ ${content}
       callbacks: [langfuseLangchainHandler],
     });
 
-    const output = typeof response.content === "string" 
-      ? response.content 
-      : (Array.isArray(response.content) ? response.content.map(c => typeof c === "string" ? c : (c as any).text || "").join("") : String(response.content));
-    const tokensUsed = (response.response_metadata as any)?.usage?.total_tokens ?? 0;
+    const output = messageText(response.content);
+    const tokensUsed = totalTokens(response);
 
     const result: AgentResult = {
       stage: "clarification",
@@ -48,12 +48,12 @@ ${content}
       previousStageOutputs: new Map([["clarification", result]]),
       currentStage: "clarification"
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[clarificationNode] Failed to analyze manuscript:", error);
-    const fallbackOutput = `Clarification analysis failed: ${error?.message || "Unknown error"}`;
+    const fallbackOutput = `Clarification analysis failed: ${errorMessage(error) || "Unknown error"}`;
     return {
       clarification: fallbackOutput,
-      validationErrors: [`Clarification failed: ${error?.message || "Unknown error"}`],
+      validationErrors: [`Clarification failed: ${errorMessage(error) || "Unknown error"}`],
       currentStage: "clarification"
     };
   }

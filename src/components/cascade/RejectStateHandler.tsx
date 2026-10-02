@@ -38,7 +38,7 @@ export default function RejectStateHandler({
     try {
       await onReformatRequest(journalId);
       setSuccess(journalId);
-    } catch (err) {
+    } catch {
       setError(journalId);
     } finally {
       setIsReformatting(null);

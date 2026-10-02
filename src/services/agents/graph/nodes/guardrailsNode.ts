@@ -3,6 +3,8 @@ import { AIMessage, SystemMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
 import { OPENAI_MODELS } from "@/services/ai/modelIds";
+import { errorMessage } from "@/services/utils/errors";
+import { messageText } from "../messageUtils";
 
 export const guardrailsNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   const llm = new ChatOpenAI({
@@ -25,19 +27,17 @@ ${content}
       callbacks: [langfuseLangchainHandler],
     });
 
-    const output = typeof response.content === "string" 
-      ? response.content 
-      : (Array.isArray(response.content) ? response.content.map(c => typeof c === "string" ? c : (c as any).text || "").join("") : String(response.content));
+    const output = messageText(response.content);
     const validationErrors = output.trim() === "PASS" ? [] : [output];
 
     return {
       validationErrors,
       messages: [new AIMessage(`Guardrails check: ${output}`)],
     };
-  } catch (error: any) {
+  } catch (error) {
     console.warn("[guardrailsNode] Guardrails check failed:", error);
     return {
-      messages: [new AIMessage(`Guardrails check bypassed due to error: ${error?.message || "Unknown error"}`)],
+      messages: [new AIMessage(`Guardrails check bypassed due to error: ${errorMessage(error) || "Unknown error"}`)],
     };
   }
 };

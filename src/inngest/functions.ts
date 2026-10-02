@@ -27,11 +27,7 @@ import { CoverLetterAgent } from "@/services/agents/cover-letter-agent";
 import { CompilationAgent } from "@/services/agents/compilation-agent";
 import { RebuttalAgent } from "@/services/agents/rebuttal-agent";
 import { AgentContext, AgentResult, Stage } from "@/services/agents/base-agent";
-import {
-  getTransporter,
-  getSenderAddress,
-  sendWeeklyDigestEmail,
-} from "@/services/email/notification-service";
+import { sendWeeklyDigestEmail } from "@/services/email/notification-service";
 
 export const processPaper = inngest.createFunction(
   {
@@ -45,8 +41,7 @@ export const processPaper = inngest.createFunction(
     retries: 2,
     onFailure: async ({ event, step }) => {
       const paperId =
-        (event.data as any)?.event?.data?.paperId ??
-        (event.data as any)?.paperId;
+        event.data.event?.data?.paperId;
       if (paperId) {
         await step.run("mark-failed", async () => {
           await db
@@ -311,8 +306,7 @@ export const processResubmission = inngest.createFunction(
     retries: 2,
     onFailure: async ({ event, step }) => {
       const paperId =
-        (event.data as any)?.event?.data?.paperId ??
-        (event.data as any)?.paperId;
+        event.data.event?.data?.paperId;
       if (paperId) {
         await step.run("mark-failed", async () => {
           await db

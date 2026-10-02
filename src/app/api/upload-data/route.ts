@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ file: savedFile }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     secureLogger.error("Upload error:", error);
     return NextResponse.json(
       { error: "Failed to upload file" },

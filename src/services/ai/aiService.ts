@@ -1,17 +1,11 @@
-import { generateText, generateObject, streamText } from "ai";
+import { generateText, streamText } from "ai";
 export { generateText, generateObject, streamText } from "ai";
 import { createOpenAI, openai } from "@ai-sdk/openai";
 import Anthropic from "@anthropic-ai/sdk";
 import { langfuse } from "@/lib/langfuse";
 import { memoryClient } from "@/lib/mem0";
-import { getApplicableRules, extractUserRewriteFeedback } from "@/services/learningService";
-import {
-  withRateLimitRetry,
-  withModelFallback,
-  withTimeout,
-  isRateLimitError,
-  isTransientError,
-} from "./rateLimiter";
+import { getApplicableRules } from "@/services/learningService";
+import { withModelFallback, withTimeout, isRateLimitError, isTransientError } from "./rateLimiter";
 import {
   DEFAULT_OPENAI_MODEL_NAME,
   DEFAULT_ANTHROPIC_MODEL_NAME,
@@ -38,6 +32,7 @@ import {
   ReviewResponseOptions,
 } from "./types";
 import { claudeAcceptsSamplingParams } from "./modelIds";
+import { errorMessage } from "@/services/utils/errors";
 
 export const DEFAULT_OPENAI_MODEL = DEFAULT_OPENAI_MODEL_NAME;
 export const DEFAULT_ANTHROPIC_MODEL = DEFAULT_ANTHROPIC_MODEL_NAME;
@@ -99,13 +94,14 @@ export async function callLLM(options: GenerateTextOptions): Promise<AIResponse>
   // 3. User preferences memory injection with safe XML wrapping
   if (options.useMemory && options.userId) {
     try {
+      // Scoped through filters: mem0 v3 rejects top-level user ids in search().
       const searchResponse = await memoryClient.search(sanitizedUserPrompt, {
-        userId: options.userId,
+        filters: { user_id: options.userId },
         topK: 3,
-      } as any);
+      });
 
       const memoryStr = searchResponse?.results
-        ? searchResponse.results.map((r: any) => `- ${r.memory}`).join("\n")
+        ? searchResponse.results.map((r) => `- ${r.memory}`).join("\n")
         : "";
 
       if (memoryStr) {
@@ -136,7 +132,7 @@ export async function callLLM(options: GenerateTextOptions): Promise<AIResponse>
 
   // 5. Execute with automated model fallback and rate-limit recovery
   try {
-    const { result, usedCandidate } = await withModelFallback(
+    const { result } = await withModelFallback(
       async (candidate) => {
         if (candidate.provider === "anthropic") {
           const client = getAnthropicClient(options.apiKey);
@@ -178,8 +174,8 @@ export async function callLLM(options: GenerateTextOptions): Promise<AIResponse>
         // OpenAI execution path
         const modelInstance = getOpenAIModelInstance(candidate.model, options.apiKey);
 
-        let trace: any = null;
-        let generation: any = null;
+        let trace: ReturnType<typeof langfuse.trace> | null = null;
+        let generation: ReturnType<ReturnType<typeof langfuse.trace>["generation"]> | null = null;
         try {
           trace = langfuse.trace({
             name: "callLLM",
@@ -212,9 +208,9 @@ export async function callLLM(options: GenerateTextOptions): Promise<AIResponse>
               generation.end({
                 output: genResult.text,
                 usage: {
-                  promptTokens: (genResult.usage as any)?.promptTokens,
-                  completionTokens: (genResult.usage as any)?.completionTokens,
-                  totalTokens: (genResult.usage as any)?.totalTokens,
+                  promptTokens: genResult.usage.inputTokens,
+                  completionTokens: genResult.usage.outputTokens,
+                  totalTokens: genResult.usage.totalTokens,
                 },
               });
               await langfuse.flushAsync().catch(() => {});
@@ -227,19 +223,20 @@ export async function callLLM(options: GenerateTextOptions): Promise<AIResponse>
             text: genResult.text,
             provider: "openai" as AIProvider,
             model: candidate.model,
-            tokensUsed: (genResult.usage as any)?.totalTokens,
+            tokensUsed: genResult.usage.totalTokens,
             usage: {
-              promptTokens: (genResult.usage as any)?.promptTokens,
-              completionTokens: (genResult.usage as any)?.completionTokens,
-              totalTokens: (genResult.usage as any)?.totalTokens,
+              promptTokens: genResult.usage.inputTokens,
+              completionTokens: genResult.usage.outputTokens,
+              totalTokens: genResult.usage.totalTokens,
             },
           };
-        } catch (openaiErr: any) {
+        } catch (openaiErr) {
           if (generation) {
             try {
               generation.end({
                 output: null,
-                error: redactApiKeys(openaiErr?.message || String(openaiErr)),
+                level: "ERROR",
+                statusMessage: redactApiKeys(errorMessage(openaiErr) || String(openaiErr)),
               });
               await langfuse.flushAsync().catch(() => {});
             } catch {}
@@ -255,8 +252,8 @@ export async function callLLM(options: GenerateTextOptions): Promise<AIResponse>
     );
 
     return result;
-  } catch (finalError: any) {
-    const safeErrMsg = redactApiKeys(finalError?.message || String(finalError));
+  } catch (finalError) {
+    const safeErrMsg = redactApiKeys(errorMessage(finalError) || String(finalError));
     console.error(`[callLLM] All candidate models failed for primary "${primaryModel}":`, safeErrMsg);
     throw new Error(`LLM call failed after model fallbacks: ${safeErrMsg}`);
   }
@@ -365,11 +362,11 @@ export async function chatLLM(options: ChatOptions): Promise<AIResponse> {
           text: genResult.text,
           provider: "openai" as AIProvider,
           model: candidate.model,
-          tokensUsed: (genResult.usage as any)?.totalTokens,
+          tokensUsed: genResult.usage.totalTokens,
           usage: {
-            promptTokens: (genResult.usage as any)?.promptTokens,
-            completionTokens: (genResult.usage as any)?.completionTokens,
-            totalTokens: (genResult.usage as any)?.totalTokens,
+            promptTokens: genResult.usage.inputTokens,
+            completionTokens: genResult.usage.outputTokens,
+            totalTokens: genResult.usage.totalTokens,
           },
         };
       },
@@ -381,8 +378,8 @@ export async function chatLLM(options: ChatOptions): Promise<AIResponse> {
     );
 
     return result;
-  } catch (error: any) {
-    const safeErrMsg = redactApiKeys(error?.message || String(error));
+  } catch (error) {
+    const safeErrMsg = redactApiKeys(errorMessage(error) || String(error));
     console.error(`[chatLLM] Chat failed across candidate models:`, safeErrMsg);
     throw new Error(`Chat completion failed: ${safeErrMsg}`);
   }
@@ -413,7 +410,7 @@ export async function streamLLMText(options: GenerateTextOptions) {
     ? `${options.systemPrompt}\n\n${SYSTEM_PROMPT_GUARDRAILS}`
     : SYSTEM_PROMPT_GUARDRAILS;
 
-  let lastError: any;
+  let lastError: unknown;
 
   for (const candidate of candidateList) {
     try {
@@ -435,9 +432,9 @@ export async function streamLLMText(options: GenerateTextOptions) {
           temperature: options.temperature,
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       lastError = error;
-      const safeErrMsg = redactApiKeys(error?.message || String(error));
+      const safeErrMsg = redactApiKeys(errorMessage(error) || String(error));
       console.warn(
         `[streamLLMText] Stream candidate ${candidate.provider ? `${candidate.provider}:` : ""}${candidate.model} failed (${safeErrMsg}). Falling back...`
       );
@@ -448,7 +445,7 @@ export async function streamLLMText(options: GenerateTextOptions) {
     }
   }
 
-  const safeErrMsg = redactApiKeys(lastError?.message || String(lastError));
+  const safeErrMsg = redactApiKeys(errorMessage(lastError) || String(lastError));
   console.error(`[streamLLMText] Stream initiation failed across all candidates:`, safeErrMsg);
   throw new Error(`Stream initiation failed: ${safeErrMsg}`);
 }
@@ -536,10 +533,7 @@ Ensure scientific accuracy, preserve author citations and specific numbers/metri
     try {
       const learnedRules = await getApplicableRules(options.userId, options.journalId);
       if (learnedRules && learnedRules.length > 0) {
-        const rulesText = Array.isArray(learnedRules)
-          ? learnedRules.map((r: any) => `- ${r.ruleText || r.rule || r}`).join("\n")
-          : String(learnedRules);
-        promptParts.push(wrapPromptContext("learned_preferences", rulesText, "Learned author preferences"));
+        promptParts.push(wrapPromptContext("learned_preferences", learnedRules, "Learned author preferences"));
       }
     } catch (e) {
       console.warn("[refineAcademicWriting] Learning rules retrieval skipped:", redactApiKeys(String(e)));

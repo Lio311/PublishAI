@@ -4,12 +4,7 @@ import {
   isSafeRedirect,
   getSafeRedirectUrl,
 } from "@/services/security/redirect";
-import {
-  getSecurityHeaders,
-  getSecurityHeadersArray,
-  applySecurityHeaders,
-  DEFAULT_CONTENT_SECURITY_POLICY,
-} from "@/services/security/headers";
+import { getSecurityHeaders, getSecurityHeadersArray, applySecurityHeaders } from "@/services/security/headers";
 import {
   validateCsrf,
   generateCsrfToken,

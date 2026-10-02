@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useEffectEvent, useRef, useMemo } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/app/i18n/routing";
@@ -11,34 +11,10 @@ import StarterKit from '@tiptap/starter-kit';
 import { Insertion, Deletion } from "./extensions/TrackChanges";
 import { AgentRunner } from "../dashboard/AgentRunner";
 
-import {
-  Bold,
-  Italic,
-  Underline,
-  Heading1,
-  Heading2,
-  Heading3,
-  List,
-  ListOrdered,
-  Quote,
-  Code,
-  Link as LinkIcon,
-  FileText,
-  Save,
-  Download,
-  Share2,
-  Sparkles,
-  BookOpen,
-  CheckCircle2,
-  AlertCircle,
-  ChevronRight,
-  Send,
-  RefreshCw,
-  Search,
-  Check,
-  Eye,
-  Plus,
-} from "lucide-react";
+import { Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, Code, FileText, Save, Download, Sparkles, BookOpen, CheckCircle2, AlertCircle, Send, RefreshCw, Search, Check, Plus } from "lucide-react";
+import { errorMessage } from "@/services/utils/errors";
+import type { Editor } from "@tiptap/react";
+import type { LiteratureItem as CitationSearchResult } from "@/services/literature/types";
 
 export interface DocumentSection {
   id: string;
@@ -59,6 +35,9 @@ export interface DocumentEditorProps {
 }
 
 export type RichDocumentEditorProps = DocumentEditorProps;
+
+/** Agent data-validation warnings: plain strings or structured findings. */
+type DataWarning = string | { textAnchor?: string; warning?: string; message?: string };
 
 /** Journal fields used for the compliance panel (from GET /api/journals). */
 interface JournalOption {
@@ -158,7 +137,7 @@ export default function RichDocumentEditor({
   const [activeSection, setActiveSection] = useState("abstract");
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const [rightTab, setRightTab] = useState<"copilot" | "citations" | "compliance">("copilot");
-  const [dataWarnings, setDataWarnings] = useState<any[]>([]);
+  const [dataWarnings, setDataWarnings] = useState<DataWarning[]>([]);
   const [aiPrompt, setAiPrompt] = useState("");
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [pipelineStatus, setPipelineStatus] = useState<"IDLE" | "RUNNING" | "PAUSED" | "COMPLETED" | "ERROR">("IDLE");
@@ -167,7 +146,7 @@ export default function RichDocumentEditor({
   // Citation search state
   const [citationQuery, setCitationQuery] = useState("");
   const [isSearchingCitations, setIsSearchingCitations] = useState(false);
-  const [citationResults, setCitationResults] = useState<any[]>([]);
+  const [citationResults, setCitationResults] = useState<CitationSearchResult[]>([]);
 
   const isMountedRef = useRef(true);
 
@@ -177,10 +156,6 @@ export default function RichDocumentEditor({
       isMountedRef.current = false;
     };
   }, []);
-
-  useEffect(() => {
-    setCurrentDocId(documentId);
-  }, [documentId]);
 
   // Target journals and their limits come from the journal catalog, not a hardcoded list.
   useEffect(() => {
@@ -215,24 +190,6 @@ export default function RichDocumentEditor({
       },
     },
   });
-
-  // Synchronize external initialContent updates into editor
-  useEffect(() => {
-    if (editor && initialContent !== undefined) {
-      const currentHtml = editor.getHTML();
-      if (initialContent !== currentHtml && initialContent !== content) {
-        editor.commands.setContent(initialContent, { emitUpdate: false });
-        setContent(initialContent);
-      }
-    }
-  }, [editor, initialContent]);
-
-  // Synchronize title if initialTitle prop updates
-  useEffect(() => {
-    if (initialTitle && initialTitle !== title) {
-      setTitle(initialTitle);
-    }
-  }, [initialTitle]);
 
   // Derived statistics from actual plain text
   const plainText = useMemo(() => {
@@ -322,24 +279,26 @@ export default function RichDocumentEditor({
           toast.success(t("saved"));
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("[RichDocumentEditor] Save error:", error);
       if (isMountedRef.current) {
         setSaveStatus("unsaved");
         if (!isAutosave) {
-          toast.error(error.message || t("saveFailed"));
+          toast.error(errorMessage(error) || t("saveFailed"));
         }
       }
     }
   };
 
+  const autosave = useEffectEvent(() => {
+    performSave(true);
+  });
+
   // Debounced Autosave with cleanup
   useEffect(() => {
     if (saveStatus !== "unsaved") return;
 
-    const timer = setTimeout(() => {
-      performSave(true);
-    }, 2500);
+    const timer = setTimeout(autosave, 2500);
 
     return () => {
       clearTimeout(timer);
@@ -402,9 +361,9 @@ export default function RichDocumentEditor({
       if (actionType === "custom") {
         setAiPrompt("");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("[RichDocumentEditor] AI error:", error);
-      toast.error(error.message || t("aiFailed"));
+      toast.error(errorMessage(error) || t("aiFailed"));
     } finally {
       if (isMountedRef.current) {
         setIsAiGenerating(false);
@@ -529,7 +488,7 @@ export default function RichDocumentEditor({
             onClick={() => {
               if (onExport) return onExport("docx");
               if (/^[0-9a-f-]{36}$/i.test(currentDocId)) {
-                window.location.href = `/api/documents/${currentDocId}/export?format=docx`;
+                window.location.assign(new URL(`/api/documents/${currentDocId}/export?format=docx`, window.location.origin));
               } else {
                 toast.info(t("saveBeforeExport"));
               }
@@ -758,8 +717,8 @@ export default function RichDocumentEditor({
                   <div key={idx} className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
                     <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold">{t("dataWarning")} {warning.textAnchor ? `- ${warning.textAnchor}` : ''}</p>
-                      <p>{warning.warning || warning.message || (typeof warning === 'string' ? warning : JSON.stringify(warning))}</p>
+                      <p className="font-semibold">{t("dataWarning")} {typeof warning !== 'string' && warning.textAnchor ? `- ${warning.textAnchor}` : ''}</p>
+                      <p>{typeof warning === 'string' ? warning : warning.warning || warning.message || JSON.stringify(warning)}</p>
                     </div>
                   </div>
                 ))}
@@ -768,7 +727,7 @@ export default function RichDocumentEditor({
             {editor && (
               <BubbleMenu
                 editor={editor}
-                shouldShow={({ editor }: { editor: any }) => editor.isActive('insertion') || editor.isActive('deletion')}
+                shouldShow={({ editor }: { editor: Editor }) => editor.isActive('insertion') || editor.isActive('deletion')}
               >
                 <div className="flex items-center gap-1 bg-white border border-slate-200 shadow-lg rounded-lg p-1.5 z-50">
                   <button
@@ -847,8 +806,8 @@ export default function RichDocumentEditor({
                   onStatusChange={setPipelineStatus}
                   onLog={setPipelineLog}
                   onResult={(res) => {
-                    if (res && res.dataWarnings && Array.isArray(res.dataWarnings)) {
-                      setDataWarnings(res.dataWarnings);
+                    if (res && typeof res === "object" && Array.isArray(res.dataWarnings)) {
+                      setDataWarnings(res.dataWarnings as DataWarning[]);
                     }
                     const text = typeof res === 'string' ? res : JSON.stringify(res, null, 2);
                     const formattedHtml = `<div class="border-l-4 border-indigo-500 pl-4 py-2 my-4 bg-indigo-50/70 rounded-r"><h3>${t("pipelineResult")}</h3><pre>${text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre></div>`;
@@ -967,7 +926,7 @@ export default function RichDocumentEditor({
                       {citationResults.slice(0, 5).map((item, idx) => (
                         <div key={idx} className="p-2 bg-white border border-slate-200 rounded-lg space-y-1">
                           <p className="font-medium text-slate-800 line-clamp-1">{item.title}</p>
-                          <p className="text-[10px] text-slate-500 line-clamp-1">{item.authors?.join(", ") || "Unknown Author"} ({item.year || item.publicationYear || "n.d."})</p>
+                          <p className="text-[10px] text-slate-500 line-clamp-1">{item.authors?.map((a) => a.name).join(", ") || "—"} ({item.year || "n.d."})</p>
                           <div className="flex items-center justify-between pt-1">
                             <span className="font-mono text-[9px] text-slate-400">{item.doi || item.id || ""}</span>
                             <button

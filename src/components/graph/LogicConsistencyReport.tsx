@@ -6,6 +6,7 @@ import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, XCircle, ShieldAlert, Sparkles, Send, RefreshCw } from "lucide-react";
+import { errorMessage, errorName } from "@/services/utils/errors";
 
 export interface LogicConsistencyReportProps {
   paperId: number;
@@ -93,17 +94,17 @@ function LogicConsistencyReportInternal({ paperId }: LogicConsistencyReportProps
       const data = await res.json();
       if (!isMountedRef.current) return;
       setReport(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      if (err?.name === "AbortError") return;
+    } catch (err) {
+      if (errorName(err) === "AbortError") return;
       if (!isMountedRef.current) return;
       console.error("Logic check execution error:", err);
-      setError(err?.message || t("failed"));
+      setError(errorMessage(err) || t("failed"));
     } finally {
       if (isMountedRef.current) {
         setLoading(false);
       }
     }
-  }, [claimsInput, paperId]);
+  }, [claimsInput, paperId, t]);
 
   const activeClaimsCount = claimsInput
     .split("\n")

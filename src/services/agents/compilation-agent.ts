@@ -14,7 +14,7 @@ export class CompilationAgent extends BaseAgent {
     try {
       const { text, tokensUsed } = await askClaude(prompt, this.model as import("./claude-client").ClaudeModel);
       return this.formatOutput(text, "completed", tokensUsed);
-    } catch (e) {
+    } catch {
       return this.formatOutput("Compilation failed.", "failed", 0);
     }
   }

@@ -38,7 +38,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ fig
     }).returning();
 
     return NextResponse.json({ analysis: savedAnalysis });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to analyze figure" }, { status: 500 });
   }
 }

@@ -1,30 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Send,
-  CheckCircle2,
-  Clock,
-  AlertTriangle,
-  XCircle,
-  RefreshCw,
-  Search,
-  ExternalLink,
-  ChevronRight,
-  Filter,
-  FileText,
-  Building2,
-  Calendar,
-  Layers,
-  ArrowUpRight,
-  Info,
-  X,
-  Copy,
-  Check,
-  ShieldCheck,
-  RotateCcw,
-  MessageSquare
-} from "lucide-react";
+import { Send, CheckCircle2, Clock, AlertTriangle, XCircle, RefreshCw, Search, ExternalLink, ChevronRight, FileText, Building2, Calendar, Layers, X, Copy, Check, ShieldCheck, RotateCcw, MessageSquare } from "lucide-react";
+import { errorMessage } from "@/services/utils/errors";
+import type { SubmissionDto } from "@/types/api";
 
 export type SubmissionStatus =
   | "preparing"
@@ -57,6 +36,25 @@ export interface SubmissionItem {
   errorLog?: string;
   commentsCount?: number;
   unresolvedCommentsCount?: number;
+}
+
+/** Maps a /api/submissions row to the dashboard's display model. */
+export function toSubmissionItem(s: SubmissionDto): SubmissionItem {
+  return {
+    id: s.id,
+    paperId: s.paperId,
+    title: s.submittedTitle || s.paper?.title || `Paper #${s.paperId}`,
+    journalName: s.connection?.displayName || s.connection?.siteUrl || "Connected Journal",
+    platform: s.connection?.platform || "Direct Submission",
+    status: (s.status || "submitted") as SubmissionStatus,
+    publishMode: (s.publishMode as SubmissionItem["publishMode"]) || "publish",
+    submittedAt: s.submittedAt || s.createdAt || undefined,
+    remotePostUrl: s.remotePostUrl || undefined,
+    confirmationId: s.confirmationId || (s.remotePostId ? `CONF-${s.remotePostId}` : undefined),
+    errorLog: s.errorLog || undefined,
+    attemptCount: s.attemptCount ?? undefined,
+    maxAttempts: s.maxAttempts ?? undefined,
+  };
 }
 
 export interface SubmissionDashboardProps {
@@ -129,20 +127,7 @@ export default function SubmissionDashboard({
         if (res.ok) {
           const data = await res.json();
           const list = Array.isArray(data) ? data : data?.submissions || [];
-          const mapped: SubmissionItem[] = list.map((s: any) => ({
-            id: s.id,
-            paperId: s.paperId,
-            title: s.submittedTitle || s.paperTitle || s.title || `Paper #${s.paperId}`,
-            journalName: s.journalName || s.siteUrl || "Connected Journal",
-            platform: s.platform || "Direct Submission",
-            status: s.status || "submitted",
-            publishMode: s.publishMode || "publish",
-            submittedAt: s.submittedAt || s.createdAt,
-            updatedAt: s.updatedAt,
-            remotePostUrl: s.remotePostUrl,
-            confirmationId: s.confirmationId || (s.remotePostId ? `CONF-${s.remotePostId}` : undefined),
-            errorLog: s.errorLog,
-          }));
+          const mapped: SubmissionItem[] = (list as SubmissionDto[]).map(toSubmissionItem);
           setSubmissionsList(mapped);
         }
       }
@@ -184,11 +169,11 @@ export default function SubmissionDashboard({
           )
         );
       }
-    } catch (err: any) {
+    } catch (err) {
       setSubmissionsList((prev) =>
         prev.map((sub) =>
           sub.id === item.id
-            ? { ...sub, errorLog: err?.message || "Network error during retry" }
+            ? { ...sub, errorLog: errorMessage(err) || "Network error during retry" }
             : sub
         )
       );

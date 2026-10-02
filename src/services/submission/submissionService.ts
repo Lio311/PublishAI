@@ -5,6 +5,7 @@ import { eq, desc } from "drizzle-orm";
 import { SubmissionStatusService } from "./submissionStatusService";
 import { JournalSubmissionStatus, SubmissionTrackingSummary } from "./types";
 import { emitSubmissionStatusEvents } from "./statusEvents";
+import { errorMessage } from "@/services/utils/errors";
 
 
 export interface SubmissionEvent {
@@ -128,9 +129,9 @@ export class SubmissionService {
           }
         }
       }
-    } catch (dbErr: any) {
+    } catch (dbErr) {
       console.warn(
-        `[SubmissionService] db.insert(submission_events) skipped or fallback used: ${dbErr?.message || dbErr}`
+        `[SubmissionService] db.insert(submission_events) skipped or fallback used: ${errorMessage(dbErr) || dbErr}`
       );
     }
 
@@ -165,8 +166,8 @@ export class SubmissionService {
           }));
         }
       }
-    } catch (err: any) {
-      console.warn(`[SubmissionService] getSubmissionEvents DB query fallback: ${err?.message || err}`);
+    } catch (err) {
+      console.warn(`[SubmissionService] getSubmissionEvents DB query fallback: ${errorMessage(err) || err}`);
     }
 
     // Return filtered in-memory events
@@ -244,8 +245,8 @@ export class SubmissionService {
           } as any)
           .where(eq(submissions.id, subId));
       }
-    } catch (err: any) {
-      console.warn(`[SubmissionService] Failed to update submissions table: ${err?.message || err}`);
+    } catch (err) {
+      console.warn(`[SubmissionService] Failed to update submissions table: ${errorMessage(err) || err}`);
     }
 
     // 3. Update associated paper record status in database
@@ -260,8 +261,8 @@ export class SubmissionService {
             } as any)
             .where(eq(papers.id, paperId));
         }
-      } catch (err: any) {
-        console.warn(`[SubmissionService] Failed to update papers table: ${err?.message || err}`);
+      } catch (err) {
+        console.warn(`[SubmissionService] Failed to update papers table: ${errorMessage(err) || err}`);
       }
     }
 
@@ -285,8 +286,8 @@ export class SubmissionService {
         metadata: options.metadata,
         force: true,
       });
-    } catch (statusErr: any) {
-      console.warn(`[SubmissionService] SubmissionStatusService sync skipped: ${statusErr?.message || statusErr}`);
+    } catch (statusErr) {
+      console.warn(`[SubmissionService] SubmissionStatusService sync skipped: ${errorMessage(statusErr) || statusErr}`);
     }
 
     // 6. Record submission event

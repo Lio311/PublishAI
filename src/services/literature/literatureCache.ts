@@ -20,7 +20,7 @@ export interface LiteratureCacheOptions {
 }
 
 export class InMemoryLruCache {
-  private cache = new Map<string, CacheEntry<any>>();
+  private cache = new Map<string, CacheEntry<unknown>>();
   private maxCapacity: number;
 
   constructor(maxCapacity: number = 500) {
@@ -89,7 +89,8 @@ export class InMemoryLruCache {
 
 export class LiteratureCache {
   private memoryCache: InMemoryLruCache;
-  private redisClient: any = null;
+  private redisClient: import('@upstash/redis').Redis | null = null;
+  private useRedis: boolean;
   private defaultSearchTtl: number;
   private defaultArticleTtl: number;
 
@@ -98,19 +99,25 @@ export class LiteratureCache {
     this.defaultSearchTtl = options.defaultSearchTtlSeconds ?? 3600; // 1 hour for searches
     this.defaultArticleTtl = options.defaultArticleTtlSeconds ?? 86400; // 24 hours for articles
 
-    if (
+    this.useRedis =
       options.useRedis !== false &&
-      process.env.UPSTASH_REDIS_REST_URL &&
-      process.env.UPSTASH_REDIS_REST_TOKEN
-    ) {
+      Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+  }
+
+  /** Redis is optional and loaded on first use, so the module works without the package configured. */
+  private async getRedis(): Promise<import('@upstash/redis').Redis | null> {
+    if (!this.useRedis) return null;
+    if (!this.redisClient) {
       try {
-        const { Redis } = require('@upstash/redis');
+        const { Redis } = await import('@upstash/redis');
         this.redisClient = Redis.fromEnv();
       } catch (e) {
         console.warn('[LiteratureCache] Failed to initialize Upstash Redis, falling back to memory only:', e);
-        this.redisClient = null;
+        this.useRedis = false;
+        return null;
       }
     }
+    return this.redisClient;
   }
 
   async get<T>(key: string): Promise<T | null> {
@@ -121,9 +128,10 @@ export class LiteratureCache {
     }
 
     // 2. Try L2 Redis cache if available
-    if (this.redisClient) {
+    const redis = await this.getRedis();
+    if (redis) {
       try {
-        const redisValue = await this.redisClient.get(key);
+        const redisValue = await redis.get(key);
         if (redisValue !== null && redisValue !== undefined) {
           // Re-populate L1 memory cache with a 5-minute buffer
           this.memoryCache.set(key, redisValue, 300);
@@ -143,9 +151,10 @@ export class LiteratureCache {
     this.memoryCache.set(key, value, ttl);
 
     // Set in Redis
-    if (this.redisClient) {
+    const redis = await this.getRedis();
+    if (redis) {
       try {
-        await this.redisClient.set(key, value, { ex: ttl });
+        await redis.set(key, value, { ex: ttl });
       } catch (err) {
         console.warn('[LiteratureCache] Redis write failed:', err);
       }
@@ -154,9 +163,10 @@ export class LiteratureCache {
 
   async delete(key: string): Promise<void> {
     this.memoryCache.delete(key);
-    if (this.redisClient) {
+    const redis = await this.getRedis();
+    if (redis) {
       try {
-        await this.redisClient.del(key);
+        await redis.del(key);
       } catch (err) {
         console.warn('[LiteratureCache] Redis delete failed:', err);
       }

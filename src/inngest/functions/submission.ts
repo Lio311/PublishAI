@@ -23,8 +23,7 @@ export const processSubmission = inngest.createFunction(
     retries: 3,
     onFailure: async ({ event, step, error }) => {
       const submissionId =
-        (event.data as any)?.event?.data?.submissionId ??
-        (event.data as any)?.submissionId;
+        event.data.event?.data?.submissionId;
 
       if (submissionId) {
         await step.run("mark-failed", async () => {

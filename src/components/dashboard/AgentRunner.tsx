@@ -3,12 +3,24 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { AlertCircle, CheckCircle2, RotateCcw, Send, Play } from "lucide-react";
 import { useLocale } from "next-intl";
+import { errorMessage as getErrorMessage, errorName } from "@/services/utils/errors";
 
 export type AgentPipelineStatus = "IDLE" | "RUNNING" | "PAUSED" | "COMPLETED" | "ERROR";
 
+/** Final LangGraph state returned when the pipeline completes. */
+export type AgentRunResult = (Record<string, unknown> & { dataWarnings?: unknown[] }) | string | null | undefined;
+
+/** One NDJSON line streamed by /api/agents/run. */
+interface AgentStreamEvent {
+  error?: string;
+  event?: string;
+  name?: string;
+  data?: { output?: AgentRunResult; [key: string]: unknown };
+}
+
 export interface AgentRunnerProps {
   paperId?: string;
-  onResult?: (result: any) => void;
+  onResult?: (result: AgentRunResult) => void;
   onStatusChange?: (status: AgentPipelineStatus) => void;
   onLog?: (log: string) => void;
 }
@@ -125,7 +137,7 @@ export function AgentRunner({
           
           for (const line of lines) {
             if (!line.trim()) continue;
-            let event: any;
+            let event: AgentStreamEvent;
             try {
               event = JSON.parse(line);
             } catch {
@@ -159,13 +171,13 @@ export function AgentRunner({
       
       setStatus(prev => (prev === "PAUSED" ? "PAUSED" : "COMPLETED"));
       if (action === "resume") setFeedback("");
-    } catch (err: any) {
-      if (err?.name === "AbortError" || controller.signal.aborted) {
+    } catch (err) {
+      if (errorName(err) === "AbortError" || controller.signal.aborted) {
         return;
       }
       console.error("AgentRunner stream error:", err);
       setErrorMessage(
-        err?.message ||
+        getErrorMessage(err) ||
           (isHe
             ? "אירעה שגיאה בלתי צפויה במהלך ביצוע צינור ה-AI."
             : "An unexpected error occurred while executing the AI pipeline.")

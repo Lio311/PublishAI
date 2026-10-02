@@ -57,7 +57,7 @@ export const SubmissionTracker: React.FC<SubmissionTrackerProps> = ({ paperId })
       cancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [paperId]);
+  }, [paperId, t]);
 
   const handleResume = async (input?: string) => {
     if (!jobId) return;

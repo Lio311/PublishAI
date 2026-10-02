@@ -5,6 +5,7 @@
  */
 
 import { redactApiKeys } from "./promptSanitizer";
+import { errorCode, errorMessage, errorStatus } from "@/services/utils/errors";
 
 export interface RetryOptions {
   maxRetries?: number;
@@ -31,11 +32,30 @@ function redactSecrets(msg: string): string {
   return redactApiKeys(msg);
 }
 
+/** Fields SDK and HTTP errors commonly carry (OpenAI, Anthropic, fetch wrappers). */
+interface ProviderErrorLike {
+  status?: number;
+  statusCode?: number;
+  code?: string;
+  name?: string;
+  type?: string;
+  isTimeout?: boolean;
+  message?: string;
+  headers?: Record<string, string | undefined>;
+  response?: { status?: number; statusCode?: number; headers?: Record<string, string | undefined> | { get?: (name: string) => string | null } };
+  cause?: { status?: number; statusCode?: number; code?: string; message?: string };
+}
+
+function asProviderError(error: unknown): ProviderErrorLike {
+  return typeof error === "object" && error !== null ? (error as ProviderErrorLike) : {};
+}
+
 /**
  * Determine if an error is an API rate-limit error (HTTP 429, 529, or quota issue).
  */
-export function isRateLimitError(error: any): boolean {
-  if (!error) return false;
+export function isRateLimitError(raw: unknown): boolean {
+  if (!raw) return false;
+  const error = asProviderError(raw);
 
   const status =
     error.status ||
@@ -76,10 +96,11 @@ export function isRateLimitError(error: any): boolean {
 /**
  * Determine if an error is transient and safe to retry (e.g. 500, 502, 503, 504, network reset, timeout).
  */
-export function isTransientError(error: any): boolean {
-  if (!error) return false;
-  if (isRateLimitError(error)) return true;
-  if (error instanceof TimeoutError || error.isTimeout || error.name === "TimeoutError") return true;
+export function isTransientError(raw: unknown): boolean {
+  if (!raw) return false;
+  if (isRateLimitError(raw)) return true;
+  const error = asProviderError(raw);
+  if (raw instanceof TimeoutError || error.isTimeout || error.name === "TimeoutError") return true;
 
   const status =
     error.status ||
@@ -146,13 +167,14 @@ export function withTimeout<T>(
 /**
  * Attempt to extract a Retry-After header delay in milliseconds.
  */
-export function getRetryAfterMs(error: any): number | null {
+export function getRetryAfterMs(raw: unknown): number | null {
+  const error = asProviderError(raw);
+  const responseHeaders = error.response?.headers;
   const retryAfter =
-    error?.headers?.["retry-after"] ||
-    error?.response?.headers?.["retry-after"] ||
-    (typeof error?.response?.headers?.get === "function"
-      ? error.response.headers.get("retry-after")
-      : null);
+    error.headers?.["retry-after"] ||
+    (responseHeaders && "get" in responseHeaders && typeof responseHeaders.get === "function"
+      ? responseHeaders.get("retry-after")
+      : (responseHeaders as Record<string, string | undefined> | undefined)?.["retry-after"]);
 
   if (retryAfter) {
     const parsed = parseFloat(retryAfter);
@@ -191,7 +213,7 @@ export async function withRateLimitRetry<T>(
   while (true) {
     try {
       return await fn();
-    } catch (error: any) {
+    } catch (error) {
       attempt++;
       const isRateLimit = isRateLimitError(error);
       const isTransient = isTransientError(error);
@@ -201,7 +223,7 @@ export async function withRateLimitRetry<T>(
         const jitter = Math.random() * 300;
         const waitTime = Math.min(retryAfter ?? delay + jitter, maxDelayMs);
 
-        const safeErrMsg = redactSecrets(error?.message || String(error));
+        const safeErrMsg = redactSecrets(errorMessage(error) || String(error));
         console.warn(
           `[${operationName}] ${
             isRateLimit ? "Rate limit hit (429/529)" : "Transient error"
@@ -215,7 +237,7 @@ export async function withRateLimitRetry<T>(
         await new Promise((resolve) => setTimeout(resolve, waitTime));
         delay = Math.min(delay * backoffFactor, maxDelayMs);
       } else {
-        const safeErrMsg = redactSecrets(error?.message || String(error));
+        const safeErrMsg = redactSecrets(errorMessage(error) || String(error));
         console.error(
           `[${operationName}] Failed after ${attempt} attempt(s). Error: ${safeErrMsg}`
         );
@@ -272,12 +294,12 @@ export async function withModelFallback<T, M = string, P = string>(
         }
       );
       return { result, usedCandidate: candidate };
-    } catch (err: any) {
+    } catch (err) {
       lastError = err;
       const nextCandidate = candidates[i + 1];
 
-      if (nextCandidate && (isRateLimitError(err) || isTransientError(err) || err?.status === 404 || err?.status === 400 || err?.code === "model_not_found")) {
-        const safeErrMsg = redactSecrets(err?.message || String(err));
+      if (nextCandidate && (isRateLimitError(err) || isTransientError(err) || errorStatus(err) === 404 || errorStatus(err) === 400 || errorCode(err) === "model_not_found")) {
+        const safeErrMsg = redactSecrets(errorMessage(err) || String(err));
         console.warn(
           `[${operationName}] Candidate ${candidateLabel} failed (${safeErrMsg}). Falling back to ${
             nextCandidate.provider ? `${nextCandidate.provider}:` : ""

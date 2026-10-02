@@ -1,4 +1,4 @@
-import { BaseAgent, AgentContext, AgentResult, Stage } from "./base-agent";
+import { BaseAgent, AgentContext, AgentResult, Stage, getStageOutput } from "./base-agent";
 
 import { askClaude } from "./claude-client";
 import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
@@ -8,9 +8,7 @@ export class ExecutionAgent extends BaseAgent {
   model = ANTHROPIC_MODELS.reasoning;
 
   async execute(context: AgentContext): Promise<AgentResult> {
-    const writingResult = context.previousStageOutputs instanceof Map
-      ? context.previousStageOutputs.get("writing")
-      : (context.previousStageOutputs as any)?.["writing"];
+    const writingResult = getStageOutput(context, "writing");
     const writingOutput = writingResult?.output;
     if (!writingOutput) {
       return this.formatOutput("No writing output to execute.", "completed", 0);
@@ -31,7 +29,7 @@ export class ExecutionAgent extends BaseAgent {
         tokensUsed,
         metadata: { updatedText: writingOutput }
       };
-    } catch (e) {
+    } catch {
       return this.formatOutput("Execution failed.", "failed", 0);
     }
   }

@@ -9,6 +9,7 @@ import {
   sanitizePromptInput,
   redactApiKeys,
 } from "./promptSanitizer";
+import { errorMessage } from "@/services/utils/errors";
 
 const PredictionResultSchema = z.object({
   probabilityScore: z.number().describe("The probability score from 0 to 100 for acceptance"),
@@ -40,7 +41,7 @@ export interface PredictAcceptanceOptions {
  */
 export async function predictAcceptance(
   paperDetails: { title: string; abstract: string; keyFindings: string },
-  journalDetails: { name: string; field: string; rules: any; requiredSections: any },
+  journalDetails: { name: string; field: string; rules: unknown; requiredSections: unknown },
   authorHistory?: string,
   options?: PredictAcceptanceOptions
 ): Promise<PredictionResult> {
@@ -114,8 +115,8 @@ Provide a probability score (0-100), reasoning, strengths, weaknesses, and recom
     );
 
     return result.object;
-  } catch (error: any) {
-    const safeErrMsg = redactApiKeys(error?.message || String(error));
+  } catch (error) {
+    const safeErrMsg = redactApiKeys(errorMessage(error) || String(error));
     console.error("[predictAcceptance] Failed across candidate models:", safeErrMsg);
     throw new Error(`Acceptance prediction failed: ${safeErrMsg}`);
   }

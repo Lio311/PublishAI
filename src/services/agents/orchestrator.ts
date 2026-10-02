@@ -3,6 +3,7 @@ import { BaseAgent, AgentContext, AgentResult } from "./base-agent";
 import { db } from "@/services/db";
 import { paperStages } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
+import { errorMessage } from "@/services/utils/errors";
 
 export class AgentOrchestrator {
   constructor(private step: any) {}
@@ -42,11 +43,11 @@ export class AgentOrchestrator {
         }).where(eq(paperStages.id, stageRecordId));
 
         return result;
-      } catch (error: any) {
+      } catch (error) {
         // Mark as failed in DB
         await db.update(paperStages).set({
           status: "failed",
-          userFeedback: error.message || "Unknown error",
+          userFeedback: errorMessage(error) || "Unknown error",
           completedAt: new Date(),
         }).where(eq(paperStages.id, stageRecordId));
         

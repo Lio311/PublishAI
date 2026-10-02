@@ -8,7 +8,7 @@ export async function gatherLiterature(query: string) {
   ]);
 
   const allResults = [...pubmedResults, ...scholarResults];
-  const combined: any[] = [];
+  const combined: typeof allResults = [];
   const seenDois = new Set<string>();
   const seenTitles = new Set<string>();
 

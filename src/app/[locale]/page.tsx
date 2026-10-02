@@ -1,7 +1,7 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import UploadZone from "@/components/dashboard/UploadZone";
 import SystemExplainButton from "@/components/dashboard/SystemExplainButton";
-import { FileText, Clock, CheckCircle, ArrowRight, ArrowLeft, ChevronRight, ChevronLeft } from "lucide-react";
+import { FileText, Clock, CheckCircle, ChevronRight, ChevronLeft } from "lucide-react";
 import { Link } from "@/app/i18n/routing";
 import { db } from "@/services/db";
 import { papers, journals } from "@/services/db/schema";

@@ -12,6 +12,7 @@ import {
   ReviewDecisionFeedback,
   VALID_STATUS_TRANSITIONS,
 } from "./types";
+import { errorMessage } from "@/services/utils/errors";
 
 export const STATUS_METADATA: Record<JournalSubmissionStatus, StatusMetadata> = {
   draft: {
@@ -231,7 +232,6 @@ export class SubmissionStatusService {
     };
 
     // Update DB if available
-    let dbUpdated = false;
     try {
       if (db) {
         await db.update(submissions).set({
@@ -246,11 +246,10 @@ export class SubmissionStatusService {
           details: { stage, actor, metadata, historyEntry } as any,
         });
 
-        dbUpdated = true;
       }
-    } catch (dbErr: any) {
+    } catch (dbErr) {
       console.warn(
-        `[SubmissionStatusService] DB update skipped or failed (blocked on DB schema / offline): ${dbErr.message}`
+        `[SubmissionStatusService] DB update skipped or failed (blocked on DB schema / offline): ${errorMessage(dbErr)}`
       );
     }
 

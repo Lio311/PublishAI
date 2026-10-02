@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const result = await ConnectionTester.testConnection(platform, siteUrl, username, password);
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error testing connection:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }

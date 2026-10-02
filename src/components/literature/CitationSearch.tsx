@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Loader2, ExternalLink, X, AlertCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { errorMessage, errorName } from "@/services/utils/errors";
 
 interface Author {
   name: string;
@@ -92,12 +93,12 @@ export default function CitationSearch() {
       });
 
       setResults(data);
-    } catch (err: any) {
-      if (err.name === 'AbortError') {
+    } catch (err) {
+      if (errorName(err) === 'AbortError') {
         // Ignored: request was intentionally cancelled
         return;
       }
-      setError(err?.message || t('errorOccurred'));
+      setError(errorMessage(err) || t('errorOccurred'));
     } finally {
       setLoading(false);
     }

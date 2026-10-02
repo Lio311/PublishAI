@@ -3,7 +3,7 @@ import { Sandbox } from '@e2b/code-interpreter';
 export async function runPythonInSandbox(
   code: string,
   dataFiles: Array<{ filename: string; url: string }>
-): Promise<{ logs: string; results: any; chartUrls: string[] }> {
+): Promise<{ logs: string; results: Record<string, unknown>; chartUrls: string[] }> {
   let sandbox: Sandbox | null = null;
   
   try {

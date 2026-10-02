@@ -3,6 +3,17 @@ import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import RichDocumentEditor from '../RichDocumentEditor';
 
+// Translations resolve to their keys; the stable function mirrors next-intl.
+jest.mock('next-intl', () => {
+  const t = (key: string) => key;
+  return { useLocale: () => 'en', useTranslations: () => t };
+});
+
+const mockPush = jest.fn();
+jest.mock('@/app/i18n/routing', () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
 // Mock sonner toast
 jest.mock('sonner', () => ({
   toast: {
@@ -23,7 +34,8 @@ describe('RichDocumentEditor Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    global.fetch = jest.fn();
+    // Default: the journal catalog request resolves to an empty list.
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => [] });
   });
 
   afterAll(() => {
@@ -33,7 +45,7 @@ describe('RichDocumentEditor Component', () => {
   it('renders TipTap editor container with title input and buttons', () => {
     render(<RichDocumentEditor initialTitle="Genomics Study" initialContent="<h2>Abstract</h2><p>Initial text</p>" />);
     expect(screen.getByTestId('tiptap-editor')).toBeInTheDocument();
-    expect(screen.getByLabelText('Document Title')).toHaveValue('Genomics Study');
+    expect(screen.getByLabelText('titleLabel')).toHaveValue('Genomics Study');
     expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
   });
 
@@ -110,7 +122,7 @@ describe('RichDocumentEditor Component', () => {
       <RichDocumentEditor documentId="doc-new" initialContent="<p>Test</p>" />
     );
 
-    const titleInput = screen.getByLabelText('Document Title');
+    const titleInput = screen.getByLabelText('titleLabel');
     fireEvent.change(titleInput, { target: { value: "New Title" } });
 
     unmount();
@@ -119,7 +131,9 @@ describe('RichDocumentEditor Component', () => {
       jest.advanceTimersByTime(3000);
     });
 
-    expect(global.fetch).not.toHaveBeenCalled();
+    // Only the journal catalog was requested; the pending autosave never fired.
+    const urls = (global.fetch as jest.Mock).mock.calls.map(([url]) => String(url));
+    expect(urls.filter((url) => url.startsWith('/api/documents'))).toEqual([]);
     jest.useRealTimers();
   });
 });

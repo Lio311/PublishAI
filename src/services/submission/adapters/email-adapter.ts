@@ -1,5 +1,6 @@
 import { sendEmail, getSenderAddress, plainTextToHtml, verifyTransport } from '@/services/email';
 import { ConnectionTestResult, SubmissionPayload, SubmissionResult } from '../connection-types';
+import { errorMessage } from "@/services/utils/errors";
 
 /**
  * Email-based submission adapter.
@@ -33,8 +34,8 @@ export class EmailAdapter {
       if (!check.success) {
         return { success: false, message: `Email transport verification failed: ${check.error}` };
       }
-    } catch (err: any) {
-      return { success: false, message: `Email transport connection error: ${err?.message || String(err)}` };
+    } catch (err) {
+      return { success: false, message: `Email transport connection error: ${errorMessage(err) || String(err)}` };
     }
     return { success: true, message: 'Email submission configured successfully' };
   }
@@ -103,10 +104,10 @@ export class EmailAdapter {
         success: true,
         confirmationId,
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
-        error: `Email submission failed: ${error?.message || String(error)}`,
+        error: `Email submission failed: ${errorMessage(error) || String(error)}`,
       };
     }
   }

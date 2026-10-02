@@ -3,6 +3,8 @@ import { HumanMessage } from "@langchain/core/messages";
 import { PublishAIState } from "../state";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
 import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
+import { errorMessage } from "@/services/utils/errors";
+import { messageText } from "../messageUtils";
 
 export const verificationNode = async (state: PublishAIState): Promise<Partial<PublishAIState>> => {
   const model = new ChatAnthropic({
@@ -14,9 +16,7 @@ export const verificationNode = async (state: PublishAIState): Promise<Partial<P
 
   try {
     const response = await model.invoke([new HumanMessage(prompt)]);
-    const output = typeof response.content === "string" 
-      ? response.content 
-      : (Array.isArray(response.content) ? response.content.map(c => typeof c === "string" ? c : (c as any).text || "").join("") : String(response.content));
+    const output = messageText(response.content);
 
     return {
       verification: {
@@ -25,11 +25,11 @@ export const verificationNode = async (state: PublishAIState): Promise<Partial<P
       },
       currentStage: "verification"
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[verificationNode] Execution failed:", error);
     return {
       verification: {
-        output: `Verification report failed: ${error?.message || "Unknown error"}`,
+        output: `Verification report failed: ${errorMessage(error) || "Unknown error"}`,
         status: "failed",
       },
       currentStage: "verification"

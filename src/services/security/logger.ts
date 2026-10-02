@@ -1,10 +1,11 @@
 export const secureLogger = {
-  error: (message: string, data?: any) => {
-    const maskSensitiveData = (obj: any): any => {
+  error: (message: string, data?: unknown) => {
+    const maskSensitiveData = (obj: unknown): unknown => {
       if (!obj) return obj;
       if (typeof obj !== 'object') return obj;
+      if (Array.isArray(obj)) return obj.map(maskSensitiveData);
       
-      const masked = { ...obj };
+      const masked: Record<string, unknown> = { ...(obj as Record<string, unknown>) };
       const sensitiveKeys = ['password', 'key', 'token', 'secret', 'authorization'];
       
       for (const key in masked) {

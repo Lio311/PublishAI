@@ -3,7 +3,7 @@ import { datasetUploadedEvent } from "../events";
 import { runPythonInSandbox } from "../../services/e2bService";
 import { generateAnalysisScript } from "../../services/dataAnalysisService";
 import { db } from "../../services/db";
-import { dataFiles, sandboxRuns, generatedCharts, papers } from "../../services/db/schema";
+import { dataFiles, sandboxRuns, generatedCharts } from "../../services/db/schema";
 import { eq } from "drizzle-orm";
 import { loadManuscriptText } from "@/services/documents/manuscriptStore";
 
@@ -18,8 +18,7 @@ export const processPaperAnalysis = inngest.createFunction(
     retries: 2,
     onFailure: async ({ event, step, error }) => {
       const paperId =
-        (event.data as any)?.event?.data?.paperId ??
-        (event.data as any)?.paperId;
+        event.data.event?.data?.paperId;
       if (paperId) {
         await step.run("mark-sandbox-failed", async () => {
           await db

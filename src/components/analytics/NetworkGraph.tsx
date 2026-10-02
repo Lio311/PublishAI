@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect, useCallback, useId } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
 import { AlertCircle, RefreshCw, Layers } from 'lucide-react';
+import { errorMessage, errorName } from "@/services/utils/errors";
 
 export const TYPE_COLORS: Record<string, string> = {
   drug: '#3b82f6',     // blue
@@ -36,6 +37,22 @@ export interface NetworkEdge {
   confidenceScore: number;
   sourceNode?: NetworkNode;
   targetNode?: NetworkNode;
+}
+
+/** Rows as returned by /api/graph/network. */
+interface RawNetworkNode {
+  id?: string | number;
+  name?: string;
+  type?: string;
+  description?: string | null;
+}
+
+interface RawNetworkEdge {
+  source: string;
+  target: string;
+  type?: string;
+  evidenceText?: string;
+  confidenceScore?: number;
 }
 
 export function NetworkGraphSkeleton() {
@@ -92,7 +109,8 @@ function NetworkGraphInternal() {
   
   const nodesRef = useRef<NetworkNode[]>([]);
   const edgesRef = useRef<NetworkEdge[]>([]);
-  const [, forceRender] = useState({});
+  // The simulation mutates refs each animation frame; render reads this snapshot.
+  const [graph, setGraph] = useState<{ nodes: NetworkNode[]; edges: NetworkEdge[] }>({ nodes: [], edges: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<NetworkNode | null>(null);
@@ -103,66 +121,74 @@ function NetworkGraphInternal() {
   const width = 800;
   const height = 500;
 
-  const fetchData = useCallback(async (signal?: AbortSignal) => {
+  const loadGraph = useCallback(async (signal?: AbortSignal) => {
+    const res = await fetch('/api/graph/network', { signal });
+    if (!res.ok) throw new Error(`Failed to fetch graph data (${res.status})`);
+    const data = await res.json();
+
+    const rawNodes = Array.isArray(data?.nodes) ? data.nodes : [];
+    const rawEdges = Array.isArray(data?.edges) ? data.edges : [];
+
+    // Initialize nodes with distributed positions
+    const initializedNodes: NetworkNode[] = (rawNodes as RawNetworkNode[]).map((n, idx: number) => {
+      const angle = (idx / (rawNodes.length || 1)) * 2 * Math.PI;
+      const radius = 100 + Math.random() * 80;
+      return {
+        ...n,
+        id: String(n.id || idx),
+        name: String(n.name || 'Unnamed'),
+        type: String(n.type || 'concept').toLowerCase(),
+        description: n.description || '',
+        x: width / 2 + Math.cos(angle) * radius,
+        y: height / 2 + Math.sin(angle) * radius,
+        vx: 0,
+        vy: 0,
+      };
+    });
+
+    // Link edges to node objects
+    const initializedEdges: NetworkEdge[] = rawEdges
+      .map((e: RawNetworkEdge) => ({
+        ...e,
+        type: String(e.type ?? "relates"),
+        confidenceScore: typeof e.confidenceScore === 'number' ? e.confidenceScore : 0.8,
+        sourceNode: initializedNodes.find((n) => n.id === String(e.source)),
+        targetNode: initializedNodes.find((n) => n.id === String(e.target)),
+      }))
+      .filter((e: NetworkEdge): e is NetworkEdge & { sourceNode: NetworkNode; targetNode: NetworkNode } => 
+        Boolean(e.sourceNode && e.targetNode)
+      );
+
+    return { nodes: initializedNodes, edges: initializedEdges };
+  }, [width, height]);
+
+  const applyGraph = useCallback((loaded: { nodes: NetworkNode[]; edges: NetworkEdge[] }) => {
+    if (!isMountedRef.current) return;
+    nodesRef.current = loaded.nodes;
+    edgesRef.current = loaded.edges;
+    setGraph(loaded);
+    setLoading(false);
+  }, []);
+
+  const failGraph = useCallback((err: unknown) => {
+    if (errorName(err) === 'AbortError' || !isMountedRef.current) return;
+    console.error('Network graph fetch error:', err);
+    setError(errorMessage(err) || 'Could not load network graph');
+    setLoading(false);
+  }, []);
+
+  // Retries show the loading state; the initial load starts with loading=true already.
+  const reload = () => {
+    setSelectedNode(null);
     setLoading(true);
     setError(null);
-    setSelectedNode(null);
-
-    try {
-      const res = await fetch('/api/graph/network', { signal });
-      if (!res.ok) throw new Error(`Failed to fetch graph data (${res.status})`);
-      const data = await res.json();
-
-      if (!isMountedRef.current) return;
-
-      const rawNodes = Array.isArray(data?.nodes) ? data.nodes : [];
-      const rawEdges = Array.isArray(data?.edges) ? data.edges : [];
-
-      // Initialize nodes with distributed positions
-      const initializedNodes: NetworkNode[] = rawNodes.map((n: any, idx: number) => {
-        const angle = (idx / (rawNodes.length || 1)) * 2 * Math.PI;
-        const radius = 100 + Math.random() * 80;
-        return {
-          ...n,
-          id: String(n.id || idx),
-          name: String(n.name || 'Unnamed'),
-          type: String(n.type || 'concept').toLowerCase(),
-          description: n.description || '',
-          x: width / 2 + Math.cos(angle) * radius,
-          y: height / 2 + Math.sin(angle) * radius,
-          vx: 0,
-          vy: 0,
-        };
-      });
-
-      // Link edges to node objects
-      const initializedEdges: NetworkEdge[] = rawEdges
-        .map((e: any) => ({
-          ...e,
-          confidenceScore: typeof e.confidenceScore === 'number' ? e.confidenceScore : 0.8,
-          sourceNode: initializedNodes.find((n) => n.id === String(e.source)),
-          targetNode: initializedNodes.find((n) => n.id === String(e.target)),
-        }))
-        .filter((e: NetworkEdge): e is NetworkEdge & { sourceNode: NetworkNode; targetNode: NetworkNode } => 
-          Boolean(e.sourceNode && e.targetNode)
-        );
-
-      nodesRef.current = initializedNodes;
-      edgesRef.current = initializedEdges;
-      setLoading(false);
-    } catch (err: any) {
-      if (err?.name === 'AbortError') return;
-      if (!isMountedRef.current) return;
-      console.error('Network graph fetch error:', err);
-      setError(err?.message || 'Could not load network graph');
-      setLoading(false);
-    }
-  }, [width, height]);
+    loadGraph().then(applyGraph, failGraph);
+  };
 
   useEffect(() => {
     isMountedRef.current = true;
     const controller = new AbortController();
-    fetchData(controller.signal);
+    loadGraph(controller.signal).then(applyGraph, failGraph);
 
     return () => {
       isMountedRef.current = false;
@@ -171,7 +197,7 @@ function NetworkGraphInternal() {
         cancelAnimationFrame(requestRef.current);
       }
     };
-  }, [fetchData]);
+  }, [loadGraph, applyGraph, failGraph]);
 
   // Force Directed Simulation Loop
   useEffect(() => {
@@ -252,7 +278,7 @@ function NetworkGraphInternal() {
         node.y = Math.max(30, Math.min(height - 30, node.y));
       }
 
-      forceRender({});
+      setGraph({ nodes: currentNodes.map((n) => ({ ...n })), edges: currentEdges });
 
       // Continue simulation if kinetic energy remains
       const totalEnergy = currentNodes.reduce(
@@ -277,7 +303,7 @@ function NetworkGraphInternal() {
 
   // Extract unique types present in current nodes for dynamic legend
   const presentTypes = Array.from(
-    new Set(nodesRef.current.map((n) => n.type.toLowerCase()))
+    new Set(graph.nodes.map((n) => n.type.toLowerCase()))
   );
   const legendTypes = presentTypes.length > 0 
     ? presentTypes 
@@ -304,7 +330,7 @@ function NetworkGraphInternal() {
         </div>
         <button
           type="button"
-          onClick={() => fetchData()}
+          onClick={reload}
           className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -314,7 +340,7 @@ function NetworkGraphInternal() {
     );
   }
 
-  if (nodesRef.current.length === 0) {
+  if (graph.nodes.length === 0) {
     return (
       <div className="w-full h-[500px] flex flex-col items-center justify-center bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-3">
         <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center">
@@ -325,7 +351,7 @@ function NetworkGraphInternal() {
         </p>
         <button
           type="button"
-          onClick={() => fetchData()}
+          onClick={reload}
           className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -347,11 +373,11 @@ function NetworkGraphInternal() {
         <h4>{isHe ? 'נתוני רשת ישויות' : 'Entity Network Data'}</h4>
         <p>
           {isHe
-            ? `הרשת כוללת ${nodesRef.current.length} ישויות ו-${edgesRef.current.length} קשרים.`
-            : `The network contains ${nodesRef.current.length} entities and ${edgesRef.current.length} relationships.`}
+            ? `הרשת כוללת ${graph.nodes.length} ישויות ו-${graph.edges.length} קשרים.`
+            : `The network contains ${graph.nodes.length} entities and ${graph.edges.length} relationships.`}
         </p>
         <ul>
-          {nodesRef.current.map((n) => (
+          {graph.nodes.map((n) => (
             <li key={n.id}>
               {n.name} ({n.type}) - {n.description || 'No description'}
             </li>
@@ -378,7 +404,7 @@ function NetworkGraphInternal() {
 
         {/* Draw Edges */}
         <g stroke="#94a3b8" strokeOpacity={0.6} aria-hidden="true">
-          {edgesRef.current.map((edge, i) => (
+          {graph.edges.map((edge, i) => (
             <line
               key={`edge-${i}`}
               x1={edge.sourceNode?.x}
@@ -404,7 +430,7 @@ function NetworkGraphInternal() {
 
         {/* Draw Nodes */}
         <g>
-          {nodesRef.current.map((node) => {
+          {graph.nodes.map((node) => {
             const isSelected = selectedNode?.id === node.id;
             const nodeColor = TYPE_COLORS[node.type] || '#94a3b8';
 

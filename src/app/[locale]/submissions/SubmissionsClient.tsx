@@ -1,15 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import SubmissionDashboard, {
-  SubmissionItem,
-} from "@/components/SubmissionDashboard";
-import ReviewResponseInterface, {
-  ReviewerCommentData,
-} from "@/components/ReviewResponseInterface";
+import React, { useState, useCallback } from "react";
+import { useLoadable } from "@/hooks/useLoadable";
+import SubmissionDashboard, { SubmissionItem, toSubmissionItem } from "@/components/SubmissionDashboard";
+import ReviewResponseInterface from "@/components/ReviewResponseInterface";
 import { SubmissionWizard } from "@/components/submission/SubmissionWizard";
-import { Send, MessageSquare, ArrowLeft, ExternalLink, Sparkles, X } from "lucide-react";
+import { Send, MessageSquare, ArrowLeft, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { SubmissionDto } from "@/types/api";
 
 interface SubmissionsClientProps {
   locale: string;
@@ -17,10 +15,7 @@ interface SubmissionsClientProps {
 
 export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
   const t = useTranslations("Submissions");
-  const isHe = locale === "he";
   const [activeTab, setActiveTab] = useState<"submissions" | "reviews">("submissions");
-  const [submissions, setSubmissions] = useState<SubmissionItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showWizard, setShowWizard] = useState<boolean>(false);
   const [selectedSubmissionForReview, setSelectedSubmissionForReview] = useState<{
     paperTitle: string;
@@ -32,45 +27,15 @@ export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
     manuscriptId: "",
   });
 
-  const loadSubmissions = useCallback(async (isMounted = true) => {
-    try {
-      setIsLoading(true);
-      const res = await fetch("/api/submissions");
-      if (res.ok) {
-        const data = await res.json();
-        const rawList = Array.isArray(data) ? data : (data?.submissions || []);
-        if (isMounted) {
-          const mapped: SubmissionItem[] = rawList.map((s: any) => ({
-            id: s.id,
-            paperId: s.paperId,
-            title: s.submittedTitle || s.paperTitle || s.title || `Paper #${s.paperId}`,
-            journalName: s.journalName || s.connection?.displayName || s.siteUrl || "Connected Journal",
-            platform: s.platform || s.connection?.platform || "Direct Submission",
-            status: s.status || "submitted",
-            publishMode: s.publishMode || "publish",
-            submittedAt: s.submittedAt || s.createdAt,
-            updatedAt: s.updatedAt,
-            remotePostUrl: s.remotePostUrl,
-            confirmationId: s.confirmationId || (s.remotePostId ? `CONF-${s.remotePostId}` : undefined),
-            errorLog: s.errorLog,
-          }));
-          setSubmissions(mapped);
-        }
-      }
-    } catch (err) {
-      console.warn("Could not fetch API submissions:", err);
-    } finally {
-      if (isMounted) setIsLoading(false);
-    }
+  const loadSubmissions = useCallback(async (signal: AbortSignal): Promise<SubmissionItem[]> => {
+    const res = await fetch("/api/submissions", { signal });
+    if (!res.ok) throw new Error(`Could not fetch submissions (${res.status})`);
+    const data = await res.json();
+    const rawList: SubmissionDto[] = Array.isArray(data) ? data : (data?.submissions || []);
+    return rawList.map(toSubmissionItem);
   }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-    loadSubmissions(isMounted);
-    return () => {
-      isMounted = false;
-    };
-  }, [loadSubmissions]);
+  const { data, loading: isLoading, reload: reloadSubmissions } = useLoadable(loadSubmissions);
+  const submissions = data ?? [];
 
   const handleNavigateToReviews = (sub: SubmissionItem) => {
     setSelectedSubmissionForReview({
@@ -126,12 +91,17 @@ export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
       </div>
 
       {/* Tab Contents */}
-      {activeTab === "submissions" ? (
+      {activeTab === "submissions" && isLoading && submissions.length === 0 ? (
+        <div className="flex justify-center py-16" role="status">
+          <Loader2 className="w-6 h-6 animate-spin text-sky-500" aria-hidden="true" />
+          <span className="sr-only">{t("loading")}</span>
+        </div>
+      ) : activeTab === "submissions" ? (
         <SubmissionDashboard
           submissions={submissions}
           onNavigateToReviews={handleNavigateToReviews}
           onNewSubmission={() => setShowWizard(true)}
-          onRefresh={() => loadSubmissions()}
+          onRefresh={reloadSubmissions}
           locale={locale}
         />
       ) : (
@@ -156,7 +126,7 @@ export default function SubmissionsClient({ locale }: SubmissionsClientProps) {
             <SubmissionWizard
               onComplete={() => {
                 setShowWizard(false);
-                loadSubmissions();
+                reloadSubmissions();
               }}
               onCancel={() => setShowWizard(false)}
             />

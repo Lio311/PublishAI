@@ -82,7 +82,7 @@ export async function POST(
     }
 
     // Determine target journal
-    let journal = (paper as any).targetJournal;
+    let journal: typeof journals.$inferSelect | undefined;
 
     if (bodyData?.targetJournalId) {
       journal = await db.query.journals.findFirst({
@@ -136,7 +136,7 @@ export async function POST(
     );
 
     return NextResponse.json(prediction);
-  } catch (error: any) {
+  } catch (error) {
     console.error("[API papers/[id]/predict POST] Error:", error);
     return NextResponse.json(
       { error: "Acceptance prediction failed. Please try again later." },

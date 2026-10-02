@@ -16,18 +16,13 @@ import {
   LiteratureSearchResult,
   LiteratureSource,
 } from './types';
-import {
-  LiteratureApiError,
-  NotFoundError,
-  RateLimitError,
-  RemoteServerError,
-  TimeoutError,
-} from './errors';
+import { LiteratureApiError, RateLimitError, RemoteServerError, TimeoutError } from './errors';
 import { LiteratureCache, literatureCache } from './literatureCache';
-import { fetchWithRetryAndTimeout, parseRateLimitReset } from './httpUtils';
+import { fetchWithRetryAndTimeout } from './httpUtils';
 import { literatureRateLimiter, LiteratureRateLimiter } from './rateLimiter';
 import { db } from '@/services/db';
 import { citations } from '@/services/db/schema';
+import { errorMessage } from "@/services/utils/errors";
 
 export * from './types';
 export * from './errors';
@@ -45,6 +40,78 @@ const SEMANTIC_SCHOLAR_API_BASE = process.env.SEMANTIC_SCHOLAR_API_URL || 'https
  * NCBI Policy: max 3 req/s without key, 10 req/s with key.
  * Requires email and tool identifier.
  */
+// ── External API response shapes (only the fields this service reads) ──
+
+interface PubMedSearchResponse {
+  error?: unknown;
+  esearchresult?: { ERROR?: unknown; idlist?: string[] };
+}
+
+interface PubMedSummaryItem {
+  error?: unknown;
+  title?: string;
+  authors?: { name?: string }[];
+  articleids?: { idtype?: string; value?: string }[];
+  pubdate?: string;
+  source?: string;
+  fulljournalname?: string;
+  volume?: string;
+  issue?: string;
+  pages?: string;
+}
+
+interface PubMedSummaryResponse {
+  error?: unknown;
+  /** Keyed by PubMed id; an "ERROR" key is present when the request failed. */
+  result?: Record<string, PubMedSummaryItem | undefined>;
+}
+
+interface CrossrefDateParts {
+  "date-parts"?: number[][];
+}
+
+interface CrossrefWork {
+  DOI?: string;
+  URL?: string;
+  title?: string | string[];
+  "container-title"?: string | string[];
+  author?: { given?: string; family?: string }[];
+  published?: CrossrefDateParts;
+  created?: CrossrefDateParts;
+  abstract?: string;
+  volume?: string;
+  issue?: string;
+  page?: string;
+  "is-referenced-by-count"?: number;
+}
+
+interface CrossrefSearchResponse {
+  message?: { items?: CrossrefWork[] };
+}
+
+interface CrossrefWorkResponse {
+  message?: CrossrefWork;
+}
+
+interface SemanticScholarPaper {
+  paperId?: string;
+  title?: string;
+  authors?: { name?: string }[];
+  externalIds?: { DOI?: string };
+  journal?: { name?: string };
+  venue?: string;
+  year?: number;
+  publicationDate?: string;
+  abstract?: string;
+  citationCount?: number;
+  message?: string;
+}
+
+interface SemanticScholarSearchResponse {
+  data?: SemanticScholarPaper[];
+  message?: string;
+}
+
 export class PubMedClient {
   private baseUrl: string;
   private defaultTimeoutMs: number;
@@ -111,7 +178,7 @@ export class PubMedClient {
       );
     }
 
-    let searchData: any;
+    let searchData: PubMedSearchResponse;
     try {
       searchData = await searchRes.json();
     } catch (parseErr) {
@@ -169,7 +236,7 @@ export class PubMedClient {
       );
     }
 
-    let summaryData: any;
+    let summaryData: PubMedSummaryResponse;
     try {
       summaryData = await summaryRes.json();
     } catch (parseErr) {
@@ -284,7 +351,7 @@ export class PubMedClient {
       );
     }
 
-    let summaryData: any;
+    let summaryData: PubMedSummaryResponse;
     try {
       summaryData = await res.json();
     } catch (parseErr) {
@@ -413,7 +480,7 @@ export class CrossrefClient {
       );
     }
 
-    let data: any;
+    let data: CrossrefSearchResponse;
     try {
       data = await res.json();
     } catch (parseErr) {
@@ -427,8 +494,9 @@ export class CrossrefClient {
 
     const items = data.message?.items || [];
 
-    const parsedItems: LiteratureItem[] = items.map((work: any) => {
-      const authors: Author[] = (work.author || []).map((a: any) => ({
+    // Works without a DOI cannot be cited or cached reliably.
+    const parsedItems: LiteratureItem[] = items.filter((work): work is CrossrefWork & { DOI: string } => Boolean(work.DOI)).map((work) => {
+      const authors: Author[] = (work.author || []).map((a) => ({
         firstName: a.given,
         lastName: a.family,
         name: [a.given, a.family].filter(Boolean).join(' ') || 'Unknown',
@@ -525,7 +593,7 @@ export class CrossrefClient {
       );
     }
 
-    let data: any;
+    let data: CrossrefWorkResponse;
     try {
       data = await res.json();
     } catch (parseErr) {
@@ -540,7 +608,7 @@ export class CrossrefClient {
     const work = data.message;
     if (!work) return null;
 
-    const authors: Author[] = (work.author || []).map((a: any) => ({
+    const authors: Author[] = (work.author || []).map((a) => ({
       firstName: a.given,
       lastName: a.family,
       name: [a.given, a.family].filter(Boolean).join(' ') || 'Unknown',
@@ -641,7 +709,7 @@ export class SemanticScholarClient {
       );
     }
 
-    let data: any;
+    let data: SemanticScholarSearchResponse;
     try {
       data = await res.json();
     } catch (parseErr) {
@@ -661,8 +729,8 @@ export class SemanticScholarClient {
 
     const items = data.data || [];
 
-    const parsedItems: LiteratureItem[] = items.map((paper: any) => {
-      const authors: Author[] = (paper.authors || []).map((a: any) => ({
+    const parsedItems: LiteratureItem[] = items.filter((paper): paper is SemanticScholarPaper & { paperId: string } => Boolean(paper.paperId)).map((paper) => {
+      const authors: Author[] = (paper.authors || []).map((a) => ({
         name: a.name || 'Unknown',
         lastName: a.name?.split(' ')?.slice(-1)[0],
         firstName: a.name?.split(' ')?.slice(0, -1).join(' '),
@@ -755,7 +823,7 @@ export class SemanticScholarClient {
       );
     }
 
-    let paper: any;
+    let paper: SemanticScholarPaper;
     try {
       paper = await res.json();
     } catch (parseErr) {
@@ -775,7 +843,7 @@ export class SemanticScholarClient {
 
     if (!paper || !paper.paperId) return null;
 
-    const authors: Author[] = (paper.authors || []).map((a: any) => ({
+    const authors: Author[] = (paper.authors || []).map((a) => ({
       name: a.name || 'Unknown',
       lastName: a.name?.split(' ')?.slice(-1)[0],
       firstName: a.name?.split(' ')?.slice(0, -1).join(' '),
@@ -845,9 +913,9 @@ export class LiteratureService {
     let requestedSources = options.sources || ['pubmed', 'crossref', 'semanticscholar'];
     
     // Explicit arXiv check: Replace any 'arxiv' request with PubMed and Semantic Scholar
-    if ((requestedSources as any[]).includes('arxiv')) {
+    if ((requestedSources as string[]).includes('arxiv')) {
       console.warn('[LiteratureService] arXiv requested but prohibited. Replaced with PubMed and Semantic Scholar.');
-      requestedSources = requestedSources.filter((s: any) => s !== 'arxiv');
+      requestedSources = requestedSources.filter((s) => (s as string) !== 'arxiv');
       if (!requestedSources.includes('pubmed')) requestedSources.push('pubmed');
       if (!requestedSources.includes('semanticscholar')) requestedSources.push('semanticscholar');
     }
@@ -1123,7 +1191,7 @@ export class LiteratureService {
         source: citation.source,
         bibtex: this.toBibTeX(citation),
         abstract: citation.abstract,
-        rawMetadata: citation as any,
+        rawMetadata: citation,
       }).returning();
 
       return {
@@ -1131,11 +1199,11 @@ export class LiteratureService {
         id: inserted?.id,
         message: 'Citation saved successfully to database.',
       };
-    } catch (err: any) {
+    } catch (err) {
       console.error('[LiteratureService] Failed to persist citation to database:', err);
       return {
         status: 'error',
-        message: `Failed to persist citation: ${err.message}`,
+        message: `Failed to persist citation: ${errorMessage(err)}`,
       };
     }
   }

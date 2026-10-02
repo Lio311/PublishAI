@@ -5,65 +5,78 @@ import { useTranslations, useLocale } from "next-intl";
 import { SecurityBriefing } from "./SecurityBriefing";
 import { ConnectionForm } from "./ConnectionForm";
 import { Loader2, ExternalLink, RefreshCw, AlertCircle, CheckCircle2, RotateCcw } from "lucide-react";
-import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import type { JournalConnectionDto, SubmissionDto } from "@/types/api";
+import { errorName } from "@/services/utils/errors";
 
 export function ConnectionsManager() {
   const t = useTranslations("submission");
   const locale = useLocale();
   const isHe = locale === "he";
   const [step, setStep] = useState<"list" | "briefing" | "form">("list");
-  const [connections, setConnections] = useState<any[]>([]);
-  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [connections, setConnections] = useState<JournalConnectionDto[]>([]);
+  const [submissions, setSubmissions] = useState<SubmissionDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = useCallback(async (isMounted = true) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const [connRes, subRes] = await Promise.all([
-        fetch("/api/journal-connection"),
-        fetch("/api/submissions")
-      ]);
-      
-      if (!isMounted) return;
+  const loadData = useCallback(async (signal?: AbortSignal) => {
+    const [connRes, subRes] = await Promise.all([
+      fetch("/api/journal-connection", { signal }),
+      fetch("/api/submissions", { signal }),
+    ]);
 
-      if (connRes.ok) {
-        const connData = await connRes.json();
-        setConnections(Array.isArray(connData) ? connData : connData?.connections || []);
-      } else {
-        console.warn("Failed to fetch journal connections", connRes.status);
-      }
+    let loadedConnections: JournalConnectionDto[] | null = null;
+    let loadedSubmissions: SubmissionDto[] | null = null;
 
-      if (subRes.ok) {
-        const subData = await subRes.json();
-        setSubmissions(Array.isArray(subData) ? subData : subData?.submissions || []);
-      } else {
-        console.warn("Failed to fetch submissions", subRes.status);
-      }
+    if (connRes.ok) {
+      const connData = await connRes.json();
+      loadedConnections = Array.isArray(connData) ? connData : connData?.connections || [];
+    } else {
+      console.warn("Failed to fetch journal connections", connRes.status);
+    }
 
-      if (!connRes.ok && !subRes.ok) {
+    if (subRes.ok) {
+      const subData = await subRes.json();
+      loadedSubmissions = Array.isArray(subData) ? subData : subData?.submissions || [];
+    } else {
+      console.warn("Failed to fetch submissions", subRes.status);
+    }
+
+    return { connections: loadedConnections, submissions: loadedSubmissions };
+  }, []);
+
+  const applyData = useCallback(
+    (loaded: { connections: JournalConnectionDto[] | null; submissions: SubmissionDto[] | null }) => {
+      if (loaded.connections) setConnections(loaded.connections);
+      if (loaded.submissions) setSubmissions(loaded.submissions);
+      if (!loaded.connections && !loaded.submissions) {
         setError(isHe ? "שגיאה בטעינת נתונים משרת ההגשות." : "Failed to load connection and submission data.");
       }
-    } catch (err) {
-      if (isMounted) {
-        console.error("Error fetching submission connections:", err);
-        setError(isHe ? "אירעה שגיאת רשת בטעינת הנתונים." : "A network error occurred while loading data.");
-      }
-    } finally {
-      if (isMounted) {
-        setIsLoading(false);
-      }
-    }
-  }, [isHe]);
+      setIsLoading(false);
+    },
+    [isHe]
+  );
+
+  const failData = useCallback(
+    (err: unknown) => {
+      if (errorName(err) === "AbortError") return;
+      console.error("Error fetching submission connections:", err);
+      setError(isHe ? "אירעה שגיאת רשת בטעינת הנתונים." : "A network error occurred while loading data.");
+      setIsLoading(false);
+    },
+    [isHe]
+  );
+
+  const fetchData = () => {
+    setIsLoading(true);
+    setError(null);
+    loadData().then(applyData, failData);
+  };
 
   useEffect(() => {
-    let mounted = true;
-    fetchData(mounted);
-    return () => {
-      mounted = false;
-    };
-  }, [fetchData]);
+    const controller = new AbortController();
+    loadData(controller.signal).then(applyData, failData);
+    return () => controller.abort();
+  }, [loadData, applyData, failData]);
 
   const handleStartNewConnection = () => {
     setStep("briefing");
@@ -157,7 +170,7 @@ export function ConnectionsManager() {
                   {conn.siteUrl}
                 </div>
                 <div className="flex items-center text-xs text-slate-400">
-                  {isHe ? "נוסף ב:" : "Added:"} {new Date(conn.createdAt).toLocaleDateString()}
+                  {isHe ? "נוסף ב:" : "Added:"} {conn.createdAt ? new Date(conn.createdAt).toLocaleDateString() : "—"}
                 </div>
               </div>
             ))}
@@ -183,14 +196,14 @@ export function ConnectionsManager() {
                   <div className="mt-1">
                     {sub.status === 'submitted' && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
                     {sub.status === 'failed' && <AlertCircle className="w-5 h-5 text-rose-500" />}
-                    {['preparing', 'submitting'].includes(sub.status) && <Loader2 className="w-5 h-5 text-sky-500 animate-spin" />}
+                    {['preparing', 'submitting'].includes(sub.status ?? '') && <Loader2 className="w-5 h-5 text-sky-500 animate-spin" />}
                   </div>
                   <div>
                     <div className="font-semibold text-slate-800">{sub.submittedTitle || `Paper #${sub.paperId}`}</div>
                     <div className="text-sm text-slate-500 flex items-center gap-2 mt-1">
                       <span className="capitalize font-medium">{sub.status}</span>
                       <span>•</span>
-                      <span>{new Date(sub.createdAt).toLocaleString()}</span>
+                      <span>{sub.createdAt ? new Date(sub.createdAt).toLocaleString() : "—"}</span>
                       <span>•</span>
                       <span className="capitalize text-sky-500">{isHe ? "מצב:" : "Mode:"} {sub.publishMode}</span>
                     </div>

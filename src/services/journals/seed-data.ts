@@ -1,6 +1,62 @@
 // Verified data from official journal websites
 // Last verified: 2026-09-23
 
+export interface SeedCitationRule {
+  journalName: string;
+  style: string;
+  inTextFormat: string;
+  referenceListOrder: string;
+  etAlThreshold?: number | null;
+  etAlDisplayCount?: number | null;
+  volumeFormat?: string | null;
+  yearFormat?: string | null;
+  journalTitleFormat?: string | null;
+  authorFormat?: string | null;
+  lastAuthorSeparator?: string | null;
+  articleTitleFormat?: string | null;
+  personalCommsInRefList?: boolean | null;
+  exampleRef?: string | null;
+  exampleReference?: string | null;
+  notes?: string | null;
+}
+
+export interface SeedArticleType {
+  journalName: string;
+  name: string;
+  isPrimary?: boolean | null;
+  wordLimit?: number | null;
+  displayItems?: number | null;
+  refs?: number | null;
+  methods?: number | null;
+  abstractWordLimit?: number | null;
+  notes?: string | null;
+  supplementaryNotes?: string | null;
+}
+
+export interface SeedAbstractRule {
+  journalName: string;
+  type: string;
+  limit?: number | null;
+  label?: string | null;
+  allowCitations?: boolean | null;
+  headings?: string[] | null;
+  structuredHeadings?: string[] | null;
+  additionalRequirements?: Record<string, unknown> | null;
+  notes?: string | null;
+}
+
+export interface SeedCoverLetterRule {
+  journalName: string;
+  required?: boolean | null;
+  maxPages?: number | null;
+  shownToReviewers?: boolean | null;
+  requiredContent?: string[] | null;
+  uniqueRequirements?: string | null;
+  toneGuidance?: string | null;
+  templatePrompt?: string | null;
+  notes?: string | null;
+}
+
 export const INITIAL_JOURNALS = [
   {
     name: "Nature",
@@ -104,7 +160,7 @@ export const INITIAL_JOURNALS = [
   }
 ];
 
-export const INITIAL_CITATION_RULES = [
+export const INITIAL_CITATION_RULES: SeedCitationRule[] = [
   {
     journalName: "Nature",
     style: "Nature",
@@ -271,7 +327,7 @@ export const INITIAL_CITATION_RULES = [
   }
 ];
 
-export const INITIAL_ARTICLE_TYPES = [
+export const INITIAL_ARTICLE_TYPES: SeedArticleType[] = [
   // Nature
   { journalName: "Nature", name: "Article", isPrimary: true, wordLimit: 3000, displayItems: 6, refs: 50, abstractWordLimit: 200, notes: "Excludes summary, methods, refs, legends", methods: 3000 },
   { journalName: "Nature", name: "Review", isPrimary: false, wordLimit: 5000, displayItems: 6, refs: 100, abstractWordLimit: 200 },
@@ -333,7 +389,7 @@ export const INITIAL_ARTICLE_TYPES = [
   { journalName: "Nature Medicine", name: "Resource", isPrimary: false, wordLimit: 4000, displayItems: null, refs: null }
 ];
 
-export const INITIAL_ABSTRACT_RULES = [
+export const INITIAL_ABSTRACT_RULES: SeedAbstractRule[] = [
   { 
     journalName: "Nature", type: "unstructured", limit: 200, label: "Summary Paragraph", allowCitations: true, headings: null, 
     additionalRequirements: { naturalStructure: ["introduction","background","main-finding-here-we-show","implications"] } 
@@ -380,7 +436,7 @@ export const INITIAL_ABSTRACT_RULES = [
   }
 ];
 
-export const INITIAL_COVER_LETTER_RULES = [
+export const INITIAL_COVER_LETTER_RULES: SeedCoverLetterRule[] = [
   { 
     journalName: "Nature", required: true, maxPages: 1, shownToReviewers: false, 
     requiredContent: ["significance-and-fit","originality-statement","co-author-approval","related-work-disclosure","reviewer-suggestions","reviewer-exclusions"], 

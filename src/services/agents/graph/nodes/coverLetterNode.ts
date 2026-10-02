@@ -3,6 +3,8 @@ import { HumanMessage } from "@langchain/core/messages";
 import { PublishAIState } from "../state";
 import { langfuseLangchainHandler } from "@/lib/langfuse";
 import { ANTHROPIC_MODELS } from "@/services/ai/modelIds";
+import { errorMessage } from "@/services/utils/errors";
+import { messageText } from "../messageUtils";
 
 const CONTENT_MAPPINGS: Record<string, string> = {
   "significance-and-fit": "Explain why these findings represent a substantial breakthrough and are of immediate interest to [journal] readership",
@@ -104,9 +106,7 @@ export const coverLetterNode = async (state: PublishAIState): Promise<Partial<Pu
 
   try {
     const response = await model.invoke([new HumanMessage(prompt)]);
-    const output = typeof response.content === "string" 
-      ? response.content 
-      : (Array.isArray(response.content) ? response.content.map(c => typeof c === "string" ? c : (c as any).text || "").join("") : String(response.content));
+    const output = messageText(response.content);
 
     return {
       coverLetter: {
@@ -115,11 +115,11 @@ export const coverLetterNode = async (state: PublishAIState): Promise<Partial<Pu
       },
       currentStage: "cover_letter"
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[coverLetterNode] Execution failed:", error);
     return {
       coverLetter: {
-        output: `Cover letter generation failed: ${error?.message || "Unknown error"}`,
+        output: `Cover letter generation failed: ${errorMessage(error) || "Unknown error"}`,
         status: "failed",
       },
       currentStage: "cover_letter"

@@ -46,13 +46,23 @@ const TONE_MAPPINGS: Record<string, string> = {
   "multidisciplinary-significance": "Show broad relevance across scientific disciplines"
 };
 
+interface CoverLetterRulesInput {
+  templatePrompt?: string | null;
+  toneGuidance?: string | null;
+  requiredContent?: string[] | null;
+  uniqueRequirements?: string | null;
+}
+
 export class CoverLetterAgent extends BaseAgent {
   stage = "cover_letter" as const; // Assuming it runs during compilation
   model: ClaudeModel = ANTHROPIC_MODELS.standard;
 
   async execute(context: AgentContext): Promise<AgentResult> {
-    const journalName = String((context.journalRules as any)?.name || "the target journal");
-    const rules = (context.journalRules as any)?.coverLetterRules;
+    const journalRules = context.journalRules as
+      | { name?: string; coverLetterRules?: CoverLetterRulesInput | null }
+      | undefined;
+    const journalName = String(journalRules?.name || "the target journal");
+    const rules = journalRules?.coverLetterRules;
     
     const preview = (context.manuscriptText || "").substring(0, 8000);
     let prompt = `You are an academic editor. Write a professional cover letter for the following manuscript being submitted to the journal "${journalName}".\n\n`;

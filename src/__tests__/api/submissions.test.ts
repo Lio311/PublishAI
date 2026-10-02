@@ -44,7 +44,7 @@ jest.mock("@/services/db", () => {
     db: {
       query: {
         papers: {
-          findFirst: jest.fn(async ({ where }: any) => {
+          findFirst: jest.fn(async (_query: any) => {
             // Find paper by ID from mockPapers
             for (const p of Object.values(mockPapers)) {
               return p; // Default resolver overridden in tests if needed

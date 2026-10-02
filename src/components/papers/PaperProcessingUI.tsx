@@ -6,20 +6,9 @@ import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 
-import { 
-  Upload, MessageSquareText, ClipboardList, BookOpen, Microscope, 
-  PenTool, Play, ShieldCheck, FileCheck, Package, Download, Loader2, CheckCircle,
-  AlertCircle,
-  BarChart2,
-  TrendingUp,
-  Users,
-  Brain,
-  Code,
-  Send,
-  RefreshCcw,
-  Layers,
-  Megaphone
-} from "lucide-react";
+import { Upload, MessageSquareText, ClipboardList, BookOpen, PenTool, ShieldCheck, FileCheck, Package, Download, Loader2, CheckCircle, AlertCircle, BarChart2, TrendingUp, Users, Brain, Code, Send, RefreshCcw, Layers, Megaphone } from "lucide-react";
+import { errorMessage, errorName } from "@/services/utils/errors";
+import type { SubmissionDto } from "@/types/api";
 
 export type FlowStep = {
   id: number;
@@ -327,7 +316,7 @@ export function PaperProcessingUI({
             if (subRes.ok && isMounted) {
               const subData = await subRes.json();
               const list = Array.isArray(subData) ? subData : subData?.submissions || [];
-              const match = list.find((s: any) => s.paperId === paperId);
+              const match = (list as SubmissionDto[]).find((s) => s.paperId === paperId);
               if (match?.id) {
                 setResolvedSubmissionId(match.id);
               }
@@ -338,8 +327,8 @@ export function PaperProcessingUI({
         } else {
           console.warn(`[PaperProcessingUI] Status polling returned HTTP ${res.status}`);
         }
-      } catch (err: any) {
-        if (err?.name === "AbortError") return;
+      } catch (err) {
+        if (errorName(err) === "AbortError") return;
         if (isMounted) {
           console.error("[PaperProcessingUI] Polling error:", err);
         }
@@ -354,7 +343,7 @@ export function PaperProcessingUI({
       controller.abort();
       clearInterval(interval);
     };
-  }, [isFinished, requiresCaptcha, paperId, initialSubmissionId, resolvedSubmissionId]);
+  }, [isFinished, requiresCaptcha, paperId, initialSubmissionId, resolvedSubmissionId, tp]);
 
   const handleCaptchaSubmit = async () => {
     const targetSubmissionId = resolvedSubmissionId ?? initialSubmissionId ?? paperId;
@@ -386,8 +375,8 @@ export function PaperProcessingUI({
         setCaptchaError(msg);
         toast.error(msg);
       }
-    } catch (err: any) {
-      const msg = err instanceof Error ? err.message : tp("captchaFailed");
+    } catch (err) {
+      const msg = err instanceof Error ? errorMessage(err) : tp("captchaFailed");
       setCaptchaError(msg);
       toast.error(msg);
       console.error(err);
@@ -422,8 +411,8 @@ export function PaperProcessingUI({
         setSubmitError(msg);
         toast.error(msg);
       }
-    } catch (err: any) {
-      const msg = err instanceof Error ? err.message : tp("submitFailed");
+    } catch (err) {
+      const msg = err instanceof Error ? errorMessage(err) : tp("submitFailed");
       setSubmitError(msg);
       toast.error(msg);
       console.error("Submission failed:", err);

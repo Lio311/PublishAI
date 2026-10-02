@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import NetworkGraph, { NetworkGraphSkeleton, TYPE_COLORS } from '@/components/analytics/NetworkGraph';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
@@ -26,6 +26,7 @@ import {
   CartesianGrid,
   LabelList
 } from 'recharts';
+import { useLoadable } from "@/hooks/useLoadable";
 
 interface AnalyticsData {
   summary: {
@@ -109,43 +110,14 @@ export default function AnalyticsDashboard() {
   const t = useTranslations("Analytics");
   const isHe = locale === 'he';
 
-  const [data, setData] = useState<AnalyticsData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const isMountedRef = useRef(true);
-
-  const fetchData = useCallback(async (signal?: AbortSignal) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/graph/analytics', { signal });
-      if (!res.ok) {
-        throw new Error(`Failed to fetch analytics data (${res.status})`);
-      }
-      const json = await res.json();
-      if (!isMountedRef.current) return;
-      setData(json);
-    } catch (err: any) {
-      if (err?.name === 'AbortError') return;
-      if (!isMountedRef.current) return;
-      setError(err?.message || 'Error loading analytics');
-    } finally {
-      if (isMountedRef.current) {
-        setLoading(false);
-      }
+  const loadAnalytics = useCallback(async (signal: AbortSignal): Promise<AnalyticsData> => {
+    const res = await fetch('/api/graph/analytics', { signal });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch analytics data (${res.status})`);
     }
+    return res.json();
   }, []);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    const controller = new AbortController();
-    fetchData(controller.signal);
-
-    return () => {
-      isMountedRef.current = false;
-      controller.abort();
-    };
-  }, [fetchData]);
+  const { data, loading, error, reload } = useLoadable(loadAnalytics);
 
   if (loading) {
     return <AnalyticsDashboardSkeleton />;
@@ -166,7 +138,7 @@ export default function AnalyticsDashboard() {
         </div>
         <button
           type="button"
-          onClick={() => fetchData()}
+          onClick={reload}
           className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -189,7 +161,7 @@ export default function AnalyticsDashboard() {
         </p>
         <button
           type="button"
-          onClick={() => fetchData()}
+          onClick={reload}
           className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />

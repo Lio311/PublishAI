@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateObject, generateText } from "ai";
+import { generateObject, generateText, type LanguageModel } from "ai";
 import { z } from "zod";
 import { getOpenAIModelInstance, resolveProvider } from "@/services/ai/aiService";
 import { createAnthropic } from "@ai-sdk/anthropic";
@@ -43,24 +43,25 @@ export async function POST(req: Request) {
     }
 
     const providerName = resolveProvider(undefined, model);
-    let aiModel;
+    let aiModel: LanguageModel;
 
     if (providerName === "anthropic") {
       const anthropic = createAnthropic({
         apiKey: process.env.ANTHROPIC_API_KEY || "",
       });
-      aiModel = anthropic(model || ANTHROPIC_MODELS.standard) as any;
+      aiModel = anthropic(model || ANTHROPIC_MODELS.standard);
     } else {
-      aiModel = getOpenAIModelInstance(model || OPENAI_MODELS.standard) as any;
+      aiModel = getOpenAIModelInstance(model || OPENAI_MODELS.standard);
     }
 
     // "text" mode returns prose (editor co-pilot); the default returns structured edit patches.
     if (mode === "text") {
       const { text, usage } = await generateText({
-        model: aiModel as any,
+        model: aiModel,
         prompt,
         system: systemPrompt || undefined,
         temperature: temperature ?? 0.3,
+        maxOutputTokens: typeof maxTokens === "number" ? Math.min(maxTokens, 16000) : undefined,
       });
       return NextResponse.json({ text, provider: providerName, tokensUsed: usage?.totalTokens });
     }
@@ -78,7 +79,7 @@ Each patch must contain:
 Analyze the prompt and provide the necessary patch operations to fulfill the request.`.trim();
 
     const { object, usage } = await generateObject({
-      model: aiModel as any,
+      model: aiModel,
       schema: patchSchema,
       prompt,
       system: enhancedSystemPrompt,
@@ -92,7 +93,7 @@ Analyze the prompt and provide the necessary patch operations to fulfill the req
       tokensUsed: usage?.totalTokens,
       usage,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("AI Generation Error:", error);
     return NextResponse.json(
       { error: "Failed to generate AI response" },

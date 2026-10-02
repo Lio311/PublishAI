@@ -434,7 +434,8 @@
   "Submissions": {
     "title": "לוח הגשות",
     "reviewsTab": "מענה לביקורת עמיתים",
-    "backToSubmissions": "חזרה ללוח ההגשות"
+    "backToSubmissions": "חזרה ללוח ההגשות",
+    "loading": "טוען הגשות..."
   },
   "Analytics": {
     "title": "לוח ניתוח GraphRAG",

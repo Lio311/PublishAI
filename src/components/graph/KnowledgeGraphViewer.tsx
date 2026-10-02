@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
@@ -14,8 +14,9 @@ import {
   Eye,
   Layers
 } from "lucide-react";
+import { useLoadable } from "@/hooks/useLoadable";
+import type { ForceGraphMethods, LinkObject, NodeObject } from "react-force-graph-2d";
 
-// @ts-ignore
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), { 
   ssr: false,
   loading: () => <KnowledgeGraphViewerSkeleton />
@@ -100,50 +101,19 @@ export function KnowledgeGraphViewerSkeleton() {
 
 function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
   const t = useTranslations("PaperTools.graph");
-  const [data, setData] = useState<KnowledgeGraphData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"graph" | "table">("graph");
-  const fgRef = useRef<any>(null);
-  const isMountedRef = useRef(true);
+  const fgRef = useRef<ForceGraphMethods | undefined>(undefined);
 
-  const fetchGraph = useCallback(async (signal?: AbortSignal) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/graph/visualize/${paperId}`, { signal });
-      if (!res.ok) {
-        throw new Error(`Server returned ${res.status}`);
-      }
-      const json = await res.json();
-      if (!isMountedRef.current) return;
-
-      const rawNodes = Array.isArray(json?.nodes) ? json.nodes : [];
-      const rawLinks = Array.isArray(json?.links) ? json.links : [];
-
-      setData({ nodes: rawNodes, links: rawLinks });
-    } catch (err: any) {
-      if (err?.name === "AbortError") return;
-      if (!isMountedRef.current) return;
-      console.error("Knowledge graph fetch failed:", err);
-      setError(err?.message || t("loadFailed"));
-    } finally {
-      if (isMountedRef.current) {
-        setLoading(false);
-      }
-    }
-  }, [paperId]);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    const controller = new AbortController();
-    fetchGraph(controller.signal);
-
-    return () => {
-      isMountedRef.current = false;
-      controller.abort();
+  const loadGraph = useCallback(async (signal: AbortSignal): Promise<KnowledgeGraphData> => {
+    const res = await fetch(`/api/graph/visualize/${paperId}`, { signal });
+    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    const json = await res.json();
+    return {
+      nodes: Array.isArray(json?.nodes) ? json.nodes : [],
+      links: Array.isArray(json?.links) ? json.links : [],
     };
-  }, [fetchGraph]);
+  }, [paperId]);
+  const { data, loading, error, reload } = useLoadable(loadGraph);
 
   const handleResetZoom = () => {
     if (fgRef.current?.zoomToFit) {
@@ -184,7 +154,7 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
         </div>
         <button
           type="button"
-          onClick={() => fetchGraph()}
+          onClick={reload}
           className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -212,7 +182,7 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
         </div>
         <button
           type="button"
-          onClick={() => fetchGraph()}
+          onClick={reload}
           className="inline-flex items-center gap-2 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -352,9 +322,9 @@ function KnowledgeGraphViewerInternal({ paperId }: { paperId: number }) {
               linkDirectionalArrowLength={4}
               linkDirectionalArrowRelPos={1}
               linkCurvature={0.2}
-              linkLabel={(link: any) => `${link.label || "relates"}\n${link.evidence || ""}`}
+              linkLabel={(link: LinkObject) => `${String(link.label ?? "relates")}\n${String(link.evidence ?? "")}`}
               backgroundColor="#020617"
-              onNodeClick={(node: any) => {
+              onNodeClick={(node: NodeObject) => {
                 if (fgRef.current && node.x !== undefined && node.y !== undefined) {
                   fgRef.current.centerAt(node.x, node.y, 800);
                   fgRef.current.zoom(4, 1000);
